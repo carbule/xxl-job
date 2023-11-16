@@ -1,0 +1,48 @@
+spring:
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      #限制单个文件大小
+      max-file-size: 20MB
+      #限制总文件大小
+      max-request-size: 20MB
+
+logging:
+  config: classpath:logback-spring.xml
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
+  type-aliases-package: com.korant.youya.workplace.pojo
+
+obs-bucket:
+  bucketProperties:
+    #头像bucket
+    configuration_1:
+      name: youya-avatar
+      code: avatar
+      policy: public
+      cdn: avatar.youyai.cn
+    #简历附件bucket
+    configuration_2:
+      name: youya-resume
+      code: resume
+      policy: private
+      cdn:
+    #公司授权书和营业执照bucket
+    configuration_3:
+      name: youya-enterprise
+      code: enterprise
+      policy: private
+      cdn:
+    #企业星球活动背景图和头像
+    configuration_4:
+      name: youya-activity
+      code: activity
+      policy: public
+      cdn: activity.youyai.cn
+
+#小程序appId
+appId: wxac76b91987ca9f96
+#小程序appSecret
+appSecret: 280f7c2a134eb1577dfa0f75aed8a1b9
