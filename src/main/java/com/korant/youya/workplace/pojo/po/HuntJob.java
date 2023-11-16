@@ -1,12 +1,15 @@
 package com.korant.youya.workplace.pojo.po;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -14,7 +17,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-14
+ * @since 2023-11-16
  */
 @Getter
 @Setter
@@ -57,20 +60,20 @@ public class HuntJob implements Serializable {
     /**
      * 面试奖励分配比例
      */
-    @TableField("interview_reward_allocation_ratio")
-    private Integer interviewRewardAllocationRatio;
+    @TableField("interview_reward_rate")
+    private Integer interviewRewardRate;
 
     /**
      * 入职奖励分配比例
      */
-    @TableField("onboard_reward_allocation_ratio")
-    private Integer onboardRewardAllocationRatio;
+    @TableField("onboard_reward_rate")
+    private Integer onboardRewardRate;
 
     /**
      * 转正奖励分配比例
      */
-    @TableField("full_member_reward_allocation_ratio")
-    private Integer fullMemberRewardAllocationRatio;
+    @TableField("full_member_reward_rate")
+    private Integer fullMemberRewardRate;
 
     /**
      * 求职状态

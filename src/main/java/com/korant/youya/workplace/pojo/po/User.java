@@ -1,13 +1,15 @@
 package com.korant.youya.workplace.pojo.po;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-14
+ * @since 2023-11-16
  */
 @Getter
 @Setter
@@ -23,7 +25,6 @@ import java.time.LocalDateTime;
 @TableName("yy_user")
 public class User implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -169,6 +170,12 @@ public class User implements Serializable {
      */
     @TableField("city_id")
     private Long cityId;
+
+    /**
+     * 行政区id
+     */
+    @TableField("district_id")
+    private Long districtId;
 
     /**
      * 实名认证状态

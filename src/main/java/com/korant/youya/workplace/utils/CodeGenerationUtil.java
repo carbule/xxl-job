@@ -28,7 +28,7 @@ public class CodeGenerationUtil {
     public static void main(String[] args) {
 
         //数据源
-        DataSourceConfig.Builder datasourceBuilder = new DataSourceConfig.Builder("jdbc:postgresql://localhost:5432/workplace?charset=utf-8&sslmode=disable", "postgres", "korant");
+        DataSourceConfig.Builder datasourceBuilder = new DataSourceConfig.Builder("jdbc:postgresql://139.9.240.37:5432/workplace_dev?charset=utf-8&sslmode=disable", "postgres", "korant@123");
         DataSourceConfig dataSourceConfig = datasourceBuilder.build();
 
         //创建对象
@@ -59,7 +59,7 @@ public class CodeGenerationUtil {
         //策略配置
         StrategyConfig.Builder strategyConfigBuilder = new StrategyConfig.Builder();
         //配置生成的表名 不配置生成所有的表
-        strategyConfigBuilder.addInclude("job_intention");
+        strategyConfigBuilder.addInclude("job","enterprise","hunt_job","yy_user");
         //过滤表前缀
         strategyConfigBuilder.addTablePrefix("yy_");
 
@@ -68,7 +68,7 @@ public class CodeGenerationUtil {
         //启用restful风格
         controllerBuilder.enableRestStyle();
         //启用文件覆盖功能
-        controllerBuilder.enableFileOverride();
+//        controllerBuilder.enableFileOverride();
 
         //entity设置
         Entity.Builder entityBuilder = strategyConfigBuilder.entityBuilder();
@@ -94,7 +94,7 @@ public class CodeGenerationUtil {
         //service设置
         Service.Builder serviceBuilder = strategyConfigBuilder.serviceBuilder();
         //启用文件覆盖
-        serviceBuilder.enableFileOverride();
+//        serviceBuilder.enableFileOverride();
         //自定义Service层名称
         serviceBuilder.convertServiceFileName(new ConverterFileName() {
             @Override
@@ -106,7 +106,7 @@ public class CodeGenerationUtil {
         //mapper设置
         Mapper.Builder mapperBuilder = strategyConfigBuilder.mapperBuilder();
         //启用文件覆盖
-        mapperBuilder.enableFileOverride();
+//        mapperBuilder.enableFileOverride();
 
         StrategyConfig strategyConfig = strategyConfigBuilder.build();
         autoGenerator.strategy(strategyConfig);

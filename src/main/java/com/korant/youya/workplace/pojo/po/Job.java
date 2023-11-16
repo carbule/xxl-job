@@ -1,20 +1,23 @@
 package com.korant.youya.workplace.pojo.po;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * <p>
- * 
+ * 企业职位表
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-14
+ * @since 2023-11-16
  */
 @Getter
 @Setter
@@ -93,8 +96,8 @@ public class Job implements Serializable {
     /**
      * 其他说明项
      */
-    @TableField("desc_item")
-    private String descItem;
+    @TableField("other_info")
+    private String otherInfo;
 
     /**
      * 国家id
@@ -153,26 +156,26 @@ public class Job implements Serializable {
     /**
      * 入职一人奖励金额
      */
-    @TableField("reward_amount_for_one_person")
-    private Integer rewardAmountForOnePerson;
+    @TableField("personal_reward")
+    private Integer personalReward;
 
     /**
      * 面试奖励分配比例
      */
-    @TableField("interview_reward_allocation_ratio")
-    private Integer interviewRewardAllocationRatio;
+    @TableField("interview_reward_rate")
+    private Integer interviewRewardRate;
 
     /**
      * 入职奖励分配比例
      */
-    @TableField("onboard_reward_allocation_ratio")
-    private Integer onboardRewardAllocationRatio;
+    @TableField("onboard_reward_rate")
+    private Integer onboardRewardRate;
 
     /**
      * 转正奖励分配比例
      */
-    @TableField("full_member_reward_allocation_ratio")
-    private Integer fullMemberRewardAllocationRatio;
+    @TableField("full_member_reward_rate")
+    private Integer fullMemberRewardRate;
 
     /**
      * 职位状态
