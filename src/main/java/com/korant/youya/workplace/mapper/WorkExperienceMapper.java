@@ -2,6 +2,11 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.WorkExperience;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,21 @@ import com.korant.youya.workplace.pojo.po.WorkExperience;
  */
 public interface WorkExperienceMapper extends BaseMapper<WorkExperience> {
 
+    /**
+     * @Author Duan-zhixiao
+     * @Description 查询工作履历信息列表
+     * @Date 15:59 2023/11/16
+     * @Param
+     * @return
+     **/
+    List<WorkExperienceListVo> queryWorkExperienceListByUserId(@Param("userId") Long userId, @Param("pageNumber") int pageNumber, @Param("pageSize") int pageSize);
+
+    /**
+     * @Author Duan-zhixiao
+     * @Description 查询工作履历信息详情
+     * @Date 16:07 2023/11/16
+     * @Param
+     * @return
+     **/
+    WorkExperienceDetailVo detail(@Param("id") Long id);
 }

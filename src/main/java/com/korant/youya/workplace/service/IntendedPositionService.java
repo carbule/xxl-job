@@ -1,7 +1,12 @@
 package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.korant.youya.workplace.pojo.dto.intendedposition.IntendedPositionCreateDto;
+import com.korant.youya.workplace.pojo.dto.intendedposition.IntendedPositionModifyDto;
 import com.korant.youya.workplace.pojo.po.IntendedPosition;
+import com.korant.youya.workplace.pojo.vo.intendedposition.IntendedPositionInfoVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,11 @@ import com.korant.youya.workplace.pojo.po.IntendedPosition;
  */
 public interface IntendedPositionService extends IService<IntendedPosition> {
 
+    List<IntendedPositionInfoVo> findIntendedPositionInfo();
+
+    void create(IntendedPositionCreateDto intendedPositionCreateDto);
+
+    void modify(IntendedPositionModifyDto intendedPositionIncreaseDto);
+
+    void delete(Long id);
 }

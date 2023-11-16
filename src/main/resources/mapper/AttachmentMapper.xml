@@ -2,4 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.AttachmentMapper">
 
+    <!--    查询其他附件信息列表-->
+    <select id="queryAttachmentListByUserId"
+            resultType="com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo">
+        SELECT
+            id,
+            file_name        AS fileName,
+            md5_file_name      AS md5FileName
+        FROM    attachment
+        WHERE uid = #{userId}
+            AND is_delete = 0
+        ORDER BY create_time DESC LIMIT #{pageSize}
+        OFFSET (#{pageNumber} -1) * #{pageSize}
+    </select>
+
+    <!--    查询其他附件信息详情-->
+    <select id="detail" resultType="com.korant.youya.workplace.pojo.vo.attachment.AttachmentDetailVo">
+        SELECT
+            id,
+            file_name        AS fileName,
+            md5_file_name      AS md5FileName
+        FROM    attachment
+        WHERE id = #{id}
+          AND is_delete = 0
+    </select>
+
 </mapper>

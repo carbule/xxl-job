@@ -1,0 +1,46 @@
+package com.korant.youya.workplace.pojo.vo.honorcertificate;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+
+import java.time.LocalDate;
+
+/**
+ * @Author duan-zhixiao
+ * @Date 2023/11/16 17:07
+ * @PackageName:com.korant.youya.workplace.pojo.vo.honorcertificate
+ * @ClassName: HonorCertificateListDto
+ * @Description: TODO
+ * @Version 1.0
+ */
+@Data
+public class HonorCertificateListDto {
+
+    /**
+     * 主键
+     */
+    private Long id;
+
+    /**
+     * 证书名称
+     */
+    private String certificateName;
+
+    /**
+     * 获得时间
+     */
+    private LocalDate obtainTime;
+
+    /**
+     * 文件名称
+     */
+    private String fileName;
+
+    /**
+     * md5文件名称
+     */
+    private String md5FileName;
+
+}

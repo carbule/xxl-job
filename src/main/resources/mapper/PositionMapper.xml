@@ -2,4 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.PositionMapper">
 
+    <!--  查询所有职位数据  -->
+    <select id="queryAllData" resultType="com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo">
+        SELECT
+            id, pid, name
+        FROM position
+        WHERE is_delete = 0
+        ORDER BY create_time
+    </select>
+
 </mapper>

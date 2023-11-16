@@ -2,4 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.HonorCertificateMapper">
 
+    <!--    查询荣誉证书信息列表-->
+    <select id="queryHonorCertificateListByUserId"
+            resultType="com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto">
+        SELECT
+            id,
+            certificate_name     AS certificateName,
+            obtain_time          AS obtainTime,
+            file_name            AS fileName,
+            md5_file_name         AS md5FileName
+        FROM    honor_certificate
+        WHERE uid = #{userId}
+            AND is_delete = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <!--    查询荣誉证书信息详情-->
+    <select id="detail"
+            resultType="com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateDetailDto">
+        SELECT
+            id,
+            certificate_name     AS certificateName,
+            obtain_time          AS obtainTime,
+            file_name            AS fileName,
+            md5_file_name         AS md5FileName
+        FROM    honor_certificate
+        WHERE id = #{id}
+          AND is_delete = 0
+    </select>
+
 </mapper>

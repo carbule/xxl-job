@@ -2,6 +2,10 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.IntendedPosition;
+import com.korant.youya.workplace.pojo.vo.intendedposition.IntendedPositionInfoVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,5 @@ import com.korant.youya.workplace.pojo.po.IntendedPosition;
  */
 public interface IntendedPositionMapper extends BaseMapper<IntendedPosition> {
 
+    List<IntendedPositionInfoVo> findIntendedPositionInfo(@Param("userId") Long userId);
 }

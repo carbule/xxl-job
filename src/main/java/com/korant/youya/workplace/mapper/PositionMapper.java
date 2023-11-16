@@ -2,6 +2,9 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.Position;
+import com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.korant.youya.workplace.pojo.po.Position;
  */
 public interface PositionMapper extends BaseMapper<Position> {
 
+    List<PositionDataTreeVo> queryAllData();
 }

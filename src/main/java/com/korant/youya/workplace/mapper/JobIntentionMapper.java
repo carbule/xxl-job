@@ -2,6 +2,8 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.JobIntention;
+import com.korant.youya.workplace.pojo.vo.jobIntention.JobIntentionVo;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.korant.youya.workplace.pojo.po.JobIntention;
  */
 public interface JobIntentionMapper extends BaseMapper<JobIntention> {
 
+    JobIntentionVo status(@Param("userId") Long userId);
 }

@@ -2,6 +2,9 @@ package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.po.Position;
+import com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.korant.youya.workplace.pojo.po.Position;
  */
 public interface PositionService extends IService<Position> {
 
+    List<PositionDataTreeVo> queryAllData();
 }

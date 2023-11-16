@@ -2,4 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.IntendedPositionMapper">
 
+    <select id="findIntendedPositionInfo"
+            resultType="com.korant.youya.workplace.pojo.vo.intendedposition.IntendedPositionInfoVo">
+        SELECT
+            ip.id,
+            ip.industry_id              AS industryId,
+            p1.name                     AS industryName,
+            ip.sector_id                AS sectorId,
+            p2.name                     AS sectorName,
+            ip.position_id              AS positionId,
+            p3.name                     AS positionName,
+            ip.min_salary               AS minSalary,
+            ip.max_salary               AS maxSalary
+        FROM    intended_position ip
+            LEFT JOIN   job_intention ji ON ji.id = ip.intention_id
+            LEFT JOIN   position p1 ON p1.id = ip.industry_id
+            LEFT JOIN   position p2 ON p2.id = ip.sector_id
+            LEFT JOIN   position p3 ON p3.id = ip.position_id
+        WHERE   ji.uid = #{userId}
+            AND ip.is_delete = 0
+            AND ji.is_delete = 0
+            AND p1.is_delete = 0
+            AND p2.is_delete = 0
+            AND p3.is_delete = 0
+        ORDER BY ip.create_time DESC
+    </select>
+
 </mapper>

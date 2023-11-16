@@ -2,4 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EducationExperienceMapper">
 
+    <select id="queryEducationExperienceListByUserId"
+            resultType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo">
+        SELECT
+            id,
+            school_name         AS schoolName,
+            edu_level           AS eduLevel,
+            start_time          AS startTime,
+            end_time            AS endTime,
+            speciality_name     AS specialityName,
+            degree_name         AS degreeName
+        FROM
+            education_experience
+        WHERE   uid = #{userId}
+          AND is_delete = 0
+        ORDER BY create_time DESC LIMIT #{pageSize}
+        OFFSET (#{pageNumber} -1) * #{pageSize}
+    </select>
+
+    <select id="detail"
+            resultType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceDetailVo">
+        SELECT
+            id,
+            school_name         AS schoolName,
+            edu_level           AS eduLevel,
+            start_time          AS startTime,
+            end_time            AS endTime,
+            speciality_name     AS specialityName,
+            degree_name         AS degreeName
+        FROM
+            education_experience
+        WHERE   id = #{id}
+          AND is_delete = 0
+    </select>
+
 </mapper>
