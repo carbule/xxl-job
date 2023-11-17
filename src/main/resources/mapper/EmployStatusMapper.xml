@@ -2,4 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EmployStatusMapper">
 
+    <!--    查询求职状态-->
+    <select id="status" resultType="com.korant.youya.workplace.pojo.vo.employstatus.EmployStatusVo">
+        SELECT
+            id, status
+        FROM
+            employ_status
+        WHERE   uid = #{userId}
+          AND is_delete = 0
+    </select>
+
 </mapper>

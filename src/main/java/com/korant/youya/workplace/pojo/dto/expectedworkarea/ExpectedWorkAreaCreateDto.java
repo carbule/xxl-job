@@ -16,10 +16,10 @@ import lombok.NonNull;
 public class ExpectedWorkAreaCreateDto {
 
     /**
-     * 意向id
+     * 状态id
      */
-    @NotNull(message = "意向id不能为空")
-    private Long intentionId;
+    @NotNull(message = "状态id不能为空")
+    private Long statusId;
 
     /**
      * 国家id
@@ -43,10 +43,5 @@ public class ExpectedWorkAreaCreateDto {
      * 行政区id
      */
     private Long districtId;
-
-    /**
-     * 详细地址
-     */
-    private String detailedAddress;
 
 }

@@ -1,24 +1,24 @@
-package com.korant.youya.workplace.pojo.dto.intendedposition;
+package com.korant.youya.workplace.pojo.dto.expectedposition;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
  * @Author duan-zhixiao
- * @Date 2023/11/16 14:29
- * @PackageName:com.korant.youya.workplace.pojo.dto.intendedposition
- * @ClassName: IntendedPositionModifyDto
+ * @Date 2023/11/17 14:28
+ * @PackageName:com.korant.youya.workplace.pojo.dto.expectedposition
+ * @ClassName: ExpectedPositionCreateDto
  * @Description: TODO
  * @Version 1.0
  */
 @Data
-public class IntendedPositionModifyDto {
+public class ExpectedPositionCreateDto {
 
     /**
-     * id
+     * 状态id
      */
-    @NotNull(message = "id不能为空")
-    private Long id;
+    @NotNull(message = "状态id不能为空")
+    private Long statusId;
 
     /**
      * 行业id

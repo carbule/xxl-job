@@ -2,4 +2,31 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.ExpectedPositionMapper">
 
+    <!--    查询用户的所有意向职位-->
+    <select id="findExpectedPositionInfo"
+            resultType="com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo">
+        SELECT
+            ep.id,
+            ep.industry_id              AS industryId,
+            p1.name                     AS industryName,
+            ep.sector_id                AS sectorId,
+            p2.name                     AS sectorName,
+            ep.position_id              AS positionId,
+            p3.name                     AS positionName,
+            ep.min_salary               AS minSalary,
+            ep.max_salary               AS maxSalary
+        FROM    expected_position ep
+                    LEFT JOIN   employ_status es ON es.id = ep.status_id
+                    LEFT JOIN   position p1 ON p1.id = ep.industry_id
+                    LEFT JOIN   position p2 ON p2.id = ep.sector_id
+                    LEFT JOIN   position p3 ON p3.id = ep.position_id
+        WHERE   es.uid = #{userId}
+          AND ep.is_delete = 0
+          AND es.is_delete = 0
+          AND p1.is_delete = 0
+          AND p2.is_delete = 0
+          AND p3.is_delete = 0
+        ORDER BY ep.create_time DESC
+    </select>
+
 </mapper>

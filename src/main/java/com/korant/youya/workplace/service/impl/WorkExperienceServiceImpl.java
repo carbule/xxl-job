@@ -43,7 +43,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     @Override
     public Page<WorkExperienceListVo> queryList(WorkExperienceQueryListDto listDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = workExperienceMapper.selectCount(new LambdaQueryWrapper<WorkExperience>().eq(WorkExperience::getUid, userId).eq(WorkExperience::getIsDelete, 0));
@@ -64,7 +64,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     @Override
     public void create(WorkExperienceCreateDto workExperienceCreateDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         WorkExperience workExperience = new WorkExperience();
         BeanUtils.copyProperties(workExperienceCreateDto, workExperience);
         workExperience.setUid(userId);

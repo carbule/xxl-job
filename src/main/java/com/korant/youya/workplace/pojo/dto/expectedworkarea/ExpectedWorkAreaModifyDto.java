@@ -43,9 +43,4 @@ public class ExpectedWorkAreaModifyDto {
      */
     private Long districtId;
 
-    /**
-     * 详细地址
-     */
-    private String detailedAddress;
-
 }

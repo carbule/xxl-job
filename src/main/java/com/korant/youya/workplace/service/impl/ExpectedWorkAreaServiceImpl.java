@@ -38,7 +38,7 @@ public class ExpectedWorkAreaServiceImpl extends ServiceImpl<ExpectedWorkAreaMap
     @Override
     public List<ExpectedWorkAreaInfoVo> queryList() {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         return expectedWorkAreaMapper.queryList(userId);
 
     }
@@ -51,7 +51,7 @@ public class ExpectedWorkAreaServiceImpl extends ServiceImpl<ExpectedWorkAreaMap
     @Override
     public void create(ExpectedWorkAreaCreateDto expectedWorkAreaCreateDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         Long count = expectedWorkAreaMapper.selectCountByUserId(userId);
         if (count >= 3) throw new YouyaException("您最多只能添加三个期望工作区域");
         ExpectedWorkArea expectedWorkArea = new ExpectedWorkArea();

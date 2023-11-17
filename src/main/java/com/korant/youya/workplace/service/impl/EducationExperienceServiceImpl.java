@@ -44,7 +44,7 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
     @Override
     public Page<EducationExperienceListVo> queryList(EducationExperienceQueryListDto listDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = educationExperienceMapper.selectCount(new LambdaQueryWrapper<EducationExperience>().eq(EducationExperience::getUid, userId).eq(EducationExperience::getIsDelete, 0));
@@ -63,7 +63,7 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
     @Override
     public void create(EducationExperienceCreateDto educationExperienceCreateDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         EducationExperience educationExperience = new EducationExperience();
         BeanUtils.copyProperties(educationExperienceCreateDto, educationExperience);
         educationExperience.setUid(userId);

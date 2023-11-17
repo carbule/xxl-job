@@ -43,7 +43,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
     @Override
     public Page<ProjectExperienceListVo> queryList(ProjectExperienceQueryListDto listDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = projectExperienceMapper.queryCountByUserId(userId);

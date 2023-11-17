@@ -42,7 +42,7 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
     @Override
     public Page<HonorCertificateListDto> queryList(HonorCertificateQueryListDto listDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = honorCertificateMapper.selectCount(new LambdaQueryWrapper<HonorCertificate>().eq(HonorCertificate::getUid, userId).eq(HonorCertificate::getIsDelete, 0));
@@ -61,7 +61,7 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
     @Override
     public void create(HonorCertificateCreateDto honorCertificateCreateDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         Long count = honorCertificateMapper.selectCount(new LambdaQueryWrapper<HonorCertificate>().eq(HonorCertificate::getUid, userId).eq(HonorCertificate::getIsDelete, 0));
         if (count >= 5L) throw new YouyaException("荣誉证书最多上传10个!");
         HonorCertificate honorCertificate = new HonorCertificate();

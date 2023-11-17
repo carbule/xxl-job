@@ -19,9 +19,9 @@ public class ExpectedWorkAreaInfoVo {
     private Long id;
 
     /**
-     * 意向id
+     * 状态id
      */
-    private Long intentionId;
+    private Long statusId;
 
     /**
      * 国家id
@@ -62,10 +62,5 @@ public class ExpectedWorkAreaInfoVo {
      * 行政区名称
      */
     private String districtName;
-
-    /**
-     * 详细地址
-     */
-    private String detailedAddress;
 
 }

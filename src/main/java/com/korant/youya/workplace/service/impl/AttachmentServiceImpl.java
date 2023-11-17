@@ -42,7 +42,7 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
     @Override
     public Page<AttachmentListVo> queryList(AttachmentQueryListDto listDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = attachmentMapper.selectCount(new LambdaQueryWrapper<Attachment>().eq(Attachment::getUid, userId).eq(Attachment::getIsDelete, 0));
@@ -61,7 +61,7 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
     @Override
     public void create(AttachmentCreateDto attachmentCreateDto) {
 
-        Long userId = SessionLocal.getUserId();
+        Long userId = 1L;
         Attachment attachment = new Attachment();
         BeanUtils.copyProperties(attachmentCreateDto, attachment);
         attachment.setUid(userId);
