@@ -1,14 +1,11 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.AttachmentMapper;
-import com.korant.youya.workplace.pojo.SessionLocal;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentCreateDto;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentModifyDto;
-import com.korant.youya.workplace.pojo.dto.attachment.AttachmentQueryListDto;
 import com.korant.youya.workplace.pojo.po.Attachment;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentDetailVo;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;
@@ -36,20 +33,14 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
     /**
      * 查询其他附件信息列表
      *
-     * @param listDto
+     * @param
      * @return
      */
     @Override
-    public Page<AttachmentListVo> queryList(AttachmentQueryListDto listDto) {
+    public List<AttachmentListVo> queryList() {
 
         Long userId = 1L;
-        int pageNumber = listDto.getPageNumber();
-        int pageSize = listDto.getPageSize();
-        Long count = attachmentMapper.selectCount(new LambdaQueryWrapper<Attachment>().eq(Attachment::getUid, userId).eq(Attachment::getIsDelete, 0));
-        List<AttachmentListVo> list = attachmentMapper.queryAttachmentListByUserId(userId, pageNumber, pageSize);
-        Page<AttachmentListVo> page = new Page<>();
-        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
-        return page;
+        return attachmentMapper.queryList(userId);
 
     }
 

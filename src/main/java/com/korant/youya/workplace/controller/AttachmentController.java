@@ -4,18 +4,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentCreateDto;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentModifyDto;
-import com.korant.youya.workplace.pojo.dto.attachment.AttachmentQueryListDto;
-import com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperienceCreateDto;
-import com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperienceModifyDto;
-import com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperienceQueryListDto;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentDetailVo;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;
-import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceDetailVo;
-import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
 import com.korant.youya.workplace.service.AttachmentService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -35,13 +31,13 @@ public class AttachmentController {
     /**
      * 查询其他附件信息列表
      *
-     * @param listDto
+     * @param
      * @return
      */
     @PostMapping("/queryList")
-    public R<?> queryList(@RequestBody @Valid AttachmentQueryListDto listDto) {
-        Page<AttachmentListVo> page = attachmentService.queryList(listDto);
-        return R.success(page);
+    public R<?> queryList() {
+        List<AttachmentListVo> attachmentListVo = attachmentService.queryList();
+        return R.success(attachmentListVo);
     }
 
     /**

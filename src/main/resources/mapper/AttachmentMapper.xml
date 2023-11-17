@@ -3,7 +3,7 @@
 <mapper namespace="com.korant.youya.workplace.mapper.AttachmentMapper">
 
     <!--    查询其他附件信息列表-->
-    <select id="queryAttachmentListByUserId"
+    <select id="queryList"
             resultType="com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo">
         SELECT
             id,
@@ -12,8 +12,7 @@
         FROM    attachment
         WHERE uid = #{userId}
             AND is_delete = 0
-        ORDER BY create_time DESC LIMIT #{pageSize}
-        OFFSET (#{pageNumber} -1) * #{pageSize}
+        ORDER BY create_time DESC
     </select>
 
     <!--    查询其他附件信息详情-->

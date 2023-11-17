@@ -3,6 +3,7 @@ package com.korant.youya.workplace.controller;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.employstatus.EmployStatusModifyDto;
 import com.korant.youya.workplace.pojo.vo.employstatus.EmployStatusVo;
+import com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo;
 import com.korant.youya.workplace.service.EmployStatusService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -31,7 +32,22 @@ public class EmployStatusController {
     @GetMapping("/status")
     public R<?> status() {
         EmployStatusVo employStatusVo = employStatusService.status();
-        return R.success(employStatusService);
+        return R.success(employStatusVo);
+    }
+
+    /**
+     * @Author Duan-zhixiao
+     * @Description 个人简历 预览页面
+     * @Date 14:48 2023/11/17
+     * @Param
+     * @return
+     **/
+    @GetMapping("/preview")
+    public R<?> preview() {
+
+        ResumePreviewVo resumePreviewVo = employStatusService.preview();
+        return R.success(resumePreviewVo);
+
     }
 
     /**

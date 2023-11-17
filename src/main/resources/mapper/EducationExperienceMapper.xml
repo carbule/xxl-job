@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EducationExperienceMapper">
 
+    <!--    查询教育经历信息列表-->
     <select id="queryEducationExperienceListByUserId"
             resultType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo">
         SELECT
@@ -20,6 +21,7 @@
         OFFSET (#{pageNumber} -1) * #{pageSize}
     </select>
 
+    <!--    查询教育经历信息详情-->
     <select id="detail"
             resultType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceDetailVo">
         SELECT
@@ -34,6 +36,24 @@
             education_experience
         WHERE   id = #{id}
           AND is_delete = 0
+    </select>
+
+    <!--    查询全部教育经历信息列表-->
+    <select id="queryList"
+            resultType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo">
+        SELECT
+            id,
+            school_name         AS schoolName,
+            edu_level           AS eduLevel,
+            start_time          AS startTime,
+            end_time            AS endTime,
+            speciality_name     AS specialityName,
+            degree_name         AS degreeName
+        FROM
+            education_experience
+        WHERE   uid = #{userId}
+          AND is_delete = 0
+        ORDER BY create_time DESC
     </select>
 
 </mapper>

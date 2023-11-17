@@ -33,4 +33,12 @@ public interface EducationExperienceMapper extends BaseMapper<EducationExperienc
      * @return
      */
     EducationExperienceDetailVo detail(@Param("id") Long id);
+
+    /**
+     * 查询全部教育经历信息列表
+     *
+     * @param
+     * @return
+     */
+    List<EducationExperienceListVo> queryList(@Param("userId") Long userId);
 }

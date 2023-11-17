@@ -4,10 +4,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentCreateDto;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentModifyDto;
-import com.korant.youya.workplace.pojo.dto.attachment.AttachmentQueryListDto;
 import com.korant.youya.workplace.pojo.po.Attachment;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentDetailVo;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -19,7 +20,7 @@ import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;
  */
 public interface AttachmentService extends IService<Attachment> {
 
-    Page<AttachmentListVo> queryList(AttachmentQueryListDto listDto);
+    List<AttachmentListVo> queryList();
 
     void create(AttachmentCreateDto attachmentCreateDto);
 

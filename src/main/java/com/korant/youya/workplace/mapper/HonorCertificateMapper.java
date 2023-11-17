@@ -33,4 +33,12 @@ public interface HonorCertificateMapper extends BaseMapper<HonorCertificate> {
      * @return
      */
     HonorCertificateDetailDto detail(@Param("id") Long id);
+
+    /**
+     * 查询全部荣誉证书信息列表
+     *
+     * @param
+     * @return
+     */
+    List<HonorCertificateListDto> queryList(@Param("userId") Long userId);
 }

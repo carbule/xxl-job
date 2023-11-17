@@ -4,6 +4,7 @@ import com.korant.youya.workplace.pojo.dto.employstatus.EmployStatusModifyDto;
 import com.korant.youya.workplace.pojo.po.EmployStatus;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.vo.employstatus.EmployStatusVo;
+import com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo;
 
 /**
  * <p>
@@ -18,4 +19,6 @@ public interface EmployStatusService extends IService<EmployStatus> {
     EmployStatusVo status();
 
     void modify(EmployStatusModifyDto employStatusModifyDto);
+
+    ResumePreviewVo preview();
 }

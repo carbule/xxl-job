@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.WorkExperienceMapper">
 
+    <!--    查询工作履历信息列表-->
     <select id="queryWorkExperienceListByUserId"
             resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo">
         SELECT
@@ -21,6 +22,7 @@
         OFFSET (#{pageNumber} -1) * #{pageSize}
     </select>
 
+    <!--    查询工作履历信息详情-->
     <select id="detail" resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo">
         SELECT
             id,
@@ -35,6 +37,29 @@
             work_experience
         WHERE   id = #{id}
           AND is_delete = 0
+    </select>
+
+    <!--    查询工作履历信息及其项目经验列表-->
+    <select id="selectWorkExperienceAndProjectExperienceByUserId"
+            resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo">
+        SELECT
+            we.id,
+            we.enterprise_name     AS enterpriseName,
+            we.department_name     AS departmentName,
+            we.position_name       AS positionName,
+            we.start_time          AS startTime,
+            we.end_time            AS endTime,
+            we.content,
+            we.performance,
+            pe.project_name        AS projectName,
+            pe.project_role        AS projectRole,
+            pe.project_content     AS projectContent
+        FROM
+            work_experience we
+            LEFT JOIN   project_experience pe   ON we.id = pe.we_id
+        WHERE   we.uid = #{userId}
+          AND we.is_delete = 0
+          AND pe.is_delete = 0
     </select>
 
 </mapper>

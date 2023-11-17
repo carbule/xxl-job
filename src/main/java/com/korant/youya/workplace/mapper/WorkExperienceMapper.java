@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.WorkExperience;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -35,4 +36,13 @@ public interface WorkExperienceMapper extends BaseMapper<WorkExperience> {
      * @return
      **/
     WorkExperienceDetailVo detail(@Param("id") Long id);
+
+    /**
+     * @Author Duan-zhixiao
+     * @Description 查询工作履历信息及其项目经验列表
+     * @Date 15:31 2023/11/17
+     * @Param
+     * @return
+     **/
+    List<WorkExperiencePreviewVo> selectWorkExperienceAndProjectExperienceByUserId(@Param("userId") Long userId);
 }
