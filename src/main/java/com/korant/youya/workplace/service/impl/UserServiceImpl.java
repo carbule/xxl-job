@@ -8,7 +8,7 @@ import com.korant.youya.workplace.enums.user.UserAccountStatus;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.UserMapper;
-import com.korant.youya.workplace.pojo.UserCache;
+import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.UserLoginByPasswordDto;
 import com.korant.youya.workplace.pojo.dto.user.UserLoginBySMSVerificationCodeDto;
 import com.korant.youya.workplace.pojo.dto.user.UserLoginByWechatCodeDto;
@@ -23,6 +23,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -64,14 +66,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isBlank(phoneNumber)) throw new YouyaException("手机号为空");
         Object o = redisUtil.get(String.format(RedisConstant.YY_USER_ID, phoneNumber));
         if (null == o) {
-            User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phoneNumber).eq(User::getIsDelete, 0));
+            LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
             //用户不存在则默认注册
-            if (null == user) {
-                user = register(phoneNumber);
+            if (null == loginUser) {
+                loginUser = register(phoneNumber);
             }
-            Integer accountStatus = user.getAccountStatus();
+            Integer accountStatus = loginUser.getAccountStatus();
             if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
-            Long id = user.getId();
+            Long id = loginUser.getId();
             String token = JwtUtil.createToken(id);
             String key = String.format(RedisConstant.YY_USER_TOKEN, id);
             //todo token暂时不设置过期时间
@@ -79,35 +81,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             redisUtil.set(key, token);
             String idKey = String.format(RedisConstant.YY_USER_ID, phoneNumber);
             redisUtil.set(idKey, id.toString());
-            UserCache userCache = new UserCache();
-            BeanUtils.copyProperties(user, userCache);
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
-            redisUtil.set(cacheKey, JSONObject.toJSONString(userCache));
+            redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
             return token;
         } else {
             String userId = o.toString();
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
             Object cacheObj = redisUtil.get(cacheKey);
             if (null == cacheObj) {
-                User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phoneNumber).eq(User::getIsDelete, 0));
+                LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
                 //用户不存在则默认注册
-                if (null == user) {
-                    user = register(phoneNumber);
+                if (null == loginUser) {
+                    loginUser = register(phoneNumber);
                 }
-                Integer accountStatus = user.getAccountStatus();
+                Integer accountStatus = loginUser.getAccountStatus();
                 if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
-                Long id = user.getId();
+                Long id = loginUser.getId();
                 String token = JwtUtil.createToken(id);
                 String key = String.format(RedisConstant.YY_USER_TOKEN, id);
                 //todo token暂时不设置过期时间
 //        redisUtil.set(key, token, 7200);
                 redisUtil.set(key, token);
-                UserCache userCache = new UserCache();
-                BeanUtils.copyProperties(user, userCache);
-                redisUtil.set(cacheKey, JSONObject.toJSONString(userCache));
+                redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
                 return token;
             } else {
-                UserCache userCache = JSONObject.parseObject(cacheObj.toString(), UserCache.class);
+                LoginUser userCache = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
                 Integer accountStatus = userCache.getAccountStatus();
                 if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
                 String token = JwtUtil.createToken(Long.valueOf(userId));
@@ -137,14 +135,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (cacheCode.equals(code)) {
             Object o = redisUtil.get(String.format(RedisConstant.YY_USER_ID, phoneNumber));
             if (null == o) {
-                User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phoneNumber).eq(User::getIsDelete, 0));
+                LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
                 //用户不存在则默认注册
-                if (null == user) {
-                    user = register(phoneNumber);
+                if (null == loginUser) {
+                    loginUser = register(phoneNumber);
                 }
-                Integer accountStatus = user.getAccountStatus();
+                Integer accountStatus = loginUser.getAccountStatus();
                 if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
-                Long id = user.getId();
+                Long id = loginUser.getId();
                 String token = JwtUtil.createToken(id);
                 String key = String.format(RedisConstant.YY_USER_TOKEN, id);
                 //todo token暂时不设置过期时间
@@ -152,36 +150,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 redisUtil.set(key, token);
                 String idKey = String.format(RedisConstant.YY_USER_ID, phoneNumber);
                 redisUtil.set(idKey, id.toString());
-                UserCache userCache = new UserCache();
-                BeanUtils.copyProperties(user, userCache);
                 String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
-                redisUtil.set(cacheKey, JSONObject.toJSONString(userCache));
+                redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
                 return token;
             } else {
                 String userId = o.toString();
                 String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
                 Object cacheObj = redisUtil.get(cacheKey);
                 if (null == cacheObj) {
-                    User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phoneNumber).eq(User::getIsDelete, 0));
+                    LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
                     //用户不存在则默认注册
-                    if (null == user) {
-                        user = register(phoneNumber);
+                    if (null == loginUser) {
+                        loginUser = register(phoneNumber);
                     }
-                    Integer accountStatus = user.getAccountStatus();
+                    Integer accountStatus = loginUser.getAccountStatus();
                     if (UserAccountStatus.FROZEN.getStatus() == accountStatus)
                         throw new YouyaException("账号已被冻结,详情请咨询客服");
-                    Long id = user.getId();
+                    Long id = loginUser.getId();
                     String token = JwtUtil.createToken(id);
                     String key = String.format(RedisConstant.YY_USER_TOKEN, id);
                     //todo token暂时不设置过期时间
 //        redisUtil.set(key, token, 7200);
                     redisUtil.set(key, token);
-                    UserCache userCache = new UserCache();
-                    BeanUtils.copyProperties(user, userCache);
-                    redisUtil.set(cacheKey, JSONObject.toJSONString(userCache));
+                    redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
                     return token;
                 } else {
-                    UserCache userCache = JSONObject.parseObject(cacheObj.toString(), UserCache.class);
+                    LoginUser userCache = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
                     Integer accountStatus = userCache.getAccountStatus();
                     if (UserAccountStatus.FROZEN.getStatus() == accountStatus)
                         throw new YouyaException("账号已被冻结,详情请咨询客服");
@@ -213,7 +207,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param phoneNumber
      * @return
      */
-    private User register(String phoneNumber) {
+    private LoginUser register(String phoneNumber) {
         boolean exists = userMapper.exists(new LambdaQueryWrapper<User>().eq(User::getPhone, phoneNumber));
         if (exists) {
             throw new YouyaException("手机号已经注册");
@@ -230,7 +224,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .setAddressPublicStatus(0)
                 .setAvatar(DEFAULT_AVATAR);
         userMapper.insert(user);
-        return user;
+        LoginUser loginUser = new LoginUser();
+        BeanUtils.copyProperties(user, loginUser);
+        return loginUser;
     }
 
     /**
@@ -250,10 +246,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Object o = redisUtil.get(key);
         if (null == o) {
             String code = verificationCodeGenerator();
+            if (!HuaWeiUtil.sendVerificationCode(code, phone)) throw new YouyaException("短信验证码发送失败，请稍后再试");
 //            if (!redisUtil.set(key, code, 600)) throw new YouyaException("获取验证码失败，请稍后再试");
             //todo 暂时不过期
             if (!redisUtil.set(key, code)) throw new YouyaException("获取验证码失败，请稍后再试");
-            if (!HuaWeiUtil.sendVerificationCode(code, phone)) throw new YouyaException("短信验证码发送失败，请稍后再试");
         } else throw new YouyaException("验证码10分钟内有效，请勿频繁获取短信验证码");
     }
 
@@ -262,7 +258,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public void logout() {
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        Long id = loginUser.getId();
+        String key = String.format(RedisConstant.YY_USER_TOKEN, id);
+        redisUtil.del(key);
     }
 
     /**

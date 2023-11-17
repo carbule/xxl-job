@@ -8,7 +8,6 @@ import com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperien
 import com.korant.youya.workplace.pojo.po.EducationExperience;
 import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
-import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceListVo;
 
 /**
  * <p>

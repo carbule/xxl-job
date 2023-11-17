@@ -2,7 +2,6 @@ package com.korant.youya.workplace.pojo.dto.expectedworkarea;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NonNull;
 
 /**
  * @Author duan-zhixiao

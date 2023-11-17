@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.HonorCertificateMapper;
-import com.korant.youya.workplace.pojo.SessionLocal;
 import com.korant.youya.workplace.pojo.dto.honorcertificate.HonorCertificateCreateDto;
 import com.korant.youya.workplace.pojo.dto.honorcertificate.HonorCertificateModifyDto;
 import com.korant.youya.workplace.pojo.dto.honorcertificate.HonorCertificateQueryListDto;

@@ -1,7 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
-import com.korant.youya.workplace.pojo.po.ExpectedPosition;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.po.ExpectedPosition;
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
 import org.apache.ibatis.annotations.Param;
 

@@ -2,4 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.UserMapper">
 
+    <select id="selectUserToLoginById" parameterType="java.lang.Long" resultType="com.korant.youya.workplace.pojo.LoginUser">
+        SELECT u.id,
+               u.phone,
+               u.identity_card         AS identityCard,
+               u.authentication_status AS authenticationStatus,
+               u.account_status        AS accountStatus,
+               r.role_name             AS role,
+               e.id                    AS enterpriseId
+        FROM yy_user AS u
+                 LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
+                 LEFT JOIN yy_role AS r ON ur.rid = r.id
+                 LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
+                 LEFT JOIN enterprise AS e ON ue.enterprise_id = e.id
+        WHERE u.id = #{id}
+          AND u.is_delete = 0
+    </select>
+
+    <select id="selectUserToLoginByPhoneNumber" parameterType="java.lang.String"
+            resultType="com.korant.youya.workplace.pojo.LoginUser">
+        SELECT u.id,
+               u.phone,
+               u.identity_card         AS identityCard,
+               u.authentication_status AS authenticationStatus,
+               u.account_status        AS accountStatus,
+               r.role_name             AS role,
+               e.id                    AS enterpriseId
+        FROM yy_user AS u
+                 LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
+                 LEFT JOIN yy_role AS r ON ur.rid = r.id
+                 LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
+                 LEFT JOIN enterprise AS e ON ue.enterprise_id = e.id
+        WHERE u.phone = #{phoneNumber}
+          AND u.is_delete = 0
+    </select>
 </mapper>

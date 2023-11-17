@@ -1,12 +1,6 @@
 package com.korant.youya.workplace.pojo.vo.workexperience;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * @Author duan-zhixiao

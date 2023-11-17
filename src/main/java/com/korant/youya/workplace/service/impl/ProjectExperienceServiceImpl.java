@@ -1,11 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.ProjectExperienceMapper;
-import com.korant.youya.workplace.pojo.SessionLocal;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceCreateDto;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceModifyDto;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceQueryListDto;

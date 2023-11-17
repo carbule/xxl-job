@@ -1,7 +1,6 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.po.Attachment;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentDetailVo;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,10 +22,15 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({YouyaException.class})
-    public ResponseEntity<?> handleBizException(YouyaException e) {
+    public ResponseEntity<?> handleYouyaException(YouyaException e) {
         log.error("业务发生异常，异常信息：", e);
         HttpStatus httpStatus = HttpStatus.valueOf(e.getStatusCode());
         return ResponseEntity.status(httpStatus).body(R.error(e.getMessage()));
+    }
+
+    @ExceptionHandler({AccessDeniedException.class})
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(R.error("权限不足,禁止访问"));
     }
 
     @ExceptionHandler({Exception.class})

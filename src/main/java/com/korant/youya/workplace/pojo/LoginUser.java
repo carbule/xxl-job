@@ -10,7 +10,12 @@ import lombok.Data;
  * @Version 1.0
  */
 @Data
-public class UserCache {
+public class LoginUser {
+
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 用户手机号
@@ -18,24 +23,9 @@ public class UserCache {
     private String phone;
 
     /**
-     * 用户姓氏
-     */
-    private String lastName;
-
-    /**
-     * 用户名
-     */
-    private String firstName;
-
-    /**
      * 用户身份证号
      */
     private String identityCard;
-
-    /**
-     * 企业id
-     */
-    private Long enterpriseId;
 
     /**
      * 实名认证状态
@@ -46,4 +36,14 @@ public class UserCache {
      * 账号状态 0-未冻结 1-已冻结
      */
     private Integer accountStatus;
+
+    /**
+     * 企业id
+     */
+    private Long enterpriseId;
+
+    /**
+     * 角色
+     */
+    private String role;
 }

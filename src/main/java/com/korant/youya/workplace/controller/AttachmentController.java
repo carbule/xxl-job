@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentCreateDto;
 import com.korant.youya.workplace.pojo.dto.attachment.AttachmentModifyDto;

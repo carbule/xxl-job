@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.WorkExperienceMapper;
-import com.korant.youya.workplace.pojo.SessionLocal;
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceCreateDto;
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceModifyDto;
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceQueryListDto;

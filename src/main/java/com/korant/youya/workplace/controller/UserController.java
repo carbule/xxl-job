@@ -8,10 +8,7 @@ import com.korant.youya.workplace.pojo.dto.user.VerificationCodeDto;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -81,7 +78,7 @@ public class UserController {
      *
      * @return
      */
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public R<?> logout() {
         userService.logout();
         return R.ok();

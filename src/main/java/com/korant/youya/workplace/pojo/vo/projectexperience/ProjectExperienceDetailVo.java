@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.pojo.vo.projectexperience;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
