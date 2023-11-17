@@ -1,26 +1,29 @@
 package com.korant.youya.workplace.pojo.po;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * <p>
- * 用户期望工作区域表
+ * 用户求职状态表
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-14
+ * @since 2023-11-17
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("expected_work_area")
-public class ExpectedWorkArea implements Serializable {
+@TableName("employ_status")
+public class EmployStatus implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,34 +34,16 @@ public class ExpectedWorkArea implements Serializable {
     private Long id;
 
     /**
-     * 状态id
+     * 用户id
      */
-    @TableField("status_id")
-    private Long statusId;
+    @TableField("uid")
+    private Long uid;
 
     /**
-     * 国家id
+     * 求职状态
      */
-    @TableField("country_id")
-    private Long countryId;
-
-    /**
-     * 省份id
-     */
-    @TableField("province_id")
-    private Long provinceId;
-
-    /**
-     * 市级id
-     */
-    @TableField("city_id")
-    private Long cityId;
-
-    /**
-     * 行政区id
-     */
-    @TableField("district_id")
-    private Long districtId;
+    @TableField("status")
+    private Integer status;
 
     /**
      * 创建时间

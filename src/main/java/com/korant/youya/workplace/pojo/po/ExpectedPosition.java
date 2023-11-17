@@ -1,26 +1,31 @@
 package com.korant.youya.workplace.pojo.po;
 
-import com.baomidou.mybatisplus.annotation.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
 /**
  * <p>
- * 用户期望工作区域表
+ * 用户意向职位表
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-14
+ * @since 2023-11-17
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("expected_work_area")
-public class ExpectedWorkArea implements Serializable {
+@TableName("expected_position")
+public class ExpectedPosition implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -37,28 +42,34 @@ public class ExpectedWorkArea implements Serializable {
     private Long statusId;
 
     /**
-     * 国家id
+     * 行业id
      */
-    @TableField("country_id")
-    private Long countryId;
+    @TableField("industry_id")
+    private Long industryId;
 
     /**
-     * 省份id
+     * 领域id
      */
-    @TableField("province_id")
-    private Long provinceId;
+    @TableField("sector_id")
+    private Long sectorId;
 
     /**
-     * 市级id
+     * 职位id
      */
-    @TableField("city_id")
-    private Long cityId;
+    @TableField("position_id")
+    private Long positionId;
 
     /**
-     * 行政区id
+     * 最低薪资
      */
-    @TableField("district_id")
-    private Long districtId;
+    @TableField("min_salary")
+    private Integer minSalary;
+
+    /**
+     * 最高薪资
+     */
+    @TableField("max_salary")
+    private Integer maxSalary;
 
     /**
      * 创建时间
