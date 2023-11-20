@@ -1,11 +1,9 @@
 package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginByPasswordDto;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginBySMSVerificationCodeDto;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginByWechatCodeDto;
-import com.korant.youya.workplace.pojo.dto.user.VerificationCodeDto;
+import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 
 /**
  * <p>
@@ -23,7 +21,7 @@ public interface UserService extends IService<User> {
      * @param wechatCodeDto
      * @return
      */
-    String loginByWechatCode(UserLoginByWechatCodeDto wechatCodeDto);
+    UserLoginVo loginByWechatCode(UserLoginByWechatCodeDto wechatCodeDto);
 
     /**
      * 短信验证码登陆
@@ -31,7 +29,7 @@ public interface UserService extends IService<User> {
      * @param smsVerificationCodeDto
      * @return
      */
-    String loginBySMSVerificationCode(UserLoginBySMSVerificationCodeDto smsVerificationCodeDto);
+    UserLoginVo loginBySMSVerificationCode(UserLoginBySMSVerificationCodeDto smsVerificationCodeDto);
 
     /**
      * 密码登陆
@@ -39,7 +37,7 @@ public interface UserService extends IService<User> {
      * @param passwordDto
      * @return
      */
-    String loginByPassword(UserLoginByPasswordDto passwordDto);
+    UserLoginVo loginByPassword(UserLoginByPasswordDto passwordDto);
 
     /**
      * 获取登陆短信二维码
@@ -47,6 +45,13 @@ public interface UserService extends IService<User> {
      * @param codeDto
      */
     void getVerificationCode(VerificationCodeDto codeDto);
+
+    /**
+     * 实名认证
+     *
+     * @param realNameAuthDto
+     */
+    void realNameAuthentication(UserRealNameAuthenticationDto realNameAuthDto);
 
     /**
      * 用户登出

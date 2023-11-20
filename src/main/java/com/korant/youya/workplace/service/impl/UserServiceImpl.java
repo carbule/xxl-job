@@ -9,23 +9,17 @@ import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.UserMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginByPasswordDto;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginBySMSVerificationCodeDto;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginByWechatCodeDto;
-import com.korant.youya.workplace.pojo.dto.user.VerificationCodeDto;
+import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 import com.korant.youya.workplace.service.UserService;
-import com.korant.youya.workplace.utils.HuaWeiUtil;
-import com.korant.youya.workplace.utils.JwtUtil;
-import com.korant.youya.workplace.utils.RedisUtil;
-import com.korant.youya.workplace.utils.WeChatUtil;
+import com.korant.youya.workplace.utils.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 
@@ -47,7 +41,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private RedisUtil redisUtil;
 
-    private static final String DEFAULT_AVATAR = "https://resources.youyai.cn/picture/avatar.jpg";
+    private static final String DEFAULT_AVATAR = "https://resources.youyai.cn/icon/male.svg";
 
     /**
      * 微信登陆
@@ -56,7 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public String loginByWechatCode(UserLoginByWechatCodeDto wechatCodeDto) {
+    public UserLoginVo loginByWechatCode(UserLoginByWechatCodeDto wechatCodeDto) {
         String code = wechatCodeDto.getCode();
         log.info("code:{}", code);
         String accessToken = WeChatUtil.getAccessToken();
@@ -83,7 +77,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             redisUtil.set(idKey, id.toString());
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
             redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
-            return token;
+            UserLoginVo userLoginVo = new UserLoginVo();
+            userLoginVo.setToken(token);
+            userLoginVo.setRole(loginUser.getRole());
+            return userLoginVo;
         } else {
             String userId = o.toString();
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
@@ -103,17 +100,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //        redisUtil.set(key, token, 7200);
                 redisUtil.set(key, token);
                 redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
-                return token;
+                UserLoginVo userLoginVo = new UserLoginVo();
+                userLoginVo.setToken(token);
+                userLoginVo.setRole(loginUser.getRole());
+                return userLoginVo;
             } else {
-                LoginUser userCache = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
-                Integer accountStatus = userCache.getAccountStatus();
+                LoginUser loginUser = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
+                Integer accountStatus = loginUser.getAccountStatus();
                 if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
                 String token = JwtUtil.createToken(Long.valueOf(userId));
                 String key = String.format(RedisConstant.YY_USER_TOKEN, userId);
                 //todo token暂时不设置过期时间
 //        redisUtil.set(key, token, 7200);
                 redisUtil.set(key, token);
-                return token;
+                UserLoginVo userLoginVo = new UserLoginVo();
+                userLoginVo.setToken(token);
+                userLoginVo.setRole(loginUser.getRole());
+                return userLoginVo;
             }
         }
     }
@@ -125,7 +128,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public String loginBySMSVerificationCode(UserLoginBySMSVerificationCodeDto smsVerificationCodeDto) {
+    public UserLoginVo loginBySMSVerificationCode(UserLoginBySMSVerificationCodeDto smsVerificationCodeDto) {
         String phoneNumber = smsVerificationCodeDto.getPhoneNumber();
         String code = smsVerificationCodeDto.getCode();
         String codeKey = String.format(RedisConstant.YY_PHONE_CODE, phoneNumber);
@@ -152,7 +155,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 redisUtil.set(idKey, id.toString());
                 String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
                 redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
-                return token;
+                UserLoginVo userLoginVo = new UserLoginVo();
+                userLoginVo.setToken(token);
+                userLoginVo.setRole(loginUser.getRole());
+                return userLoginVo;
             } else {
                 String userId = o.toString();
                 String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
@@ -173,10 +179,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //        redisUtil.set(key, token, 7200);
                     redisUtil.set(key, token);
                     redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
-                    return token;
+                    UserLoginVo userLoginVo = new UserLoginVo();
+                    userLoginVo.setToken(token);
+                    userLoginVo.setRole(loginUser.getRole());
+                    return userLoginVo;
                 } else {
-                    LoginUser userCache = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
-                    Integer accountStatus = userCache.getAccountStatus();
+                    LoginUser loginUser = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
+                    Integer accountStatus = loginUser.getAccountStatus();
                     if (UserAccountStatus.FROZEN.getStatus() == accountStatus)
                         throw new YouyaException("账号已被冻结,详情请咨询客服");
                     String token = JwtUtil.createToken(Long.valueOf(userId));
@@ -184,7 +193,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     //todo token暂时不设置过期时间
 //        redisUtil.set(key, token, 7200);
                     redisUtil.set(key, token);
-                    return token;
+                    UserLoginVo userLoginVo = new UserLoginVo();
+                    userLoginVo.setToken(token);
+                    userLoginVo.setRole(loginUser.getRole());
+                    return userLoginVo;
                 }
             }
         } else throw new YouyaException("验证码错误");
@@ -197,7 +209,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public String loginByPassword(UserLoginByPasswordDto passwordDto) {
+    public UserLoginVo loginByPassword(UserLoginByPasswordDto passwordDto) {
         return null;
     }
 
@@ -254,13 +266,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
+     * 实名认证
+     *
+     * @param realNameAuthDto
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void realNameAuthentication(UserRealNameAuthenticationDto realNameAuthDto) {
+        Long id = SpringSecurityUtil.getUserId();
+        String idcard = realNameAuthDto.getIdcard();
+        User user = userMapper.selectById(id);
+        if (null == user) throw new YouyaException("用户未注册");
+        Integer authenticationStatus = user.getAuthenticationStatus();
+        if (0 == authenticationStatus) {
+            String lastName = realNameAuthDto.getLastName();
+            String firstName = realNameAuthDto.getFirstName();
+            String name = lastName + firstName;
+            String phone = user.getPhone();
+            if (!HuaWeiUtil.realNameAuth(idcard, phone, name)) throw new YouyaException("实名认证失败");
+            user.setLastName(lastName);
+            user.setFirstName(firstName);
+            user.setIdentityCard(idcard);
+            user.setAuthenticationStatus(UserAuthenticationStatusEnum.CERTIFIED.getType());
+            userMapper.updateById(user);
+            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
+            redisUtil.del(cacheKey);
+        } else {
+            throw new YouyaException("请勿重复认证");
+        }
+    }
+
+    /**
      * 用户登出
      */
     @Override
     public void logout() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        Long id = loginUser.getId();
+        Long id = SpringSecurityUtil.getUserId();
         String key = String.format(RedisConstant.YY_USER_TOKEN, id);
         redisUtil.del(key);
     }

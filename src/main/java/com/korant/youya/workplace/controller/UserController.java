@@ -1,10 +1,8 @@
 package com.korant.youya.workplace.controller;
 
 import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginByPasswordDto;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginBySMSVerificationCodeDto;
-import com.korant.youya.workplace.pojo.dto.user.UserLoginByWechatCodeDto;
-import com.korant.youya.workplace.pojo.dto.user.VerificationCodeDto;
+import com.korant.youya.workplace.pojo.dto.user.*;
+import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -33,8 +31,8 @@ public class UserController {
      */
     @PostMapping("/loginByWechatCode")
     public R<?> loginByWechatCode(@RequestBody @Valid UserLoginByWechatCodeDto wechatCodeDto) {
-        String token = userService.loginByWechatCode(wechatCodeDto);
-        return R.success(token);
+        UserLoginVo loginVo = userService.loginByWechatCode(wechatCodeDto);
+        return R.success(loginVo);
     }
 
     /**
@@ -45,8 +43,8 @@ public class UserController {
      */
     @PostMapping("/loginBySMSVerificationCode")
     public R<?> loginBySMSVerificationCode(@RequestBody @Valid UserLoginBySMSVerificationCodeDto smsVerificationCodeDto) {
-        String token = userService.loginBySMSVerificationCode(smsVerificationCodeDto);
-        return R.success(token);
+        UserLoginVo loginVo = userService.loginBySMSVerificationCode(smsVerificationCodeDto);
+        return R.success(loginVo);
     }
 
     /**
@@ -57,8 +55,8 @@ public class UserController {
      */
     @PostMapping("/loginByPassword")
     public R<?> loginByPassword(@RequestBody @Valid UserLoginByPasswordDto passwordDto) {
-        String token = userService.loginByPassword(passwordDto);
-        return R.success(token);
+        UserLoginVo loginVo = userService.loginByPassword(passwordDto);
+        return R.success(loginVo);
     }
 
     /**
@@ -70,6 +68,18 @@ public class UserController {
     @PostMapping("/getVerificationCode")
     public R<?> getVerificationCode(@RequestBody @Valid VerificationCodeDto codeDto) {
         userService.getVerificationCode(codeDto);
+        return R.ok();
+    }
+
+    /**
+     * 实名认证
+     *
+     * @param realNameAuthDto
+     * @return
+     */
+    @PostMapping("/realNameAuth")
+    public R<?> realNameAuthentication(@RequestBody @Valid UserRealNameAuthenticationDto realNameAuthDto) {
+        userService.realNameAuthentication(realNameAuthDto);
         return R.ok();
     }
 
