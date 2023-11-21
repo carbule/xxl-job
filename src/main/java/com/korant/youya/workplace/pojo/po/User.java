@@ -154,25 +154,25 @@ public class User implements Serializable {
      * 国家编码
      */
     @TableField("country_code")
-    private Long countryCode;
+    private String countryCode;
 
     /**
      * 省份编码
      */
     @TableField("province_code")
-    private Long provinceCode;
+    private String provinceCode;
 
     /**
      * 市级编码
      */
     @TableField("city_code")
-    private Long cityCode;
+    private String cityCode;
 
     /**
      * 行政区编码
      */
     @TableField("district_code")
-    private Long districtCode;
+    private String districtCode;
 
     /**
      * 实名认证状态
