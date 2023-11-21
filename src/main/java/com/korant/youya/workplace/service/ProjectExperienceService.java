@@ -6,8 +6,8 @@ import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceCr
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceModifyDto;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceQueryListDto;
 import com.korant.youya.workplace.pojo.po.ProjectExperience;
+import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceListVo;
-import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
 
 /**
  * <p>
@@ -25,7 +25,7 @@ public interface ProjectExperienceService extends IService<ProjectExperience> {
 
     void modify(ProjectExperienceModifyDto projectExperienceModifyDto);
 
-    WorkExperienceDetailVo detail(Long id);
+    ProjectExperienceDetailVo detail(Long id);
 
     void delete(Long id);
 }

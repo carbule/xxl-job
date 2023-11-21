@@ -9,9 +9,11 @@ import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionModi
 import com.korant.youya.workplace.pojo.po.ExpectedPosition;
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
 import com.korant.youya.workplace.service.ExpectedPositionService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class ExpectedPositionServiceImpl extends ServiceImpl<ExpectedPositionMap
     @Override
     public List<ExpectedPositionInfoVo> findExpectedPositionInfo() {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
 
         return expectedPositionMapper.findExpectedPositionInfo(userId);
 
@@ -53,6 +55,7 @@ public class ExpectedPositionServiceImpl extends ServiceImpl<ExpectedPositionMap
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(ExpectedPositionCreateDto expectedPositionCreateDto) {
 
         Long count = expectedPositionMapper.selectCount(new LambdaQueryWrapper<ExpectedPosition>().eq(ExpectedPosition::getStatusId, expectedPositionCreateDto.getStatusId()));
@@ -72,6 +75,7 @@ public class ExpectedPositionServiceImpl extends ServiceImpl<ExpectedPositionMap
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(ExpectedPositionModifyDto expectedPositionModifyDto) {
 
         ExpectedPosition expectedPosition = expectedPositionMapper.selectById(expectedPositionModifyDto.getId());
@@ -89,6 +93,7 @@ public class ExpectedPositionServiceImpl extends ServiceImpl<ExpectedPositionMap
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
 
         ExpectedPosition expectedPosition = expectedPositionMapper.selectById(id);

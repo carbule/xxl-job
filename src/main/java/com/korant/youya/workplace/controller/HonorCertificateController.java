@@ -71,7 +71,7 @@ public class HonorCertificateController {
     @GetMapping("/detail/{id}")
     public R<?> detail(@PathVariable("id") Long id) {
         HonorCertificateDetailDto honorCertificateDetailDto = honorCertificateService.detail(id);
-        return R.success(honorCertificateService);
+        return R.success(honorCertificateDetailDto);
     }
 
     /**

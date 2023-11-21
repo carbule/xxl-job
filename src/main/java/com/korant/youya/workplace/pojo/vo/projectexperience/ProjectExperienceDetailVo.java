@@ -33,4 +33,14 @@ public class ProjectExperienceDetailVo {
      */
     private String projectContent;
 
+    /**
+     * weId
+     */
+    private Long weId;
+
+    /**
+     * 企业名称
+     */
+    private String enterpriseName;
+
 }

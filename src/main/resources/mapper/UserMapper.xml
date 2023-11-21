@@ -36,4 +36,22 @@
         WHERE u.phone = #{phoneNumber}
           AND u.is_delete = 0
     </select>
+
+    <select id="resumePersonDetail" resultType="com.korant.youya.workplace.pojo.vo.user.resumePersonInfoVo">
+        SELECT
+            u.avatar,
+            u.last_name            AS lastName,
+            u.first_name           AS firstName,
+            u.gender,
+            u.birthday,
+            u.political_outlook     AS  politicalOutlook,
+            u.personal_signature    AS  personalSignature,
+            u.self_evaluation       AS  selfEvaluation,
+            e.name                  AS  userEnterprise
+        FROM yy_user AS u
+                 LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
+                 LEFT JOIN enterprise AS e ON ue.enterprise_id = e.id AND e.is_delete = 0
+        WHERE u.id = #{userId}
+          AND u.is_delete = 0
+    </select>
 </mapper>

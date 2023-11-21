@@ -60,7 +60,7 @@ spring:
             adaptive: true
             #10秒自动刷新一次
             period: 10
-      connect-timeout: 3000 # 连接超时时间（毫秒）
+      connect-timeout: 300 # 连接超时时间（毫秒）
 
 mybatis-plus:
   configuration:

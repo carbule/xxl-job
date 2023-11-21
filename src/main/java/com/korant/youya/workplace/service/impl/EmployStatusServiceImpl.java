@@ -14,6 +14,7 @@ import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoV
 import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import com.korant.youya.workplace.service.EmployStatusService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +54,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
     @Override
     public EmployStatusVo status() {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         return employStatusMapper.status(userId);
 
     }
@@ -66,7 +67,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
     @Override
     public void modify(EmployStatusModifyDto employStatusModifyDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         employStatusMapper.update(new EmployStatus(),
                 new LambdaUpdateWrapper<EmployStatus>()
                         .eq(EmployStatus::getUid, userId)
@@ -84,7 +85,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
     @Override
     public ResumePreviewVo preview() {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         ResumePreviewVo resumePreviewVo = new ResumePreviewVo();
 
         //        求职意向-意向职位

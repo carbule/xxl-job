@@ -12,9 +12,11 @@ import com.korant.youya.workplace.pojo.po.HonorCertificate;
 import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateDetailDto;
 import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto;
 import com.korant.youya.workplace.service.HonorCertificateService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
     @Override
     public Page<HonorCertificateListDto> queryList(HonorCertificateQueryListDto listDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = honorCertificateMapper.selectCount(new LambdaQueryWrapper<HonorCertificate>().eq(HonorCertificate::getUid, userId).eq(HonorCertificate::getIsDelete, 0));
@@ -58,9 +60,10 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(HonorCertificateCreateDto honorCertificateCreateDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         Long count = honorCertificateMapper.selectCount(new LambdaQueryWrapper<HonorCertificate>().eq(HonorCertificate::getUid, userId).eq(HonorCertificate::getIsDelete, 0));
         if (count >= 5L) throw new YouyaException("荣誉证书最多上传10个!");
         HonorCertificate honorCertificate = new HonorCertificate();
@@ -77,6 +80,7 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(HonorCertificateModifyDto honorCertificateModifyDto) {
 
         HonorCertificate honorCertificate = honorCertificateMapper.selectById(honorCertificateModifyDto.getId());
@@ -106,6 +110,7 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
 
         HonorCertificate honorCertificate = honorCertificateMapper.selectById(id);

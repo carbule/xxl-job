@@ -12,9 +12,11 @@ import com.korant.youya.workplace.pojo.po.WorkExperience;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
 import com.korant.youya.workplace.service.WorkExperienceService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     @Override
     public Page<WorkExperienceListVo> queryList(WorkExperienceQueryListDto listDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = workExperienceMapper.selectCount(new LambdaQueryWrapper<WorkExperience>().eq(WorkExperience::getUid, userId).eq(WorkExperience::getIsDelete, 0));
@@ -61,9 +63,10 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(WorkExperienceCreateDto workExperienceCreateDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         WorkExperience workExperience = new WorkExperience();
         BeanUtils.copyProperties(workExperienceCreateDto, workExperience);
         workExperience.setUid(userId);
@@ -79,6 +82,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(WorkExperienceModifyDto workExperienceModifyDto) {
 
         WorkExperience workExperience = workExperienceMapper.selectById(workExperienceModifyDto.getId());
@@ -108,6 +112,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
 
         WorkExperience workExperience = workExperienceMapper.selectById(id);

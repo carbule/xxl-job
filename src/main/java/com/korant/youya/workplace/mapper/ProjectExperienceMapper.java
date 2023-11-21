@@ -2,8 +2,8 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.ProjectExperience;
+import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceListVo;
-import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -43,5 +43,5 @@ public interface ProjectExperienceMapper extends BaseMapper<ProjectExperience> {
      * @Param
      * @return
      **/
-    WorkExperienceDetailVo detail(@Param("id") Long id);
+    ProjectExperienceDetailVo detail(@Param("id") Long id);
 }

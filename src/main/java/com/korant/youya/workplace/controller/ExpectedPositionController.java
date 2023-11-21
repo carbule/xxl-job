@@ -27,7 +27,7 @@ public class ExpectedPositionController {
     private ExpectedPositionService expectedPositionService;
 
     /**
-     * 查询用户求职意向
+     * 查询用户求职意向职位
      *
      * @return
      */
@@ -38,7 +38,7 @@ public class ExpectedPositionController {
     }
 
     /**
-     * 添加求职意向
+     * 添加求职意向职位
      *
      * @return
      */
@@ -49,7 +49,7 @@ public class ExpectedPositionController {
     }
 
     /**
-     * 编辑求职意向
+     * 编辑求职意向职位
      *
      * @return
      */
@@ -60,7 +60,7 @@ public class ExpectedPositionController {
     }
 
     /**
-     * 删除求职意向
+     * 删除求职意向职位
      *
      * @param
      * @return

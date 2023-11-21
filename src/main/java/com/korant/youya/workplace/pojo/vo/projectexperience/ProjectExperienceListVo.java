@@ -20,6 +20,11 @@ public class ProjectExperienceListVo extends PageParam {
     private Long id;
 
     /**
+     * 企业名称
+     */
+    private String enterpriseName;
+
+    /**
      * 项目名称
      */
     private String projectName;

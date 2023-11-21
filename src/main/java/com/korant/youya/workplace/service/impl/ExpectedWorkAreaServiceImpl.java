@@ -8,9 +8,11 @@ import com.korant.youya.workplace.pojo.dto.expectedworkarea.ExpectedWorkAreaModi
 import com.korant.youya.workplace.pojo.po.ExpectedWorkArea;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo;
 import com.korant.youya.workplace.service.ExpectedWorkAreaService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -36,7 +38,7 @@ public class ExpectedWorkAreaServiceImpl extends ServiceImpl<ExpectedWorkAreaMap
     @Override
     public List<ExpectedWorkAreaInfoVo> queryList() {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         return expectedWorkAreaMapper.queryList(userId);
 
     }
@@ -47,9 +49,10 @@ public class ExpectedWorkAreaServiceImpl extends ServiceImpl<ExpectedWorkAreaMap
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(ExpectedWorkAreaCreateDto expectedWorkAreaCreateDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         Long count = expectedWorkAreaMapper.selectCountByUserId(userId);
         if (count >= 3) throw new YouyaException("您最多只能添加三个期望工作区域");
         ExpectedWorkArea expectedWorkArea = new ExpectedWorkArea();
@@ -64,6 +67,7 @@ public class ExpectedWorkAreaServiceImpl extends ServiceImpl<ExpectedWorkAreaMap
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(ExpectedWorkAreaModifyDto expectedWorkAreaModifyDto) {
 
         ExpectedWorkArea expectedWorkArea = expectedWorkAreaMapper.selectById(expectedWorkAreaModifyDto.getId());
@@ -80,6 +84,7 @@ public class ExpectedWorkAreaServiceImpl extends ServiceImpl<ExpectedWorkAreaMap
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
 
         ExpectedWorkArea expectedWorkArea = expectedWorkAreaMapper.selectById(id);

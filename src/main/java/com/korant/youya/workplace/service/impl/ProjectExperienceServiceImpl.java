@@ -8,12 +8,14 @@ import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceCr
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceModifyDto;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceQueryListDto;
 import com.korant.youya.workplace.pojo.po.ProjectExperience;
+import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceListVo;
-import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
 import com.korant.youya.workplace.service.ProjectExperienceService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
     @Override
     public Page<ProjectExperienceListVo> queryList(ProjectExperienceQueryListDto listDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = projectExperienceMapper.queryCountByUserId(userId);
@@ -60,6 +62,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(ProjectExperienceCreateDto projectExperienceCreateDto) {
 
         ProjectExperience projectExperience = new ProjectExperience();
@@ -76,6 +79,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(ProjectExperienceModifyDto projectExperienceModifyDto) {
 
         ProjectExperience projectExperience = projectExperienceMapper.selectById(projectExperienceModifyDto.getId());
@@ -93,7 +97,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
      * @return
      **/
     @Override
-    public WorkExperienceDetailVo detail(Long id) {
+    public ProjectExperienceDetailVo detail(Long id) {
         return projectExperienceMapper.detail(id);
     }
 
@@ -105,6 +109,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
 
         ProjectExperience projectExperience = projectExperienceMapper.selectById(id);

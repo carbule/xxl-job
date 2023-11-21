@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.pojo.dto.educationexperience;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -25,20 +26,20 @@ public class EducationExperienceCreateDto {
     /**
      * 学历
      */
-    @NotBlank(message =  "学历不能为空")
+    @NotNull(message =  "学历不能为空")
     private Integer eduLevel;
 
     /**
      * 开始时间
      */
-    @NotBlank(message =  "开始时间不能为空")
-    private LocalDate startTime;
+    @NotNull(message =  "开始时间不能为空")
+    private String startTime;
 
     /**
      * 结束时间
      */
-    @NotBlank(message =  "结束时间不能为空")
-    private LocalDate endTime;
+    @NotNull(message =  "结束时间不能为空")
+    private String endTime;
 
     /**
      * 专业名称

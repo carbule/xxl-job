@@ -33,12 +33,12 @@ public class EducationExperienceListVo {
     /**
      * 开始时间
      */
-    private LocalDate startTime;
+    private String startTime;
 
     /**
      * 结束时间
      */
-    private LocalDate endTime;
+    private String endTime;
 
     /**
      * 专业名称

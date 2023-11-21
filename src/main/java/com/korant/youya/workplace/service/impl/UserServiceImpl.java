@@ -12,6 +12,7 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
+import com.korant.youya.workplace.pojo.vo.user.resumePersonInfoVo;
 import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.utils.*;
 import jakarta.annotation.Resource;
@@ -304,6 +305,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long id = SpringSecurityUtil.getUserId();
         String key = String.format(RedisConstant.YY_USER_TOKEN, id);
         redisUtil.del(key);
+    }
+
+    /**
+     * @Author Duan-zhixiao
+     * @Description 在线简历-查询个人信息
+     * @Date 16:31 2023/11/20
+     * @Param
+     * @return
+     **/
+    @Override
+    public resumePersonInfoVo resumePersonDetail() {
+
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.resumePersonDetail(userId);
+
+    }
+
+    /**
+     * @Author Duan-zhixiao
+     * @Description 在线简历-修改个人信息
+     * @Date 17:47 2023/11/20
+     * @Param
+     * @return
+     **/
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto) {
+
+        Long userId = SpringSecurityUtil.getUserId();
+        User user = new User();
+        BeanUtils.copyProperties(resumePersonModifyDto, user);
+        user.setId(userId);
+        userMapper.updateById(user);
+
     }
 
     /**

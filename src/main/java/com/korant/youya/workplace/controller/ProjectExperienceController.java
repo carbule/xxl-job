@@ -5,8 +5,8 @@ import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceCreateDto;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceModifyDto;
 import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceQueryListDto;
+import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceListVo;
-import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
 import com.korant.youya.workplace.service.ProjectExperienceService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -70,8 +70,8 @@ public class ProjectExperienceController {
      */
     @GetMapping("/detail/{id}")
     public R<?> detail(@PathVariable("id") Long id) {
-        WorkExperienceDetailVo workExperienceDetailVo = projectExperienceService.detail(id);
-        return R.success(workExperienceDetailVo);
+        ProjectExperienceDetailVo projectExperienceDetailVo = projectExperienceService.detail(id);
+        return R.success(projectExperienceDetailVo);
     }
 
     /**

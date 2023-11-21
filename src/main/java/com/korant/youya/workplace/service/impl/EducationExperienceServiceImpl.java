@@ -12,9 +12,11 @@ import com.korant.youya.workplace.pojo.po.EducationExperience;
 import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
 import com.korant.youya.workplace.service.EducationExperienceService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
     @Override
     public Page<EducationExperienceListVo> queryList(EducationExperienceQueryListDto listDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         Long count = educationExperienceMapper.selectCount(new LambdaQueryWrapper<EducationExperience>().eq(EducationExperience::getUid, userId).eq(EducationExperience::getIsDelete, 0));
@@ -58,9 +60,10 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(EducationExperienceCreateDto educationExperienceCreateDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         EducationExperience educationExperience = new EducationExperience();
         BeanUtils.copyProperties(educationExperienceCreateDto, educationExperience);
         educationExperience.setUid(userId);
@@ -75,6 +78,7 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(EducationExperienceModifyDto educationExperienceModifyDto) {
 
         EducationExperience educationExperience = educationExperienceMapper.selectById(educationExperienceModifyDto.getId());
@@ -104,6 +108,7 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
 
         EducationExperience educationExperience = educationExperienceMapper.selectById(id);

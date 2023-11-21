@@ -9,9 +9,11 @@ import com.korant.youya.workplace.pojo.po.Attachment;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentDetailVo;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;
 import com.korant.youya.workplace.service.AttachmentService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
     @Override
     public List<AttachmentListVo> queryList() {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         return attachmentMapper.queryList(userId);
 
     }
@@ -49,9 +51,10 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(AttachmentCreateDto attachmentCreateDto) {
 
-        Long userId = 1L;
+        Long userId = SpringSecurityUtil.getUserId();
         Attachment attachment = new Attachment();
         BeanUtils.copyProperties(attachmentCreateDto, attachment);
         attachment.setUid(userId);
@@ -66,6 +69,7 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(AttachmentModifyDto attachmentModifyDto) {
 
         Attachment attachment = attachmentMapper.selectById(attachmentModifyDto.getId());
@@ -95,6 +99,7 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
 
         Attachment attachment = attachmentMapper.selectById(id);
