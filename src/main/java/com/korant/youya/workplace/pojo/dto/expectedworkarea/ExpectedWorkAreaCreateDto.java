@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.pojo.dto.expectedworkarea;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

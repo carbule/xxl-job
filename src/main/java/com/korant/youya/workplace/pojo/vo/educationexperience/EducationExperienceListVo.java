@@ -2,8 +2,6 @@ package com.korant.youya.workplace.pojo.vo.educationexperience;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-
 /**
  * @Author duan-zhixiao
  * @Date 2023/11/16 16:39

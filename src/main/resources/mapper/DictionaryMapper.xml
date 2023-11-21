@@ -12,4 +12,14 @@
           AND d.dict_value = #{fieldValue}
     </select>
 
+    <!--  根据字典分类查询字典列表  -->
+    <select id="queryListByCategory" parameterType="java.lang.String"
+            resultType="com.korant.youya.workplace.pojo.DictVo">
+        SELECT d.dict_name AS name, d.dict_value AS value
+        FROM yy_dictionary_category dc,
+            yy_dictionary d
+        WHERE dc.id = d.category_id
+          AND dc.category_code = #{category}
+          AND d.is_delete = 0
+    </select>
 </mapper>

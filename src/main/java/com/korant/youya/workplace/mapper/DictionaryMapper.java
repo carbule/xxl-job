@@ -1,8 +1,11 @@
 package com.korant.youya.workplace.mapper;
 
-import com.korant.youya.workplace.pojo.po.Dictionary;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.DictVo;
+import com.korant.youya.workplace.pojo.po.Dictionary;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -22,4 +25,12 @@ public interface DictionaryMapper extends BaseMapper<Dictionary> {
      * @return
      */
     String translateDict(@Param("categoryCode") String categoryCode, @Param("fieldValue") Integer fieldValue);
+
+    /**
+     * 根据字典分类查询字典列表
+     *
+     * @param category
+     * @return
+     */
+    List<DictVo> queryListByCategory(@Param("category") String category);
 }

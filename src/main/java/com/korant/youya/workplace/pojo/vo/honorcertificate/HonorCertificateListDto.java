@@ -2,8 +2,6 @@ package com.korant.youya.workplace.pojo.vo.honorcertificate;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-
 /**
  * @Author duan-zhixiao
  * @Date 2023/11/16 17:07

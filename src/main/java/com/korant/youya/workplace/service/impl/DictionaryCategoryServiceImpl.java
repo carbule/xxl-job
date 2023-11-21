@@ -1,9 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.korant.youya.workplace.pojo.po.DictionaryCategory;
-import com.korant.youya.workplace.mapper.DictionaryCategoryMapper;
-import com.korant.youya.workplace.service.DictionaryCategoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.mapper.DictionaryCategoryMapper;
+import com.korant.youya.workplace.pojo.po.DictionaryCategory;
+import com.korant.youya.workplace.service.DictionaryCategoryService;
 import org.springframework.stereotype.Service;
 
 /**

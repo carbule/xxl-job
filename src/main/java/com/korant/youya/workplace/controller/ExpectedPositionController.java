@@ -1,15 +1,7 @@
 package com.korant.youya.workplace.controller;
 
-import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionCreateDto;
-import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionModifyDto;
-import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
-import com.korant.youya.workplace.service.ExpectedPositionService;
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>

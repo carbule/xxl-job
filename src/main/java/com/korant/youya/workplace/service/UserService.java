@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
-import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 
 /**
  * <p>

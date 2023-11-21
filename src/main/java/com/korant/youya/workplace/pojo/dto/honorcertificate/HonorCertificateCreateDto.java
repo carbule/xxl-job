@@ -3,8 +3,6 @@ package com.korant.youya.workplace.pojo.dto.honorcertificate;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.time.LocalDate;
-
 /**
  * @Author duan-zhixiao
  * @Date 2023/11/16 17:08

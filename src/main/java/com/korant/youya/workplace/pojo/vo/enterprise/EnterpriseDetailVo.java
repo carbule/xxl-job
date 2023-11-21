@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.pojo.vo.enterprise;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 /**

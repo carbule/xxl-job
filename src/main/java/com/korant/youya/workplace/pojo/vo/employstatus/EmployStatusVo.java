@@ -1,11 +1,8 @@
 package com.korant.youya.workplace.pojo.vo.employstatus;
 
 import com.korant.youya.workplace.annotations.Dict;
-import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionCreateDto;
-import com.korant.youya.workplace.pojo.dto.expectedworkarea.ExpectedWorkAreaCreateDto;
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
