@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * @Version 1.0
  */
 @Data
-public class resumePersonInfoVo {
+public class ResumePersonInfoVo {
 
     /**
      * 用户头像

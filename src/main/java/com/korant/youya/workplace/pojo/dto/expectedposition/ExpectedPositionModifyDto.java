@@ -21,22 +21,22 @@ public class ExpectedPositionModifyDto {
     private Long id;
 
     /**
-     * 行业id
+     * 行业编码
      */
-    @NotNull(message = "行业id不能为空")
-    private Long industryId;
+    @NotNull(message = "行业编码不能为空")
+    private Long industryCode;
 
     /**
-     * 领域id
+     * 领域编码
      */
-    @NotNull(message = "领域id不能为空")
-    private Long sectorId;
+    @NotNull(message = "领域编码不能为空")
+    private Long sectorCode;
 
     /**
-     * 职位id
+     * 职位编码
      */
-    @NotNull(message = "职位id不能为空")
-    private Long positionId;
+    @NotNull(message = "职位编码不能为空")
+    private Long positionCode;
 
     /**
      * 最低薪资

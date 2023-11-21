@@ -18,7 +18,7 @@ public interface EmployStatusService extends IService<EmployStatus> {
 
     EmployStatusVo status();
 
-    void modify(EmployStatusModifyDto employStatusModifyDto);
+    void create(EmployStatusModifyDto employStatusModifyDto);
 
     ResumePreviewVo preview();
 }

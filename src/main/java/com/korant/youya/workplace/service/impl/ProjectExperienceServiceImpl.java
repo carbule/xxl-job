@@ -34,9 +34,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
     private  ProjectExperienceMapper projectExperienceMapper;
 
     /**
-     * @Author Duan-zhixiao
      * @Description 查询项目经验信息列表
-     * @Date 16:16 2023/11/16
      * @Param
      * @return
      **/
@@ -55,9 +53,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 创建项目经验信息
-     * @Date 16:16 2023/11/16
      * @Param
      * @return
      **/
@@ -72,9 +68,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 修改项目经验信息
-     * @Date 16:16 2023/11/16
      * @Param
      * @return
      **/
@@ -90,9 +84,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 查询项目经验信息详情
-     * @Date 16:16 2023/11/16
      * @Param
      * @return
      **/
@@ -102,9 +94,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 删除项目经验信息
-     * @Date 16:16 2023/11/16
      * @Param
      * @return
      **/

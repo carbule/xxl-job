@@ -37,22 +37,22 @@ public class ExpectedPosition implements Serializable {
     private Long statusId;
 
     /**
-     * 行业id
+     * 行业编码
      */
-    @TableField("industry_id")
-    private Long industryId;
+    @TableField("industry_code")
+    private Long industryCode;
 
     /**
-     * 领域id
+     * 领域编码
      */
-    @TableField("sector_id")
-    private Long sectorId;
+    @TableField("sector_code")
+    private Long sectorCode;
 
     /**
-     * 职位id
+     * 职位编码
      */
-    @TableField("position_id")
-    private Long positionId;
+    @TableField("position_code")
+    private Long positionCode;
 
     /**
      * 最低薪资

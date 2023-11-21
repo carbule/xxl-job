@@ -1,10 +1,9 @@
 package com.korant.youya.workplace.pojo.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * @Author duan-zhixiao
@@ -44,7 +43,7 @@ public class ResumePersonModifyDto {
     /**
      * 用户生日
      */
-    private LocalDateTime birthday;
+    private LocalDate birthday;
 
     /**
      * 政治面貌

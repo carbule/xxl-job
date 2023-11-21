@@ -20,5 +20,5 @@ public interface EmployStatusMapper extends BaseMapper<EmployStatus> {
      *
      * @param
      **/
-    EmployStatusVo status(@Param("userId") Long userId);
+    Integer status(@Param("userId") Long userId);
 }

@@ -66,9 +66,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     private static final String DEFAULT_LOGO = "https://resources.youyai.cn/picture/firmLogo.jpg";
 
     /**
-     * @Author Duan-zhixiao
      * @Description 获取营业执照信息
-     * @Date 14:27 2023/11/20
      * @Param
      * @return
      **/
@@ -97,9 +95,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 创建企业
-     * @Date 14:27 2023/11/20
      * @Param
      * @return
      **/
@@ -132,9 +128,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 修改企业logo
-     * @Date 14:27 2023/11/20
      * @Param
      * @return
      **/
@@ -146,9 +140,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 修改企业
-     * @Date 14:34 2023/11/20
      * @Param
      * @return
      **/
@@ -160,9 +152,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 根据当前登陆用户查询企业信息
-     * @Date 14:38 2023/11/20
      * @Param
      * @return
      **/
@@ -175,9 +165,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 查询企业详细信息
-     * @Date 14:41 2023/11/20
      * @Param
      * @return
      **/
@@ -195,9 +183,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 变更企业
-     * @Date 14:50 2023/11/20
      * @Param
      * @return
      **/
@@ -242,9 +228,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 根据企业名称查询企业
-     * @Date 17:02 2023/11/20
      * @Param
      * @return
      **/
@@ -262,9 +246,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 解除关联企业绑定
-     * @Date 17:18 2023/11/20
      * @Param
      * @return
      **/

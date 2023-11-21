@@ -5,6 +5,7 @@ import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienc
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo;
 import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto;
+import com.korant.youya.workplace.pojo.vo.user.ResumePersonPreviewVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import lombok.Data;
 
@@ -20,6 +21,11 @@ import java.util.List;
  */
 @Data
 public class ResumePreviewVo {
+
+    /**
+     * 求职意向-个人信息相关
+     */
+    private ResumePersonPreviewVo resumePersonPreviewVo;
 
     /**
      * 求职意向-意向职位

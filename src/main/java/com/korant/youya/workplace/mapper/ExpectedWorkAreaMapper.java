@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.expectedworkarea.ExpectedWorkAreaCreateDto;
 import com.korant.youya.workplace.pojo.po.ExpectedWorkArea;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo;
 import org.apache.ibatis.annotations.Param;
@@ -30,4 +31,6 @@ public interface ExpectedWorkAreaMapper extends BaseMapper<ExpectedWorkArea> {
      * @return
      */
     Long selectCountByUserId(@Param("userId") Long userId);
+
+    void insertBatch(@Param("workAreaCreateDtoList") List<ExpectedWorkAreaCreateDto> workAreaCreateDtoList, @Param("id") Long id);
 }

@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionCreateDto;
 import com.korant.youya.workplace.pojo.po.ExpectedPosition;
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
 import org.apache.ibatis.annotations.Param;
@@ -24,4 +25,5 @@ public interface ExpectedPositionMapper extends BaseMapper<ExpectedPosition> {
      **/
     List<ExpectedPositionInfoVo> findExpectedPositionInfo(@Param("userId") Long userId);
 
+    void insertBatch(@Param("positionCreateDtoList") List<ExpectedPositionCreateDto> positionCreateDtoList, @Param("id") Long id);
 }

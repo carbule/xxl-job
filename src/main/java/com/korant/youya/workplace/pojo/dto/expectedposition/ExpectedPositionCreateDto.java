@@ -15,28 +15,22 @@ import lombok.Data;
 public class ExpectedPositionCreateDto {
 
     /**
-     * 状态id
+     * 行业编码
      */
-    @NotNull(message = "状态id不能为空")
-    private Long statusId;
+    @NotNull(message = "行业编码不能为空")
+    private Long industryCode;
 
     /**
-     * 行业id
+     * 领域编码
      */
-    @NotNull(message = "行业id不能为空")
-    private Long industryId;
+    @NotNull(message = "领域编码不能为空")
+    private Long sectorCode;
 
     /**
-     * 领域id
+     * 职位编码
      */
-    @NotNull(message = "领域id不能为空")
-    private Long sectorId;
-
-    /**
-     * 职位id
-     */
-    @NotNull(message = "职位id不能为空")
-    private Long positionId;
+    @NotNull(message = "职位编码不能为空")
+    private Long positionCode;
 
     /**
      * 最低薪资

@@ -1,11 +1,10 @@
 package com.korant.youya.workplace.controller;
 
 import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
+import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
-import com.korant.youya.workplace.pojo.vo.user.resumePersonInfoVo;
-import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
+import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -98,13 +97,24 @@ public class UserController {
     }
 
     /**
+     * 在线简历-查询联系方式
+     *
+     * @return
+     */
+    @GetMapping("/resumeContactDetail")
+    public R<?> resumeContactDetail() {
+        ResumeContactInfoVo resumeContactInfoVo = userService.resumeContactDetail();
+        return R.success(resumeContactInfoVo);
+    }
+
+    /**
      * 在线简历-查询个人信息
      *
      * @return
      */
     @GetMapping("/resumePersonDetail")
     public R<?> resumePersonDetail() {
-        resumePersonInfoVo resumePersonInfoVo = userService.resumePersonDetail();
+        ResumePersonInfoVo resumePersonInfoVo = userService.resumePersonDetail();
         return R.success(resumePersonInfoVo);
     }
 

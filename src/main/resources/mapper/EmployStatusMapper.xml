@@ -3,9 +3,9 @@
 <mapper namespace="com.korant.youya.workplace.mapper.EmployStatusMapper">
 
     <!--    查询求职状态-->
-    <select id="status" resultType="com.korant.youya.workplace.pojo.vo.employstatus.EmployStatusVo">
+    <select id="status" resultType="java.lang.Integer">
         SELECT
-            id, status
+            status
         FROM
             employ_status
         WHERE   uid = #{userId}

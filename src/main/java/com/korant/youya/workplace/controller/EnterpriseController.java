@@ -114,11 +114,11 @@ public class EnterpriseController {
     }
 
     /**
-     * 根据企业名称查询企业
+     * 关联企业-根据企业名称查询企业
      *
      * @return
      */
-    @PostMapping("/getEnterpriseByName/{name}")
+    @PostMapping("/getEnterpriseByName")
     public R<?> getEnterpriseByName(@RequestBody @Valid EnterpriseQueryListDto enterpriseQueryListDto) {
         Page<EnterpriseInfoByNameVo> page = enterpriseService.getEnterpriseByName(enterpriseQueryListDto);
         return R.success(page);

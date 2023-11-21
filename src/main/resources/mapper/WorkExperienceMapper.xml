@@ -39,9 +39,27 @@
           AND is_delete = 0
     </select>
 
+    <resultMap id="WorkExperienceAndProjectExperience" type="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo">
+        <id property="id" column="id" />
+        <result property="enterpriseName" column="enterpriseName" />
+        <result property="departmentName" column="departmentName" />
+        <result property="positionName" column="positionName" />
+        <result property="startTime" column="startTime" />
+        <result property="endTime" column="endTime" />
+        <result property="content" column="content" />
+        <result property="performance" column="performance" />
+        <collection property="experiencePreviewListVoList" ofType="com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewListVo">
+            <id property="projectId" column="projectId" />
+            <result property="projectName" column="projectName" />
+            <result property="projectRole" column="projectRole" />
+            <result property="projectContent" column="projectContent" />
+        </collection>
+    </resultMap>
+
     <!--    查询工作履历信息及其项目经验列表-->
     <select id="selectWorkExperienceAndProjectExperienceByUserId"
-            resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo">
+            resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
+            resultMap="WorkExperienceAndProjectExperience">
         SELECT
             we.id,
             we.enterprise_name     AS enterpriseName,
@@ -51,14 +69,14 @@
             we.end_time            AS endTime,
             we.content,
             we.performance,
+            pe.id                  AS projectId,
             pe.project_name        AS projectName,
             pe.project_role        AS projectRole,
             pe.project_content     AS projectContent
         FROM
             work_experience we
-            LEFT JOIN   project_experience pe   ON we.id = pe.we_id
+            LEFT JOIN   project_experience pe   ON we.id = pe.we_id AND we.is_delete = 0
         WHERE   we.uid = #{userId}
-          AND we.is_delete = 0
           AND pe.is_delete = 0
     </select>
 

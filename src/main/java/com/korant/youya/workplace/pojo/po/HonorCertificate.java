@@ -47,7 +47,7 @@ public class HonorCertificate implements Serializable {
      * 获得时间
      */
     @TableField("obtain_time")
-    private LocalDate obtainTime;
+    private String obtainTime;
 
     /**
      * 文件名称

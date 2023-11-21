@@ -2,6 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.ExpectedWorkAreaMapper">
 
+    <insert id="insertBatch">
+        INSERT INTO expected_work_area(status_id, country_code, province_code, city_code, district_code, create_time, is_delete) VALUES
+        <foreach collection="workAreaCreateDtoList" item="item" index="index" separator=",">
+            (#{id}, #{item.countryCode}, #{item.provinceCode}, #{item.cityCode}, #{item.districtCode}, NOW(), 0)
+        </foreach>
+    </insert>
+
     <!--    查询用户期望工作区域-->
     <select id="queryList"
             resultType="com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo">
@@ -31,10 +38,9 @@
         SELECT
             COUNT(DISTINCT ewa.id)
         FROM   expected_work_area ewa
-                   LEFT JOIN   employ_status es ON es.id = ewa.status_id
+                   LEFT JOIN   employ_status es ON es.id = ewa.status_id              AND es.is_delete = 0
         WHERE   es.uid = #{userId}
           AND ewa.is_delete = 0
-          AND es.is_delete = 0
     </select>
 
 </mapper>

@@ -16,12 +16,6 @@ import lombok.Data;
 public class ExpectedWorkAreaCreateDto {
 
     /**
-     * 状态id
-     */
-    @NotNull(message = "状态id不能为空")
-    private Long statusId;
-
-    /**
      * 国家编码
      */
     @NotNull(message = "国家编码不能为空")

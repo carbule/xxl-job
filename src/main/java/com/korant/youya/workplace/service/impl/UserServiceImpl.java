@@ -11,8 +11,9 @@ import com.korant.youya.workplace.mapper.UserMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
-import com.korant.youya.workplace.pojo.vo.user.resumePersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
 import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.utils.*;
 import jakarta.annotation.Resource;
@@ -315,7 +316,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      **/
     @Override
-    public resumePersonInfoVo resumePersonDetail() {
+    public ResumePersonInfoVo resumePersonDetail() {
 
         Long userId = SpringSecurityUtil.getUserId();
         return userMapper.resumePersonDetail(userId);
@@ -339,6 +340,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setId(userId);
         userMapper.updateById(user);
 
+    }
+
+    @Override
+    public ResumeContactInfoVo resumeContactDetail() {
+        return null;
     }
 
     /**

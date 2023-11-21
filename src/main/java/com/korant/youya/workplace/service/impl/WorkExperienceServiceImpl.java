@@ -35,9 +35,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     private WorkExperienceMapper workExperienceMapper;
 
     /**
-     * @Author Duan-zhixiao
      * @Description 查询工作履历信息列表
-     * @Date 15:53 2023/11/16
      * @Param
      * @return
      **/
@@ -56,9 +54,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 创建工作履历信息
-     * @Date 15:53 2023/11/16
      * @Param
      * @return
      **/
@@ -75,9 +71,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 修改工作履历信息
-     * @Date 15:53 2023/11/16
      * @Param
      * @return
      **/
@@ -93,9 +87,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 查询工作履历信息详情
-     * @Date 15:53 2023/11/16
      * @Param
      * @return
      **/
@@ -105,9 +97,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 删除工作履历信息
-     * @Date 15:53 2023/11/16
      * @Param
      * @return
      **/

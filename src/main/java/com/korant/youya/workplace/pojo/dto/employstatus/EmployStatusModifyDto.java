@@ -1,5 +1,7 @@
 package com.korant.youya.workplace.pojo.dto.employstatus;
 
+import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionCreateDto;
+import com.korant.youya.workplace.pojo.dto.expectedworkarea.ExpectedWorkAreaCreateDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,5 +21,15 @@ public class EmployStatusModifyDto {
      */
     @NotNull(message = "求职状态不能为空")
     private Integer status;
+
+    /**
+     * 意向职位
+     */
+    private ExpectedPositionCreateDto[] expectedPositionCreateDtos;
+
+    /**
+     * 期望工作区域
+     */
+    private ExpectedWorkAreaCreateDto[] expectedWorkAreaCreateDtos;
 
 }

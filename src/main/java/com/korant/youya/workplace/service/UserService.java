@@ -3,8 +3,9 @@ package com.korant.youya.workplace.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
-import com.korant.youya.workplace.pojo.vo.user.resumePersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
 
 /**
  * <p>
@@ -59,7 +60,9 @@ public interface UserService extends IService<User> {
      */
     void logout();
 
-    resumePersonInfoVo resumePersonDetail();
+    ResumePersonInfoVo resumePersonDetail();
 
     void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto);
+
+    ResumeContactInfoVo resumeContactDetail();
 }

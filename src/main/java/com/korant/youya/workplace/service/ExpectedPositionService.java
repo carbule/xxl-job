@@ -18,11 +18,4 @@ import java.util.List;
  */
 public interface ExpectedPositionService extends IService<ExpectedPosition> {
 
-    List<ExpectedPositionInfoVo> findExpectedPositionInfo();
-
-    void create(ExpectedPositionCreateDto expectedPositionCreateDto);
-
-    void modify(ExpectedPositionModifyDto expectedPositionModifyDto);
-
-    void delete(Long id);
 }

@@ -1,6 +1,9 @@
 package com.korant.youya.workplace.pojo.vo.workexperience;
 
+import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewListVo;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author duan-zhixiao
@@ -12,6 +15,11 @@ import lombok.Data;
  */
 @Data
 public class WorkExperiencePreviewVo {
+
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 企业名称
@@ -49,18 +57,8 @@ public class WorkExperiencePreviewVo {
     private String performance;
 
     /**
-     * 项目名称
+     * 项目经验列表
      */
-    private String projectName;
-
-    /**
-     * 项目角色
-     */
-    private String projectRole;
-
-    /**
-     * 项目内容
-     */
-    private String projectContent;
+    private List<ProjectExperiencePreviewListVo> experiencePreviewListVoList;
 
 }

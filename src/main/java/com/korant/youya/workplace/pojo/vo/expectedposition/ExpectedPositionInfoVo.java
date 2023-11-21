@@ -19,9 +19,19 @@ public class ExpectedPositionInfoVo {
     private Long id;
 
     /**
-     * 行业id
+     * 行业编码
      */
-    private Long industryId;
+    private Long industryCode;
+
+    /**
+     * 领域编码
+     */
+    private Long sectorCode;
+
+    /**
+     * 职位编码
+     */
+    private Long positionCode;
 
     /**
      * 行业名称
@@ -29,19 +39,9 @@ public class ExpectedPositionInfoVo {
     private String industryName;
 
     /**
-     * 领域id
-     */
-    private Long sectorId;
-
-    /**
      * 领域名称
      */
     private String sectorName;
-
-    /**
-     * 职位id
-     */
-    private Long positionId;
 
     /**
      * 职位名称
