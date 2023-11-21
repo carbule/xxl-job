@@ -41,8 +41,8 @@ public class ObsServiceImpl implements ObsService {
         if (StringUtils.isBlank(originalFilename)) throw new YouyaException("文件名称不能为空");
         String contentType = file.getContentType();
         if (StringUtils.isBlank(contentType)) throw new YouyaException("文件类型不能为空");
-        if (!contentType.equals("image/jpeg") && !contentType.equals("image/png"))
-            throw new YouyaException("文件类型只能是jpg或者png");
+        if (!contentType.equals("image/jpeg") && !contentType.equals("image/png") && !contentType.equals("application/pdf"))
+            throw new YouyaException("文件类型只能是jpg、png或者pdf格式");
         String bucketName = ObsBucketConfig.getBucketName(fileCode);
         String fileName = ObsUtil.getFileBase64Name(file);
         if (StringUtils.isBlank(fileName)) throw new YouyaException("上传文件失败");
