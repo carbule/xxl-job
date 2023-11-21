@@ -151,28 +151,28 @@ public class User implements Serializable {
     private String selfEvaluation;
 
     /**
-     * 国家id
+     * 国家编码
      */
-    @TableField("country_id")
-    private Long countryId;
+    @TableField("country_code")
+    private Long countryCode;
 
     /**
-     * 省份id
+     * 省份编码
      */
-    @TableField("province_id")
-    private Long provinceId;
+    @TableField("province_code")
+    private Long provinceCode;
 
     /**
-     * 市级id
+     * 市级编码
      */
-    @TableField("city_id")
-    private Long cityId;
+    @TableField("city_code")
+    private Long cityCode;
 
     /**
-     * 行政区id
+     * 行政区编码
      */
-    @TableField("district_id")
-    private Long districtId;
+    @TableField("district_code")
+    private Long districtCode;
 
     /**
      * 实名认证状态
