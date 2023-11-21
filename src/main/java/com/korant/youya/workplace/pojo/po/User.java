@@ -1,12 +1,15 @@
 package com.korant.youya.workplace.pojo.po;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -14,7 +17,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-16
+ * @since 2023-11-21
  */
 @Getter
 @Setter
@@ -97,6 +100,36 @@ public class User implements Serializable {
     private String email;
 
     /**
+     * 国家编码
+     */
+    @TableField("country_code")
+    private String countryCode;
+
+    /**
+     * 省份编码
+     */
+    @TableField("province_code")
+    private String provinceCode;
+
+    /**
+     * 市级编码
+     */
+    @TableField("city_code")
+    private String cityCode;
+
+    /**
+     * 行政区编码
+     */
+    @TableField("district_code")
+    private String districtCode;
+
+    /**
+     * 详细地址
+     */
+    @TableField("address")
+    private String address;
+
+    /**
      * 名字公开状态 0-否 1-是
      */
     @TableField("name_public_status")
@@ -149,30 +182,6 @@ public class User implements Serializable {
      */
     @TableField("self_evaluation")
     private String selfEvaluation;
-
-    /**
-     * 国家编码
-     */
-    @TableField("country_code")
-    private String countryCode;
-
-    /**
-     * 省份编码
-     */
-    @TableField("province_code")
-    private String provinceCode;
-
-    /**
-     * 市级编码
-     */
-    @TableField("city_code")
-    private String cityCode;
-
-    /**
-     * 行政区编码
-     */
-    @TableField("district_code")
-    private String districtCode;
 
     /**
      * 实名认证状态
