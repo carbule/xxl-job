@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korant.youya.workplace.mapper.DictionaryMapper">
+
+    <!--  根据dictCode和dictValue翻译字典  -->
+    <select id="translateDict" resultType="java.lang.String">
+        SELECT d.dict_name
+        FROM yy_dictionary_category dc,
+             yy_dictionary d
+        WHERE dc.id = d.category_id
+          AND dc.category_code = #{categoryCode}
+          AND d.dict_value = #{fieldValue}
+    </select>
+
+</mapper>
