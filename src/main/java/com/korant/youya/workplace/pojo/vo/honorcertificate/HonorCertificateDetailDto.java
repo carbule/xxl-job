@@ -28,7 +28,7 @@ public class HonorCertificateDetailDto {
     /**
      * 获得时间
      */
-    private LocalDate obtainTime;
+    private String obtainTime;
 
     /**
      * 文件名称

@@ -59,24 +59,24 @@ public class EnterpriseModifyDto {
     private String email;
 
     /**
-     * 国家id
+     * 国家编码
      */
-    private Long countryId;
+    private String countryCode;
 
     /**
-     * 省份id
+     * 省份编码
      */
-    private Long provinceId;
+    private String provinceCode;
 
     /**
-     * 市级id
+     * 市级编码
      */
-    private Long cityId;
+    private String cityCode;
 
     /**
-     * 行政区id
+     * 行政区编码
      */
-    private Long districtId;
+    private String districtCode;
 
     /**
      * 联系地址

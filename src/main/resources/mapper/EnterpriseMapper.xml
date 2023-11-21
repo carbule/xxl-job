@@ -20,11 +20,11 @@
             introduction    = #{modifyDto.introduction},
             phone           = #{modifyDto.phone},
             email           = #{modifyDto.email},
-            country_id       = #{modifyDto.countryId},
-            province_id      = #{modifyDto.provinceId},
-            city_id          = #{modifyDto.cityId},
-            district_id      = #{modifyDto.districtId},
-            contact_address  = #{modifyDto.contactAddress},
+            country_code    = #{modifyDto.countryCode},
+            province_code   = #{modifyDto.provinceCode},
+            city_code       = #{modifyDto.cityCode},
+            district_code   = #{modifyDto.districtCode},
+            contact_address = #{modifyDto.contactAddress},
             update_time     = CURRENT_TIMESTAMP
         WHERE id = #{modifyDto.id}
     </update>
@@ -67,16 +67,12 @@
                e.auth_status        AS authStatus
         FROM
             enterprise e
-                LEFT JOIN   district_data dp1 ON dp1.id = e.country_id
-                LEFT JOIN   district_data dp2 ON dp2.id = e.province_id
-                LEFT JOIN   district_data dp3 ON dp3.id = e.city_id
-                LEFT JOIN   district_data dp4 ON dp4.id = e.district_id
+                LEFT JOIN   district_data dp1 ON dp1.code = e.country_code  AND dp1.is_delete = 0
+                LEFT JOIN   district_data dp2 ON dp2.code = e.province_code AND dp2.is_delete = 0
+                LEFT JOIN   district_data dp3 ON dp3.code = e.city_code AND dp3.is_delete = 0
+                LEFT JOIN   district_data dp4 ON dp4.code = e.district_code AND dp4.is_delete = 0
         WHERE e.id = #{id}
           AND e.is_delete = 0
-          AND dp1.is_delete = 0
-          AND dp2.is_delete = 0
-          AND dp3.is_delete = 0
-          AND dp4.is_delete = 0
     </select>
 
     <select id="getEnterpriseByName"

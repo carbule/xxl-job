@@ -21,26 +21,27 @@ public class ExpectedWorkAreaModifyDto {
     private Long id;
 
     /**
-     * 国家id
+     * 国家编码
      */
-    @NotNull(message = "国家id不能为空")
-    private Long countryId;
+    @NotNull(message = "国家编码不能为空")
+    private String countryCode;
 
     /**
-     * 省份id
+     * 省份编码
      */
-    @NotNull(message = "省份id不能为空")
-    private Long provinceId;
+    @NotNull(message = "省份编码不能为空")
+    private String provinceCode;
 
     /**
-     * 市级id
+     * 市级编码
      */
-    @NotNull(message = "市级id不能为空")
-    private Long cityId;
+    @NotNull(message = "市级编码不能为空")
+    private String cityCode;
 
     /**
-     * 行政区id
+     * 行政区编码
      */
-    private Long districtId;
+    @NotNull(message = "行政区编码不能为空")
+    private String districtCode;
 
 }

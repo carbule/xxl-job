@@ -33,7 +33,7 @@ public class HonorCertificateModifyDto {
      * 获得时间
      */
     @NotBlank(message = "获得时间不能为空")
-    private LocalDate obtainTime;
+    private String obtainTime;
 
     /**
      * 文件名称

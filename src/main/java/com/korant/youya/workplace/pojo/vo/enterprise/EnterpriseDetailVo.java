@@ -85,6 +85,26 @@ public class EnterpriseDetailVo {
     private Integer authStatus;
 
     /**
+     * 国家编码
+     */
+    private String countryCode;
+
+    /**
+     * 省份编码
+     */
+    private String provinceCode;
+
+    /**
+     * 市级编码
+     */
+    private String cityCode;
+
+    /**
+     * 行政区编码
+     */
+    private String districtCode;
+
+    /**
      * 国家名称
      */
     private String countryName;
@@ -107,7 +127,6 @@ public class EnterpriseDetailVo {
     /**
      * 联系地址
      */
-    @TableField("contact_address")
     private String contactAddress;
 
 }
