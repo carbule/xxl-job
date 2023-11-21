@@ -31,6 +31,11 @@ public class PositionDataTreeVo {
     private String name;
 
     /**
+     * 职位编码
+     */
+    private String code;
+
+    /**
      * 职位子节点
      */
     private List<PositionDataTreeVo> children = new ArrayList<>();

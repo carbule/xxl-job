@@ -43,6 +43,12 @@ public class Position implements Serializable {
     private String name;
 
     /**
+     * 职位编码
+     */
+    @TableField("code")
+    private String code;
+
+    /**
      * 职位等级
      */
     @TableField("level")

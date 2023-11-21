@@ -27,12 +27,10 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
     private PositionMapper positionMapper;
 
     /**
-     * @Author Duan-zhixiao
-     * @Description 查询出所有的职位信息
-     * @Date 11:58 2023/11/16
-     * @Param
+     * 查询所有职位数据
+     *
      * @return
-     **/
+     */
     @Override
     public List<PositionDataTreeVo> queryAllData() {
         //查询出所有职位信息

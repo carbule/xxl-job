@@ -16,5 +16,10 @@ import java.util.List;
  */
 public interface PositionMapper extends BaseMapper<Position> {
 
+    /**
+     * 查询所有职位数据
+     *
+     * @return
+     */
     List<PositionDataTreeVo> queryAllData();
 }

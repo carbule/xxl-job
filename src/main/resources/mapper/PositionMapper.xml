@@ -5,7 +5,7 @@
     <!--  查询所有职位数据  -->
     <select id="queryAllData" resultType="com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo">
         SELECT
-            id, pid, name
+            id, pid, name, code
         FROM position
         WHERE is_delete = 0
         ORDER BY create_time
