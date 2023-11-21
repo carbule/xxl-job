@@ -43,22 +43,22 @@ public class Job implements Serializable {
     private Integer uid;
 
     /**
-     * 行业id
+     * 行业编码
      */
-    @TableField("industry_id")
-    private Long industryId;
+    @TableField("industry_code")
+    private String industryCode;
 
     /**
-     * 领域id
+     * 领域编码
      */
-    @TableField("sector_id")
-    private Long sectorId;
+    @TableField("sector_code")
+    private String sectorCode;
 
     /**
-     * 职位id
+     * 职位编码
      */
-    @TableField("position_id")
-    private Long positionId;
+    @TableField("position_code")
+    private String positionCode;
 
     /**
      * 学历要求
