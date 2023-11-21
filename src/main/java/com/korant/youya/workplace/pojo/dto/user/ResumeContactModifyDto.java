@@ -1,21 +1,24 @@
-package com.korant.youya.workplace.pojo.vo.user;
+package com.korant.youya.workplace.pojo.dto.user;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
  * @Author duan-zhixiao
- * @Date 2023/11/21 15:57
- * @PackageName:com.korant.youya.workplace.pojo.vo.user
- * @ClassName: ResumeContactInfoVo
+ * @Date 2023/11/21 16:23
+ * @PackageName:com.korant.youya.workplace.pojo.dto.user
+ * @ClassName: ResumeContactModifyDto
  * @Description: TODO
  * @Version 1.0
  */
 @Data
-public class ResumeContactInfoVo {
+public class ResumeContactModifyDto {
 
     /**
      * 用户手机号
      */
+    @NotNull(message = "手机号不能为空")
     private String phone;
 
     /**
@@ -31,6 +34,7 @@ public class ResumeContactInfoVo {
     /**
      * 用户邮箱
      */
+    @Email
     private String email;
 
     /**
@@ -54,29 +58,8 @@ public class ResumeContactInfoVo {
     private String districtCode;
 
     /**
-     * 国家名称
-     */
-    private String countryName;
-
-    /**
-     * 省份名称
-     */
-    private String provinceName;
-
-    /**
-     * 市级名称
-     */
-    private String cityName;
-
-    /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      *  详细地址
      */
     private String address;
-
 
 }

@@ -344,7 +344,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public ResumeContactInfoVo resumeContactDetail() {
-        return null;
+
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.resumeContactDetail(userId);
+
+    }
+
+    @Override
+    public void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto) {
+
+        Long userId = SpringSecurityUtil.getUserId();
+        User user = new User();
+        BeanUtils.copyProperties(resumeContactModifyDto, user);
+        user.setId(userId);
+        userMapper.updateById(user);
+
     }
 
     /**

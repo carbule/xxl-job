@@ -3,6 +3,7 @@ package com.korant.youya.workplace.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonPreviewVo;
 import org.apache.ibatis.annotations.Param;
@@ -24,4 +25,6 @@ public interface UserMapper extends BaseMapper<User> {
     ResumePersonInfoVo resumePersonDetail(@Param("userId") Long userId);
 
     ResumePersonPreviewVo resumePersonPreview(@Param("userId") Long userId);
+
+    ResumeContactInfoVo resumeContactDetail(@Param("userId") Long userId);
 }

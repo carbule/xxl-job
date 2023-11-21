@@ -108,6 +108,17 @@ public class UserController {
     }
 
     /**
+     * 在线简历-编辑联系方式
+     *
+     * @return
+     */
+    @PostMapping("/modifyResumeContactDetail")
+    public R<?> modifyResumeContactDetail(@RequestBody @Valid ResumeContactModifyDto resumeContactModifyDto) {
+        userService.modifyResumeContactDetail(resumeContactModifyDto);
+        return R.ok();
+    }
+
+    /**
      * 在线简历-查询个人信息
      *
      * @return

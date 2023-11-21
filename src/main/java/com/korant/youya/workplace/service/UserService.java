@@ -65,4 +65,6 @@ public interface UserService extends IService<User> {
     void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto);
 
     ResumeContactInfoVo resumeContactDetail();
+
+    void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto);
 }
