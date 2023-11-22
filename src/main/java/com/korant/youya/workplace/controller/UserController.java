@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.controller;
 
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
@@ -124,6 +125,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/resumePersonDetail")
+    @ExplanationDict
     public R<?> resumePersonDetail() {
         ResumePersonInfoVo resumePersonInfoVo = userService.resumePersonDetail();
         return R.success(resumePersonInfoVo);

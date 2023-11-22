@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.pojo.vo.user;
 
+import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
 /**
@@ -40,6 +41,7 @@ public class ResumePersonPreviewVo {
     /**
      * 学历
      */
+    @Dict(categoryCode = "education")
     private Integer eduLevel;
 
     /**
@@ -50,6 +52,7 @@ public class ResumePersonPreviewVo {
     /**
      * 政治面貌
      */
+    @Dict(categoryCode = "political_outlook")
     private Integer politicalOutlook;
 
     /**
@@ -70,6 +73,7 @@ public class ResumePersonPreviewVo {
     /**
      * 求职状态
      */
+    @Dict(categoryCode = "employ_status")
     private Integer employStatus;
 
     /**
