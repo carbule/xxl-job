@@ -55,7 +55,7 @@ public class EnterpriseTodo implements Serializable {
     private Integer eventType;
 
     /**
-     * 操作 1-拒绝 2-同意
+     * 操作 0-待审核 1-拒绝 2-同意
      */
     @TableField("operate")
     private Integer operate;
