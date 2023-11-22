@@ -351,7 +351,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto) {
 
         Long userId = SpringSecurityUtil.getUserId();
-        resumeContactModifyDto.setCityCode("10000");
+        resumeContactModifyDto.setCountryCode("10000");
         userMapper.modifyResumeContactDetail(userId, resumeContactModifyDto);
 
     }
