@@ -2,7 +2,7 @@ package com.korant.youya.workplace.filter;
 
 import com.alibaba.fastjson.JSONObject;
 import com.korant.youya.workplace.constants.RedisConstant;
-import com.korant.youya.workplace.enums.user.UserAccountStatus;
+import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.mapper.UserMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.R;
@@ -91,7 +91,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                         } else {
                             redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
                             Integer accountStatus = loginUser.getAccountStatus();
-                            if (UserAccountStatus.FROZEN.getStatus() == accountStatus) {
+                            if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) {
                                 log.error("请求路径：{},账号:{}已被冻结", requestURI, id);
                                 returnJson(response, HttpServletResponse.SC_FORBIDDEN, "403", "账号已被冻结,详情请咨询客服");
                             } else {
@@ -109,7 +109,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                     } else {
                         LoginUser loginUser = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
                         Integer accountStatus = loginUser.getAccountStatus();
-                        if (UserAccountStatus.FROZEN.getStatus() == accountStatus) {
+                        if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) {
                             log.error("请求路径：{},账号:{}已被冻结", requestURI, id);
                             returnJson(response, HttpServletResponse.SC_FORBIDDEN, "403", "账号已被冻结,详情请咨询客服");
                         } else {

@@ -1,7 +1,7 @@
 package com.korant.youya.workplace.enums.user;
 
 /**
- * @ClassName JobTypeEnum
+ * @ClassName UserAuthenticationStatusEnum
  * @Description
  * @Author chenyiqiang
  * @Date 2023/8/16 9:34
@@ -16,15 +16,15 @@ public enum UserAuthenticationStatusEnum {
 
     private int status;
 
-    UserAuthenticationStatusEnum(int type) {
-        this.status = type;
+    UserAuthenticationStatusEnum(int status) {
+        this.status = status;
     }
 
-    public int getType() {
+    public int getStatus() {
         return status;
     }
 
-    public void setType(int type) {
-        this.status = type;
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

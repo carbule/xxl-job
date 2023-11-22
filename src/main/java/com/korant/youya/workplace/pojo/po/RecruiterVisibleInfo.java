@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * 友涯用户表
+ * 招聘方可见信息表
  * </p>
  *
  * @author chenyiqiang
@@ -22,58 +22,22 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("yy_user")
-public class User implements Serializable {
+@TableName("recruiter_visible_Info")
+public class RecruiterVisibleInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 用户id
+     * 主键
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
-     * 用户头像
+     * 用户id
      */
-    @TableField("avatar")
-    private String avatar;
-
-    /**
-     * 用户姓氏
-     */
-    @TableField("last_name")
-    private String lastName;
-
-    /**
-     * 用户名字
-     */
-    @TableField("first_name")
-    private String firstName;
-
-    /**
-     * 用户身份证号
-     */
-    @TableField("identity_card")
-    private String identityCard;
-
-    /**
-     * 用户密码
-     */
-    @TableField("password")
-    private String password;
-
-    /**
-     * 用户性别
-     */
-    @TableField("gender")
-    private Integer gender;
-
-    /**
-     * 用户生日
-     */
-    @TableField("birthday")
-    private LocalDateTime birthday;
+    @TableField("uid")
+    private Long uid;
 
     /**
      * 用户手机号
@@ -128,36 +92,6 @@ public class User implements Serializable {
      */
     @TableField("address")
     private String address;
-
-    /**
-     * 政治面貌
-     */
-    @TableField("political_outlook")
-    private Integer politicalOutlook;
-
-    /**
-     * 个性签名
-     */
-    @TableField("personal_signature")
-    private String personalSignature;
-
-    /**
-     * 自我评价
-     */
-    @TableField("self_evaluation")
-    private String selfEvaluation;
-
-    /**
-     * 实名认证状态
-     */
-    @TableField("authentication_status")
-    private Integer authenticationStatus;
-
-    /**
-     * 账号状态 0-未冻结 1-已冻结
-     */
-    @TableField("account_status")
-    private Integer accountStatus;
 
     /**
      * 创建时间

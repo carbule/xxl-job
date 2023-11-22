@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.constants.RedisConstant;
-import com.korant.youya.workplace.enums.user.UserAccountStatus;
+import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.UserMapper;
@@ -68,7 +68,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 loginUser = register(phoneNumber);
             }
             Integer accountStatus = loginUser.getAccountStatus();
-            if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+            if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
             Long id = loginUser.getId();
             String token = JwtUtil.createToken(id);
             String key = String.format(RedisConstant.YY_USER_TOKEN, id);
@@ -94,7 +94,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     loginUser = register(phoneNumber);
                 }
                 Integer accountStatus = loginUser.getAccountStatus();
-                if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
                 Long id = loginUser.getId();
                 String token = JwtUtil.createToken(id);
                 String key = String.format(RedisConstant.YY_USER_TOKEN, id);
@@ -109,7 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             } else {
                 LoginUser loginUser = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
                 Integer accountStatus = loginUser.getAccountStatus();
-                if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
                 String token = JwtUtil.createToken(Long.valueOf(userId));
                 String key = String.format(RedisConstant.YY_USER_TOKEN, userId);
                 //todo token暂时不设置过期时间
@@ -146,7 +146,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     loginUser = register(phoneNumber);
                 }
                 Integer accountStatus = loginUser.getAccountStatus();
-                if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
                 Long id = loginUser.getId();
                 String token = JwtUtil.createToken(id);
                 String key = String.format(RedisConstant.YY_USER_TOKEN, id);
@@ -172,7 +172,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         loginUser = register(phoneNumber);
                     }
                     Integer accountStatus = loginUser.getAccountStatus();
-                    if (UserAccountStatus.FROZEN.getStatus() == accountStatus)
+                    if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus)
                         throw new YouyaException("账号已被冻结,详情请咨询客服");
                     Long id = loginUser.getId();
                     String token = JwtUtil.createToken(id);
@@ -188,7 +188,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 } else {
                     LoginUser loginUser = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
                     Integer accountStatus = loginUser.getAccountStatus();
-                    if (UserAccountStatus.FROZEN.getStatus() == accountStatus)
+                    if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus)
                         throw new YouyaException("账号已被冻结,详情请咨询客服");
                     String token = JwtUtil.createToken(Long.valueOf(userId));
                     String key = String.format(RedisConstant.YY_USER_TOKEN, userId);
@@ -228,14 +228,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         User user = new User();
         user.setPhone(phoneNumber)
-                .setAuthenticationStatus(UserAuthenticationStatusEnum.NOT_CERTIFIED.getType())
-                .setAccountStatus(UserAccountStatus.UNFROZEN.getStatus())
-                .setNamePublicStatus(0)
-                .setPhonePublicStatus(0)
-                .setWechatPublicStatus(0)
-                .setQqPublicStatus(0)
-                .setEmailPublicStatus(0)
-                .setAddressPublicStatus(0)
+                .setAuthenticationStatus(UserAuthenticationStatusEnum.NOT_CERTIFIED.getStatus())
+                .setAccountStatus(UserAccountStatusEnum.UNFROZEN.getStatus())
                 .setAvatar(DEFAULT_AVATAR);
         userMapper.insert(user);
         LoginUser loginUser = new LoginUser();
@@ -254,7 +248,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phone).eq(User::getIsDelete, 0));
         if (null != user) {
             Integer accountStatus = user.getAccountStatus();
-            if (UserAccountStatus.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+            if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
         }
         String key = String.format(RedisConstant.YY_PHONE_CODE, phone);
         Object o = redisUtil.get(key);
@@ -289,7 +283,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setLastName(lastName);
             user.setFirstName(firstName);
             user.setIdentityCard(idcard);
-            user.setAuthenticationStatus(UserAuthenticationStatusEnum.CERTIFIED.getType());
+            user.setAuthenticationStatus(UserAuthenticationStatusEnum.CERTIFIED.getStatus());
             userMapper.updateById(user);
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
             redisUtil.del(cacheKey);

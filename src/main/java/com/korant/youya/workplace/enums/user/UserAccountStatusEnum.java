@@ -7,7 +7,7 @@ package com.korant.youya.workplace.enums.user;
  * @Date 2023/9/6 10:49
  * @Version 1.0
  */
-public enum UserAccountStatus {
+public enum UserAccountStatusEnum {
 
     //未冻结
     UNFROZEN(0),
@@ -16,7 +16,7 @@ public enum UserAccountStatus {
 
     private int status;
 
-    UserAccountStatus(int status) {
+    UserAccountStatusEnum(int status) {
         this.status = status;
     }
 
