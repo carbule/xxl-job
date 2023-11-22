@@ -52,7 +52,7 @@ public class EnterpriseTodo implements Serializable {
      * 事项类型 1-hr认证 2-员工认证
      */
     @TableField("event_type")
-    private Integer eventType;
+    private String eventType;
 
     /**
      * 操作 1-拒绝 2-同意
