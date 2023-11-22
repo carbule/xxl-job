@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.pojo.vo.educationexperience;
 
+import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
 /**
@@ -26,6 +27,7 @@ public class EducationExperienceListVo {
     /**
      * 学历
      */
+    @Dict(categoryCode = "education")
     private Integer eduLevel;
 
     /**
@@ -47,4 +49,5 @@ public class EducationExperienceListVo {
      * 学位名称
      */
     private String degreeName;
+
 }

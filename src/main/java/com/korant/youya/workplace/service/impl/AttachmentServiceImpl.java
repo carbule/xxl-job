@@ -1,5 +1,7 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.AttachmentMapper;
@@ -15,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -75,7 +78,7 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
         Attachment attachment = attachmentMapper.selectById(attachmentModifyDto.getId());
         if (attachment == null) throw new YouyaException("附件信息不存在！");
         BeanUtils.copyProperties(attachmentModifyDto, attachment);
-        attachmentMapper.updateById(attachment);
+        attachmentMapper.modify(attachmentModifyDto);
 
     }
 
@@ -104,8 +107,10 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
 
         Attachment attachment = attachmentMapper.selectById(id);
         if (attachment == null) throw new YouyaException("附件信息不存在！");
-        attachment.setIsDelete(1);
-        attachmentMapper.updateById(attachment);
+        attachmentMapper.update(new Attachment(),
+                new LambdaUpdateWrapper<Attachment>()
+                        .eq(Attachment::getId, id)
+                        .set(Attachment::getIsDelete, 1));
 
     }
 }

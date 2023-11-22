@@ -2,6 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EducationExperienceMapper">
 
+    <!--    修改教育经历信息-->
+    <update id="modify">
+        UPDATE
+            education_experience
+        SET
+            school_name         = #{educationExperienceModifyDto.schoolName},
+            edu_level           = #{educationExperienceModifyDto.eduLevel},
+            start_time          = #{educationExperienceModifyDto.startTime},
+            end_time            = #{educationExperienceModifyDto.endTime},
+            speciality_name     = #{educationExperienceModifyDto.specialityName},
+            degree_name         = #{educationExperienceModifyDto.degreeName},
+            update_time         = CURRENT_TIMESTAMP
+        WHERE id = #{educationExperienceModifyDto.id}
+    </update>
+
     <!--    查询教育经历信息列表-->
     <select id="queryEducationExperienceListByUserId"
             resultType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo">

@@ -19,13 +19,42 @@ import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceLis
  */
 public interface ProjectExperienceService extends IService<ProjectExperience> {
 
+    /**
+     * 查询项目经验信息列表
+     *
+     * @param listDto
+     * @return
+     */
     Page<ProjectExperienceListVo> queryList(ProjectExperienceQueryListDto listDto);
 
+    /**
+     * 创建项目经验信息
+     *
+     * @return
+     */
     void create(ProjectExperienceCreateDto projectExperienceCreateDto);
 
+    /**
+     * 修改项目经验信息
+     *
+     * @param
+     * @return
+     */
     void modify(ProjectExperienceModifyDto projectExperienceModifyDto);
 
+    /**
+     * 查询项目经验信息详情
+     *
+     * @param id
+     * @return
+     */
     ProjectExperienceDetailVo detail(Long id);
 
+    /**
+     * 删除项目经验信息
+     *
+     * @param
+     * @return
+     */
     void delete(Long id);
 }

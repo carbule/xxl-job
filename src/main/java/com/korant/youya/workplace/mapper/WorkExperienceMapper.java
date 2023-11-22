@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceModifyDto;
 import com.korant.youya.workplace.pojo.po.WorkExperience;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
@@ -39,4 +40,11 @@ public interface WorkExperienceMapper extends BaseMapper<WorkExperience> {
      * @return
      **/
     List<WorkExperiencePreviewVo> selectWorkExperienceAndProjectExperienceByUserId(@Param("userId") Long userId);
+
+    /**
+     * @Description 修改工作履历信息
+     * @Param
+     * @return
+     **/
+    int modify(@Param("workExperienceModifyDto") WorkExperienceModifyDto workExperienceModifyDto);
 }

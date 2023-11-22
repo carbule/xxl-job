@@ -19,13 +19,42 @@ import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienc
  */
 public interface EducationExperienceService extends IService<EducationExperience> {
 
+    /**
+     * 查询教育经历信息列表
+     *
+     * @param listDto
+     * @return
+     */
     Page<EducationExperienceListVo> queryList(EducationExperienceQueryListDto listDto);
 
+    /**
+     * 创建教育经历信息
+     *
+     * @return
+     */
     void create(EducationExperienceCreateDto educationExperienceCreateDto);
 
+    /**
+     * 修改教育经历信息
+     *
+     * @param
+     * @return
+     */
     void modify(EducationExperienceModifyDto educationExperienceModifyDto);
 
+    /**
+     * 查询教育经历信息详情
+     *
+     * @param id
+     * @return
+     */
     EducationExperienceDetailVo detail(Long id);
 
+    /**
+     * 删除教育经历信息
+     *
+     * @param
+     * @return
+     */
     void delete(Long id);
 }

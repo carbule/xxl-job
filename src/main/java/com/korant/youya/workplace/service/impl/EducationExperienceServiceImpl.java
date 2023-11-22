@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
@@ -83,8 +84,7 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
 
         EducationExperience educationExperience = educationExperienceMapper.selectById(educationExperienceModifyDto.getId());
         if (educationExperience == null) throw new YouyaException("教育经历不存在!");
-        BeanUtils.copyProperties(educationExperienceModifyDto, educationExperience);
-        educationExperienceMapper.updateById(educationExperience);
+        educationExperienceMapper.modify(educationExperienceModifyDto);
 
     }
 
@@ -113,8 +113,10 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
 
         EducationExperience educationExperience = educationExperienceMapper.selectById(id);
         if (educationExperience == null) throw new YouyaException("教育经历不存在!");
-        educationExperience.setIsDelete(1);
-        educationExperienceMapper.updateById(educationExperience);
+        educationExperienceMapper.update(new EducationExperience(),
+                new LambdaUpdateWrapper<EducationExperience>()
+                        .eq(EducationExperience::getId, id)
+                        .set(EducationExperience::getIsDelete, 1));
 
     }
 }

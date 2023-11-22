@@ -23,12 +23,15 @@ import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo
 import com.korant.youya.workplace.service.EmployStatusService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -96,7 +99,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
 
         Long userId = SpringSecurityUtil.getUserId();
         EmployStatus employStatus = employStatusMapper.selectOne(new LambdaQueryWrapper<EmployStatus>().eq(EmployStatus::getUid, userId).eq(EmployStatus::getIsDelete, 0));
-        if (employStatus == null) {
+        if (employStatus != null) {
             //删除历史缓存数据
             employStatus.setIsDelete(1);
             employStatusMapper.updateById(employStatus);
@@ -112,12 +115,27 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
         if (employStatusModifyDto.getExpectedPositionCreateDtos().length != 0){
             List<ExpectedPositionCreateDto> positionCreateDtoList = Arrays.asList(employStatusModifyDto.getExpectedPositionCreateDtos());
             if (positionCreateDtoList.size() > 5) throw new YouyaException("职位最多5个");
-            expectedPositionMapper.insertBatch(positionCreateDtoList, status.getId());
+            for (ExpectedPositionCreateDto expectedPositionCreateDto: positionCreateDtoList) {
+                ExpectedPosition expectedPosition = new ExpectedPosition();
+                BeanUtils.copyProperties(expectedPositionCreateDto, expectedPosition);
+                expectedPosition.setStatusId(status.getId());
+                expectedPosition.setIsDelete(0);
+                expectedPosition.setCreateTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai")));
+                expectedPositionMapper.insert(expectedPosition);
+            }
         }
         if (employStatusModifyDto.getExpectedWorkAreaCreateDtos().length != 0){
             List<ExpectedWorkAreaCreateDto> workAreaCreateDtoList = Arrays.asList(employStatusModifyDto.getExpectedWorkAreaCreateDtos());
             if (workAreaCreateDtoList.size() > 3) throw new YouyaException("工作区域最多3个");
-            expectedWorkAreaMapper.insertBatch(workAreaCreateDtoList, status.getId());
+            for (ExpectedWorkAreaCreateDto expectedWorkAreaCreateDto: workAreaCreateDtoList) {
+                ExpectedWorkArea expectedWorkArea = new ExpectedWorkArea();
+                BeanUtils.copyProperties(expectedWorkAreaCreateDto, expectedWorkArea);
+                expectedWorkArea.setStatusId(status.getId());
+                expectedWorkArea.setIsDelete(0);
+                expectedWorkArea.setCountryCode("100000");
+                expectedWorkArea.setCreateTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai")));
+                expectedWorkAreaMapper.insert(expectedWorkArea);
+            }
         }
 
     }

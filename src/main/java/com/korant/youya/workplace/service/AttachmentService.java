@@ -19,14 +19,39 @@ import java.util.List;
  */
 public interface AttachmentService extends IService<Attachment> {
 
+    /**
+     * 查询其他附件信息列表
+     *
+     * @param
+     * @return
+     */
     List<AttachmentListVo> queryList();
 
+    /**
+     * 创建其他附件信息
+     *
+     * @return
+     */
     void create(AttachmentCreateDto attachmentCreateDto);
 
+    /**
+     * 修改其他附件信息
+     *
+     * @return
+     */
     void modify(AttachmentModifyDto attachmentModifyDto);
 
+    /**
+     * 查询其他附件信息详情
+     *
+     * @return
+     */
     AttachmentDetailVo detail(Long id);
 
+    /**
+     * 删除其他附件信息
+     *
+     */
     void delete(Long id);
 
 }

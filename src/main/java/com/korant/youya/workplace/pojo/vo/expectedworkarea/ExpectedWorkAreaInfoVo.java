@@ -14,16 +14,6 @@ import lombok.Data;
 public class ExpectedWorkAreaInfoVo {
 
     /**
-     * 主键
-     */
-    private Long id;
-
-    /**
-     * 状态id
-     */
-    private Long statusId;
-
-    /**
      * 国家编码
      */
     private String countryCode;

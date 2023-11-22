@@ -19,13 +19,42 @@ import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
  */
 public interface WorkExperienceService extends IService<WorkExperience> {
 
+    /**
+     * 查询工作履历信息列表
+     *
+     * @param listDto
+     * @return
+     */
     Page<WorkExperienceListVo> queryList(WorkExperienceQueryListDto listDto);
 
+    /**
+     * 创建工作履历信息
+     *
+     * @return
+     */
     void create(WorkExperienceCreateDto workExperienceCreateDto);
 
+    /**
+     * 修改工作履历信息
+     *
+     * @param
+     * @return
+     */
     void modify(WorkExperienceModifyDto workExperienceModifyDto);
 
+    /**
+     * 查询工作履历信息详情
+     *
+     * @param id
+     * @return
+     */
     WorkExperienceDetailVo detail(Long id);
 
+    /**
+     * 删除工作履历信息
+     *
+     * @param
+     * @return
+     */
     void delete(Long id);
 }

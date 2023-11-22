@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
@@ -78,8 +79,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
 
         ProjectExperience projectExperience = projectExperienceMapper.selectById(projectExperienceModifyDto.getId());
         if (projectExperience == null) throw new YouyaException("项目经验信息不存在！");
-        BeanUtils.copyProperties(projectExperienceModifyDto, projectExperience);
-        projectExperienceMapper.updateById(projectExperience);
+        projectExperienceMapper.modify(projectExperienceModifyDto);
 
     }
 
@@ -104,8 +104,10 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
 
         ProjectExperience projectExperience = projectExperienceMapper.selectById(id);
         if (projectExperience == null) throw new YouyaException("项目经验信息不存在！");
-        projectExperience.setIsDelete(1);
-        projectExperienceMapper.updateById(projectExperience);
+        projectExperienceMapper.update(new ProjectExperience(),
+                new LambdaUpdateWrapper<ProjectExperience>()
+                        .eq(ProjectExperience::getId, id)
+                        .set(ProjectExperience::getIsDelete, 1));
 
     }
 }

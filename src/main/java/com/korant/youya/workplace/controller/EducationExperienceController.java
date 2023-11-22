@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperienceCreateDto;
 import com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperienceModifyDto;
@@ -34,6 +35,7 @@ public class EducationExperienceController {
      * @return
      */
     @PostMapping("/queryList")
+    @ExplanationDict
     public R<?> queryList(@RequestBody @Valid EducationExperienceQueryListDto listDto) {
         Page<EducationExperienceListVo> page = educationExperienceService.queryList(listDto);
         return R.success(page);
@@ -69,6 +71,7 @@ public class EducationExperienceController {
      * @return
      */
     @GetMapping("/detail/{id}")
+    @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         EducationExperienceDetailVo educationExperienceDetailVo = educationExperienceService.detail(id);
         return R.success(educationExperienceDetailVo);

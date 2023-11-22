@@ -17,7 +17,6 @@ public class ExpectedWorkAreaCreateDto {
     /**
      * 国家编码
      */
-    @NotNull(message = "国家编码不能为空")
     private String countryCode;
 
     /**

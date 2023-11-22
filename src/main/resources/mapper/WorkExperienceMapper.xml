@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.WorkExperienceMapper">
 
+    <!--    修改工作履历信息-->
+    <update id="modify">
+        UPDATE
+            work_experience
+        SET
+            enterprise_name     = #{workExperienceModifyDto.enterpriseName},
+            department_name     = #{workExperienceModifyDto.departmentName},
+            position_name       = #{workExperienceModifyDto.positionName},
+            start_time          = #{workExperienceModifyDto.startTime},
+            end_time            = #{workExperienceModifyDto.endTime},
+            content             =#{workExperienceModifyDto.content},
+            performance         =#{workExperienceModifyDto.performance},
+            update_time         = CURRENT_TIMESTAMP
+        WHERE id = #{workExperienceModifyDto.id}
+    </update>
+
     <!--    查询工作履历信息列表-->
     <select id="queryWorkExperienceListByUserId"
             resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo">

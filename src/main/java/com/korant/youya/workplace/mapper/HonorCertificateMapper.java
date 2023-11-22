@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.honorcertificate.HonorCertificateModifyDto;
 import com.korant.youya.workplace.pojo.po.HonorCertificate;
 import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateDetailDto;
 import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto;
@@ -41,4 +42,12 @@ public interface HonorCertificateMapper extends BaseMapper<HonorCertificate> {
      * @return
      */
     List<HonorCertificateListDto> queryList(@Param("userId") Long userId);
+
+    /**
+     * 修改荣誉证书信息
+     *
+     * @param
+     * @return
+     */
+    int modify(@Param("honorCertificateModifyDto") HonorCertificateModifyDto honorCertificateModifyDto);
 }

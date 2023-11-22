@@ -2,6 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.AttachmentMapper">
 
+    <!--    修改其他附件信息-->
+    <update id="modify">
+        UPDATE
+            attachm
+        SET file_name       = #{attachmentModifyDto.fileName},
+            md5_file_name   = #{attachmentModifyDto.md5FileName},
+            update_time     = CURRENT_TIMESTAMP
+        WHERE id = #{attachmentModifyDto.id}
+    </update>
+
     <!--    查询其他附件信息列表-->
     <select id="queryList"
             resultType="com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo">

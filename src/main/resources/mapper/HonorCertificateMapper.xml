@@ -2,6 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.HonorCertificateMapper">
 
+    <!--    修改荣誉证书信息-->
+    <update id="modify">
+        UPDATE
+            honor_certificate
+        SET
+            certificate_name    = #{honorCertificateModifyDto.certificateName},
+            obtain_time         = #{honorCertificateModifyDto.obtainTime},
+            file_name           = #{honorCertificateModifyDto.fileName},
+            md5_file_name       = #{honorCertificateModifyDto.md5FileName},
+            update_time         = CURRENT_TIMESTAMP
+        WHERE id = #{honorCertificateModifyDto.id}
+    </update>
+
     <!--    查询荣誉证书信息列表-->
     <select id="queryHonorCertificateListByUserId"
             resultType="com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto">

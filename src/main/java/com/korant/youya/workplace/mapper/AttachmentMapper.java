@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.attachment.AttachmentModifyDto;
 import com.korant.youya.workplace.pojo.po.Attachment;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentDetailVo;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;
@@ -34,4 +35,11 @@ public interface AttachmentMapper extends BaseMapper<Attachment> {
      */
     AttachmentDetailVo detail(@Param("id") Long id);
 
+    /**
+     * 修改其他附件信息
+     *
+     * @param
+     * @return
+     */
+    int modify(@Param("attachmentModifyDto") AttachmentModifyDto attachmentModifyDto);
 }

@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
@@ -85,8 +86,7 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
 
         HonorCertificate honorCertificate = honorCertificateMapper.selectById(honorCertificateModifyDto.getId());
         if (honorCertificate == null) throw new YouyaException("荣誉证书信息不存在!");
-        BeanUtils.copyProperties(honorCertificateModifyDto, honorCertificate);
-        honorCertificateMapper.updateById(honorCertificate);
+        honorCertificateMapper.modify(honorCertificateModifyDto);
 
     }
 
@@ -115,8 +115,10 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
 
         HonorCertificate honorCertificate = honorCertificateMapper.selectById(id);
         if (honorCertificate == null) throw new YouyaException("荣誉证书信息不存在!");
-        honorCertificate.setIsDelete(1);
-        honorCertificateMapper.updateById(honorCertificate);
+        honorCertificateMapper.update(new HonorCertificate(),
+                new LambdaUpdateWrapper<HonorCertificate>()
+                        .eq(HonorCertificate::getId, id)
+                        .set(HonorCertificate::getIsDelete, 1));
 
     }
 }

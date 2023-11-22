@@ -43,6 +43,7 @@ public class EmployStatusController {
      * @return
      **/
     @GetMapping("/preview")
+    @ExplanationDict
     public R<?> preview() {
 
         ResumePreviewVo resumePreviewVo = employStatusService.preview();

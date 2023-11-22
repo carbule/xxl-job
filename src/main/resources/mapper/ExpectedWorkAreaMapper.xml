@@ -13,7 +13,6 @@
     <select id="queryList"
             resultType="com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo">
         SELECT
-            ewa.id,
             ewa.country_code           AS countryCode,
             dp1.name                   AS countryName,
             ewa.province_code          AS provinceCode,
