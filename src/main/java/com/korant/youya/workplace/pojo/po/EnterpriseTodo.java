@@ -46,13 +46,13 @@ public class EnterpriseTodo implements Serializable {
      * 工号
      */
     @TableField("employee_id")
-    private Integer employeeId;
+    private String employeeId;
 
     /**
      * 事项类型 1-hr认证 2-员工认证
      */
     @TableField("event_type")
-    private String eventType;
+    private Integer eventType;
 
     /**
      * 操作 1-拒绝 2-同意
