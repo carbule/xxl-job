@@ -4,11 +4,10 @@ import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/16 16:39
  * @PackageName:com.korant.youya.workplace.pojo.vo.educationexperience
  * @ClassName: EducationExperienceListVo
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data

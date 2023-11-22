@@ -3,11 +3,10 @@ package com.korant.youya.workplace.pojo.vo.user;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/21 15:57
  * @PackageName:com.korant.youya.workplace.pojo.vo.user
  * @ClassName: ResumeContactInfoVo
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data

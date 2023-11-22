@@ -5,11 +5,10 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/20 16:27
  * @PackageName:com.korant.youya.workplace.pojo.vo.user
  * @ClassName: resumePersonInfoVo
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data

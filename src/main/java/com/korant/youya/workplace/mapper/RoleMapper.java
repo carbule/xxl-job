@@ -15,7 +15,7 @@ import org.apache.ibatis.annotations.Param;
 public interface RoleMapper extends BaseMapper<Role> {
 
     /**
-     * @Author Duan-zhixiao
+
      * @Description 获取用户在企业中的角色类型
      * @Date 17:22 2023/11/20
      * @Param

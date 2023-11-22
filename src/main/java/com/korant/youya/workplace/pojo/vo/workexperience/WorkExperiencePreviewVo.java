@@ -6,11 +6,10 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/17 15:07
  * @PackageName:com.korant.youya.workplace.pojo.vo.workexperience
  * @ClassName: WorkExperiencePreviewVo
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data

@@ -8,11 +8,10 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/17 14:16
  * @PackageName:com.korant.youya.workplace.pojo.vo.employstatus
  * @ClassName: EmployStatusVo
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data

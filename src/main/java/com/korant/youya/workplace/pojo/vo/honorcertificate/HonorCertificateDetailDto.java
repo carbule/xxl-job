@@ -3,11 +3,10 @@ package com.korant.youya.workplace.pojo.vo.honorcertificate;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/16 17:07
  * @PackageName:com.korant.youya.workplace.pojo.vo.honorcertificate
  * @ClassName: HonorCertificateDetailDto
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data

@@ -4,11 +4,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/17 14:29
  * @PackageName:com.korant.youya.workplace.pojo.dto.expectedposition
  * @ClassName: ExpectedPositionModifyDto
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data

@@ -3,11 +3,10 @@ package com.korant.youya.workplace.pojo.vo.expectedworkarea;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/16 14:59
  * @PackageName:com.korant.youya.workplace.pojo.dto.expectedworkarea
  * @ClassName: ExpectedWorkAreaInfoDto
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data
