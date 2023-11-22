@@ -13,7 +13,6 @@
     <select id="findExpectedPositionInfo"
             resultType="com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo">
         SELECT
-            ep.id,
             ep.industry_code            AS industryCode,
             p1.name                     AS industryName,
             ep.sector_code              AS sectorCode,
