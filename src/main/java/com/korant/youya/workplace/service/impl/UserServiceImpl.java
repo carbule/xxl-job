@@ -309,9 +309,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 在线简历-查询个人信息
-     * @Date 16:31 2023/11/20
      * @Param
      * @return
      **/
@@ -324,9 +322,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * @Author Duan-zhixiao
      * @Description 在线简历-修改个人信息
-     * @Date 17:47 2023/11/20
      * @Param
      * @return
      **/
@@ -342,6 +338,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     }
 
+    /**
+     * 在线简历-查询联系方式
+     *
+     * @return
+     */
     @Override
     public ResumeContactInfoVo resumeContactDetail() {
 
@@ -350,6 +351,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     }
 
+    /**
+     * 在线简历-编辑联系方式
+     *
+     * @return
+     */
     @Override
     public void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto) {
 

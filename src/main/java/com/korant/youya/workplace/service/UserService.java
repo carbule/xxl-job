@@ -60,11 +60,33 @@ public interface UserService extends IService<User> {
      */
     void logout();
 
+    /**
+     * 在线简历-查询个人信息
+     *
+     * @return
+     */
     ResumePersonInfoVo resumePersonDetail();
 
+    /**
+     * 在线简历-修改个人信息
+     *
+     * @param
+     * @return
+     */
     void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto);
 
+    /**
+     * 在线简历-查询联系方式
+     *
+     * @return
+     */
     ResumeContactInfoVo resumeContactDetail();
 
+    /**
+     * 在线简历-编辑联系方式
+     *
+     * @return
+     */
     void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto);
+
 }
