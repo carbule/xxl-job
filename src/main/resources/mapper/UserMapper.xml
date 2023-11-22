@@ -1,6 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.UserMapper">
+    <update id="resumePersonModify">
+        UPDATE
+            yy_user
+        SET avatar                  = #{resumePersonModifyDto.avatar},
+            last_name               = #{resumePersonModifyDto.lastName},
+            first_name              = #{resumePersonModifyDto.firstName},
+            gender                  = #{resumePersonModifyDto.gender},
+            birthday                = #{resumePersonModifyDto.birthday},
+            political_outlook       = #{resumePersonModifyDto.politicalOutlook},
+            personal_signature      = #{resumePersonModifyDto.personalSignature},
+            self_evaluation         = #{resumePersonModifyDto.selfEvaluation},
+            update_time             = CURRENT_TIMESTAMP
+        WHERE id = #{userId}
+    </update>
+
+    <update id="modifyResumeContactDetail">
+        UPDATE yy_user
+        SET country_code            = #{modifyDto.countryCode},
+            province_code           = #{modifyDto.provinceCode},
+            city_code               = #{modifyDto.cityCode},
+            district_code           = #{modifyDto.districtCode},
+            address                 = #{modifyDto.address},
+            phone                   = #{modifyDto.phone},
+            email                   = #{modifyDto.email},
+            qq                      = #{modifyDto.qq},
+            wechat_id               = #{modifyDto.wechatId},
+            update_time             = CURRENT_TIMESTAMP
+        WHERE id = #{userId}
+    </update>
 
     <select id="selectUserToLoginById" parameterType="java.lang.Long" resultType="com.korant.youya.workplace.pojo.LoginUser">
         SELECT u.id,

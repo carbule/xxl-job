@@ -325,10 +325,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto) {
 
         Long userId = SpringSecurityUtil.getUserId();
-        User user = new User();
-        BeanUtils.copyProperties(resumePersonModifyDto, user);
-        user.setId(userId);
-        userMapper.updateById(user);
+        userMapper.resumePersonModify(userId, resumePersonModifyDto);
 
     }
 
@@ -354,10 +351,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto) {
 
         Long userId = SpringSecurityUtil.getUserId();
-        User user = new User();
-        BeanUtils.copyProperties(resumeContactModifyDto, user);
-        user.setId(userId);
-        userMapper.updateById(user);
+        resumeContactModifyDto.setCityCode("10000");
+        userMapper.modifyResumeContactDetail(userId, resumeContactModifyDto);
 
     }
 
