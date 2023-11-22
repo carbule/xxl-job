@@ -85,9 +85,54 @@
           AND u.is_delete = 0
     </select>
 
+    <resultMap id="resumePreview" type="com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo">
+        <id property="id" column="id" />
+        <result property="avatar" column="avatar" />
+        <result property="lastName" column="lastName" />
+        <result property="firstName" column="firstName" />
+        <result property="gender" column="gender" />
+        <result property="age" column="age" />
+        <result property="politicalOutlook" column="politicalOutlook" />
+        <result property="personalSignature" column="personalSignature" />
+        <result property="selfEvaluation" column="selfEvaluation" />
+        <result property="authenticationStatus" column="authenticationStatus" />
+        <result property="phone" column="phone" />
+        <result property="email" column="email" />
+        <result property="qq" column="qq" />
+        <result property="wechatId" column="wechatId" />
+        <result property="countryName" column="countryName" />
+        <result property="provinceName" column="provinceName" />
+        <result property="cityName" column="cityName" />
+        <result property="districtName" column="districtName" />
+        <result property="address" column="address" />
+        <collection property="educationExperienceList" ofType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo">
+            <id property="id" column="eeId" />
+            <result property="schoolName" column="schoolName" />
+            <result property="eduLevel" column="eduLevel" />
+            <result property="startTime" column="startTime" />
+            <result property="endTime" column="endTime" />
+            <result property="specialityName" column="specialityName" />
+            <result property="degreeName" column="degreeName" />
+        </collection>
+        <collection property="honorCertificateList" ofType="com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto">
+            <id property="id" column="hcId" />
+            <result property="certificateName" column="certificateName" />
+            <result property="obtainTime" column="obtainTime" />
+            <result property="fileName" column="hcFileName" />
+            <result property="md5FileName" column="hcMd5FileName" />
+        </collection>
+        <collection property="attachmentList" ofType="com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo">
+            <id property="id" column="aId" />
+            <result property="fileName" column="aFileName" />
+            <result property="md5FileName" column="aMd5FileName" />
+        </collection>
+    </resultMap>
+
     <select id="resumePersonPreview"
-            resultType="com.korant.youya.workplace.pojo.vo.user.ResumePersonPreviewVo">
+            resultType="com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo"
+            resultMap="resumePreview" >
         SELECT
+            u.id,
             u.avatar,
             u.last_name                                  AS lastName,
             u.first_name                                 AS firstName,
@@ -105,12 +150,30 @@
             dp2.name                                    AS provinceName,
             dp3.name                                    AS cityName,
             dp4.name                                    AS districtName,
-            u.address
+            u.address,
+            ee.id                                       AS eeId,
+            ee.school_name                              AS schoolName,
+            ee.edu_level                                AS eduLevel,
+            ee.start_time                               AS startTime,
+            ee.end_time                                 AS endTime,
+            ee.speciality_name                          AS specialityName,
+            ee.degree_name                              AS degreeName,
+            hc.id                                       AS hcId,
+            hc.certificate_name                         AS certificateName,
+            hc.obtain_time                              AS obtainTime,
+            hc.file_name                                AS hcFileName,
+            hc.md5_file_name                            AS hcMd5FileName,
+            a.id                                        AS aId,
+            a.file_name                                 AS aFileName,
+            a.md5_file_name                             AS aMd5FileName
         FROM yy_user AS u
                  LEFT JOIN   district_data dp1 ON dp1.code = u.country_code      AND dp1.is_delete = 0
                  LEFT JOIN   district_data dp2 ON dp2.code = u.province_code     AND dp2.is_delete = 0
                  LEFT JOIN   district_data dp3 ON dp3.code = u.city_code         AND dp3.is_delete = 0
                  LEFT JOIN   district_data dp4 ON dp4.code = u.district_code     AND dp4.is_delete = 0
+                 LEFT JOIN   education_experience ee ON ee.uid = u.id            AND ee.is_delete = 0
+                 LEFT JOIN   honor_certificate hc ON hc.uid = u.id               AND hc.is_delete = 0
+                 LEFT JOIN   attachment a ON a.uid = u.id                        AND a.is_delete = 0
         WHERE u.id = #{userId}
           AND u.is_delete = 0
     </select>

@@ -149,7 +149,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
     public ResumePreviewVo preview() {
 
         Long userId = SpringSecurityUtil.getUserId();
-        ResumePreviewVo resumePreviewVo = new ResumePreviewVo();
+        ResumePreviewVo resumePreviewVo = userMapper.resumePersonPreview(userId);
 
         //        求职意向-意向职位
         List<ExpectedPositionInfoVo> expectedPositionInfoVoList = expectedPositionMapper.findExpectedPositionInfo(userId);
@@ -163,26 +163,10 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
         List<WorkExperiencePreviewVo> workExperiencePreviewVoList = workExperienceMapper.selectWorkExperienceAndProjectExperienceByUserId(userId);
         resumePreviewVo.setWorkExperiencePreviewVoList(workExperiencePreviewVoList);
 
-        //        教育经历
-        List<EducationExperienceListVo> educationExperienceListVoList = educationExperienceMapper.queryList(userId);
-        resumePreviewVo.setEducationExperienceListVoList(educationExperienceListVoList);
-
-        //        荣誉证书
-        List<HonorCertificateListDto> honorCertificateListDtoList =  honorCertificateMapper.queryList(userId);
-        resumePreviewVo.setHonorCertificateListDtoList(honorCertificateListDtoList);
-
-        //        其他附件
-        List<AttachmentListVo> attachmentListVoList = attachmentMapper.queryList(userId);
-        resumePreviewVo.setAttachmentListVoList(attachmentListVoList);
-
-        //        个人信息
-        ResumePersonPreviewVo resumePersonPreviewVo = userMapper.resumePersonPreview(userId);
-        resumePreviewVo.setResumePersonPreviewVo(resumePersonPreviewVo);
-
         //        学历
-        if (!CollectionUtils.isEmpty(educationExperienceListVoList)){
-            Optional<EducationExperienceListVo> max = educationExperienceListVoList.stream().max(Comparator.comparingInt(EducationExperienceListVo::getEduLevel));
-            resumePersonPreviewVo.setEduLevel(max.get().getEduLevel());
+        if (!CollectionUtils.isEmpty(resumePreviewVo.getEducationExperienceList())){
+            Optional<EducationExperienceListVo> max = resumePreviewVo.getEducationExperienceList().stream().max(Comparator.comparingInt(EducationExperienceListVo::getEduLevel));
+            resumePreviewVo.setEduLevel(max.get().getEduLevel());
         }
 
         //        工龄
@@ -193,7 +177,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
             LocalDate today = LocalDate.now();
             Period period = Period.between(startDate, today);
             int years = period.getYears();
-            resumePersonPreviewVo.setSeniority(years);
+            resumePreviewVo.setSeniority(years);
         }
 
         return resumePreviewVo;

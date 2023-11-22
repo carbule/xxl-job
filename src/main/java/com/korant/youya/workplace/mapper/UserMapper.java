@@ -5,6 +5,7 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.ResumeContactModifyDto;
 import com.korant.youya.workplace.pojo.dto.user.ResumePersonModifyDto;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonPreviewVo;
@@ -26,7 +27,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     ResumePersonInfoVo resumePersonDetail(@Param("userId") Long userId);
 
-    ResumePersonPreviewVo resumePersonPreview(@Param("userId") Long userId);
+    ResumePreviewVo resumePersonPreview(@Param("userId") Long userId);
 
     ResumeContactInfoVo resumeContactDetail(@Param("userId") Long userId);
 
