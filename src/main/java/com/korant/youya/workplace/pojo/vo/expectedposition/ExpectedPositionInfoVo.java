@@ -13,6 +13,11 @@ import lombok.Data;
 public class ExpectedPositionInfoVo {
 
     /**
+     * id
+     */
+    private Long id;
+
+    /**
      * 行业编码
      */
     private Long industryCode;

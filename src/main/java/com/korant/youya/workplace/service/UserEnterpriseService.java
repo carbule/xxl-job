@@ -13,4 +13,18 @@ import com.korant.youya.workplace.pojo.po.UserEnterprise;
  */
 public interface UserEnterpriseService extends IService<UserEnterprise> {
 
+    /**
+     * 解除关联企业绑定
+     *
+     * @return
+     */
+    void unbinding(Long id);
+
+    /**
+     * 退出公司
+     *
+     * @return
+     */
+    void exit(Long id);
+
 }

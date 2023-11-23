@@ -18,13 +18,24 @@ import java.util.List;
 public class EmployStatusVo {
 
     /**
+     * id
+     */
+    private Long id;
+
+    /**
      * 求职状态
      */
     @Dict(categoryCode = "employ_status")
     private Integer status;
 
+    /**
+     * 求职意向-意向职位
+     */
     private List<ExpectedPositionInfoVo> expectedPositionInfoVoList;
 
+    /**
+     * 求职意向-期望工作区域
+     */
     private List<ExpectedWorkAreaInfoVo> expectedWorkAreaInfoVoList;
 
 

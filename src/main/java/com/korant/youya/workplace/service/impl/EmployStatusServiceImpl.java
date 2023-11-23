@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -53,12 +54,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
     private ExpectedWorkAreaMapper expectedWorkAreaMapper;
     @Resource
     private WorkExperienceMapper workExperienceMapper;
-    @Resource
-    private EducationExperienceMapper educationExperienceMapper;
-    @Resource
-    private  HonorCertificateMapper honorCertificateMapper;
-    @Resource
-    private AttachmentMapper attachmentMapper;
+
     @Resource
     private UserMapper userMapper;
 
@@ -71,15 +67,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
     public EmployStatusVo status() {
 
         Long userId = SpringSecurityUtil.getUserId();
-        EmployStatusVo employStatusVo = new EmployStatusVo();
-        Integer status =  employStatusMapper.status(userId);
-        employStatusVo.setStatus(status);
-
-        List<ExpectedPositionInfoVo> expectedPositionInfoVoList = expectedPositionMapper.findExpectedPositionInfo(userId);
-        employStatusVo.setExpectedPositionInfoVoList(expectedPositionInfoVoList);
-
-        List<ExpectedWorkAreaInfoVo> expectedWorkAreaInfoVoList = expectedWorkAreaMapper.queryList(userId);
-        employStatusVo.setExpectedWorkAreaInfoVoList(expectedWorkAreaInfoVoList);
+        EmployStatusVo employStatusVo = employStatusMapper.queryStatus(userId);
 
         return employStatusVo;
 
@@ -100,8 +88,8 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
             //删除历史缓存数据
             employStatus.setIsDelete(1);
             employStatusMapper.updateById(employStatus);
-            expectedPositionMapper.update(new ExpectedPosition(), new LambdaUpdateWrapper<ExpectedPosition>().eq(ExpectedPosition::getStatusId, employStatus.getId()).set(ExpectedPosition::getIsDelete, 1));
-            expectedWorkAreaMapper.update(new ExpectedWorkArea(), new LambdaUpdateWrapper<ExpectedWorkArea>().eq(ExpectedWorkArea::getStatusId, employStatus.getId()).set(ExpectedWorkArea::getIsDelete, 1));
+            expectedPositionMapper.updateByStatus(employStatus.getId());
+            expectedWorkAreaMapper.updateByStatus(employStatus.getId());
         }
 
         EmployStatus status = new EmployStatus();
@@ -147,14 +135,13 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
 
         Long userId = SpringSecurityUtil.getUserId();
         ResumePreviewVo resumePreviewVo = userMapper.resumePersonPreview(userId);
+        EmployStatusVo employStatusVo = employStatusMapper.queryStatus(userId);
 
         //        求职意向-意向职位
-        List<ExpectedPositionInfoVo> expectedPositionInfoVoList = expectedPositionMapper.findExpectedPositionInfo(userId);
-        resumePreviewVo.setExpectedPositionInfoVoList(expectedPositionInfoVoList);
+        resumePreviewVo.setExpectedPositionInfoVoList(employStatusVo.getExpectedPositionInfoVoList());
 
         //        求职意向-期望工作区域
-        List<ExpectedWorkAreaInfoVo> expectedWorkAreaInfoVoList = expectedWorkAreaMapper.queryList(userId);
-        resumePreviewVo.setExpectedWorkAreaInfoVoList(expectedWorkAreaInfoVoList);
+        resumePreviewVo.setExpectedWorkAreaInfoVoList(employStatusVo.getExpectedWorkAreaInfoVoList());
 
         //        工作履历-项目经验
         List<WorkExperiencePreviewVo> workExperiencePreviewVoList = workExperienceMapper.selectWorkExperienceAndProjectExperienceByUserId(userId);
@@ -170,7 +157,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
         if (!CollectionUtils.isEmpty(workExperiencePreviewVoList)){
             Optional<WorkExperiencePreviewVo> min = workExperiencePreviewVoList.stream().min(Comparator.comparing(WorkExperiencePreviewVo::getStartTime));
             String startTime = min.get().getStartTime();
-            LocalDate startDate = LocalDate.parse(startTime.substring(0, 6));
+            LocalDate startDate = LocalDate.parse(startTime + "-01" , DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             LocalDate today = LocalDate.now();
             Period period = Period.between(startDate, today);
             int years = period.getYears();

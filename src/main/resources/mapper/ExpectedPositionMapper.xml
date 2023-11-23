@@ -9,10 +9,20 @@
         </foreach>
     </insert>
 
+    <!--    删除期望职位-->
+    <update id="updateByStatus">
+        UPDATE
+            expected_position
+        SET is_delete = 1,
+            update_time = CURRENT_TIMESTAMP
+        WHERE status_id = #{id}
+    </update>
+
     <!--    查询用户的所有意向职位-->
     <select id="findExpectedPositionInfo"
             resultType="com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo">
         SELECT
+            ep.id,
             ep.industry_code            AS industryCode,
             p1.name                     AS industryName,
             ep.sector_code              AS sectorCode,
@@ -30,5 +40,49 @@
           AND ep.is_delete = 0
         ORDER BY ep.create_time DESC
     </select>
-
+    <select id="queryCountByPositionCode" resultType="java.lang.Long">
+    </select>
+    <select id="queryListByPositionCode"
+            resultType="com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoByPositionCodeVo">
+        SELECT
+            yu.id,
+            yu.avatar,
+            yu.last_name            AS lastName,
+            yu.first_name           AS firstName,
+            yu.personal_signature   AS personalSignature,
+            ep.min_salary           AS minSalary,
+            ep.max_salary           AS maxSalary,
+            p.name                  AS positionName,
+            dd1.name                AS cityName,
+            dd2.name                AS districtName
+        FROM yy_user yu
+                 LEFT JOIN employ_status es ON yu.id = es.uid AND es.is_delete = 0
+                 LEFT JOIN (
+            SELECT
+                status_id, position_code, min_salary, max_salary,
+                ROW_NUMBER() OVER (PARTITION BY status_id ORDER BY create_time) as rn
+            FROM expected_position
+            WHERE is_delete = 0
+        ) ep ON es.id = ep.status_id AND ep.rn = 1
+                 LEFT JOIN (
+            SELECT
+                status_id, city_code, district_code,
+                ROW_NUMBER() OVER (PARTITION BY status_id ORDER BY create_time) as rn
+            FROM expected_work_area
+            WHERE is_delete = 0
+        ) ewa ON es.id = ewa.status_id AND ewa.rn = 1
+                 LEFT JOIN position p	ON ep.position_code = p.code AND p.is_delete = 0
+                 LEFT JOIN district_data dd1	ON ewa.city_code = dd1.code AND dd1.is_delete = 0
+                 LEFT JOIN district_data dd2	ON ewa.district_code = dd2.code AND dd2.is_delete = 0
+                 RIGHT JOIN	(
+            SELECT  DISTINCT yu.id
+            FROM yy_user yu
+                     LEFT JOIN employ_status es ON yu.id = es.uid AND es.is_delete = 0
+                     LEFT JOIN expected_position ep ON es.id = ep.status_id AND es.is_delete = 0
+            WHERE	ep.position_code = #{positionCode}
+              AND yu.is_delete = 0
+        ) A ON yu.id = A.id
+        ORDER BY yu.create_time DESC LIMIT #{pageSize}
+        OFFSET (#{pageNumber} -1) * #{pageSize}
+    </select>
 </mapper>

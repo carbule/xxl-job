@@ -91,9 +91,9 @@
             pe.project_content     AS projectContent
         FROM
             work_experience we
-            LEFT JOIN   project_experience pe   ON we.id = pe.we_id AND we.is_delete = 0
+            LEFT JOIN   project_experience pe   ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE   we.uid = #{userId}
-          AND pe.is_delete = 0
+          AND we.is_delete = 0
     </select>
 
 </mapper>

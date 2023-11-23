@@ -33,4 +33,11 @@ public interface ExpectedWorkAreaMapper extends BaseMapper<ExpectedWorkArea> {
     Long selectCountByUserId(@Param("userId") Long userId);
 
     void insertBatch(@Param("workAreaCreateDtoList") List<ExpectedWorkAreaCreateDto> workAreaCreateDtoList, @Param("id") Long id);
+
+    /**
+     * 删除期望工作区域
+     *
+     * @return
+     */
+    int updateByStatus(@Param("id") Long id);
 }

@@ -9,10 +9,20 @@
         </foreach>
     </insert>
 
+    <!--    删除期望工作区域-->
+    <update id="updateByStatus">
+        UPDATE
+            expected_work_area
+        SET is_delete = 1,
+            update_time = CURRENT_TIMESTAMP
+        WHERE status_id = #{id}
+    </update>
+
     <!--    查询用户期望工作区域-->
     <select id="queryList"
             resultType="com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo">
         SELECT
+            ewa.id,
             ewa.country_code           AS countryCode,
             dp1.name                   AS countryName,
             ewa.province_code          AS provinceCode,

@@ -41,6 +41,11 @@ public class ResumePersonInfoVo {
     private LocalDateTime birthday;
 
     /**
+     * 实名认证状态
+     */
+    private Integer authenticationStatus;
+
+    /**
      * 政治面貌
      */
     @Dict(categoryCode = "political_outlook")

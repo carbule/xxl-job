@@ -100,6 +100,7 @@
         <result property="email" column="email" />
         <result property="qq" column="qq" />
         <result property="wechatId" column="wechatId" />
+        <result property="employStatus" column="status" />
         <result property="countryName" column="countryName" />
         <result property="provinceName" column="provinceName" />
         <result property="cityName" column="cityName" />
@@ -146,6 +147,7 @@
             u.email,
             u.qq,
             u.wechat_id                                 AS wechatId,
+            es.status,
             dp1.name                                    AS countryName,
             dp2.name                                    AS provinceName,
             dp3.name                                    AS cityName,
@@ -171,6 +173,7 @@
                  LEFT JOIN   district_data dp2 ON dp2.code = u.province_code     AND dp2.is_delete = 0
                  LEFT JOIN   district_data dp3 ON dp3.code = u.city_code         AND dp3.is_delete = 0
                  LEFT JOIN   district_data dp4 ON dp4.code = u.district_code     AND dp4.is_delete = 0
+                 LEFT JOIN   employ_status es ON es.uid = u.id                   AND es.is_delete = 0
                  LEFT JOIN   education_experience ee ON ee.uid = u.id            AND ee.is_delete = 0
                  LEFT JOIN   honor_certificate hc ON hc.uid = u.id               AND hc.is_delete = 0
                  LEFT JOIN   attachment a ON a.uid = u.id                        AND a.is_delete = 0

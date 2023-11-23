@@ -33,7 +33,6 @@ public class ExpectedWorkAreaCreateDto {
     /**
      * 行政区编码
      */
-    @NotNull(message = "行政区编码不能为空")
     private String districtCode;
 
 }
