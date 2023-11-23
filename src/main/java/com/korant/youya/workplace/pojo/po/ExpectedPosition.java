@@ -67,6 +67,12 @@ public class ExpectedPosition implements Serializable {
     private Integer maxSalary;
 
     /**
+     * 顺序
+     */
+    @TableField("sort")
+    private Integer sort;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)

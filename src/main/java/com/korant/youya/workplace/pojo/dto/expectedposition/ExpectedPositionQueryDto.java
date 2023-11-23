@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/23 13:49
  * @PackageName:com.korant.youya.workplace.pojo.dto.expectedposition
  * @ClassName: ExpectedPositionQueryDto

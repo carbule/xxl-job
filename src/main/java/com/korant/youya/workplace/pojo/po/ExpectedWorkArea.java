@@ -61,6 +61,12 @@ public class ExpectedWorkArea implements Serializable {
     private String districtCode;
 
     /**
+     * 顺序
+     */
+    @TableField("sort")
+    private Integer sort;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)

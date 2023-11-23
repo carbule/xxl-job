@@ -3,7 +3,6 @@ package com.korant.youya.workplace.pojo.vo.expectedposition;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/23 13:53
  * @PackageName:com.korant.youya.workplace.pojo.vo.expectedposition
  * @ClassName: ExpectedPositionInfoByPositionCodeVo
