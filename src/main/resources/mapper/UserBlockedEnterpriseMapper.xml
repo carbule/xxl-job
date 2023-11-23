@@ -2,4 +2,42 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.UserBlockedEnterpriseMapper">
 
+    <resultMap id="queryPersonalBlockedEnterpriseMap"
+               type="com.korant.youya.workplace.pojo.vo.userblockedenterprise.PersonalBlockedEnterpriseVo">
+        <result column="isBlockedCurrentEnterprise" property="isBlockedCurrentEnterprise"/>
+        <collection property="blockedEnterprises" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.userblockedenterprise.BlockedEnterprise">
+            <id column="blockId" property="blockId"/>
+            <result column="enterpriseName" property="enterpriseName"/>
+        </collection>
+    </resultMap>
+
+    <!--  查询个人屏蔽的企业  -->
+    <select id="queryPersonalBlockedEnterprise" resultMap="queryPersonalBlockedEnterpriseMap">
+        SELECT (SELECT CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END
+                FROM yy_user_blocked_enterprise
+                WHERE uid = #{userId}
+                  AND enterprise_id = #{enterpriseId}
+                  AND is_delete = 0) AS isBlockedCurrentEnterprise,
+               be.id                 AS blockId,
+               e.name                AS enterpriseName
+        FROM yy_user AS u
+                 LEFT JOIN yy_user_blocked_enterprise AS be ON u.id = be.uid AND be.is_delete = 0
+                 LEFT JOIN enterprise AS e ON be.enterprise_id = e.id
+        WHERE u.id = #{userId}
+          AND u.is_delete = 0
+        ORDER BY be.create_time DESC LIMIT #{personalBlockedEnterpriseDto.pageSize}
+        OFFSET (#{personalBlockedEnterpriseDto.pageNumber} -1) * #{personalBlockedEnterpriseDto.pageSize}
+    </select>
+
+    <!--  根据企业名称查询企业  -->
+    <select id="queryEnterpriseByName"
+            parameterType="com.korant.youya.workplace.pojo.dto.userblockedenterprise.QueryEnterpriseByNameDto"
+            resultType="com.korant.youya.workplace.pojo.vo.userblockedenterprise.QueryEnterpriseByNameVo">
+        SELECT id, name AS enterpriseName
+        FROM enterprise
+        WHERE name = #{queryEnterpriseByNameDto.enterpriseName}
+          AND auth_status = 2
+          AND is_delete = 0
+    </select>
 </mapper>

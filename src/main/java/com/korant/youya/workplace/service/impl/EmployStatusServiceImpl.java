@@ -1,7 +1,6 @@
 package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
@@ -14,8 +13,6 @@ import com.korant.youya.workplace.pojo.po.ExpectedWorkArea;
 import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
 import com.korant.youya.workplace.pojo.vo.employstatus.EmployStatusVo;
 import com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo;
-import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
-import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import com.korant.youya.workplace.service.EmployStatusService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;

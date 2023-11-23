@@ -1,16 +1,12 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.mapper.ExpectedPositionMapper;
 import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionQueryDto;
-import com.korant.youya.workplace.pojo.po.EducationExperience;
 import com.korant.youya.workplace.pojo.po.ExpectedPosition;
-import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoByPositionCodeVo;
 import com.korant.youya.workplace.service.ExpectedPositionService;
-import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
