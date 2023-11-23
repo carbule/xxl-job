@@ -22,7 +22,7 @@ public interface UserPrivacyMapper extends BaseMapper<UserPrivacy> {
      * @param userId
      * @return
      */
-    UserPersonalInfoPrivacyVo personalInfoPrivacy(@Param("userId") Long userId);
+    UserPersonalInfoPrivacyVo queryPersonalInfoPrivacy(@Param("userId") Long userId);
 
     /**
      * 修改个人信息隐私设置

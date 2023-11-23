@@ -1,26 +1,29 @@
 package com.korant.youya.workplace.pojo.po;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * <p>
- * 企业屏蔽表
+ * 用户屏蔽企业信息表
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-14
+ * @since 2023-11-23
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("shield_enterprise")
-public class ShieldEnterprise implements Serializable {
+@TableName("yy_user_blocked_enterprise")
+public class UserBlockedEnterprise implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

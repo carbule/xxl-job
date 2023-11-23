@@ -3,7 +3,7 @@
 <mapper namespace="com.korant.youya.workplace.mapper.UserPrivacyMapper">
 
     <!--  查询个人信息隐私设置  -->
-    <select id="personalInfoPrivacy" parameterType="java.lang.Long"
+    <select id="queryPersonalInfoPrivacy" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.userprivacy.UserPersonalInfoPrivacyVo">
         SELECT id,
                uid,

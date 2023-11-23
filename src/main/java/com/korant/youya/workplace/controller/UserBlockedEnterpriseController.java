@@ -5,14 +5,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 企业屏蔽表 前端控制器
+ * 用户屏蔽企业信息表 前端控制器
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-11-14
+ * @since 2023-11-23
  */
 @RestController
-@RequestMapping("/shieldEnterprise")
-public class ShieldEnterpriseController {
+@RequestMapping("/userBlockedEnterprise")
+public class UserBlockedEnterpriseController {
 
 }

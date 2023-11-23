@@ -59,7 +59,7 @@ public class CodeGenerationUtil {
         //策略配置
         StrategyConfig.Builder strategyConfigBuilder = new StrategyConfig.Builder();
         //配置生成的表名 不配置生成所有的表
-        strategyConfigBuilder.addInclude("yy_user_privacy","yy_user_name_visible_info","recruiter_visible_Info","everyone_visible_Info");
+        strategyConfigBuilder.addInclude("yy_user_blocked_enterprise");
         //过滤表前缀
         strategyConfigBuilder.addTablePrefix("yy_");
 

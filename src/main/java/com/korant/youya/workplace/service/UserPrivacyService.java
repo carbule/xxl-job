@@ -20,7 +20,7 @@ public interface UserPrivacyService extends IService<UserPrivacy> {
      *
      * @return
      */
-    UserPersonalInfoPrivacyVo personalInfoPrivacy();
+    UserPersonalInfoPrivacyVo queryPersonalInfoPrivacy();
 
     /**
      * 修改个人隐私

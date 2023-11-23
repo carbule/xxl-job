@@ -28,9 +28,9 @@ public class UserPrivacyController {
      *
      * @return
      */
-    @GetMapping("/personalInfoPrivacy")
-    public R<?> personalInfoPrivacy() {
-        UserPersonalInfoPrivacyVo personalInfoPrivacy = userPrivacyService.personalInfoPrivacy();
+    @GetMapping("/queryPersonalInfoPrivacy")
+    public R<?> queryPersonalInfoPrivacy() {
+        UserPersonalInfoPrivacyVo personalInfoPrivacy = userPrivacyService.queryPersonalInfoPrivacy();
         return R.success(personalInfoPrivacy);
     }
 

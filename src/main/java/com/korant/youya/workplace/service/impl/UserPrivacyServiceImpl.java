@@ -51,9 +51,9 @@ public class UserPrivacyServiceImpl extends ServiceImpl<UserPrivacyMapper, UserP
      * @return
      */
     @Override
-    public UserPersonalInfoPrivacyVo personalInfoPrivacy() {
+    public UserPersonalInfoPrivacyVo queryPersonalInfoPrivacy() {
         Long userId = SpringSecurityUtil.getUserId();
-        UserPersonalInfoPrivacyVo privacyVo = userPrivacyMapper.personalInfoPrivacy(userId);
+        UserPersonalInfoPrivacyVo privacyVo = userPrivacyMapper.queryPersonalInfoPrivacy(userId);
         privacyVo.setNamePublicStatusName(NameVisibleTypeEnum.getNameByValue(privacyVo.getNamePublicStatusValue()));
         privacyVo.setPhonePublicStatusName(OtherInfoVisibleTypeEnum.getNameByValue(privacyVo.getPhonePublicStatusValue()));
         privacyVo.setWechatPublicStatusName(OtherInfoVisibleTypeEnum.getNameByValue(privacyVo.getWechatPublicStatusValue()));
@@ -76,12 +76,12 @@ public class UserPrivacyServiceImpl extends ServiceImpl<UserPrivacyMapper, UserP
         if (null == userPrivacy) {
             userPrivacy = new UserPrivacy();
             userPrivacy.setUid(userId)
-                    .setNamePublicStatus(1)
-                    .setPhonePublicStatus(3)
-                    .setWechatPublicStatus(3)
-                    .setQqPublicStatus(3)
-                    .setEmailPublicStatus(3)
-                    .setAddressPublicStatus(3);
+                    .setNamePublicStatus(NameVisibleTypeEnum.FULL_NAME.getValue())
+                    .setPhonePublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setWechatPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setQqPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setEmailPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setAddressPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue());
             userPrivacyMapper.insert(userPrivacy);
         }
 

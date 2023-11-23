@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
+import com.korant.youya.workplace.enums.userprivacy.NameVisibleTypeEnum;
+import com.korant.youya.workplace.enums.userprivacy.OtherInfoVisibleTypeEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
@@ -254,12 +256,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long id = user.getId();
         UserPrivacy userPrivacy = new UserPrivacy();
         userPrivacy.setUid(id)
-                .setNamePublicStatus(1)
-                .setPhonePublicStatus(3)
-                .setWechatPublicStatus(3)
-                .setQqPublicStatus(3)
-                .setEmailPublicStatus(3)
-                .setAddressPublicStatus(3);
+                .setNamePublicStatus(NameVisibleTypeEnum.FULL_NAME.getValue())
+                .setPhonePublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                .setWechatPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                .setQqPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                .setEmailPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                .setAddressPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue());
         userPrivacyMapper.insert(userPrivacy);
         UserNameVisibleInfo userNameVisibleInfo = new UserNameVisibleInfo();
         userNameVisibleInfo.setUid(id);
@@ -371,9 +373,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
+     * @return
      * @Description 在线简历-修改个人信息
      * @Param
-     * @return
      **/
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -383,12 +385,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (null == userPrivacy) {
             userPrivacy = new UserPrivacy();
             userPrivacy.setUid(userId)
-                    .setNamePublicStatus(1)
-                    .setPhonePublicStatus(3)
-                    .setWechatPublicStatus(3)
-                    .setQqPublicStatus(3)
-                    .setEmailPublicStatus(3)
-                    .setAddressPublicStatus(3);
+                    .setNamePublicStatus(NameVisibleTypeEnum.FULL_NAME.getValue())
+                    .setPhonePublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setWechatPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setQqPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setEmailPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setAddressPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue());
             userPrivacyMapper.insert(userPrivacy);
         } else {
             UserNameVisibleInfo userNameVisibleInfo = userNameVisibleInfoMapper.selectOne(new LambdaQueryWrapper<UserNameVisibleInfo>().eq(UserNameVisibleInfo::getUid, userId).eq(UserNameVisibleInfo::getIsDelete, 0));
