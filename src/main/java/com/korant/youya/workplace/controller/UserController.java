@@ -98,6 +98,17 @@ public class UserController {
     }
 
     /**
+     * 用户注销
+     *
+     * @return
+     */
+    @GetMapping("/cancel")
+    public R<?> cancel() {
+        userService.cancel();
+        return R.ok();
+    }
+
+    /**
      * 在线简历-查询联系方式
      *
      * @return

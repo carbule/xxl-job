@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
@@ -42,6 +43,14 @@ public interface UserService extends IService<User> {
     UserLoginVo loginByPassword(UserLoginByPasswordDto passwordDto);
 
     /**
+     * 注册用户
+     *
+     * @param phoneNumber
+     * @return
+     */
+    LoginUser register(String phoneNumber);
+
+    /**
      * 获取登陆短信二维码
      *
      * @param codeDto
@@ -59,6 +68,11 @@ public interface UserService extends IService<User> {
      * 用户登出
      */
     void logout();
+
+    /**
+     * 用户注销
+     */
+    void cancel();
 
     /**
      * 在线简历-查询个人信息
@@ -88,5 +102,4 @@ public interface UserService extends IService<User> {
      * @return
      */
     void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto);
-
 }

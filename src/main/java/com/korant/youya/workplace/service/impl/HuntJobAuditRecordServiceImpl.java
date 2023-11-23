@@ -1,9 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.korant.youya.workplace.pojo.po.HuntJobAuditRecord;
-import com.korant.youya.workplace.mapper.HuntJobAuditRecordMapper;
-import com.korant.youya.workplace.service.HuntJobAuditRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.mapper.HuntJobAuditRecordMapper;
+import com.korant.youya.workplace.pojo.po.HuntJobAuditRecord;
+import com.korant.youya.workplace.service.HuntJobAuditRecordService;
 import org.springframework.stereotype.Service;
 
 /**

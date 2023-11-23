@@ -88,6 +88,15 @@ public class RedisUtil {
     }
 
     /**
+     * 删除缓存
+     *
+     * @param key 可以传一个值 或多个
+     */
+    public Boolean del(String key) {
+        return redisTemplate.delete(key);
+    }
+
+    /**
      * 普通缓存获取
      *
      * @param key 键

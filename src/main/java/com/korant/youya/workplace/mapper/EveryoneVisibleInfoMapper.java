@@ -1,7 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
-import com.korant.youya.workplace.pojo.po.EveryoneVisibleInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.po.EveryoneVisibleInfo;
 
 /**
  * <p>

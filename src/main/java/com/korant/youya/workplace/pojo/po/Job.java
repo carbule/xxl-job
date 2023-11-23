@@ -181,6 +181,12 @@ public class Job implements Serializable {
     private Integer status;
 
     /**
+     * 审核状态
+     */
+    @TableField("audit_status")
+    private Integer auditStatus;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)

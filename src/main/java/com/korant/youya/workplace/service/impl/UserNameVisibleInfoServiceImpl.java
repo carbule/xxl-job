@@ -1,9 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.korant.youya.workplace.pojo.po.UserNameVisibleInfo;
-import com.korant.youya.workplace.mapper.UserNameVisibleInfoMapper;
-import com.korant.youya.workplace.service.UserNameVisibleInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.mapper.UserNameVisibleInfoMapper;
+import com.korant.youya.workplace.pojo.po.UserNameVisibleInfo;
+import com.korant.youya.workplace.service.UserNameVisibleInfoService;
 import org.springframework.stereotype.Service;
 
 /**

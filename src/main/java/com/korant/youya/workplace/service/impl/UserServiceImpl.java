@@ -7,10 +7,10 @@ import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
-import com.korant.youya.workplace.mapper.UserMapper;
+import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
-import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
@@ -38,12 +38,29 @@ import java.util.Random;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Resource
+    private UserService userService;
+
+    @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserPrivacyMapper userPrivacyMapper;
+
+    @Resource
+    private UserNameVisibleInfoMapper userNameVisibleInfoMapper;
+
+    @Resource
+    private EveryoneVisibleInfoMapper everyoneVisibleInfoMapper;
+
+    @Resource
+    private RecruiterVisibleInfoMapper recruiterVisibleInfoMapper;
 
     @Resource
     private RedisUtil redisUtil;
 
     private static final String DEFAULT_AVATAR = "https://resources.youyai.cn/icon/male.svg";
+
+    private static final String CHINA_CODE = "100000";
 
     /**
      * 微信登陆
@@ -52,6 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserLoginVo loginByWechatCode(UserLoginByWechatCodeDto wechatCodeDto) {
         String code = wechatCodeDto.getCode();
         log.info("code:{}", code);
@@ -65,7 +83,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
             //用户不存在则默认注册
             if (null == loginUser) {
-                loginUser = register(phoneNumber);
+                loginUser = userService.register(phoneNumber);
             }
             Integer accountStatus = loginUser.getAccountStatus();
             if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
@@ -91,10 +109,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
                 //用户不存在则默认注册
                 if (null == loginUser) {
-                    loginUser = register(phoneNumber);
+                    loginUser = userService.register(phoneNumber);
                 }
                 Integer accountStatus = loginUser.getAccountStatus();
-                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus)
+                    throw new YouyaException("账号已被冻结,详情请咨询客服");
                 Long id = loginUser.getId();
                 String token = JwtUtil.createToken(id);
                 String key = String.format(RedisConstant.YY_USER_TOKEN, id);
@@ -109,7 +128,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             } else {
                 LoginUser loginUser = JSONObject.parseObject(cacheObj.toString(), LoginUser.class);
                 Integer accountStatus = loginUser.getAccountStatus();
-                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus)
+                    throw new YouyaException("账号已被冻结,详情请咨询客服");
                 String token = JwtUtil.createToken(Long.valueOf(userId));
                 String key = String.format(RedisConstant.YY_USER_TOKEN, userId);
                 //todo token暂时不设置过期时间
@@ -130,6 +150,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserLoginVo loginBySMSVerificationCode(UserLoginBySMSVerificationCodeDto smsVerificationCodeDto) {
         String phoneNumber = smsVerificationCodeDto.getPhoneNumber();
         String code = smsVerificationCodeDto.getCode();
@@ -143,10 +164,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
                 //用户不存在则默认注册
                 if (null == loginUser) {
-                    loginUser = register(phoneNumber);
+                    loginUser = userService.register(phoneNumber);
                 }
                 Integer accountStatus = loginUser.getAccountStatus();
-                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+                if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus)
+                    throw new YouyaException("账号已被冻结,详情请咨询客服");
                 Long id = loginUser.getId();
                 String token = JwtUtil.createToken(id);
                 String key = String.format(RedisConstant.YY_USER_TOKEN, id);
@@ -169,7 +191,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     LoginUser loginUser = userMapper.selectUserToLoginByPhoneNumber(phoneNumber);
                     //用户不存在则默认注册
                     if (null == loginUser) {
-                        loginUser = register(phoneNumber);
+                        loginUser = userService.register(phoneNumber);
                     }
                     Integer accountStatus = loginUser.getAccountStatus();
                     if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus)
@@ -211,6 +233,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserLoginVo loginByPassword(UserLoginByPasswordDto passwordDto) {
         return null;
     }
@@ -221,17 +244,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param phoneNumber
      * @return
      */
-    private LoginUser register(String phoneNumber) {
-        boolean exists = userMapper.exists(new LambdaQueryWrapper<User>().eq(User::getPhone, phoneNumber));
-        if (exists) {
-            throw new YouyaException("手机号已经注册");
-        }
+    public LoginUser register(String phoneNumber) {
         User user = new User();
         user.setPhone(phoneNumber)
                 .setAuthenticationStatus(UserAuthenticationStatusEnum.NOT_CERTIFIED.getStatus())
                 .setAccountStatus(UserAccountStatusEnum.UNFROZEN.getStatus())
                 .setAvatar(DEFAULT_AVATAR);
         userMapper.insert(user);
+        Long id = user.getId();
+        UserPrivacy userPrivacy = new UserPrivacy();
+        userPrivacy.setUid(id)
+                .setNamePublicStatus(1)
+                .setPhonePublicStatus(3)
+                .setWechatPublicStatus(3)
+                .setQqPublicStatus(3)
+                .setEmailPublicStatus(3)
+                .setAddressPublicStatus(3);
+        userPrivacyMapper.insert(userPrivacy);
+        UserNameVisibleInfo userNameVisibleInfo = new UserNameVisibleInfo();
+        userNameVisibleInfo.setUid(id);
+        userNameVisibleInfoMapper.insert(userNameVisibleInfo);
+        EveryoneVisibleInfo everyoneVisibleInfo = new EveryoneVisibleInfo();
+        everyoneVisibleInfo.setUid(id);
+        everyoneVisibleInfoMapper.insert(everyoneVisibleInfo);
+        RecruiterVisibleInfo recruiterVisibleInfo = new RecruiterVisibleInfo();
+        recruiterVisibleInfo.setUid(id);
+        recruiterVisibleInfoMapper.insert(recruiterVisibleInfo);
         LoginUser loginUser = new LoginUser();
         BeanUtils.copyProperties(user, loginUser);
         return loginUser;
@@ -269,17 +307,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void realNameAuthentication(UserRealNameAuthenticationDto realNameAuthDto) {
-        Long id = SpringSecurityUtil.getUserId();
-        String idcard = realNameAuthDto.getIdcard();
-        User user = userMapper.selectById(id);
-        if (null == user) throw new YouyaException("用户未注册");
-        Integer authenticationStatus = user.getAuthenticationStatus();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Integer authenticationStatus = loginUser.getAuthenticationStatus();
         if (0 == authenticationStatus) {
             String lastName = realNameAuthDto.getLastName();
             String firstName = realNameAuthDto.getFirstName();
+            String idcard = realNameAuthDto.getIdcard();
             String name = lastName + firstName;
-            String phone = user.getPhone();
+            String phone = loginUser.getPhone();
             if (!HuaWeiUtil.realNameAuth(idcard, phone, name)) throw new YouyaException("实名认证失败");
+            Long id = loginUser.getId();
+            User user = userMapper.selectById(id);
             user.setLastName(lastName);
             user.setFirstName(firstName);
             user.setIdentityCard(idcard);
@@ -303,16 +341,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
+     * 用户注销
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancel() {
+        Long id = SpringSecurityUtil.getUserId();
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, id).eq(User::getIsDelete, 0));
+        if (null == user) throw new YouyaException("用户未注册或已注销");
+        String phone = user.getPhone();
+        String idKey = String.format(RedisConstant.YY_USER_ID, phone);
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
+        String tokenKey = String.format(RedisConstant.YY_USER_TOKEN, id);
+        if (!redisUtil.del(idKey) || !redisUtil.del(cacheKey) || !redisUtil.del(tokenKey))
+            throw new YouyaException("注销失败,请稍后再试");
+        user.setIsDelete(1);
+        userMapper.updateById(user);
+    }
+
+    /**
+     * @return
      * @Description 在线简历-查询个人信息
      * @Param
-     * @return
      **/
     @Override
     public ResumePersonInfoVo resumePersonDetail() {
-
         Long userId = SpringSecurityUtil.getUserId();
         return userMapper.resumePersonDetail(userId);
-
     }
 
     /**
@@ -323,8 +378,45 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto) {
-
         Long userId = SpringSecurityUtil.getUserId();
+        UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
+        if (null == userPrivacy) {
+            userPrivacy = new UserPrivacy();
+            userPrivacy.setUid(userId)
+                    .setNamePublicStatus(1)
+                    .setPhonePublicStatus(3)
+                    .setWechatPublicStatus(3)
+                    .setQqPublicStatus(3)
+                    .setEmailPublicStatus(3)
+                    .setAddressPublicStatus(3);
+            userPrivacyMapper.insert(userPrivacy);
+        } else {
+            UserNameVisibleInfo userNameVisibleInfo = userNameVisibleInfoMapper.selectOne(new LambdaQueryWrapper<UserNameVisibleInfo>().eq(UserNameVisibleInfo::getUid, userId).eq(UserNameVisibleInfo::getIsDelete, 0));
+            if (null == userNameVisibleInfo) {
+                userNameVisibleInfo = new UserNameVisibleInfo();
+                userNameVisibleInfo.setUid(userId);
+                userNameVisibleInfoMapper.insert(userNameVisibleInfo);
+            } else {
+                Integer namePublicStatus = userPrivacy.getNamePublicStatus();
+                switch (namePublicStatus) {
+                    case 1:
+                        userNameVisibleInfo.setLastName(resumePersonModifyDto.getLastName());
+                        userNameVisibleInfo.setFirstName(resumePersonModifyDto.getFirstName());
+                        break;
+                    case 2:
+                        userNameVisibleInfo.setFirstName(null);
+                        userNameVisibleInfo.setLastName(resumePersonModifyDto.getLastName());
+                        break;
+                    case 3:
+                        userNameVisibleInfo.setLastName(null);
+                        userNameVisibleInfo.setFirstName(resumePersonModifyDto.getFirstName());
+                        break;
+                    default:
+                        break;
+                }
+                userNameVisibleInfoMapper.updateById(userNameVisibleInfo);
+            }
+        }
         userMapper.resumePersonModify(userId, resumePersonModifyDto);
 
     }
@@ -336,10 +428,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public ResumeContactInfoVo resumeContactDetail() {
-
         Long userId = SpringSecurityUtil.getUserId();
         return userMapper.resumeContactDetail(userId);
-
     }
 
     /**
@@ -349,9 +439,98 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto) {
-
         Long userId = SpringSecurityUtil.getUserId();
-        resumeContactModifyDto.setCountryCode("100000");
+        UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
+        if (null == userPrivacy) {
+            userPrivacy = new UserPrivacy();
+            userPrivacy.setUid(userId)
+                    .setNamePublicStatus(1)
+                    .setPhonePublicStatus(3)
+                    .setWechatPublicStatus(3)
+                    .setQqPublicStatus(3)
+                    .setEmailPublicStatus(3)
+                    .setAddressPublicStatus(3);
+            userPrivacyMapper.insert(userPrivacy);
+        } else {
+            EveryoneVisibleInfo everyoneVisibleInfo = everyoneVisibleInfoMapper.selectOne(new LambdaQueryWrapper<EveryoneVisibleInfo>().eq(EveryoneVisibleInfo::getUid, userId).eq(EveryoneVisibleInfo::getIsDelete, 0));
+            if (null == everyoneVisibleInfo) {
+                everyoneVisibleInfo = new EveryoneVisibleInfo();
+                everyoneVisibleInfo.setUid(userId);
+                everyoneVisibleInfoMapper.insert(everyoneVisibleInfo);
+            }
+            RecruiterVisibleInfo recruiterVisibleInfo = recruiterVisibleInfoMapper.selectOne(new LambdaQueryWrapper<RecruiterVisibleInfo>().eq(RecruiterVisibleInfo::getUid, userId).eq(RecruiterVisibleInfo::getIsDelete, 0));
+            if (null == recruiterVisibleInfo) {
+                recruiterVisibleInfo = new RecruiterVisibleInfo();
+                recruiterVisibleInfo.setUid(userId);
+                recruiterVisibleInfoMapper.insert(recruiterVisibleInfo);
+            }
+            Integer phonePublicStatus = userPrivacy.getPhonePublicStatus();
+            Integer wechatPublicStatus = userPrivacy.getWechatPublicStatus();
+            Integer qqPublicStatus = userPrivacy.getQqPublicStatus();
+            Integer emailPublicStatus = userPrivacy.getEmailPublicStatus();
+            Integer addressPublicStatus = userPrivacy.getAddressPublicStatus();
+            switch (phonePublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setPhone(resumeContactModifyDto.getPhone());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setPhone(resumeContactModifyDto.getPhone());
+                    break;
+                default:
+                    break;
+            }
+            switch (wechatPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setWechatId(resumeContactModifyDto.getWechatId());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setWechatId(resumeContactModifyDto.getWechatId());
+                    break;
+                default:
+                    break;
+            }
+            switch (qqPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setQq(resumeContactModifyDto.getQq());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setQq(resumeContactModifyDto.getQq());
+                    break;
+                default:
+                    break;
+            }
+            switch (emailPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setEmail(resumeContactModifyDto.getEmail());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setEmail(resumeContactModifyDto.getEmail());
+                    break;
+                default:
+                    break;
+            }
+            switch (addressPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setCountryCode(CHINA_CODE);
+                    everyoneVisibleInfo.setProvinceCode(resumeContactModifyDto.getProvinceCode());
+                    everyoneVisibleInfo.setCityCode(resumeContactModifyDto.getCityCode());
+                    everyoneVisibleInfo.setDistrictCode(resumeContactModifyDto.getDistrictCode());
+                    everyoneVisibleInfo.setAddress(resumeContactModifyDto.getAddress());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setCountryCode(CHINA_CODE);
+                    recruiterVisibleInfo.setProvinceCode(resumeContactModifyDto.getProvinceCode());
+                    recruiterVisibleInfo.setCityCode(resumeContactModifyDto.getCityCode());
+                    recruiterVisibleInfo.setDistrictCode(resumeContactModifyDto.getDistrictCode());
+                    recruiterVisibleInfo.setAddress(resumeContactModifyDto.getAddress());
+                    break;
+                default:
+                    break;
+            }
+            everyoneVisibleInfoMapper.updateById(everyoneVisibleInfo);
+            recruiterVisibleInfoMapper.updateById(recruiterVisibleInfo);
+        }
+        resumeContactModifyDto.setCountryCode(CHINA_CODE);
         userMapper.modifyResumeContactDetail(userId, resumeContactModifyDto);
 
     }

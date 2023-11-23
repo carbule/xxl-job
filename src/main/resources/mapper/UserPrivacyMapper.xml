@@ -2,4 +2,31 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.UserPrivacyMapper">
 
+    <!--  查询个人信息隐私设置  -->
+    <select id="personalInfoPrivacy" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.userprivacy.UserPersonalInfoPrivacyVo">
+        SELECT id,
+               uid,
+               name_public_status    AS namePublicStatusValue,
+               phone_public_status   AS phonePublicStatusValue,
+               wechat_public_status  AS wechatPublicStatusValue,
+               qq_public_status      AS qqPublicStatusValue,
+               email_public_status   AS emailPublicStatusValue,
+               address_public_status AS addressPublicStatusValue
+        FROM yy_user_privacy
+        WHERE uid = #{userId}
+          AND is_delete = 0
+    </select>
+
+    <update id="modify" parameterType="com.korant.youya.workplace.pojo.dto.userprivacy.UserPrivacyModifyDto">
+        UPDATE yy_user_privacy
+        SET name_public_status    = #{modifyDto.namePublicStatus},
+            phone_public_status   = #{modifyDto.phonePublicStatus},
+            wechat_public_status  = #{modifyDto.wechatPublicStatus},
+            qq_public_status      = #{modifyDto.qqPublicStatus},
+            email_public_status   = #{modifyDto.emailPublicStatus},
+            address_public_status = #{modifyDto.addressPublicStatus},
+            update_time           = CURRENT_TIMESTAMP
+        WHERE id = #{modifyDto.id}
+    </update>
 </mapper>

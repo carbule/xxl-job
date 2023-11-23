@@ -11,14 +11,11 @@ import com.korant.youya.workplace.pojo.dto.expectedworkarea.ExpectedWorkAreaCrea
 import com.korant.youya.workplace.pojo.po.EmployStatus;
 import com.korant.youya.workplace.pojo.po.ExpectedPosition;
 import com.korant.youya.workplace.pojo.po.ExpectedWorkArea;
-import com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo;
 import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
 import com.korant.youya.workplace.pojo.vo.employstatus.EmployStatusVo;
 import com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo;
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaInfoVo;
-import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto;
-import com.korant.youya.workplace.pojo.vo.user.ResumePersonPreviewVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import com.korant.youya.workplace.service.EmployStatusService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;

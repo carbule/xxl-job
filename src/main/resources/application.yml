@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-circular-references: true
   profiles:
     active: dev
   servlet:
@@ -12,6 +14,9 @@ logging:
   config: classpath:logback-spring.xml
 
 mybatis-plus:
+  global-config:
+    db-config:
+      update-strategy: ignored
   mapper-locations: classpath*:mapper/*.xml
   type-aliases-package: com.korant.youya.workplace.pojo
 

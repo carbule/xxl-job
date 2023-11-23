@@ -1,9 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.korant.youya.workplace.pojo.po.RecruiterVisibleInfo;
-import com.korant.youya.workplace.mapper.RecruiterVisibleInfoMapper;
-import com.korant.youya.workplace.service.RecruiterVisibleInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.mapper.RecruiterVisibleInfoMapper;
+import com.korant.youya.workplace.pojo.po.RecruiterVisibleInfo;
+import com.korant.youya.workplace.service.RecruiterVisibleInfoService;
 import org.springframework.stereotype.Service;
 
 /**

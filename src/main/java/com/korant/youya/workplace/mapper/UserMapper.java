@@ -8,7 +8,6 @@ import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
-import com.korant.youya.workplace.pojo.vo.user.ResumePersonPreviewVo;
 import org.apache.ibatis.annotations.Param;
 
 /**
