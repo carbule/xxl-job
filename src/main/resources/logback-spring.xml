@@ -10,9 +10,9 @@
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径 -->
     <!-- 定义日志文件 输入位置 -->
     <!-- 日志存放路径 -->
-    <property name="info.path" value="/opt/youya/logs/info"/>
-    <property name="debug.path" value="/opt/youya/logs/debug"/>
-    <property name="error.path" value="/opt/youya/logs/error"/>
+    <property name="info.path" value="/opt/workplace/logs/info"/>
+    <property name="debug.path" value="/opt/workplace/logs/debug"/>
+    <property name="error.path" value="/opt/workplace/logs/error"/>
     <!-- 日志输出格式 -->
     <!-- <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n"/> -->
     <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%thread|%-5level|%msg%n"/>
@@ -28,7 +28,7 @@
     <appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${info.path}/youya-info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${info.path}/workplace-info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -52,7 +52,7 @@
     <appender name="file_debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${debug.path}/youya-debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${debug.path}/workplace-debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -76,7 +76,7 @@
     <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${error.path}/youya-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${error.path}/workplace-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
