@@ -115,7 +115,7 @@ public class HonorCertificateServiceImpl extends ServiceImpl<HonorCertificateMap
 
         HonorCertificate honorCertificate = honorCertificateMapper.selectById(id);
         if (honorCertificate == null) throw new YouyaException("荣誉证书信息不存在!");
-        honorCertificateMapper.update(new HonorCertificate(),
+        honorCertificateMapper.update(null,
                 new LambdaUpdateWrapper<HonorCertificate>()
                         .eq(HonorCertificate::getId, id)
                         .set(HonorCertificate::getIsDelete, 1));

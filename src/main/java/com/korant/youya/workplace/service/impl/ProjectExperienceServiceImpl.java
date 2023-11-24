@@ -104,7 +104,7 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
 
         ProjectExperience projectExperience = projectExperienceMapper.selectById(id);
         if (projectExperience == null) throw new YouyaException("项目经验信息不存在！");
-        projectExperienceMapper.update(new ProjectExperience(),
+        projectExperienceMapper.update(null,
                 new LambdaUpdateWrapper<ProjectExperience>()
                         .eq(ProjectExperience::getId, id)
                         .set(ProjectExperience::getIsDelete, 1));

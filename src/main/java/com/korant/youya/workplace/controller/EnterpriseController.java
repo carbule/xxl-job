@@ -2,6 +2,7 @@ package com.korant.youya.workplace.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
@@ -12,6 +13,8 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * <p>
@@ -94,6 +97,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/detail/{id}")
+    @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         EnterpriseDetailVo detailVo = enterpriseService.detail(id);
         return R.success(detailVo);
@@ -118,19 +122,8 @@ public class EnterpriseController {
      */
     @PostMapping("/getEnterpriseByName")
     public R<?> getEnterpriseByName(@RequestBody @Valid EnterpriseQueryListDto enterpriseQueryListDto) {
-        Page<EnterpriseInfoByNameVo> page = enterpriseService.getEnterpriseByName(enterpriseQueryListDto);
-        return R.success(page);
-    }
-
-    /**
-     * 解除关联企业绑定
-     *
-     * @return
-     */
-    @GetMapping("/Unbinding/{id}")
-    public R<?> Unbinding(@PathVariable("id") Long id) {
-        enterpriseService.Unbinding(id);
-        return R.ok();
+        List<EnterpriseInfoByNameVo> list = enterpriseService.getEnterpriseByName(enterpriseQueryListDto);
+        return R.success(list);
     }
 
 }

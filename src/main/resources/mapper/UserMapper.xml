@@ -205,4 +205,20 @@
           AND u.is_delete = 0
     </select>
 
+    <select id="getUserCurrentlyInfo" resultType="com.korant.youya.workplace.pojo.vo.user.UserCurrentlyInfo">
+        SELECT
+            u.id,
+            u.avatar,
+            u.last_name                                  AS lastName,
+            u.first_name                                 AS firstName,
+            u.personal_signature                         AS  personalSignature,
+            u.authentication_status                      AS  authenticationStatus,
+            r.role_name                                       AS role
+        FROM
+            yy_user AS u
+                LEFT JOIN yy_user_role yur ON u.id = yur.uid AND yur.is_delete = 0
+                LEFT JOIN yy_role AS r ON yur.rid = r.id AND r.is_delete = 0
+        WHERE u.id = #{userId}
+          AND u.is_delete = 0
+    </select>
 </mapper>

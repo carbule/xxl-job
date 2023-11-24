@@ -1,13 +1,13 @@
 package com.korant.youya.workplace.pojo.vo.enterprise;
 
+import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/20 13:56
  * @PackageName:com.korant.youya.workplace.pojo.vo.enterprise
  * @ClassName: EnterpriseDetailVo
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data
@@ -41,16 +41,19 @@ public class EnterpriseDetailVo {
     /**
      * 企业类型
      */
+    @Dict(categoryCode = "enterprise_type")
     private Integer entType;
 
     /**
      * 企业规模
      */
+    @Dict(categoryCode = "enterprise_scale")
     private Integer scale;
 
     /**
      * 融资阶段
      */
+    @Dict(categoryCode = "financing_stage")
     private Integer financingStage;
 
     /**

@@ -8,6 +8,7 @@ import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.UserCurrentlyInfo;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -33,4 +34,6 @@ public interface UserMapper extends BaseMapper<User> {
     Integer resumePersonModify(@Param("userId") Long userId, @Param("resumePersonModifyDto") ResumePersonModifyDto resumePersonModifyDto);
 
     Integer modifyResumeContactDetail(@Param("userId") Long userId, @Param("resumeContactModifyDto") ResumeContactModifyDto resumeContactModifyDto);
+
+    UserCurrentlyInfo getUserCurrentlyInfo(@Param("userId") Long userId);
 }

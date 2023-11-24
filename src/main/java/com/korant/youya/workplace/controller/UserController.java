@@ -5,6 +5,7 @@ import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.UserCurrentlyInfo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
@@ -152,6 +153,18 @@ public class UserController {
     public R<?> resumePersonModify(@RequestBody ResumePersonModifyDto resumePersonModifyDto) {
         userService.resumePersonModify(resumePersonModifyDto);
         return R.ok();
+    }
+
+    /**
+     * 获取当前用户状态
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/getUserCurrentlyInfo")
+    public R<?> getUserCurrentlyInfo() {
+        UserCurrentlyInfo userCurrentlyInfo = userService.getUserCurrentlyInfo();
+        return R.success(userCurrentlyInfo);
     }
 
 }

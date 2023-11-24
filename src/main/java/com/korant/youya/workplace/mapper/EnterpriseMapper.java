@@ -1,9 +1,12 @@
 package com.korant.youya.workplace.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseChangeDto;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyDto;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyLogoDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
+import com.korant.youya.workplace.pojo.po.EnterpriseTodo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;
@@ -26,14 +29,14 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
      * @Param
      * @return
      **/
-    void modifyLogo(@Param("modifyLogoDto") EnterpriseModifyLogoDto modifyLogoDto);
+    int modifyLogo(@Param("modifyLogoDto") EnterpriseModifyLogoDto modifyLogoDto);
 
     /**
      * @Description 修改企业
      * @Param
      * @return
      **/
-    void modify(@Param("modifyDto") EnterpriseModifyDto modifyDto);
+    int modify(@Param("modifyDto") EnterpriseModifyDto modifyDto);
 
     /**
      * @Description 根据当前登陆用户查询企业信息
@@ -54,6 +57,13 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
      * @Param
      * @return
      **/
-    List<EnterpriseInfoByNameVo> getEnterpriseByName(@Param("name") String name, @Param("pageNumber") int pageNumber, @Param("pageSize") int pageSize);
+    List<EnterpriseInfoByNameVo> getEnterpriseByName(@Param("name") String name, @Param("status") Integer status);
+
+    /**
+     * @Description 变更企业信息
+     * @Param
+     * @return
+     **/
+    int changeEnterpriseInfo(@Param("changeDto") EnterpriseChangeDto changeDto);
 
 }

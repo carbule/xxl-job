@@ -9,13 +9,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
+import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
-import com.korant.youya.workplace.mapper.EnterpriseMapper;
-import com.korant.youya.workplace.mapper.RoleMapper;
-import com.korant.youya.workplace.mapper.UserEnterpriseMapper;
-import com.korant.youya.workplace.mapper.UserRoleMapper;
+import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.Enterprise;
+import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.po.UserEnterprise;
 import com.korant.youya.workplace.pojo.po.UserRole;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
@@ -55,10 +54,10 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     private EnterpriseMapper enterpriseMapper;
 
     @Resource
-    private UserRoleMapper userRoleMapper;
+    private UserMapper userMapper;
 
     @Resource
-    private RoleMapper roleMapper;
+    private UserRoleMapper userRoleMapper;
 
     @Resource
     private UserEnterpriseMapper userEnterpriseMapper;
@@ -106,6 +105,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     public void create(EnterpriseCreateDto createDto) {
 
         Long userId = SpringSecurityUtil.getUserId();
+        User user = userMapper.selectById(userId);
+        if (user.getAuthenticationStatus() ==  UserAuthenticationStatusEnum.NOT_CERTIFIED.getStatus())
+            throw new YouyaException("请先进行实名认证！");
         if (userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0)))
             throw new YouyaException("您已绑定过企业");
         String name = createDto.getName();
@@ -120,12 +122,18 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         enterprise.setLogo(DEFAULT_LOGO);
         enterprise.setAuthStatus(EnterpriseAuthStatusEnum.AUTH_IN_PROGRESS.getStatus());
         enterpriseMapper.insert(enterprise);
+
+        //企业人员关联
         UserEnterprise userEnterprise = new UserEnterprise();
         userEnterprise.setUid(userId);
         userEnterprise.setEnterpriseId(enterprise.getId());
         userEnterpriseMapper.insert(userEnterprise);
 
-
+        //TODO 注册企业的人自动成为管理员
+        UserRole userRole = new UserRole();
+        userRole.setUid(userId);
+        userRole.setRid(2L);
+        userRoleMapper.insert(userRole);
 
     }
 
@@ -135,8 +143,11 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modifyLogo(EnterpriseModifyLogoDto modifyLogoDto) {
 
+        boolean exists = enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, modifyLogoDto.getId()).eq(Enterprise::getIsDelete, 0));
+        if (!exists) throw new YouyaException("企业不存在！");
         enterpriseMapper.modifyLogo(modifyLogoDto);
 
     }
@@ -147,8 +158,12 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(EnterpriseModifyDto modifyDto) {
 
+        boolean exists = enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, modifyDto.getId()).eq(Enterprise::getIsDelete, 0));
+        if (!exists) throw new YouyaException("企业不存在！");
+        modifyDto.setCountryCode("100000");
         enterpriseMapper.modify(modifyDto);
 
     }
@@ -190,9 +205,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      * @return
      **/
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void changeEnterpriseInfo(EnterpriseChangeDto changeDto) {
 
-        Long userId = SpringSecurityUtil.getUserId();
         Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, changeDto.getId()).eq(Enterprise::getIsDelete, 0));
         if (null == enterprise) throw new YouyaException("企业未注册");
         //校验企业成立时间
@@ -209,23 +224,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             throw new YouyaException("企业认证成功后才能进行变更操作");
         String name = changeDto.getName();
         if (name.equals(enterprise.getName())) throw new YouyaException("请勿重复提交企业实名信息");
-        LambdaUpdateWrapper<Enterprise> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Enterprise::getId, changeDto.getId());
-        Enterprise e = new Enterprise();
-        BeanUtils.copyProperties(changeDto, e);
-        e.setAuthStatus(EnterpriseAuthStatusEnum.AUTH_IN_PROGRESS.getStatus());
-        enterpriseMapper.update(e, updateWrapper);
-
-        //你自动成为创建公司的管理员
-        if(userRoleMapper.exists(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0))){
-            userRoleMapper.update(new UserRole(), new LambdaUpdateWrapper<UserRole>().eq(UserRole::getUid, userId).set(UserRole::getRid, 2L));
-        }
-        else{
-            UserRole userRole = new UserRole();
-            userRole.setUid(userId);
-            userRole.setRid(2L);
-            userRoleMapper.insert(userRole);
-        }
+        enterpriseMapper.changeEnterpriseInfo(changeDto);
 
     }
 
@@ -235,36 +234,10 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      * @return
      **/
     @Override
-    public Page<EnterpriseInfoByNameVo> getEnterpriseByName(EnterpriseQueryListDto enterpriseQueryListDto) {
+    public List<EnterpriseInfoByNameVo> getEnterpriseByName(EnterpriseQueryListDto enterpriseQueryListDto) {
 
-        int pageNumber = enterpriseQueryListDto.getPageNumber();
-        int pageSize = enterpriseQueryListDto.getPageSize();
-        Long count = enterpriseMapper.selectCount(new LambdaQueryWrapper<Enterprise>().like(Enterprise::getName, enterpriseQueryListDto.getName()).eq(Enterprise::getIsDelete, 0));
-        List<EnterpriseInfoByNameVo> list = enterpriseMapper.getEnterpriseByName(enterpriseQueryListDto.getName(), pageNumber, pageSize);
-        Page<EnterpriseInfoByNameVo> page = new Page<>();
-        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
-        return page;
+        return enterpriseMapper.getEnterpriseByName(enterpriseQueryListDto.getName(), EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus());
 
-    }
-
-    /**
-     * @Description 解除关联企业绑定
-     * @Param
-     * @return
-     **/
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void Unbinding(Long id) {
-
-        //判断当前用户是否为企业管理员
-        Long userId = SpringSecurityUtil.getUserId();
-        Long role = roleMapper.getRoleByUserAndEnterprise(userId, id);
-        if (role == 2) throw new YouyaException("管理员无法再次解绑！");
-        userEnterpriseMapper.update(new UserEnterprise(),
-                new LambdaUpdateWrapper<UserEnterprise>()
-                        .eq(UserEnterprise::getUid, userId)
-                        .eq(UserEnterprise::getEnterpriseId, id)
-                        .set(UserEnterprise::getIsDelete, 1));
     }
 
 }

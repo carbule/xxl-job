@@ -105,7 +105,7 @@ public class AttachmentServiceImpl extends ServiceImpl<AttachmentMapper, Attachm
 
         Attachment attachment = attachmentMapper.selectById(id);
         if (attachment == null) throw new YouyaException("附件信息不存在！");
-        attachmentMapper.update(new Attachment(),
+        attachmentMapper.update(null,
                 new LambdaUpdateWrapper<Attachment>()
                         .eq(Attachment::getId, id)
                         .set(Attachment::getIsDelete, 1));

@@ -113,7 +113,7 @@ public class EducationExperienceServiceImpl extends ServiceImpl<EducationExperie
 
         EducationExperience educationExperience = educationExperienceMapper.selectById(id);
         if (educationExperience == null) throw new YouyaException("教育经历不存在!");
-        educationExperienceMapper.update(new EducationExperience(),
+        educationExperienceMapper.update(null,
                 new LambdaUpdateWrapper<EducationExperience>()
                         .eq(EducationExperience::getId, id)
                         .set(EducationExperience::getIsDelete, 1));

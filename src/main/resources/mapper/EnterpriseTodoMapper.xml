@@ -2,4 +2,77 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EnterpriseTodoMapper">
 
+    <select id="getEnterpriseTodoByUser"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseTodoDetailVo">
+        SELECT
+            e.id,
+            e.name,
+            e.ent_type          AS  entType,
+            e.scale,
+            e.financing_stage   AS financingStage,
+            et.operate,
+            u.last_name         AS lastName,
+            u.first_name        AS firstName,
+            u.avatar
+        FROM
+            enterprise_todo et
+                INNER JOIN enterprise e ON et.enterprise_id = e.id AND e.is_delete = 0
+                INNER JOIN yy_user_enterprise yue ON e.id = yue.enterprise_id AND yue.is_delete = 0
+                INNER JOIN yy_user_role yur ON yue.uid = yur.uid AND yur.is_delete = 0  AND yur.rid = 2
+                INNER JOIN yy_user u ON yur.uid = u.id AND u.is_delete = 0
+        WHERE et.uid = #{userId}
+          AND et.is_delete = 0
+          AND et.operate != 1
+    </select>
+
+    <select id="queryApprovalList"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseTodoListVo">
+        SELECT
+            et.id,
+            et.event_type           AS   eventType,
+            u.last_name             AS   lastName,
+            u.first_name            AS   firstName,
+            u.avatar,
+            et.employee_id          AS   employeeId,
+            u.identity_card         AS   identityCard,
+            et.create_time          AS   createTime
+        FROM
+            enterprise_todo et
+                LEFT JOIN yy_user u ON et.uid = u.id AND u.is_delete = 0
+        WHERE et.enterprise_id = #{id}
+            AND et.is_delete = 0
+            AND et.operate = #{status}
+        ORDER BY et.create_time DESC LIMIT #{pageSize}
+        OFFSET (#{pageNumber} -1) * #{pageSize}
+    </select>
+
+    <!--    管理员查看成员列表-->
+    <select id="queryEmployeeList"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseEmployeeListVo">
+        SELECT
+            u.id,
+            u.last_name                 AS lastName,
+            u.first_name                AS firstName,
+            u.avatar,
+            u.phone,
+            A.emid                      AS employeeId,
+            u.identity_card             AS identityCard,
+            A.eid                       AS enterpriseId
+        FROM
+            yy_user u
+                INNER JOIN (
+                    SELECT
+                        uid,
+                        enterprise_id   AS eid,
+                        employee_id     AS emid
+                    FROM enterprise_todo
+                    WHERE enterprise_id = #{id}
+                      AND is_delete = 0
+                      AND event_type = 1
+                      AND operate = 2) A ON u.id = A.uid
+                LEFT JOIN enterprise_todo et ON A.eid = et.id
+        ORDER BY u.create_time DESC LIMIT #{pageSize}
+        OFFSET (#{pageNumber} -1) * #{pageSize}
+    </select>
+
 </mapper>

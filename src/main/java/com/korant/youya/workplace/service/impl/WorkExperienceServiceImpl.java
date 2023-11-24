@@ -107,7 +107,7 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
 
         WorkExperience workExperience = workExperienceMapper.selectById(id);
         if (workExperience == null) throw new YouyaException("工作履历信息不存在!");
-        workExperienceMapper.update(new WorkExperience(),
+        workExperienceMapper.update(null,
                 new LambdaUpdateWrapper<WorkExperience>()
                         .eq(WorkExperience::getId, id)
                         .set(WorkExperience::getIsDelete, 1));

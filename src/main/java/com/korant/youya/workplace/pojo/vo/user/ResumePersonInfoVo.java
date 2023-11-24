@@ -3,6 +3,7 @@ package com.korant.youya.workplace.pojo.vo.user;
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -38,7 +39,7 @@ public class ResumePersonInfoVo {
     /**
      * 用户生日
      */
-    private LocalDateTime birthday;
+    private LocalDate birthday;
 
     /**
      * 实名认证状态

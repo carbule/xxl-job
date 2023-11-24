@@ -15,6 +15,7 @@ import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.UserCurrentlyInfo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.utils.*;
@@ -534,6 +535,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         resumeContactModifyDto.setCountryCode(CHINA_CODE);
         userMapper.modifyResumeContactDetail(userId, resumeContactModifyDto);
+
+    }
+
+    @Override
+    public UserCurrentlyInfo getUserCurrentlyInfo() {
+
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.getUserCurrentlyInfo(userId);
 
     }
 

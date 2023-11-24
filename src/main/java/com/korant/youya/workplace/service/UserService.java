@@ -6,6 +6,7 @@ import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.UserCurrentlyInfo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
 
 /**
@@ -102,4 +103,12 @@ public interface UserService extends IService<User> {
      * @return
      */
     void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto);
+
+    /**
+     * 获取当前用户状态
+     *
+     * @param
+     * @return
+     */
+    UserCurrentlyInfo getUserCurrentlyInfo();
 }

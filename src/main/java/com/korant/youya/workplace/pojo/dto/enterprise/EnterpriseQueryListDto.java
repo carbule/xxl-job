@@ -5,15 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/20 16:54
  * @PackageName:com.korant.youya.workplace.pojo.dto.enterprise
  * @ClassName: EnterpriseQueryListDto
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data
-public class EnterpriseQueryListDto extends PageParam {
+public class EnterpriseQueryListDto{
 
     /**
      * 企业名称

@@ -15,7 +15,7 @@
         UPDATE enterprise
         SET ent_type        = #{modifyDto.entType},
             scale           = #{modifyDto.scale},
-            financing_stage  = #{modifyDto.financingStage},
+            financing_stage = #{modifyDto.financingStage},
             website         = #{modifyDto.website},
             introduction    = #{modifyDto.introduction},
             phone           = #{modifyDto.phone},
@@ -27,6 +27,20 @@
             contact_address = #{modifyDto.contactAddress},
             update_time     = CURRENT_TIMESTAMP
         WHERE id = #{modifyDto.id}
+    </update>
+
+    <update id="changeEnterpriseInfo">
+        UPDATE enterprise
+        SET name                    = #{changeDto.name},
+            social_credit_code      = #{changeDto.socialCreditCode},
+            register_address        = #{changeDto.registerAddress},
+            establish_date          = #{changeDto.establishDate},
+            power_of_attorney       = #{changeDto.powerOfAttorney},
+            business_license        = #{changeDto.businessLicense},
+            corporation             = #{changeDto.corporation},
+            auth_status             = 0,
+            update_time             = CURRENT_TIMESTAMP
+        WHERE id = #{changeDto.id}
     </update>
 
     <!--    根据当前登陆用户查询企业信息-->
@@ -59,6 +73,10 @@
                e.business_license   AS businessLicense,
                e.phone,
                e.email,
+               e.country_code       AS countryCode,
+               e.province_code      AS provinceCode,
+               e.city_code          AS cityCode,
+               e.district_code      AS districtCode,
                dp1.name             AS countryName,
                dp2.name             AS provinceName,
                dp3.name             AS cityName,
@@ -75,15 +93,17 @@
           AND e.is_delete = 0
     </select>
 
+    <!--    根据企业名称查询企业-->
     <select id="getEnterpriseByName"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo">
         SELECT id, name
         FROM
             enterprise
         WHERE name like CONCAT('%', #{name},'%')
-          AND is_delete = 0
-        ORDER BY create_time DESC LIMIT #{pageSize}
-        OFFSET (#{pageNumber} -1) * #{pageSize}
+            AND is_delete = 0
+            AND auth_status = #{status}
+        ORDER BY create_time DESC LIMIT 10
+        OFFSET 0
     </select>
 
 </mapper>

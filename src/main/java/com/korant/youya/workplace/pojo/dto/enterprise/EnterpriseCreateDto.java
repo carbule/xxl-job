@@ -1,16 +1,16 @@
 package com.korant.youya.workplace.pojo.dto.enterprise;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/20 13:52
  * @PackageName:com.korant.youya.workplace.pojo.dto.enterprise
  * @ClassName: EnterpriseCreateDto
- * @Description: TODO
+ * @Description:
  * @Version 1.0
  */
 @Data
@@ -37,7 +37,7 @@ public class EnterpriseCreateDto {
     /**
      * 成立日期
      */
-    @NotBlank(message = "成立日期不能为空")
+    @NotNull(message = "成立日期不能为空")
     private LocalDate establishDate;
 
     /**
@@ -51,5 +51,10 @@ public class EnterpriseCreateDto {
      */
     @NotBlank(message = "营业执照不能为空")
     private String businessLicense;
+
+    /**
+     * 法人
+     */
+    private String corporation;
 
 }
