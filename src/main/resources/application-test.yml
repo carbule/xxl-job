@@ -3,15 +3,15 @@ server:
 
 spring:
   datasource:
+    # 数据库连接URL
+    url: jdbc:postgresql://139.9.240.37:5432/workplace_test?charset=utf-8&sslmode=disable
+    # 数据库用户名
+    username: postgres
+    # 数据库密码
+    password: korant@123
     type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.postgresql.Driver
     druid:
-      driver-class-name: org.postgresql.Driver
-      # 数据库连接URL
-      url: jdbc:postgresql://139.9.240.37:5432/workplace_test?charset=utf-8&sslmode=disable
-      # 数据库用户名
-      username: postgres
-      # 数据库密码
-      password: korant@123
       # 连接池初始化时创建的连接数
       initialSize: 5
       # 连接池中最大连接数
@@ -55,7 +55,12 @@ spring:
           max-idle: 10 # 连接池中的最大空闲连接
           min-idle: 5 # 连接池中的最小空闲连接
           max-wait: 5000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
-      connect-timeout: 5000 # 连接超时时间（毫秒）
+        cluster:
+          refresh:
+            adaptive: true
+            #10秒自动刷新一次
+            period: 10
+      connect-timeout: 300 # 连接超时时间（毫秒）
 
 mybatis-plus:
   configuration:
