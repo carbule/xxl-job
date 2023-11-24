@@ -1,7 +1,9 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +15,11 @@ import com.korant.youya.workplace.pojo.po.HuntJob;
  */
 public interface HuntJobMapper extends BaseMapper<HuntJob> {
 
+    /**
+     * 修改求职信息
+     *
+     * @param modifyDto
+     * @return
+     */
+    int modify(@Param("modifyDto") HuntJobModifyDto modifyDto);
 }

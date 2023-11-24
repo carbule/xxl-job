@@ -73,6 +73,12 @@ public class HuntJob implements Serializable {
     private Integer fullMemberRewardRate;
 
     /**
+     * 求职说明
+     */
+    @TableField("description")
+    private String description;
+
+    /**
      * 求职状态
      */
     @TableField("status")
