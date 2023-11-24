@@ -140,9 +140,11 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
         ResumePreviewVo resumePreviewVo = userMapper.resumePersonPreview(userId);
         EmployStatusVo employStatusVo = employStatusMapper.queryStatus(userId);
 
-        if(employStatusVo != null){
+        if(employStatusVo.getExpectedPositionInfoVoList() != null){
             //        求职意向-意向职位
             resumePreviewVo.setExpectedPositionInfoVoList(employStatusVo.getExpectedPositionInfoVoList());
+        }
+        if(employStatusVo.getExpectedWorkAreaInfoVoList() != null){
             //        求职意向-期望工作区域
             resumePreviewVo.setExpectedWorkAreaInfoVoList(employStatusVo.getExpectedWorkAreaInfoVoList());
         }
