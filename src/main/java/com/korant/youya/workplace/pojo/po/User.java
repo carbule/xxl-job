@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -70,7 +71,13 @@ public class User implements Serializable {
      * 用户生日
      */
     @TableField("birthday")
-    private LocalDateTime birthday;
+    private LocalDate birthday;
+
+    /**
+     * 用户开始工作时间
+     */
+    @TableField("start_working_time")
+    private LocalDate startWorkingTime;
 
     /**
      * 用户手机号

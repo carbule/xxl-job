@@ -21,5 +21,6 @@
         WHERE dc.id = d.category_id
           AND dc.category_code = #{category}
           AND d.is_delete = 0
+          ORDER BY d.dict_value
     </select>
 </mapper>

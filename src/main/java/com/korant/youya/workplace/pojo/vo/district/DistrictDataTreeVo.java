@@ -2,6 +2,7 @@ package com.korant.youya.workplace.pojo.vo.district;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,5 +38,5 @@ public class DistrictDataTreeVo {
     /**
      * 地区子节点
      */
-    private List<DistrictDataTreeVo> children;
+    private List<DistrictDataTreeVo> children = new ArrayList<>();
 }
