@@ -6,8 +6,10 @@ import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailOnHomePageVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobListOnHomePageVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPreviewVo;
 
 /**
  * <p>
@@ -20,9 +22,39 @@ import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonInfoVo;
 public interface HuntJobService extends IService<HuntJob> {
 
     /**
+     * 查询首页求职信息列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<HuntJobListOnHomePageVo> queryListOnHomePage(HuntJobQueryListDto listDto);
+
+    /**
+     * 根据求职id查询首页求职信息详情
+     *
+     * @param id
+     * @return
+     */
+    HuntJobDetailOnHomePageVo queryDetailOnHomePageById(Long id);
+
+    /**
+     * 收藏或取消收藏求职信息
+     *
+     * @param id
+     */
+    void collect(Long id);
+
+    /**
      * 校验用户信息
      */
     void checkUserInfo();
+
+    /**
+     * 求职预览
+     *
+     * @return
+     */
+    HuntJobPreviewVo preview();
 
     /**
      * 创建求职信息
@@ -52,13 +84,4 @@ public interface HuntJobService extends IService<HuntJob> {
      * @param id
      */
     void delete(Long id);
-
-    /**
-     * 根据职位查看求职者
-     *
-     * @param
-     * @return
-     */
-    Page<HuntJobPersonInfoVo> queryListByPositionCode(HuntJobQueryListDto huntJobQueryListDto);
-
 }

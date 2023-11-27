@@ -8,6 +8,7 @@ import com.korant.youya.workplace.enums.huntjob.HuntJobStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
+import com.korant.youya.workplace.mapper.AttentionHuntJobMapper;
 import com.korant.youya.workplace.mapper.EducationExperienceMapper;
 import com.korant.youya.workplace.mapper.HuntJobMapper;
 import com.korant.youya.workplace.mapper.UserMapper;
@@ -15,12 +16,14 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
+import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
 import com.korant.youya.workplace.pojo.po.EducationExperience;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.po.User;
-import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailOnHomePageVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonInfoVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobListOnHomePageVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPreviewVo;
 import com.korant.youya.workplace.service.HuntJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -29,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * <p>
@@ -51,6 +53,51 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     @Resource
     private EducationExperienceMapper educationExperienceMapper;
 
+    @Resource
+    private AttentionHuntJobMapper attentionHuntJobMapper;
+
+    /**
+     * 查询首页求职信息列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<HuntJobListOnHomePageVo> queryListOnHomePage(HuntJobQueryListDto listDto) {
+        return null;
+    }
+
+    /**
+     * 根据求职id查询首页求职信息详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public HuntJobDetailOnHomePageVo queryDetailOnHomePageById(Long id) {
+        return null;
+    }
+
+    /**
+     * 收藏或取消收藏求职信息
+     *
+     * @param id
+     */
+    @Override
+    public void collect(Long id) {
+        Long userId = SpringSecurityUtil.getUserId();
+        boolean exists = attentionHuntJobMapper.exists(new LambdaQueryWrapper<AttentionHuntJob>().eq(AttentionHuntJob::getUid, userId).eq(AttentionHuntJob::getHuntId, id));
+        //取消收藏
+        if (exists) {
+            attentionHuntJobMapper.delete(new LambdaQueryWrapper<AttentionHuntJob>().eq(AttentionHuntJob::getUid, userId).eq(AttentionHuntJob::getHuntId, id));
+        } else {//收藏
+            AttentionHuntJob a = new AttentionHuntJob();
+            a.setUid(userId);
+            a.setHuntId(id);
+            attentionHuntJobMapper.insert(a);
+        }
+    }
+
     /**
      * 校验用户信息
      */
@@ -70,6 +117,17 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (!exists) throw new YouyaException("请至少补充一条教育经历");
         LocalDate startWorkingTime = user.getStartWorkingTime();
         if (null == startWorkingTime) throw new YouyaException("请完善个人信息中开始工作时间");
+    }
+
+    /**
+     * 求职预览
+     *
+     * @return
+     */
+    @Override
+    public HuntJobPreviewVo preview() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return huntJobMapper.preview(userId);
     }
 
     /**
@@ -154,19 +212,5 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (HuntJobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可删除");
         huntJob.setIsDelete(1);
         huntJobMapper.updateById(huntJob);
-    }
-
-    @Override
-    public Page<HuntJobPersonInfoVo> queryListByPositionCode(HuntJobQueryListDto huntJobQueryListDto) {
-
-//        int pageNumber = huntJobQueryListDto.getPageNumber();
-//        int pageSize = huntJobQueryListDto.getPageSize();
-//        Long count = huntJobMapper.selectCount(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getPositionId, huntJobQueryListDto.getPositionCode()).eq(HuntJob::getIsDelete, 0));
-//        List<HuntJobPersonInfoVo> list = huntJobMapper.queryListByPositionCode(huntJobQueryListDto.getPositionCode(), pageNumber, pageSize);
-//        Page<HuntJobPersonInfoVo> page = new Page<>();
-//        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
-//        return page;
-        return null;
-
     }
 }

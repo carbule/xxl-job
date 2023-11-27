@@ -63,6 +63,26 @@ public class UserBlockedEnterpriseServiceImpl extends ServiceImpl<UserBlockedEnt
     }
 
     /**
+     * 屏蔽当前所在企业
+     */
+    @Override
+    public void blockCurrentEnterprise() {
+        LoginUser user = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = user.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("暂未关联企业");
+        Long userId = user.getId();
+        UserBlockedEnterprise userBlockedEnterprise = userBlockedEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserBlockedEnterprise>().eq(UserBlockedEnterprise::getUid, userId).eq(UserBlockedEnterprise::getEnterpriseId, enterpriseId).eq(UserBlockedEnterprise::getIsDelete, 0));
+        if (null == userBlockedEnterprise) {
+            UserBlockedEnterprise blockedEnterprise = new UserBlockedEnterprise();
+            blockedEnterprise.setUid(userId).setEnterpriseId(enterpriseId);
+            userBlockedEnterpriseMapper.insert(blockedEnterprise);
+        } else {
+            userBlockedEnterprise.setIsDelete(1);
+            userBlockedEnterpriseMapper.updateById(userBlockedEnterprise);
+        }
+    }
+
+    /**
      * 创建屏蔽企业
      *
      * @param userBlockedEnterpriseCreateDto

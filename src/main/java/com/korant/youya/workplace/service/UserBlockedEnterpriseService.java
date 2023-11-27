@@ -36,6 +36,11 @@ public interface UserBlockedEnterpriseService extends IService<UserBlockedEnterp
     QueryEnterpriseByNameVo queryEnterpriseByName(QueryEnterpriseByNameDto queryEnterpriseByNameDto);
 
     /**
+     * 屏蔽当前所在企业
+     */
+    void blockCurrentEnterprise();
+
+    /**
      * 创建屏蔽企业
      *
      * @param userBlockedEnterpriseCreateDto

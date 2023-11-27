@@ -34,7 +34,7 @@ public class UserBlockedEnterpriseController {
      */
     @PostMapping("/queryPersonalBlockedEnterprise")
     public R<?> queryPersonalBlockedEnterprise(@RequestBody @Valid QueryPersonalBlockedEnterpriseDto personalBlockedEnterpriseDto) {
-         PageData<PersonalBlockedEnterpriseVo> pageData  = userBlockedEnterpriseService.queryPersonalBlockedEnterprise(personalBlockedEnterpriseDto);
+        PageData<PersonalBlockedEnterpriseVo> pageData = userBlockedEnterpriseService.queryPersonalBlockedEnterprise(personalBlockedEnterpriseDto);
         return R.success(pageData);
     }
 
@@ -47,6 +47,17 @@ public class UserBlockedEnterpriseController {
     public R<?> queryEnterpriseByName(@RequestBody @Valid QueryEnterpriseByNameDto queryEnterpriseByNameDto) {
         QueryEnterpriseByNameVo enterpriseByNameVo = userBlockedEnterpriseService.queryEnterpriseByName(queryEnterpriseByNameDto);
         return R.success(enterpriseByNameVo);
+    }
+
+    /**
+     * 屏蔽当前所在企业
+     *
+     * @return
+     */
+    @GetMapping("/blockCurrentEnterprise")
+    public R<?> blockCurrentEnterprise() {
+        userBlockedEnterpriseService.blockCurrentEnterprise();
+        return R.ok();
     }
 
     /**

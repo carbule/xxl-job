@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.pojo.dto.huntjob;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -44,4 +45,10 @@ public class HuntJobCreateDto {
      * 转正奖励分配比例
      */
     private Integer fullMemberRewardRate;
+
+    /**
+     * 求职说明
+     */
+    @NotBlank(message = "求职说明不能为空")
+    private String description;
 }
