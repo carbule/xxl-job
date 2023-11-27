@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -303,5 +304,25 @@ public class UserPrivacyServiceImpl extends ServiceImpl<UserPrivacyMapper, UserP
             recruiterVisibleInfoMapper.updateById(recruiterVisibleInfo);
             userPrivacyMapper.modify(modifyDto);
         }
+    }
+
+    /**
+     * 查询名字隐私设置类型
+     *
+     * @return
+     */
+    @Override
+    public List<?> queryNameVisibleType() {
+        return NameVisibleTypeEnum.getAllEnumsValue();
+    }
+
+    /**
+     * 查询其他隐私设置类型
+     *
+     * @return
+     */
+    @Override
+    public List<?> queryOtherInfoVisibleType() {
+        return OtherInfoVisibleTypeEnum.getAllEnumsValue();
     }
 }

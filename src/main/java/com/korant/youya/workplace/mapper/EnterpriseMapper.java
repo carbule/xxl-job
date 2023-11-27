@@ -1,12 +1,10 @@
 package com.korant.youya.workplace.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseChangeDto;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyDto;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyLogoDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
-import com.korant.youya.workplace.pojo.po.EnterpriseTodo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;

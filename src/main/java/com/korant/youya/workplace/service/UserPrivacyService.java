@@ -5,6 +5,8 @@ import com.korant.youya.workplace.pojo.dto.userprivacy.UserPrivacyModifyDto;
 import com.korant.youya.workplace.pojo.po.UserPrivacy;
 import com.korant.youya.workplace.pojo.vo.userprivacy.UserPersonalInfoPrivacyVo;
 
+import java.util.List;
+
 /**
  * <p>
  * 用户个人信息隐私设置 服务类
@@ -28,4 +30,16 @@ public interface UserPrivacyService extends IService<UserPrivacy> {
      * @param modifyDto
      */
     void modify(UserPrivacyModifyDto modifyDto);
+
+    /**
+     * 查询名字隐私设置类型
+     */
+    List<?> queryNameVisibleType();
+
+    /**
+     * 查询其他隐私设置类型
+     *
+     * @return
+     */
+    List<?> queryOtherInfoVisibleType();
 }

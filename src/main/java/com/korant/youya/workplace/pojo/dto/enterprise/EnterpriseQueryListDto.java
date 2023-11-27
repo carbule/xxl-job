@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.pojo.dto.enterprise;
 
-import com.korant.youya.workplace.pojo.PageParam;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 

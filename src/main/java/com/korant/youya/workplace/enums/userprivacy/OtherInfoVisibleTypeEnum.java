@@ -1,10 +1,10 @@
 package com.korant.youya.workplace.enums.userprivacy;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 
 /**
  * @ClassName OtherInfoVisibleTypeEnum
@@ -59,18 +59,22 @@ public enum OtherInfoVisibleTypeEnum {
      *
      * @return
      */
-    public static String getAllEnumsValue() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        OtherInfoVisibleTypeEnum[] values = OtherInfoVisibleTypeEnum.values();
-        HashMap<Object, Object> map = new HashMap<>();
-        for (OtherInfoVisibleTypeEnum value : values) {
-            map.put(value.getName(), value.getValue());
+    public static List<?> getAllEnumsValue() {
+        OtherInfoVisibleTypeEnum[] enums = OtherInfoVisibleTypeEnum.values();
+        List<OtherInfoVisibleType> list = new ArrayList<>();
+        for (OtherInfoVisibleTypeEnum typeEnum : enums) {
+            OtherInfoVisibleType otherInfoVisibleType = new OtherInfoVisibleType();
+            otherInfoVisibleType.setName(typeEnum.getName());
+            otherInfoVisibleType.setValue(typeEnum.getValue());
+            list.add(otherInfoVisibleType);
         }
-        try {
-            return objectMapper.writeValueAsString(map);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return list;
+    }
+
+    @Data
+    static class OtherInfoVisibleType {
+        private String name;
+
+        private Integer value;
     }
 }
