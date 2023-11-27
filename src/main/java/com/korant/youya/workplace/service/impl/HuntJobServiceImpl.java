@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.enums.huntjob.HuntJobAuditStatusEnum;
 import com.korant.youya.workplace.enums.huntjob.HuntJobStatusEnum;
@@ -13,10 +14,13 @@ import com.korant.youya.workplace.mapper.UserMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
 import com.korant.youya.workplace.pojo.po.EducationExperience;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonInfoVo;
 import com.korant.youya.workplace.service.HuntJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -149,5 +154,19 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (HuntJobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可删除");
         huntJob.setIsDelete(1);
         huntJobMapper.updateById(huntJob);
+    }
+
+    @Override
+    public Page<HuntJobPersonInfoVo> queryListByPositionCode(HuntJobQueryListDto huntJobQueryListDto) {
+
+//        int pageNumber = huntJobQueryListDto.getPageNumber();
+//        int pageSize = huntJobQueryListDto.getPageSize();
+//        Long count = huntJobMapper.selectCount(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getPositionId, huntJobQueryListDto.getPositionCode()).eq(HuntJob::getIsDelete, 0));
+//        List<HuntJobPersonInfoVo> list = huntJobMapper.queryListByPositionCode(huntJobQueryListDto.getPositionCode(), pageNumber, pageSize);
+//        Page<HuntJobPersonInfoVo> page = new Page<>();
+//        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+//        return page;
+        return null;
+
     }
 }

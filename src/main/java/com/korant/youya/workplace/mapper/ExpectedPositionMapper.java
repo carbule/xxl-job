@@ -3,7 +3,6 @@ package com.korant.youya.workplace.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionCreateDto;
 import com.korant.youya.workplace.pojo.po.ExpectedPosition;
-import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoByPositionCodeVo;
 import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -27,20 +26,6 @@ public interface ExpectedPositionMapper extends BaseMapper<ExpectedPosition> {
     List<ExpectedPositionInfoVo> findExpectedPositionInfo(@Param("userId") Long userId);
 
     void insertBatch(@Param("positionCreateDtoList") List<ExpectedPositionCreateDto> positionCreateDtoList, @Param("id") Long id);
-
-    /**
-     * @Description 根据职位查看求职者总数
-     * @Param
-     * @return
-     **/
-    Long queryCountByPositionCode(@Param("positionCode") String positionCode);
-
-    /**
-     * @Description 根据职位查看求职者
-     * @Param
-     * @return
-     **/
-    List<ExpectedPositionInfoByPositionCodeVo> queryListByPositionCode(@Param("positionCode") String positionCode, @Param("pageNumber") int pageNumber, @Param("pageSize") int pageSize);
 
     /**
      * 删除期望职位

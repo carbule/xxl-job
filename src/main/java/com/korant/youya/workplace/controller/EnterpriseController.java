@@ -5,6 +5,7 @@ import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
+import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;
 import com.korant.youya.workplace.service.EnterpriseService;
@@ -123,6 +124,28 @@ public class EnterpriseController {
     public R<?> getEnterpriseByName(@RequestBody @Valid EnterpriseQueryListDto enterpriseQueryListDto) {
         List<EnterpriseInfoByNameVo> list = enterpriseService.getEnterpriseByName(enterpriseQueryListDto);
         return R.success(list);
+    }
+
+    /**
+     * 查询企业hr跟员工总数
+     *
+     * @return
+     */
+    @GetMapping("/getHrAndEmployeeTotal/{id}")
+    public R<?> getHrAndEmployeeTotal(@PathVariable("id") Long id) {
+        EnterpriseHrAndEmployeeTotalVo enterpriseHrAndEmployeeTotalVo = enterpriseService.getHrAndEmployeeTotal(id);
+        return R.success(enterpriseHrAndEmployeeTotalVo);
+    }
+
+    /**
+     * 查询企业审核未通过原因
+     *
+     * @return
+     */
+    @GetMapping("/getRefuseReason/{id}")
+    public R<?> getRefuseReason(@PathVariable("id") Long id) {
+        String message = enterpriseService.getRefuseReason(id);
+        return R.ok(message);
     }
 
 }

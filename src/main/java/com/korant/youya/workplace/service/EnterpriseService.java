@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
+import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;
 import org.springframework.web.multipart.MultipartFile;
@@ -83,4 +84,17 @@ public interface EnterpriseService extends IService<Enterprise> {
      */
     List<EnterpriseInfoByNameVo> getEnterpriseByName(EnterpriseQueryListDto enterpriseQueryListDto);
 
+    /**
+     * 查询企业hr跟员工总数
+     *
+     * @return
+     */
+    EnterpriseHrAndEmployeeTotalVo getHrAndEmployeeTotal(Long id);
+
+    /**
+     * 查询企业审核未通过原因
+     *
+     * @return
+     */
+    String getRefuseReason(Long id);
 }

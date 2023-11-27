@@ -106,4 +106,15 @@
         OFFSET 0
     </select>
 
+    <select id="getHrAndEmployeeTotal"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo">
+        SELECT
+            COUNT(DISTINCT yur.uid) AS hr,
+            (COUNT(DISTINCT yue.uid) - COUNT(DISTINCT yur.uid)) - 1 AS employee
+        FROM
+            yy_user_enterprise yue
+                LEFT JOIN yy_user_role yur ON yue.uid = yur.uid AND yur.is_delete = 0 AND yur.rid = 1
+        WHERE yue.enterprise_id = #{id}
+          AND yue.is_delete = 0
+    </select>
 </mapper>

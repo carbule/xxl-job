@@ -9,16 +9,14 @@ import com.korant.youya.workplace.config.ObsBucketConfig;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
-import com.korant.youya.workplace.mapper.EnterpriseMapper;
-import com.korant.youya.workplace.mapper.UserEnterpriseMapper;
-import com.korant.youya.workplace.mapper.UserMapper;
-import com.korant.youya.workplace.mapper.UserRoleMapper;
+import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.po.UserEnterprise;
 import com.korant.youya.workplace.pojo.po.UserRole;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
+import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;
 import com.korant.youya.workplace.service.EnterpriseService;
@@ -58,7 +56,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     private UserMapper userMapper;
 
     @Resource
-    private UserRoleMapper userRoleMapper;
+    private EnterpriseAuditRecordMapper enterpriseAuditRecordMapper;
 
     @Resource
     private UserEnterpriseMapper userEnterpriseMapper;
@@ -110,7 +108,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         if (user.getAuthenticationStatus() ==  UserAuthenticationStatusEnum.NOT_CERTIFIED.getStatus())
             throw new YouyaException("请先进行实名认证！");
         if (userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0)))
-            throw new YouyaException("您已绑定过企业");
+           throw new YouyaException("您已绑定过企业");
         String name = createDto.getName();
         boolean exists = enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getName, name).eq(Enterprise::getIsDelete, 0));
         if (exists) throw new YouyaException("该企业已被创建");
@@ -129,12 +127,6 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         userEnterprise.setUid(userId);
         userEnterprise.setEnterpriseId(enterprise.getId());
         userEnterpriseMapper.insert(userEnterprise);
-
-        //TODO 注册企业的人自动成为管理员
-        UserRole userRole = new UserRole();
-        userRole.setUid(userId);
-        userRole.setRid(2L);
-        userRoleMapper.insert(userRole);
 
     }
 
@@ -239,6 +231,28 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
         return enterpriseMapper.getEnterpriseByName(enterpriseQueryListDto.getName(), EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus());
 
+    }
+
+    /**
+     * @Description 根据企业名称查询企业
+     * @Param
+     * @return
+     **/
+    @Override
+    public EnterpriseHrAndEmployeeTotalVo getHrAndEmployeeTotal(Long id) {
+
+        return enterpriseMapper.getHrAndEmployeeTotal(id);
+    }
+
+    /**
+     * 查询企业审核未通过原因
+     *
+     * @return
+     */
+    @Override
+    public String getRefuseReason(Long id) {
+
+        return enterpriseAuditRecordMapper.getRefuseReason(id);
     }
 
 }

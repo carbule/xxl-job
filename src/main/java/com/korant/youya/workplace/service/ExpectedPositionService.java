@@ -1,10 +1,7 @@
 package com.korant.youya.workplace.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionQueryDto;
 import com.korant.youya.workplace.pojo.po.ExpectedPosition;
-import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoByPositionCodeVo;
 
 /**
  * <p>
@@ -15,12 +12,4 @@ import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionInfoB
  * @since 2023-11-17
  */
 public interface ExpectedPositionService extends IService<ExpectedPosition> {
-
-    /**
-     * 根据职位查看求职者
-     *
-     * @param
-     * @return
-     */
-    Page<ExpectedPositionInfoByPositionCodeVo> queryListByPositionCode(ExpectedPositionQueryDto expectedPositionQueryDto);
 }

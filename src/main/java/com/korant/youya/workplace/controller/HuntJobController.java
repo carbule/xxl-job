@@ -1,9 +1,12 @@
 package com.korant.youya.workplace.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
 import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonInfoVo;
 import com.korant.youya.workplace.service.HuntJobService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -79,4 +82,18 @@ public class HuntJobController {
         huntJobService.delete(id);
         return R.ok();
     }
+
+
+    /**
+     * 根据职位查看求职者
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/queryListByPositionCode")
+    public R<?> queryListByPositionCode(@RequestBody @Valid HuntJobQueryListDto huntJobQueryListDto) {
+        Page<HuntJobPersonInfoVo> page = huntJobService.queryListByPositionCode(huntJobQueryListDto);
+        return R.success(page);
+    }
+
 }

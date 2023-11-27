@@ -1,16 +1,17 @@
-package com.korant.youya.workplace.pojo.vo.expectedposition;
+package com.korant.youya.workplace.pojo.vo.huntjob;
 
 import lombok.Data;
 
 /**
- * @Date 2023/11/23 13:53
- * @PackageName:com.korant.youya.workplace.pojo.vo.expectedposition
- * @ClassName: ExpectedPositionInfoByPositionCodeVo
+ * @Author duan-zhixiao
+ * @Date 2023/11/27 10:16
+ * @PackageName:com.korant.youya.workplace.pojo.vo.huntjob
+ * @ClassName: HuntJobPersonInfoVo
  * @Description: TODO
  * @Version 1.0
  */
 @Data
-public class ExpectedPositionInfoByPositionCodeVo {
+public class HuntJobPersonInfoVo {
 
     /**
      * 用户id

@@ -1,10 +1,13 @@
 package com.korant.youya.workplace.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonInfoVo;
 
 /**
  * <p>
@@ -49,4 +52,13 @@ public interface HuntJobService extends IService<HuntJob> {
      * @param id
      */
     void delete(Long id);
+
+    /**
+     * 根据职位查看求职者
+     *
+     * @param
+     * @return
+     */
+    Page<HuntJobPersonInfoVo> queryListByPositionCode(HuntJobQueryListDto huntJobQueryListDto);
+
 }
