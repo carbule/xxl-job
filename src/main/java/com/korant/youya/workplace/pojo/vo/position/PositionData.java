@@ -5,7 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/24 16:19
  * @PackageName:com.korant.youya.workplace.pojo.vo.position
  * @ClassName: PositionData

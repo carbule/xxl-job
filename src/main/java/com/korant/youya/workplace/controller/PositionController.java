@@ -49,25 +49,14 @@ public class PositionController {
         return R.success(positionDataList);
     }
 
-//    /**
-//     * 根据行位查询所有领域
-//     *
-//     * @return
-//     */
-//    @GetMapping("/querySector/{code}")
-//    public R<?> querySector(@PathVariable("code") String code) {
-//        List<PositionData> positionDataList = positionService.querySector(code);
-//        return R.success(positionDataList);
-//    }
-
     /**
-     * 根据领域查询所有职位
+     * 根据行位查询所有领域和职位
      *
      * @return
      */
-    @GetMapping("/queryPosition/{code}")
-    public R<?> queryPosition(@PathVariable("code") String code) {
-        List<PositionData> positionDataList = positionService.queryPosition(code);
+    @GetMapping("/querySectorAndPosition/{code}")
+    public R<?> querySector(@PathVariable("code") String code) {
+        List<PositionData> positionDataList = positionService.querySector(code);
         return R.success(positionDataList);
     }
 

@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/24 15:21
  * @PackageName:com.korant.youya.workplace.pojo.vo.userenterprise
  * @ClassName: UserEnterpriseTransferDto

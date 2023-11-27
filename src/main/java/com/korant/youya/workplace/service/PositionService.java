@@ -31,17 +31,11 @@ public interface PositionService extends IService<Position> {
      */
     List<PositionData> queryIndustry();
 
-//    /**
-//     * 根据行位查询所有领域
-//     *
-//     * @return
-//     */
-//    List<PositionData> querySector(String code);
-
     /**
-     * 根据领域查询所有职位
+     * 根据行位查询所有领域
      *
      * @return
      */
-    List<PositionData> queryPosition(String code);
+    List<PositionData> querySector(String code);
+
 }

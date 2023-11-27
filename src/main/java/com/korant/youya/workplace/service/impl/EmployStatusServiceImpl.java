@@ -139,12 +139,11 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
         Long userId = SpringSecurityUtil.getUserId();
         ResumePreviewVo resumePreviewVo = userMapper.resumePersonPreview(userId);
         EmployStatusVo employStatusVo = employStatusMapper.queryStatus(userId);
-
-        if(employStatusVo.getExpectedPositionInfoVoList() != null){
+        //避免用户未填写求职意向
+        if(employStatusVo != null){
+            resumePreviewVo.setEmployStatus(employStatusVo.getStatus());
             //        求职意向-意向职位
             resumePreviewVo.setExpectedPositionInfoVoList(employStatusVo.getExpectedPositionInfoVoList());
-        }
-        if(employStatusVo.getExpectedWorkAreaInfoVoList() != null){
             //        求职意向-期望工作区域
             resumePreviewVo.setExpectedWorkAreaInfoVoList(employStatusVo.getExpectedWorkAreaInfoVoList());
         }

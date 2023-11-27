@@ -27,7 +27,6 @@ public interface PositionMapper extends BaseMapper<Position> {
 
     List<PositionData> queryIndustry();
 
-//    List<PositionData> querySector(@Param("code") String code);
+    List<PositionData> querySector(@Param("code") String code);
 
-    List<PositionData> queryPosition(@Param("code") String code);
 }

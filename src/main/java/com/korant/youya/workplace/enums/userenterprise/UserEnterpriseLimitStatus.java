@@ -1,7 +1,6 @@
 package com.korant.youya.workplace.enums.userenterprise;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/24 16:07
  * @PackageName:com.korant.youya.workplace.enums.userenterprise
  * @ClassName: UserEnterpriseLimitStatus

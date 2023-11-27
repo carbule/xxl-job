@@ -20,41 +20,32 @@
         ORDER BY create_time
     </select>
 
-<!--    <resultMap id="SectorAndPosition" type="com.korant.youya.workplace.pojo.vo.position.PositionData">-->
-<!--        <id property="id" column="id" />-->
-<!--        <result property="pid" column="pid" />-->
-<!--        <result property="name" column="name" />-->
-<!--        <result property="code" column="code" />-->
-<!--        <collection property="positionDataList" ofType="com.korant.youya.workplace.pojo.vo.position.PositionData">-->
-<!--            <id property="id" column="p3Id" />-->
-<!--            <result property="pid" column="p3Pid" />-->
-<!--            <result property="name" column="p3Name" />-->
-<!--            <result property="code" column="p3Code" />-->
-<!--        </collection>-->
-<!--    </resultMap>-->
-<!--    -->
-<!--    <select id="querySector" resultType="com.korant.youya.workplace.pojo.vo.position.PositionData"-->
-<!--    resultMap="SectorAndPosition">-->
-<!--        SELECT-->
-<!--            p1.id , p1.pid, p1.name, p1.code,-->
-<!--            p3.id p3Id, p3.pid p3Pid, p3.name p3Name, p3.code p3Code-->
-<!--        FROM position p1-->
-<!--            LEFT JOIN position p2 ON p1.pid = p2.id AND p2.is_delete = 0-->
-<!--            LEFT JOIN position p3 ON p1.id = p3.pid AND p3.is_delete = 0-->
-<!--        WHERE p1.is_delete = 0-->
-<!--          AND p1.level = 2-->
-<!--          AND p2.code = #{code}-->
-<!--        ORDER BY p1.create_time-->
-<!--    </select>-->
+    <resultMap id="SectorAndPosition" type="com.korant.youya.workplace.pojo.vo.position.PositionData">
+        <id property="id" column="id" />
+        <result property="pid" column="pid" />
+        <result property="name" column="name" />
+        <result property="code" column="code" />
+        <collection property="positionDataList" ofType="com.korant.youya.workplace.pojo.vo.position.PositionData">
+            <id property="id" column="p3Id" />
+            <result property="pid" column="p3Pid" />
+            <result property="name" column="p3Name" />
+            <result property="code" column="p3Code" />
+        </collection>
+    </resultMap>
 
-    <select id="queryPosition" resultType="com.korant.youya.workplace.pojo.vo.position.PositionData">
+    <select id="querySector" resultType="com.korant.youya.workplace.pojo.vo.position.PositionData"
+    resultMap="SectorAndPosition">
         SELECT
-            p1.id, p1.pid, p1.name, p1.code
+            p1.id , p1.pid, p1.name, p1.code,
+            p3.id p3Id, p3.pid p3Pid, p3.name p3Name, p3.code p3Code
         FROM position p1
-                 LEFT JOIN position p2 ON p1.pid = p2.id AND p2.is_delete = 0
+            LEFT JOIN position p2 ON p1.pid = p2.id AND p2.is_delete = 0
+            LEFT JOIN position p3 ON p1.id = p3.pid AND p3.is_delete = 0
         WHERE p1.is_delete = 0
-          AND p1.level = 3
+          AND p1.level = 2
+          AND p3.level = 3
           AND p2.code = #{code}
         ORDER BY p1.create_time
     </select>
+
 </mapper>

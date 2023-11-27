@@ -3,7 +3,6 @@ package com.korant.youya.workplace.pojo.vo.userenterprise;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/24 9:55
  * @PackageName:com.korant.youya.workplace.pojo.vo.userenterprise
  * @ClassName: UserEnterpriseColleagueInfoVo

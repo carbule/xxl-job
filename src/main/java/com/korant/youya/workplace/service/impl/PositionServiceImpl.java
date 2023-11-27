@@ -56,26 +56,15 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
         return positionDataList;
     }
 
-//    /**
-//     * 根据行位查询所有领域
-//     *
-//     * @return
-//     */
-//    @Override
-//    public List<PositionData> querySector(String code) {
-//
-//        List<PositionData> positionDataList = positionMapper.querySector(code);
-//        return positionDataList;
-//    }
-
     /**
-     * 根据领域查询所有职位
+     * 根据行位查询所有领域
      *
      * @return
      */
     @Override
-    public List<PositionData> queryPosition(String code) {
-        List<PositionData> positionDataList = positionMapper.queryPosition(code);
+    public List<PositionData> querySector(String code) {
+
+        List<PositionData> positionDataList = positionMapper.querySector(code);
         return positionDataList;
     }
 
