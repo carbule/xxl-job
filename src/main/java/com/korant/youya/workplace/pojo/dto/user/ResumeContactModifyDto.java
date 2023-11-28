@@ -33,7 +33,7 @@ public class ResumeContactModifyDto {
     /**
      * 用户邮箱
      */
-    @Email
+    @Email(message = "邮箱格式错误")
     private String email;
 
     /**

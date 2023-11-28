@@ -3,7 +3,6 @@ package com.korant.youya.workplace.pojo.vo.workexperience;
 import lombok.Data;
 
 /**
- * @Author duan-zhixiao
  * @Date 2023/11/28 12:01
  * @PackageName:com.korant.youya.workplace.pojo.vo.workexperience
  * @ClassName: WorkExperienceEnterpriseVo

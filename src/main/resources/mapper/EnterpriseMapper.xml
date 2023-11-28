@@ -54,7 +54,7 @@
             enterprise e
                 LEFT JOIN yy_user_enterprise yue ON e.id = yue.enterprise_id AND yue.is_delete = 0
         WHERE e.is_delete = 0
-          AND yue.uid = 1727987868909064193
+          AND yue.uid = #{userId}
     </select>
 
     <!--    查询企业详细信息-->
