@@ -538,6 +538,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     }
 
+    /**
+     * 获取当前用户状态
+     *
+     * @param
+     * @return
+     */
     @Override
     public UserCurrentlyInfo getUserCurrentlyInfo() {
 
