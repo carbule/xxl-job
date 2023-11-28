@@ -97,4 +97,18 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @return
      */
     String getRefuseReason(Long id);
+
+    /**
+     * 重新提交公司认证信息
+     *
+     * @return
+     */
+    void resubmit(EnterpriseChangeDto enterpriseChangeDto);
+
+    /**
+     * 撤销企业认证申请
+     *
+     * @return
+     */
+    void revoke(Long id);
 }

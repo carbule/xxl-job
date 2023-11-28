@@ -13,6 +13,11 @@ import lombok.Data;
 public class EnterpriseInfoByUserVo {
 
     /**
+     * 用户id
+     */
+    private Long uid;
+
+    /**
      * 企业id
      */
     private Long id;
@@ -26,5 +31,10 @@ public class EnterpriseInfoByUserVo {
      * 认证状态
      */
     private Integer authStatus;
+
+    /**
+     * 是否是管理员
+     */
+    private Boolean isAdmin;
 
 }

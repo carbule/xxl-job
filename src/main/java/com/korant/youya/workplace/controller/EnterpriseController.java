@@ -148,4 +148,27 @@ public class EnterpriseController {
         return R.ok(message);
     }
 
+    /**
+     * 重新提交公司认证信息
+     *
+     * @return
+     */
+    @PostMapping("/resubmit")
+    public R<?> resubmit(@RequestBody @Valid EnterpriseChangeDto enterpriseChangeDto) {
+        enterpriseService.resubmit(enterpriseChangeDto);
+        return R.ok();
+    }
+
+
+    /**
+     * 撤销企业认证申请
+     *
+     * @return
+     */
+    @GetMapping("/revoke/{id}")
+    public R<?> revoke(@PathVariable("id") Long id) {
+        enterpriseService.revoke(id);
+        return R.ok();
+    }
+
 }

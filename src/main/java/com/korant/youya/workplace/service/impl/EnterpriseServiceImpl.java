@@ -4,19 +4,15 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
-import com.korant.youya.workplace.mapper.EnterpriseAuditRecordMapper;
-import com.korant.youya.workplace.mapper.EnterpriseMapper;
-import com.korant.youya.workplace.mapper.UserEnterpriseMapper;
-import com.korant.youya.workplace.mapper.UserMapper;
+import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
-import com.korant.youya.workplace.pojo.po.Enterprise;
-import com.korant.youya.workplace.pojo.po.User;
-import com.korant.youya.workplace.pojo.po.UserEnterprise;
+import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo;
 import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
@@ -113,7 +109,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
            throw new YouyaException("您已绑定过企业");
         String name = createDto.getName();
         boolean exists = enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getName, name).eq(Enterprise::getIsDelete, 0));
-        if (exists) throw new YouyaException("该企业已被创建");
+        if (exists) throw new YouyaException("该企业已被创建,请更换名称");
         LocalDate establishDate = createDto.getEstablishDate();
         Date date = Date.from(establishDate.atStartOfDay(ZoneId.of("Asia/Shanghai")).toInstant());
         long between = DateUtil.between(date, new Date(), DateUnit.DAY);
@@ -172,7 +168,11 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     public EnterpriseInfoByUserVo queryEnterpriseInfoByUser() {
 
         Long userId = SpringSecurityUtil.getUserId();
-        return enterpriseMapper.queryEnterpriseInfoByUser(userId);
+        EnterpriseInfoByUserVo enterpriseInfoByUser = enterpriseMapper.queryEnterpriseInfoByUser(userId);
+        if (enterpriseInfoByUser != null){
+            enterpriseInfoByUser.setIsAdmin(userId.equals(enterpriseInfoByUser.getUid()));
+        }
+        return enterpriseInfoByUser;
 
     }
 
@@ -236,13 +236,17 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * @Description 根据企业名称查询企业
+     * @Description 查询企业hr跟员工总数
      * @Param
      * @return
      **/
     @Override
     public EnterpriseHrAndEmployeeTotalVo getHrAndEmployeeTotal(Long id) {
 
+//        //获取公司所有的hr
+//        List<EnterpriseHrVo> enterpriseHrVos = enterpriseMapper.getEnterpriseHr(id);
+//        //获取公司所有的员工
+//        List<EnterpriseEmployeeVo> enterpriseEmployeeVos = enterpriseMapper.getEnterpriseEmployee(id);
         return enterpriseMapper.getHrAndEmployeeTotal(id);
     }
 
@@ -256,5 +260,53 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
         return enterpriseAuditRecordMapper.getRefuseReason(id);
     }
+
+    /**
+     * 重新提交公司认证信息
+     *
+     * @return
+     */
+    @Override
+    public void resubmit(EnterpriseChangeDto enterpriseChangeDto) {
+
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseChangeDto.getId()).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未注册");
+        //校验企业成立时间
+        LocalDate establishDate = enterpriseChangeDto.getEstablishDate();
+        Date date = Date.from(establishDate.atStartOfDay().atZone(ZoneId.of("Asia/Shanghai")).toInstant());
+        long between = DateUtil.between(date, new Date(), DateUnit.DAY);
+        if (between < 365) throw new YouyaException("成立时间未届满一年的企业不可注册");
+        boolean exists = enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getName, enterpriseChangeDto.getName()).eq(Enterprise::getIsDelete, 0));
+        if (exists) throw new YouyaException("该企业已被创建,请更换名称");
+        enterpriseMapper.changeEnterpriseInfo(enterpriseChangeDto);
+
+        //删除历史为通过信息
+        enterpriseAuditRecordMapper.update(null, new LambdaUpdateWrapper<EnterpriseAuditRecord>()
+                .eq(EnterpriseAuditRecord::getEnterpriseId, enterpriseChangeDto.getId())
+                .set(EnterpriseAuditRecord::getIsDelete, 0)
+                .set(EnterpriseAuditRecord::getIsDelete, 1));
+
+    }
+
+    /**
+     * 撤销企业认证申请
+     *
+     * @return
+     */
+    @Override
+    public void revoke(Long id) {
+
+        Long userId = SpringSecurityUtil.getUserId();
+        enterpriseMapper.update(null, new LambdaUpdateWrapper<Enterprise>()
+                .eq(Enterprise::getId, id)
+                .set(Enterprise::getIsDelete, 1));
+
+        userEnterpriseMapper.update(null, new LambdaUpdateWrapper<UserEnterprise>()
+                .eq(UserEnterprise::getEnterpriseId, id)
+                .eq(UserEnterprise::getUid, userId)
+                .set(UserEnterprise::getIsDelete, 1));
+
+    }
+
 
 }

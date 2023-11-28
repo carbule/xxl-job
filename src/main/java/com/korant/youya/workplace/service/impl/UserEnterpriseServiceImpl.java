@@ -139,7 +139,7 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
         //提交过的申请删除
         enterpriseTodoMapper.update(null,
                 new LambdaUpdateWrapper<EnterpriseTodo>()
-                        .eq(EnterpriseTodo::getUid, userId)
+                        .eq(EnterpriseTodo::getUid, userEnterpriseRemoveDto.getUid())
                         .set(EnterpriseTodo::getIsDelete, 1));
 
     }
