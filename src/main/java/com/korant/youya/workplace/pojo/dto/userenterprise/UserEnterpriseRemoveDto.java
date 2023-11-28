@@ -19,10 +19,4 @@ public class UserEnterpriseRemoveDto {
     @NotNull(message = "用户id不能为空")
     private Long uid;
 
-    /**
-     * 企业id
-     */
-    @NotNull(message = "企业id不能为空")
-    private Long enterpriseId;
-
 }

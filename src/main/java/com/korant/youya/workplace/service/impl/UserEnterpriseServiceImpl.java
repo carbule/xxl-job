@@ -121,13 +121,10 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
     @Transactional(rollbackFor = Exception.class)
     public void removeUser(UserEnterpriseRemoveDto userEnterpriseRemoveDto) {
 
-        Long userId = SpringSecurityUtil.getUserId();
-
         //解除hr跟公司的绑定
         userEnterpriseMapper.update(null,
                 new LambdaUpdateWrapper<UserEnterprise>()
                         .eq(UserEnterprise::getUid, userEnterpriseRemoveDto.getUid())
-                        .eq(UserEnterprise::getEnterpriseId, userEnterpriseRemoveDto.getEnterpriseId())
                         .set(UserEnterprise::getIsDelete, 1));
 
         //TODO 删除当前用户的hr角色

@@ -47,9 +47,4 @@ public class EnterpriseEmployeeListVo {
      */
     private String identityCard;
 
-    /**
-     * 企业id
-     */
-    private Long enterpriseId;
-
 }

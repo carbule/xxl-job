@@ -56,8 +56,7 @@
             u.avatar,
             u.phone,
             A.emid                      AS employeeId,
-            u.identity_card             AS identityCard,
-            A.eid                       AS enterpriseId
+            u.identity_card             AS identityCard
         FROM
             yy_user u
                 INNER JOIN (
