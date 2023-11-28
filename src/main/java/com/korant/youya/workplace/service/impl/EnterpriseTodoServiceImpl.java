@@ -93,7 +93,18 @@ public class EnterpriseTodoServiceImpl extends ServiceImpl<EnterpriseTodoMapper,
     public EnterpriseTodoDetailVo getEnterpriseTodoByUser() {
 
         Long userId = SpringSecurityUtil.getUserId();
-        return enterpriseTodoMapper.getEnterpriseTodoByUser(userId);
+        EnterpriseTodoDetailVo enterpriseTodoDetailVo = enterpriseTodoMapper.getEnterpriseTodoByUser(userId);
+        //是否是移交过管理员的hr
+        if (enterpriseTodoDetailVo == null){
+            UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>()
+                    .eq(UserEnterprise::getUid, userId)
+                    .eq(UserEnterprise::getIsDelete, 0));
+            if (userEnterprise != null){
+                //获取当前公司信息及管理员信息
+                enterpriseTodoDetailVo = enterpriseMapper.getAdminAndEnterpriseInfo(userEnterprise.getEnterpriseId());
+            }
+        }
+        return enterpriseTodoDetailVo;
 
     }
 

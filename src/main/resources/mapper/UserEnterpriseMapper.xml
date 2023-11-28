@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.UserEnterpriseMapper">
 
+    <!--    根据姓名查询公司同事总数-->
     <select id="queryCountColleagueByName" resultType="java.lang.Integer">
         SELECT
             COUNT(DISTINCT yu.id)
@@ -14,10 +15,9 @@
         </if>
         AND yu.is_delete = 0
         AND yu.id != #{userId}
-        GROUP BY yu.id
-        ORDER BY yu.create_time DESC
     </select>
 
+    <!--    根据姓名查询公司同事-->
     <select id="queryColleagueByName"
             resultType="com.korant.youya.workplace.pojo.vo.userenterprise.UserEnterpriseColleagueInfoVo">
         SELECT

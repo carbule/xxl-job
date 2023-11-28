@@ -93,7 +93,7 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
         //TODO 管理员角色相关后续考虑
         if (role !=null && role == 2) throw new YouyaException("管理员无法退出公司！");
 
-        //HR退出公司后 已发布职位发布人自动转为公司管理员
+        //TODO 退出公司后 已发布职位发布人自动转为公司管理员
         if (role !=null && role == 1) {
             //解除hr角色关系
             userRoleMapper.update(null,
@@ -117,6 +117,12 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
 
     }
 
+    /**
+     * 管理员移除公司下用户(HR)
+     *
+     * @param
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void removeUser(UserEnterpriseRemoveDto userEnterpriseRemoveDto) {
@@ -171,20 +177,17 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void transfer(UserEnterpriseTransferDto userEnterpriseQueryListDto) {
 
         Long userId = SpringSecurityUtil.getUserId();
 
-        //删除角色关系 公司关系
+        //转让者角色变为hr
         userRoleMapper.update(null,
                 new LambdaUpdateWrapper<UserRole>()
                         .eq(UserRole::getUid, userId)
-                        .set(UserRole::getIsDelete, 1));
-
-        userEnterpriseMapper.update(null,
-                new LambdaUpdateWrapper<UserEnterprise>()
-                        .eq(UserEnterprise::getUid, userId)
-                        .set(UserEnterprise::getIsDelete, 1));
+                        .eq(UserRole::getIsDelete, 0)
+                        .set(UserRole::getRid, 1));
 
         //被转让者变成公司的管理员
         //先删除被转让者的角色

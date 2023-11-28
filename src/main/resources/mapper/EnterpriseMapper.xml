@@ -135,4 +135,24 @@
             AND yue.enterprise_id = #{id}
             AND yur.rid = 2
     </select>
+
+    <select id="getAdminAndEnterpriseInfo"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseTodoDetailVo">
+        SELECT
+            e.id,
+            e.name,
+            e.ent_type          AS  entType,
+            e.scale,
+            e.financing_stage   AS financingStage,
+            u.last_name         AS lastName,
+            u.first_name        AS firstName,
+            u.avatar
+        FROM
+            enterprise e
+                INNER JOIN   yy_user_enterprise yue ON e.id = yue.enterprise_id AND yue.is_delete = 0
+                INNER JOIN   yy_user_role yur ON yue.uid = yur.uid AND yur.is_delete = 0 AND yur.rid = 2
+                INNER JOIN   yy_user u ON yur.uid = u.id AND u.is_delete = 0
+        WHERE   e.is_delete = 0
+          AND e.id = #{enterpriseId}
+    </select>
 </mapper>

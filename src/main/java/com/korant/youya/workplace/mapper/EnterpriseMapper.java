@@ -6,6 +6,7 @@ import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyDto;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyLogoDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
+import com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseTodoDetailVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -75,4 +76,11 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
      * @return
      **/
     Long getAdminByEnterpriseId(@Param("id") Long id);
+
+    /**
+     * @Description 获取当前公司信息及管理员信息
+     * @Param
+     * @return
+     **/
+    EnterpriseTodoDetailVo getAdminAndEnterpriseInfo(@Param("enterpriseId") Long enterpriseId);
 }
