@@ -13,6 +13,7 @@
             AND (yu.first_name like CONCAT('%', #{name},'%') OR yu.last_name like CONCAT('%', #{name},'%') )
         </if>
         AND yu.is_delete = 0
+        AND yu.id != #{userId}
         GROUP BY yu.id
         ORDER BY yu.create_time DESC
     </select>
@@ -30,6 +31,7 @@
             AND (yu.first_name like CONCAT('%', #{name},'%') OR yu.last_name like CONCAT('%', #{name},'%') )
         </if>
             AND yu.is_delete = 0
+            AND yu.id != #{userId}
         GROUP BY yu.id
         ORDER BY yu.create_time DESC LIMIT #{pageSize}
         OFFSET (#{pageNumber} -1) * #{pageSize}

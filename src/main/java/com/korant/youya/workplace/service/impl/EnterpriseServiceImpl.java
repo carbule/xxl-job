@@ -60,6 +60,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     @Resource
     private UserEnterpriseMapper userEnterpriseMapper;
 
+    @Resource
+    private UserRoleMapper userRoleMapper;
+
     public static final String ENTERPRISE_BUCKET = "enterprise";
 
     private static final String DEFAULT_LOGO = "https://resources.youyai.cn/picture/firmLogo.jpg";
@@ -126,6 +129,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         userEnterprise.setUid(userId);
         userEnterprise.setEnterpriseId(enterprise.getId());
         userEnterpriseMapper.insert(userEnterprise);
+
+        //TODO 注册企业的人自动成为管理员
+        //赋予用户管理员角色
+        UserRole userRole = new UserRole();
+        userRole.setUid(userEnterprise.getUid());
+        userRole.setRid(2L);
+        userRoleMapper.insert(userRole);
 
     }
 
@@ -319,14 +329,21 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     public void revoke(Long id) {
 
         Long userId = SpringSecurityUtil.getUserId();
+        //删除公司信息
         enterpriseMapper.update(null, new LambdaUpdateWrapper<Enterprise>()
                 .eq(Enterprise::getId, id)
                 .set(Enterprise::getIsDelete, 1));
 
+        //删除用户公司关系
         userEnterpriseMapper.update(null, new LambdaUpdateWrapper<UserEnterprise>()
                 .eq(UserEnterprise::getEnterpriseId, id)
                 .eq(UserEnterprise::getUid, userId)
                 .set(UserEnterprise::getIsDelete, 1));
+
+        //删除用户管理员角色
+        userRoleMapper.update(null, new LambdaUpdateWrapper<UserRole>()
+                .eq(UserRole::getUid, userId)
+                .set(UserRole::getIsDelete, 1));
 
     }
 

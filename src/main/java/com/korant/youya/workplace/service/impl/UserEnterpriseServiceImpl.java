@@ -153,10 +153,11 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
     @Override
     public Page<UserEnterpriseColleagueInfoVo> queryColleagueByName(UserEnterpriseQueryListDto userEnterpriseQueryListDto) {
 
+        Long userId = SpringSecurityUtil.getUserId();
         int pageNumber = userEnterpriseQueryListDto.getPageNumber();
         int pageSize = userEnterpriseQueryListDto.getPageSize();
-        Integer count = userEnterpriseMapper.queryCountColleagueByName(userEnterpriseQueryListDto.getId(), userEnterpriseQueryListDto.getName());
-        List<UserEnterpriseColleagueInfoVo> list = userEnterpriseMapper.queryColleagueByName(userEnterpriseQueryListDto.getId(), userEnterpriseQueryListDto.getName(), pageNumber, pageSize);
+        Integer count = userEnterpriseMapper.queryCountColleagueByName(userEnterpriseQueryListDto.getId(), userEnterpriseQueryListDto.getName(), userId);
+        List<UserEnterpriseColleagueInfoVo> list = userEnterpriseMapper.queryColleagueByName(userEnterpriseQueryListDto.getId(), userEnterpriseQueryListDto.getName(), userId, pageNumber, pageSize);
         Page<UserEnterpriseColleagueInfoVo> page = new Page<>();
         if (count == null){
             count = 0;
@@ -195,15 +196,16 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
                         .eq(UserRole::getUid, userEnterpriseQueryListDto.getUid())
                         .set(UserRole::getIsDelete, 1));
 
+        //TODO 成为管理员角色
         UserRole userRole = new UserRole();
         userRole.setUid(userEnterpriseQueryListDto.getUid());
         userRole.setRid(2L);
         userRoleMapper.insert(userRole);
 
-        //提交过的申请删除
+        //被转让者提交过的申请删除
         enterpriseTodoMapper.update(null,
                 new LambdaUpdateWrapper<EnterpriseTodo>()
-                        .eq(EnterpriseTodo::getUid, userId)
+                        .eq(EnterpriseTodo::getUid, userEnterpriseQueryListDto.getUid())
                         .set(EnterpriseTodo::getIsDelete, 1));
 
     }

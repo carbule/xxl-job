@@ -23,7 +23,7 @@ public interface UserEnterpriseMapper extends BaseMapper<UserEnterprise> {
      * @param
      * @return
      */
-    Integer queryCountColleagueByName(@Param("id") Long id, @Param("name") String name);
+    Integer queryCountColleagueByName(@Param("id") Long id, @Param("name") String name, @Param("userId") Long userId);
 
     /**
      * 根据姓名查询公司同事
@@ -31,5 +31,5 @@ public interface UserEnterpriseMapper extends BaseMapper<UserEnterprise> {
      * @param
      * @return
      */
-    List<UserEnterpriseColleagueInfoVo> queryColleagueByName(@Param("id") Long id, @Param("name") String name, @Param("pageNumber") int pageNumber, @Param("pageSize") int pageSize);
+    List<UserEnterpriseColleagueInfoVo> queryColleagueByName(@Param("id") Long id, @Param("name") String name,@Param("userId") Long userId, @Param("pageNumber") int pageNumber, @Param("pageSize") int pageSize);
 }

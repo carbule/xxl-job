@@ -74,6 +74,8 @@ public class EnterpriseTodoServiceImpl extends ServiceImpl<EnterpriseTodoMapper,
         if (!enterpriseExists) throw new YouyaException("您申请的企业不存在！");
         boolean exists = enterpriseTodoMapper.exists(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getIsDelete, 0));
         if (exists) throw new YouyaException("您已提交过加入申请，请勿重复提交！");
+        boolean userEnterpriseExists = userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getEnterpriseId, enterpriseTodoCreateDto.getEnterpriseId()).eq(UserEnterprise::getIsDelete, 0));
+        if (userEnterpriseExists) throw new YouyaException("您已加入过公司，无法再次加入公司！");
         EnterpriseTodo enterpriseTodo = new EnterpriseTodo();
         BeanUtils.copyProperties(enterpriseTodoCreateDto, enterpriseTodo);
         enterpriseTodo.setUid(userId);
