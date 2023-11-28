@@ -7,7 +7,10 @@ import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceModifyDt
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceQueryListDto;
 import com.korant.youya.workplace.pojo.po.WorkExperience;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceEnterpriseVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -57,4 +60,12 @@ public interface WorkExperienceService extends IService<WorkExperience> {
      * @return
      */
     void delete(Long id);
+
+    /**
+     * 查询工作履历所有公司
+     *
+     * @param
+     * @return
+     */
+    List<WorkExperienceEnterpriseVo> queryEnterpriseList();
 }

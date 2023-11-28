@@ -113,15 +113,21 @@
         OFFSET 0
     </select>
 
+    <!--    查询企业hr跟员工总数-->
     <select id="getHrAndEmployeeTotal"
-            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo">
+            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeInfoVo">
         SELECT
-            COUNT(DISTINCT yur.uid) AS hr,
-            (COUNT(DISTINCT yue.uid) - COUNT(DISTINCT yur.uid)) - 1 AS employee
+            yu.id,
+            yu.avatar,
+            CASE WHEN yur.rid is null THEN 0
+            ELSE rid END
         FROM
             yy_user_enterprise yue
-                LEFT JOIN yy_user_role yur ON yue.uid = yur.uid AND yur.is_delete = 0 AND yur.rid = 1
+                LEFT JOIN yy_user yu ON yue.uid = yu.id AND yu.is_delete = 0
+                LEFT JOIN yy_user_role yur ON yu.id = yur.uid AND yur.is_delete = 0
         WHERE yue.enterprise_id = #{id}
           AND yue.is_delete = 0
+        ORDER BY yue.create_time DESC
     </select>
+
 </mapper>

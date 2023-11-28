@@ -13,10 +13,7 @@ import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.*;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;
+import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.service.EnterpriseService;
 import com.korant.youya.workplace.utils.HuaWeiUtil;
 import com.korant.youya.workplace.utils.ObsUtil;
@@ -27,14 +24,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.XMLFormatter;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -243,11 +244,32 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     @Override
     public EnterpriseHrAndEmployeeTotalVo getHrAndEmployeeTotal(Long id) {
 
-//        //获取公司所有的hr
-//        List<EnterpriseHrVo> enterpriseHrVos = enterpriseMapper.getEnterpriseHr(id);
-//        //获取公司所有的员工
-//        List<EnterpriseEmployeeVo> enterpriseEmployeeVos = enterpriseMapper.getEnterpriseEmployee(id);
-        return enterpriseMapper.getHrAndEmployeeTotal(id);
+        List<EnterpriseHrAndEmployeeInfoVo> enterpriseHrAndEmployeeInfoVoList = enterpriseMapper.getHrAndEmployeeTotal(id);
+        EnterpriseHrAndEmployeeTotalVo enterpriseHrAndEmployeeTotalVo = new EnterpriseHrAndEmployeeTotalVo();
+        if (!CollectionUtils.isEmpty(enterpriseHrAndEmployeeInfoVoList)){
+            //hr列表
+            List<EnterpriseHrAndEmployeeInfoVo> hrList = enterpriseHrAndEmployeeInfoVoList.stream().filter(x -> x.getRid() == 1).collect(Collectors.toList());
+            enterpriseHrAndEmployeeTotalVo.setHr(hrList.size());
+            List<String> hrAvatar = new ArrayList<>();
+            if (hrList.size() > 5){
+                hrAvatar = hrList.subList(0, 5).stream().map(x -> x.getAvatar()).collect(Collectors.toList());
+            }else {
+                hrAvatar = hrList.stream().map(x -> x.getAvatar()).collect(Collectors.toList());
+            }
+            enterpriseHrAndEmployeeTotalVo.setHrAvatar(hrAvatar);
+            //员工列表
+            List<EnterpriseHrAndEmployeeInfoVo> employeeList = enterpriseHrAndEmployeeInfoVoList.stream().filter(x -> x.getRid() == 0).collect(Collectors.toList());
+            enterpriseHrAndEmployeeTotalVo.setEmployee(employeeList.size());
+            List<String> employeeAvatar = new ArrayList<>();
+            if (employeeList.size() > 5){
+                employeeAvatar = employeeList.subList(0, 5).stream().map(x -> x.getAvatar()).collect(Collectors.toList());
+            }else {
+                employeeAvatar = employeeList.stream().map(x -> x.getAvatar()).collect(Collectors.toList());
+            }
+            enterpriseHrAndEmployeeTotalVo.setEmployeeAvatar(employeeAvatar);
+        }
+
+        return enterpriseHrAndEmployeeTotalVo;
     }
 
     /**

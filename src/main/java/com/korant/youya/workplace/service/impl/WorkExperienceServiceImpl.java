@@ -11,6 +11,7 @@ import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceModifyDt
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceQueryListDto;
 import com.korant.youya.workplace.pojo.po.WorkExperience;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceEnterpriseVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
 import com.korant.youya.workplace.service.WorkExperienceService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -112,5 +113,18 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
                         .eq(WorkExperience::getId, id)
                         .set(WorkExperience::getIsDelete, 1));
 
+    }
+
+    /**
+     * 查询工作履历所有公司
+     *
+     * @param
+     * @return
+     */
+    @Override
+    public List<WorkExperienceEnterpriseVo> queryEnterpriseList() {
+
+        Long userId = SpringSecurityUtil.getUserId();
+        return workExperienceMapper.WorkExperienceEnterpriseVo(userId);
     }
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceModifyDto;
 import com.korant.youya.workplace.pojo.po.WorkExperience;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceEnterpriseVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import org.apache.ibatis.annotations.Param;
@@ -47,4 +48,12 @@ public interface WorkExperienceMapper extends BaseMapper<WorkExperience> {
      * @return
      **/
     int modify(@Param("workExperienceModifyDto") WorkExperienceModifyDto workExperienceModifyDto);
+
+    /**
+     * 查询工作履历所有公司
+     *
+     * @param
+     * @return
+     */
+    List<WorkExperienceEnterpriseVo> WorkExperienceEnterpriseVo(@Param("userId") Long userId);
 }

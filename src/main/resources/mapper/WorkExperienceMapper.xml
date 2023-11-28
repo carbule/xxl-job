@@ -96,4 +96,17 @@
           AND we.is_delete = 0
     </select>
 
+    <!--    查询工作履历所有公司-->
+    <select id="WorkExperienceEnterpriseVo"
+            resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceEnterpriseVo">
+        SELECT
+            id,
+            enterprise_name     AS enterpriseName
+        FROM
+            work_experience
+        WHERE   uid = #{userId}
+          AND is_delete = 0
+        ORDER BY create_time DESC
+    </select>
+
 </mapper>

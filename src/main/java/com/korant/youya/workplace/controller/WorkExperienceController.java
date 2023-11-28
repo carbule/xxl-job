@@ -6,11 +6,14 @@ import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceCreateDt
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceModifyDto;
 import com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceQueryListDto;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceEnterpriseVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceListVo;
 import com.korant.youya.workplace.service.WorkExperienceService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -85,4 +88,17 @@ public class WorkExperienceController {
         workExperienceService.delete(id);
         return R.ok();
     }
+
+    /**
+     * 查询工作履历所有公司
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryEnterpriseList")
+    public R<?> queryEnterpriseList() {
+        List<WorkExperienceEnterpriseVo> list = workExperienceService.queryEnterpriseList();
+        return R.success(list);
+    }
+
 }
