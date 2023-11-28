@@ -1,6 +1,9 @@
 package com.korant.youya.workplace.pojo.vo.huntjob;
 
+import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @ClassName HuntJobDetailOnHomePageVo
@@ -38,14 +41,20 @@ public class HuntJobDetailOnHomePageVo {
     private String firstName;
 
     /**
-     * 是否收藏求职
+     * 年龄
      */
-    private Integer isCollected;
+    private Integer age;
 
     /**
-     * 工作类型 1-全职 2-兼职
+     * 学历
      */
-    private Integer jobType;
+    @Dict(categoryCode = "education")
+    private Integer eduLevel;
+
+    /**
+     * 工作年限
+     */
+    private Integer workExperience;
 
     /**
      * 期望最低工资
@@ -58,32 +67,73 @@ public class HuntJobDetailOnHomePageVo {
     private Integer maxExpectedSalary;
 
     /**
+     * 奖励金额
+     */
+    private Integer award;
+
+    /**
+     * 求职状态
+     */
+    @Dict(categoryCode = "employ_status")
+    private Integer employStatus;
+
+    /**
+     * 求职说明
+     */
+    private String description;
+
+    /**
+     * 用户手机号
+     */
+    private String phone;
+
+    /**
+     * 用户微信号
+     */
+    private String wechatId;
+
+    /**
+     * 用户QQ号
+     */
+    private String qq;
+
+    /**
+     * 用户邮箱
+     */
+    private String email;
+
+    /**
      * 国家名称
      */
     private String countryName;
 
     /**
-     * 省名称
+     * 省份名称
      */
     private String provinceName;
 
     /**
-     * 市名称
+     * 市级名称
      */
     private String cityName;
 
     /**
-     * 职位
+     * 行政区名称
      */
-    private String position;
+    private String districtName;
 
     /**
-     * 结算方式
+     * 详细地址
      */
-    private Integer settlementMethod;
+    private String address;
 
     /**
-     * 奖励金额
+     * 是否关注求职
      */
-    private Integer award;
+    private Integer isCollected;
+
+    /**
+     * 工作履历
+     */
+    private List<WorkExperienceVo> workExperienceVoList;
 }

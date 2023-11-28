@@ -6,10 +6,8 @@ import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailOnHomePageVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobListOnHomePageVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPreviewVo;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
+import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.service.HuntJobService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -49,6 +47,7 @@ public class HuntJobController {
      * @return
      */
     @GetMapping("/queryDetailOnHomePageById/{id}")
+    @ExplanationDict
     public R<?> queryDetailOnHomePageById(@PathVariable("id") Long id) {
         HuntJobDetailOnHomePageVo detailOnHomePageVo = huntJobService.queryDetailOnHomePageById(id);
         return R.success(detailOnHomePageVo);
@@ -64,6 +63,18 @@ public class HuntJobController {
     public R<?> collect(@PathVariable("id") Long id) {
         huntJobService.collect(id);
         return R.ok();
+    }
+
+    /**
+     * 查询用户个人求职列表
+     *
+     * @param personalListDto
+     * @return
+     */
+    @PostMapping("/queryPersonalList")
+    public R<?> queryPersonalList(@RequestBody @Valid HuntJobQueryPersonalListDto personalListDto) {
+        Page<HuntJobPersonalListVo> page = huntJobService.queryPersonalList(personalListDto);
+        return R.success(page);
     }
 
     /**
@@ -112,7 +123,7 @@ public class HuntJobController {
     }
 
     /**
-     * 查询求职信息详情
+     * 根据id查询求职信息详情
      *
      * @param
      * @return
@@ -121,6 +132,30 @@ public class HuntJobController {
     public R<?> detail(@PathVariable("id") Long id) {
         HuntJobDetailVo detailVo = huntJobService.detail(id);
         return R.success(detailVo);
+    }
+
+    /**
+     * 根据id关闭职位
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/close/{id}")
+    public R<?> close(@PathVariable("id") Long id) {
+        huntJobService.close(id);
+        return R.ok();
+    }
+
+    /**
+     * 根据id发布职位
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/release/{id}")
+    public R<?> release(@PathVariable("id") Long id) {
+        huntJobService.release(id);
+        return R.ok();
     }
 
     /**
@@ -133,5 +168,4 @@ public class HuntJobController {
         huntJobService.delete(id);
         return R.ok();
     }
-
 }

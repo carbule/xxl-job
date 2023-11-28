@@ -34,7 +34,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.XMLFormatter;
 import java.util.stream.Collectors;
 
 /**

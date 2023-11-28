@@ -55,6 +55,12 @@ public class DistrictData implements Serializable {
     private Integer level;
 
     /**
+     * 地区拼音
+     */
+    @TableField("pinyin")
+    private String pinyin;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)

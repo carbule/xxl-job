@@ -9,9 +9,9 @@ package com.korant.youya.workplace.enums.huntjob;
  */
 public enum HuntJobStatusEnum {
 
-    //未冻结
+    //未发布
     UNPUBLISHED(0),
-    //已冻结
+    //已发布
     PUBLISHED(1);
 
     private int status;

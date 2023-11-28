@@ -54,6 +54,7 @@ public class HuntJobPreviewVo {
     /**
      * 求职状态
      */
+    @Dict(categoryCode = "employ_status")
     private Integer employStatus;
 
     /**

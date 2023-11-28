@@ -5,11 +5,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailOnHomePageVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobListOnHomePageVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPreviewVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.*;
 
 /**
  * <p>
@@ -45,6 +43,14 @@ public interface HuntJobService extends IService<HuntJob> {
     void collect(Long id);
 
     /**
+     * 查询用户个人求职列表
+     *
+     * @param personalListDto
+     * @return
+     */
+    Page<HuntJobPersonalListVo> queryPersonalList(HuntJobQueryPersonalListDto personalListDto);
+
+    /**
      * 校验用户信息
      */
     void checkUserInfo();
@@ -71,12 +77,26 @@ public interface HuntJobService extends IService<HuntJob> {
     void modify(HuntJobModifyDto modifyDto);
 
     /**
-     * 查询求职信息详情
+     * 根据id查询求职信息详情
      *
      * @param id
      * @return
      */
     HuntJobDetailVo detail(Long id);
+
+    /**
+     * 根据id关闭职位
+     *
+     * @param id
+     */
+    void close(Long id);
+
+    /**
+     * 根据id发布职位
+     *
+     * @param id
+     */
+    void release(Long id);
 
     /**
      * 删除求职信息

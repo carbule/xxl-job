@@ -5,7 +5,10 @@ import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseChangeDto;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyDto;
 import com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseModifyLogoDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
-import com.korant.youya.workplace.pojo.vo.enterprise.*;
+import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
+import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeInfoVo;
+import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
+import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;
 import com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseTodoDetailVo;
 import org.apache.ibatis.annotations.Param;
 

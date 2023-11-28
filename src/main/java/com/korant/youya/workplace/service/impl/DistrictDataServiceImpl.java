@@ -4,13 +4,17 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.mapper.DistrictDataMapper;
 import com.korant.youya.workplace.pojo.po.DistrictData;
 import com.korant.youya.workplace.pojo.vo.district.DistrictDataTreeVo;
+import com.korant.youya.workplace.pojo.vo.district.DistrictDataVo;
+import com.korant.youya.workplace.pojo.vo.district.QueryAllDataSortedByAcronymVo;
 import com.korant.youya.workplace.service.DistrictDataService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * <p>
@@ -45,6 +49,26 @@ public class DistrictDataServiceImpl extends ServiceImpl<DistrictDataMapper, Dis
     }
 
     /**
+     * 查询所有地区数据按缩略词排序
+     *
+     * @return
+     */
+    @Override
+    public QueryAllDataSortedByAcronymVo queryAllDataSortedByAcronym() {
+        List<DistrictDataVo> districtDataVoList = districtDataMapper.queryAllDataSortedByAcronym();
+        Map<String, List<DistrictDataVo>> map = IntStream.rangeClosed('A', 'Z')
+                .mapToObj(c -> String.valueOf((char) c))
+                .collect(Collectors.toMap(key -> key, key -> new ArrayList<>()));
+        districtDataVoList.forEach(s -> {
+            List<DistrictDataVo> list = map.get(s.getAcronym());
+            list.add(s);
+        });
+        QueryAllDataSortedByAcronymVo acronymVo = new QueryAllDataSortedByAcronymVo();
+        acronymVo.setDistrictDataMap(map);
+        return acronymVo;
+    }
+
+    /**
      * 从集合中筛选出子节点
      *
      * @param dataTreeVo
@@ -70,4 +94,12 @@ public class DistrictDataServiceImpl extends ServiceImpl<DistrictDataMapper, Dis
         }
     }
 
+    public static void main(String[] args) {
+        Map<String, List<DistrictDataVo>> map = IntStream.rangeClosed('A', 'Z')
+                .mapToObj(c -> String.valueOf((char) c))
+                .collect(Collectors.toMap(key -> key, key -> new ArrayList<>()));
+
+        // 打印生成的 Map
+        System.out.println(map);
+    }
 }

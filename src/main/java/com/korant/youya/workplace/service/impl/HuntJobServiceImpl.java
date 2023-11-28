@@ -16,14 +16,12 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
 import com.korant.youya.workplace.pojo.po.EducationExperience;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.po.User;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailOnHomePageVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobListOnHomePageVo;
-import com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPreviewVo;
+import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.service.HuntJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -32,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -64,6 +63,11 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      */
     @Override
     public Page<HuntJobListOnHomePageVo> queryListOnHomePage(HuntJobQueryListDto listDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        String districtCode = listDto.getDistrictCode();
+        String positionCode = listDto.getPositionCode();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
         return null;
     }
 
@@ -75,7 +79,8 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      */
     @Override
     public HuntJobDetailOnHomePageVo queryDetailOnHomePageById(Long id) {
-        return null;
+        Long userId = SpringSecurityUtil.getUserId();
+        return huntJobMapper.queryDetailOnHomePageById(userId, id);
     }
 
     /**
@@ -96,6 +101,25 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
             a.setHuntId(id);
             attentionHuntJobMapper.insert(a);
         }
+    }
+
+    /**
+     * 查询用户个人求职列表
+     *
+     * @param personalListDto
+     * @return
+     */
+    @Override
+    public Page<HuntJobPersonalListVo> queryPersonalList(HuntJobQueryPersonalListDto personalListDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        Integer status = personalListDto.getStatus();
+        int pageNumber = personalListDto.getPageNumber();
+        int pageSize = personalListDto.getPageSize();
+        Long count = huntJobMapper.selectCount(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getUid, userId).eq(HuntJob::getStatus, status).eq(HuntJob::getIsDelete, 0));
+        List<HuntJobPersonalListVo> list = huntJobMapper.queryPersonalList(userId, status, personalListDto);
+        Page<HuntJobPersonalListVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
     }
 
     /**
@@ -189,14 +213,49 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     }
 
     /**
-     * 查询求职信息详情
+     * 根据id查询求职信息详情
      *
      * @param id
      * @return
      */
     @Override
     public HuntJobDetailVo detail(Long id) {
-        return null;
+        Long userId = SpringSecurityUtil.getUserId();
+        return huntJobMapper.detail(userId, id);
+    }
+
+    /**
+     * 根据id关闭职位
+     *
+     * @param id
+     */
+    @Override
+    public void close(Long id) {
+        HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, id).eq(HuntJob::getIsDelete, 0));
+        if (null == huntJob) throw new YouyaException("求职信息不存在");
+        Long userId = SpringSecurityUtil.getUserId();
+        if (!userId.equals(huntJob.getUid())) throw new YouyaException("非法操作");
+        Integer status = huntJob.getStatus();
+        if (HuntJobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("当前求职信息已关闭");
+        huntJob.setStatus(HuntJobStatusEnum.UNPUBLISHED.getStatus());
+        huntJobMapper.updateById(huntJob);
+    }
+
+    /**
+     * 根据id发布职位
+     *
+     * @param id
+     */
+    @Override
+    public void release(Long id) {
+        HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, id).eq(HuntJob::getIsDelete, 0));
+        if (null == huntJob) throw new YouyaException("求职信息不存在");
+        Long userId = SpringSecurityUtil.getUserId();
+        if (!userId.equals(huntJob.getUid())) throw new YouyaException("非法操作");
+        Integer status = huntJob.getStatus();
+        if (HuntJobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("当前求职信息已发布");
+        huntJob.setStatus(HuntJobStatusEnum.PUBLISHED.getStatus());
+        huntJobMapper.updateById(huntJob);
     }
 
     /**

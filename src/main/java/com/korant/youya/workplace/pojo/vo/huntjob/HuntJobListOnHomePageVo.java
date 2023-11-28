@@ -18,11 +18,6 @@ public class HuntJobListOnHomePageVo {
     private Long id;
 
     /**
-     * 用户id
-     */
-    private Long uid;
-
-    /**
      * 用户头像
      */
     private String avatar;
@@ -38,9 +33,14 @@ public class HuntJobListOnHomePageVo {
     private String firstName;
 
     /**
-     * 工作类型 1-全职 2-兼职
+     * 个性签名
      */
-    private Integer jobType;
+    private String personalSignature;
+
+    /**
+     * 职位
+     */
+    private String positionName;
 
     /**
      * 期望最低工资
@@ -58,27 +58,22 @@ public class HuntJobListOnHomePageVo {
     private String countryName;
 
     /**
-     * 省名称
+     * 省份名称
      */
     private String provinceName;
 
     /**
-     * 市名称
+     * 市级名称
      */
     private String cityName;
 
     /**
-     * 职位
+     * 行政区名称
      */
-    private String position;
+    private String districtName;
 
     /**
      * 奖励金额
      */
     private Integer award;
-
-    /**
-     * 发布天数
-     */
-    private Integer publishDays;
 }

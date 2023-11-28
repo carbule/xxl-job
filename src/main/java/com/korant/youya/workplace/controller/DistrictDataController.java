@@ -2,6 +2,7 @@ package com.korant.youya.workplace.controller;
 
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.vo.district.DistrictDataTreeVo;
+import com.korant.youya.workplace.pojo.vo.district.QueryAllDataSortedByAcronymVo;
 import com.korant.youya.workplace.service.DistrictDataService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,4 +37,14 @@ public class DistrictDataController {
         return R.success(districtDataTreeVoList);
     }
 
+    /**
+     * 查询所有地区数据按缩略词排序
+     *
+     * @return
+     */
+    @GetMapping("/queryAllDataSortedByAcronym")
+    public R<?> queryAllDataSortedByAcronym() {
+        QueryAllDataSortedByAcronymVo acronymVo = districtDataService.queryAllDataSortedByAcronym();
+        return R.success(acronymVo);
+    }
 }

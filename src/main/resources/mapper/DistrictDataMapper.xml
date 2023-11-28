@@ -15,7 +15,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, pid, name, code, create_time, update_time, is_delete
+        id
+        , pid, name, code, create_time, update_time, is_delete
     </sql>
 
     <!--  查出所有地区信息  -->
@@ -26,4 +27,14 @@
         ORDER BY code
     </select>
 
+    <!--  查询所有地区数据按缩略词排序  -->
+    <select id="queryAllDataSortedByAcronym" resultType="com.korant.youya.workplace.pojo.vo.district.DistrictDataVo">
+        SELECT id,
+               name,
+               code,
+               UPPER(LEFT (pinyin, 1)) AS acronym,
+               RANK()                     OVER (PARTITION BY pinyin) AS rank
+        FROM district_data
+        where name != '不限' AND is_delete = 0;
+    </select>
 </mapper>
