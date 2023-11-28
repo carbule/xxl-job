@@ -180,8 +180,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
         Long userId = SpringSecurityUtil.getUserId();
         EnterpriseInfoByUserVo enterpriseInfoByUser = enterpriseMapper.queryEnterpriseInfoByUser(userId);
+        Long admin = enterpriseMapper.getAdminByEnterpriseId(enterpriseInfoByUser.getId());
         if (enterpriseInfoByUser != null){
-            enterpriseInfoByUser.setIsAdmin(userId.equals(enterpriseInfoByUser.getUid()));
+            enterpriseInfoByUser.setIsAdmin(userId.equals(admin));
         }
         return enterpriseInfoByUser;
 

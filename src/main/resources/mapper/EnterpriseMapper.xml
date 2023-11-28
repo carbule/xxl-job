@@ -47,19 +47,14 @@
     <select id="queryEnterpriseInfoByUser"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo">
         SELECT
-            yur.uid uid, e.id id, e.name, e.auth_status authStatus
+            e.id,
+            e.name,
+            e.auth_status authStatus
         FROM
-            yy_user_role yur
-                INNER JOIN	yy_user_enterprise yue ON yur.uid = yue.uid AND yue.is_delete = 0
-                AND yue.enterprise_id =
-                   (SELECT
-                       enterprise_id
-                   FROM
-                       yy_user_enterprise
-                   WHERE uid = #{userId}
-                     AND is_delete = 0)
-                INNER JOIN enterprise e ON yue.enterprise_id = e.id AND e.is_delete = 0
-        WHERE yur.rid = 2
+            enterprise e
+                LEFT JOIN yy_user_enterprise yue ON e.id = yue.enterprise_id AND yue.is_delete = 0
+        WHERE e.is_delete = 0
+          AND yue.uid = 1727987868909064193
     </select>
 
     <!--    查询企业详细信息-->
@@ -130,4 +125,14 @@
         ORDER BY yue.create_time DESC
     </select>
 
+    <select id="getAdminByEnterpriseId" resultType="java.lang.Long">
+        SELECT
+            yur.uid
+        FROM
+            yy_user_role yur
+        LEFT JOIN   yy_user_enterprise yue ON yur.uid = yue.uid AND yue.is_delete = 0
+        WHERE   yur.is_delete = 0
+            AND yue.enterprise_id = #{id}
+            AND yur.rid = 2
+    </select>
 </mapper>

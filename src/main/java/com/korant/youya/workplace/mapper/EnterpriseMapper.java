@@ -69,4 +69,10 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
      **/
     List<EnterpriseHrAndEmployeeInfoVo> getHrAndEmployeeTotal(@Param("id") Long id);
 
+    /**
+     * @Description 获取公司的管理员
+     * @Param
+     * @return
+     **/
+    Long getAdminByEnterpriseId(@Param("id") Long id);
 }

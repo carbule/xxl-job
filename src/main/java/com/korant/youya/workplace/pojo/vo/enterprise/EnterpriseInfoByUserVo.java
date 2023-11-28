@@ -13,11 +13,6 @@ import lombok.Data;
 public class EnterpriseInfoByUserVo {
 
     /**
-     * 用户id
-     */
-    private Long uid;
-
-    /**
      * 企业id
      */
     private Long id;
