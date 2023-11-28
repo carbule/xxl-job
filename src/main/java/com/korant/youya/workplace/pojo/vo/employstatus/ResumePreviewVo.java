@@ -13,7 +13,6 @@ import java.util.List;
 
 /**
  * @Date 2023/11/17 14:59
- * @PackageName:com.korant.youya.workplace.pojo.vo.employstatus
  * @ClassName: ResumePreviewVo
  * @Description:
  * @Version 1.0

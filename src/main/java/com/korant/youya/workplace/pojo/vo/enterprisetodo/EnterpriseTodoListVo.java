@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 /**
  * @Date 2023/11/22 14:27
- * @PackageName:com.korant.youya.workplace.pojo.vo.enterprisetodo
  * @ClassName: EnterpriseTodoListVo
  * @Description:
  * @Version 1.0

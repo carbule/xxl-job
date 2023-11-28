@@ -4,7 +4,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/17 14:31
- * @PackageName:com.korant.youya.workplace.pojo.vo.expectedposition
  * @ClassName: ExpectedPositionInfoVo
  * @Description:
  * @Version 1.0

@@ -6,7 +6,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/21 16:23
- * @PackageName:com.korant.youya.workplace.pojo.dto.user
  * @ClassName: ResumeContactModifyDto
  * @Description:
  * @Version 1.0

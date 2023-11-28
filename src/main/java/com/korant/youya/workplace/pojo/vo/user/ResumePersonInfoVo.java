@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 /**
  * @Date 2023/11/20 16:27
- * @PackageName:com.korant.youya.workplace.pojo.vo.user
  * @ClassName: resumePersonInfoVo
  * @Description:
  * @Version 1.0

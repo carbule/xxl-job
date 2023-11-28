@@ -4,7 +4,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/22 14:58
- * @PackageName:com.korant.youya.workplace.pojo.vo.enterprisetodo
  * @ClassName: EnterpriseEmployeeListVo
  * @Description:
  * @Version 1.0

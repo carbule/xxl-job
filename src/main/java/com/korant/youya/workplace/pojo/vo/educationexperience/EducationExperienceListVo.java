@@ -5,7 +5,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/16 16:39
- * @PackageName:com.korant.youya.workplace.pojo.vo.educationexperience
  * @ClassName: EducationExperienceListVo
  * @Description:
  * @Version 1.0

@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 /**
  * @Date 2023/11/20 17:42
- * @PackageName:com.korant.youya.workplace.pojo.dto.user
  * @ClassName: ResumePersonModifyDto
  * @Description:
  * @Version 1.0

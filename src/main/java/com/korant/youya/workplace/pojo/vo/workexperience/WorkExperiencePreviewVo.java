@@ -7,7 +7,6 @@ import java.util.List;
 
 /**
  * @Date 2023/11/17 15:07
- * @PackageName:com.korant.youya.workplace.pojo.vo.workexperience
  * @ClassName: WorkExperiencePreviewVo
  * @Description:
  * @Version 1.0

@@ -5,7 +5,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/16 15:06
- * @PackageName:com.korant.youya.workplace.pojo.dto.expectedworkarea
  * @ClassName: ExpectedWorkAreaModifyDto
  * @Description:
  * @Version 1.0

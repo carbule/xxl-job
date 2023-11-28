@@ -5,7 +5,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/20 16:54
- * @PackageName:com.korant.youya.workplace.pojo.dto.enterprise
  * @ClassName: EnterpriseQueryListDto
  * @Description:
  * @Version 1.0

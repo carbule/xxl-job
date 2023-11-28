@@ -5,7 +5,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/20 13:56
- * @PackageName:com.korant.youya.workplace.pojo.vo.enterprise
  * @ClassName: EnterpriseDetailVo
  * @Description:
  * @Version 1.0

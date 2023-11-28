@@ -5,7 +5,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/22 9:45
- * @PackageName:com.korant.youya.workplace.pojo.dto.enterprisetodo
  * @ClassName: EnterpriseTodoCreateDto
  * @Description:
  * @Version 1.0

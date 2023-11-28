@@ -4,7 +4,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/16 17:07
- * @PackageName:com.korant.youya.workplace.pojo.vo.honorcertificate
  * @ClassName: HonorCertificateDetailDto
  * @Description:
  * @Version 1.0

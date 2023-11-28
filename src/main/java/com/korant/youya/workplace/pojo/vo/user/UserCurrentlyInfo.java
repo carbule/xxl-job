@@ -4,9 +4,7 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/24 14:18
- * @PackageName:com.korant.youya.workplace.pojo.vo.user
  * @ClassName: UserCurrentlyInfo
- * @Description: TODO
  * @Version 1.0
  */
 @Data

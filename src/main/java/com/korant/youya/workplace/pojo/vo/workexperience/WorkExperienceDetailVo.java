@@ -4,7 +4,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/16 15:51
- * @PackageName:com.korant.youya.workplace.pojo.vo.workexperience
  * @ClassName: WorkExperienceDetailVo
  * @Description:
  * @Version 1.0

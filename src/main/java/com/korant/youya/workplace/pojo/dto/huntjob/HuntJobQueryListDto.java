@@ -6,9 +6,7 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/27 10:15
- * @PackageName:com.korant.youya.workplace.pojo.dto.huntjob
  * @ClassName: HuntJobQueryListDto
- * @Description: TODO
  * @Version 1.0
  */
 @Data

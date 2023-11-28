@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * @Date 2023/11/17 14:16
- * @PackageName:com.korant.youya.workplace.pojo.vo.employstatus
  * @ClassName: EmployStatusVo
  * @Description:
  * @Version 1.0

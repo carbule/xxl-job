@@ -5,7 +5,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/17 14:29
- * @PackageName:com.korant.youya.workplace.pojo.dto.expectedposition
  * @ClassName: ExpectedPositionModifyDto
  * @Description:
  * @Version 1.0

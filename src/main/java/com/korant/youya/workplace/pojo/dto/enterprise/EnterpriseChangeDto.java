@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 /**
  * @Date 2023/11/20 13:57
- * @PackageName:com.korant.youya.workplace.pojo.dto.enterprise
  * @ClassName: EnterpriseChangeDto
  * @Description:
  * @Version 1.0

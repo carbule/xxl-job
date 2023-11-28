@@ -7,7 +7,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/17 14:25
- * @PackageName:com.korant.youya.workplace.pojo.dto.employstatus
  * @ClassName: EmployStatusModifyDto
  * @Description:
  * @Version 1.0

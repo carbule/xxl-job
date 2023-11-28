@@ -6,9 +6,7 @@ import java.util.List;
 
 /**
  * @Date 2023/11/24 16:19
- * @PackageName:com.korant.youya.workplace.pojo.vo.position
  * @ClassName: PositionData
- * @Description: TODO
  * @Version 1.0
  */
 @Data

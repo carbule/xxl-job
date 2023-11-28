@@ -5,7 +5,6 @@ import lombok.Data;
 
 /**
  * @Date 2023/11/21 13:47
- * @PackageName:com.korant.youya.workplace.pojo.vo.user
  * @ClassName: ResumePersonPreviewVo
  * @Description:
  * @Version 1.0
