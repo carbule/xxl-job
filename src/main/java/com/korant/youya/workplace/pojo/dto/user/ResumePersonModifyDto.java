@@ -1,6 +1,8 @@
 package com.korant.youya.workplace.pojo.dto.user;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -42,6 +44,12 @@ public class ResumePersonModifyDto {
      * 用户生日
      */
     private LocalDate birthday;
+
+    /**
+     * 用户开始工作时间
+     */
+    @NotNull(message = "开始工作时间不能为空")
+    private LocalDate startWorkingTime;
 
     /**
      * 政治面貌

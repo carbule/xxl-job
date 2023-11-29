@@ -9,6 +9,7 @@
             first_name              = #{resumePersonModifyDto.firstName},
             gender                  = #{resumePersonModifyDto.gender},
             birthday                = #{resumePersonModifyDto.birthday},
+            start_working_time      = #{resumePersonModifyDto.startWorkingTime},
             political_outlook       = #{resumePersonModifyDto.politicalOutlook},
             personal_signature      = #{resumePersonModifyDto.personalSignature},
             self_evaluation         = #{resumePersonModifyDto.selfEvaluation},
@@ -73,6 +74,7 @@
             u.first_name           AS firstName,
             u.gender,
             u.birthday,
+            u.start_working_time    AS  startWorkingTime,
             u.political_outlook     AS  politicalOutlook,
             u.personal_signature    AS  personalSignature,
             u.self_evaluation       AS  selfEvaluation,
@@ -92,6 +94,7 @@
         <result property="firstName" column="firstName" />
         <result property="gender" column="gender" />
         <result property="age" column="age" />
+        <result property="seniority" column="seniority" />
         <result property="politicalOutlook" column="politicalOutlook" />
         <result property="personalSignature" column="personalSignature" />
         <result property="selfEvaluation" column="selfEvaluation" />
@@ -139,6 +142,7 @@
             u.first_name                                 AS firstName,
             u.gender,
             DATE_PART('year', AGE(NOW(), u.birthday))    AS age,
+            DATE_PART('year', AGE(NOW(), u.start_working_time))    AS seniority,
             u.political_outlook                          AS  politicalOutlook,
             u.personal_signature                         AS  personalSignature,
             u.self_evaluation                            AS  selfEvaluation,

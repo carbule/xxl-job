@@ -158,16 +158,16 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
             resumePreviewVo.setEduLevel(max.get().getEduLevel());
         }
 
-        //        工龄
-        if (!CollectionUtils.isEmpty(workExperiencePreviewVoList)){
-            Optional<WorkExperiencePreviewVo> min = workExperiencePreviewVoList.stream().min(Comparator.comparing(WorkExperiencePreviewVo::getStartTime));
-            String startTime = min.get().getStartTime();
-            LocalDate startDate = LocalDate.parse(startTime + "-01" , DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            LocalDate today = LocalDate.now();
-            Period period = Period.between(startDate, today);
-            int years = period.getYears();
-            resumePreviewVo.setSeniority(years);
-        }
+//        //        工龄
+//        if (!CollectionUtils.isEmpty(workExperiencePreviewVoList)){
+//            Optional<WorkExperiencePreviewVo> min = workExperiencePreviewVoList.stream().min(Comparator.comparing(WorkExperiencePreviewVo::getStartTime));
+//            String startTime = min.get().getStartTime();
+//            LocalDate startDate = LocalDate.parse(startTime + "-01" , DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+//            LocalDate today = LocalDate.now();
+//            Period period = Period.between(startDate, today);
+//            int years = period.getYears();
+//            resumePreviewVo.setSeniority(years);
+//        }
 
         return resumePreviewVo;
     }

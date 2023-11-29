@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.pojo.vo.user;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
@@ -38,6 +39,11 @@ public class ResumePersonInfoVo {
      * 用户生日
      */
     private LocalDate birthday;
+
+    /**
+     * 用户开始工作时间
+     */
+    private LocalDate startWorkingTime;
 
     /**
      * 实名认证状态

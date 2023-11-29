@@ -145,6 +145,8 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
                         .eq(EnterpriseTodo::getUid, userEnterpriseRemoveDto.getUid())
                         .set(EnterpriseTodo::getIsDelete, 1));
 
+        //TODO hr当前已经发布的职位全部移交到管理员手中
+
     }
 
     /**
