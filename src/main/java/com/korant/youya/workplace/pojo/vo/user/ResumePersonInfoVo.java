@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.pojo.vo.user;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
@@ -43,7 +44,8 @@ public class ResumePersonInfoVo {
     /**
      * 用户开始工作时间
      */
-    private String startWorkingTime;
+    @JsonFormat(pattern = "yyyy-MM",timezone="GMT+8")
+    private LocalDate startWorkingTime;
 
     /**
      * 实名认证状态

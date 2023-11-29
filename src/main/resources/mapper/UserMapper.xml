@@ -142,7 +142,7 @@
             u.first_name                                 AS firstName,
             u.gender,
             DATE_PART('year', AGE(NOW(), u.birthday))    AS age,
-            DATE_PART('year', AGE(NOW(), TO_TIMESTAMP(u.start_working_time, 'YYYY-MM')))    AS seniority,
+            DATE_PART('year', AGE(NOW(), u.start_working_time))    AS seniority,
             u.political_outlook                          AS  politicalOutlook,
             u.personal_signature                         AS  personalSignature,
             u.self_evaluation                            AS  selfEvaluation,
