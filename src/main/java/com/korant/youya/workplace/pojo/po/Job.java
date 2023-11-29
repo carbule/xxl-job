@@ -28,19 +28,19 @@ public class Job implements Serializable {
      * 主键
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
-    private Integer id;
+    private Long id;
 
     /**
      * 企业id
      */
     @TableField("enterprise_id")
-    private Integer enterpriseId;
+    private Long enterpriseId;
 
     /**
      * 发布人id
      */
     @TableField("uid")
-    private Integer uid;
+    private Long uid;
 
     /**
      * 行业编码
@@ -130,31 +130,19 @@ public class Job implements Serializable {
      * 经度
      */
     @TableField("longitude")
-    private String longitude;
+    private Float longitude;
 
     /**
      * 纬度
      */
     @TableField("latitude")
-    private String latitude;
+    private Float latitude;
 
     /**
      * 推荐奖励
      */
     @TableField("award")
     private Integer award;
-
-    /**
-     * 招聘人数
-     */
-    @TableField("recruitment_numbers")
-    private Integer recruitmentNumbers;
-
-    /**
-     * 入职一人奖励金额
-     */
-    @TableField("personal_reward")
-    private Integer personalReward;
 
     /**
      * 面试奖励分配比例

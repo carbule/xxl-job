@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.pojo.dto.user;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

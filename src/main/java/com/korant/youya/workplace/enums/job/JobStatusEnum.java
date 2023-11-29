@@ -1,24 +1,22 @@
-package com.korant.youya.workplace.enums.huntjob;
+package com.korant.youya.workplace.enums.job;
 
 /**
- * @ClassName HuntJobAuditStatusEnum
+ * @ClassName HuntJobStatusEnum
  * @Description
  * @Author chenyiqiang
  * @Date 2023/9/6 10:49
  * @Version 1.0
  */
-public enum HuntJobAuditStatusEnum {
+public enum JobStatusEnum {
 
-    //未审核
-    UNAUDITED(0),
-    //审核失败
-    AUDIT_FAILED(1),
-    //审核成功
-    AUDIT_SUCCESS(2);
+    //未发布
+    UNPUBLISHED(0),
+    //已发布
+    PUBLISHED(1);
 
     private int status;
 
-    HuntJobAuditStatusEnum(int status) {
+    JobStatusEnum(int status) {
         this.status = status;
     }
 

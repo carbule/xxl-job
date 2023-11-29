@@ -85,12 +85,6 @@ public class HuntJob implements Serializable {
     private Integer status;
 
     /**
-     * 审核状态
-     */
-    @TableField("audit_status")
-    private Integer auditStatus;
-
-    /**
      * 刷新时间
      */
     @TableField("refresh_time")

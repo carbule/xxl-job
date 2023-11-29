@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.pojo.vo.user;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;

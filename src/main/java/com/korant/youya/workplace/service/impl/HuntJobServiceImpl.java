@@ -3,7 +3,6 @@ package com.korant.youya.workplace.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.korant.youya.workplace.enums.huntjob.HuntJobAuditStatusEnum;
 import com.korant.youya.workplace.enums.huntjob.HuntJobStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
@@ -63,12 +62,16 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      */
     @Override
     public Page<HuntJobListOnHomePageVo> queryListOnHomePage(HuntJobQueryListDto listDto) {
-        Long userId = SpringSecurityUtil.getUserId();
-        String districtCode = listDto.getDistrictCode();
-        String positionCode = listDto.getPositionCode();
+        LoginUser userInfo = SpringSecurityUtil.getUserInfo();
+        Long userId = userInfo.getId();
+        Long enterpriseId = userInfo.getEnterpriseId();
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
-        return null;
+        int count = huntJobMapper.queryHomePageListCount(userId, enterpriseId, listDto);
+        List<HuntJobListOnHomePageVo> list = huntJobMapper.queryListOnHomePage(userId, enterpriseId, listDto);
+        Page<HuntJobListOnHomePageVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
     }
 
     /**
@@ -180,7 +183,6 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         BeanUtils.copyProperties(createDto, huntJob);
         huntJob.setUid(userInfo.getId());
         huntJob.setStatus(HuntJobStatusEnum.PUBLISHED.getStatus());
-        huntJob.setAuditStatus(HuntJobAuditStatusEnum.UNAUDITED.getStatus());
         huntJob.setRefreshTime(LocalDateTime.now());
         huntJob.setRefreshTime(LocalDateTime.now());
         huntJobMapper.insert(huntJob);
