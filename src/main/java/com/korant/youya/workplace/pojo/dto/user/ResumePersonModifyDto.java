@@ -49,7 +49,7 @@ public class ResumePersonModifyDto {
      * 用户开始工作时间
      */
     @NotNull(message = "开始工作时间不能为空")
-    private LocalDate startWorkingTime;
+    private String startWorkingTime;
 
     /**
      * 政治面貌

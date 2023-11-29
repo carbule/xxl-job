@@ -43,7 +43,7 @@ public class ResumePersonInfoVo {
     /**
      * 用户开始工作时间
      */
-    private LocalDate startWorkingTime;
+    private String startWorkingTime;
 
     /**
      * 实名认证状态

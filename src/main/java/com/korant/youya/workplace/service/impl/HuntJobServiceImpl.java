@@ -139,7 +139,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (null == birthday) throw new YouyaException("请完善个人信息中出生日期");
         boolean exists = educationExperienceMapper.exists(new LambdaQueryWrapper<EducationExperience>().eq(EducationExperience::getUid, userId).eq(EducationExperience::getIsDelete, 0));
         if (!exists) throw new YouyaException("请至少补充一条教育经历");
-        LocalDate startWorkingTime = user.getStartWorkingTime();
+        String startWorkingTime = user.getStartWorkingTime();
         if (null == startWorkingTime) throw new YouyaException("请完善个人信息中开始工作时间");
     }
 
