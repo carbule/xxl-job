@@ -94,32 +94,26 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
         if (employStatusModifyDto.getExpectedPositionCreateDtos().length != 0){
             List<ExpectedPositionCreateDto> positionCreateDtoList = Arrays.asList(employStatusModifyDto.getExpectedPositionCreateDtos());
             if (positionCreateDtoList.size() > 5) throw new YouyaException("职位最多5个");
-            Integer sort = 1;
             for (ExpectedPositionCreateDto expectedPositionCreateDto: positionCreateDtoList) {
                 ExpectedPosition expectedPosition = new ExpectedPosition();
                 BeanUtils.copyProperties(expectedPositionCreateDto, expectedPosition);
                 expectedPosition.setStatusId(status.getId());
-                expectedPosition.setSort(sort);
                 expectedPosition.setIsDelete(0);
                 expectedPosition.setCreateTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai")));
                 expectedPositionMapper.insert(expectedPosition);
-                sort++;
             }
         }
         if (employStatusModifyDto.getExpectedWorkAreaCreateDtos().length != 0){
             List<ExpectedWorkAreaCreateDto> workAreaCreateDtoList = Arrays.asList(employStatusModifyDto.getExpectedWorkAreaCreateDtos());
             if (workAreaCreateDtoList.size() > 3) throw new YouyaException("工作区域最多3个");
-            Integer sort = 1;
             for (ExpectedWorkAreaCreateDto expectedWorkAreaCreateDto: workAreaCreateDtoList) {
                 ExpectedWorkArea expectedWorkArea = new ExpectedWorkArea();
                 BeanUtils.copyProperties(expectedWorkAreaCreateDto, expectedWorkArea);
                 expectedWorkArea.setStatusId(status.getId());
-                expectedWorkArea.setSort(sort);
                 expectedWorkArea.setIsDelete(0);
                 expectedWorkArea.setCountryCode("100000");
                 expectedWorkArea.setCreateTime(LocalDateTime.now(ZoneId.of("Asia/Shanghai")));
                 expectedWorkAreaMapper.insert(expectedWorkArea);
-                sort++;
             }
         }
 
