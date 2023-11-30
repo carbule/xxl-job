@@ -6,6 +6,8 @@
         <result column="avatar" property="avatar"/>
         <result column="lastName" property="lastName"/>
         <result column="firstName" property="firstName"/>
+        <result column="gender" property="gender"/>
+        <result column="personalSignature" property="personalSignature"/>
         <result column="age" property="age"/>
         <result column="schoolName" property="schoolName"/>
         <result column="eduLevel" property="eduLevel"/>
@@ -56,6 +58,8 @@
         <result column="avatar" property="avatar"/>
         <result column="lastName" property="lastName"/>
         <result column="firstName" property="firstName"/>
+        <result column="gender" property="gender"/>
+        <result column="personalSignature" property="personalSignature"/>
         <result column="age" property="age"/>
         <result column="eduLevel" property="eduLevel"/>
         <result column="workExperience" property="workExperience"/>
@@ -85,6 +89,8 @@
         <result column="avatar" property="avatar"/>
         <result column="lastName" property="lastName"/>
         <result column="firstName" property="firstName"/>
+        <result column="gender" property="gender"/>
+        <result column="personalSignature" property="personalSignature"/>
         <result column="age" property="age"/>
         <result column="eduLevel" property="eduLevel"/>
         <result column="workExperience" property="workExperience"/>
@@ -146,6 +152,7 @@
         t1.avatar,
         t1.lastName,
         t1.firstName,
+        t1.gender,
         t1.personalSignature,
         t1.positionName,
         t1.minExpectedSalary,
@@ -159,6 +166,7 @@
         u.avatar,
         nvi.last_name AS lastName,
         nvi.first_name AS firstName,
+        u.gender,
         u.personal_signature AS personalSignature,
         p.name AS positionName,
         ep.min_salary AS minExpectedSalary,
@@ -211,6 +219,8 @@
                u.avatar,
                nv.last_name          AS lastName,
                nv.first_name         AS firstName,
+               u.gender,
+               u.personal_signature  AS personalSignature,
                (SELECT CASE
                            WHEN u.birthday IS NOT NULL THEN DATE_PART('year', AGE(NOW(), u.birthday))
                            ELSE NULL
@@ -344,42 +354,44 @@
     <!--  求职发布预览  -->
     <select id="publishPreview" parameterType="java.lang.Long" resultMap="previewMap">
         SELECT u.avatar,
-               nv.last_name       AS lastName,
-               nv.first_name      AS firstName,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
+               u.gender,
+               u.personal_signature AS personalSignature,
                (SELECT CASE
                            WHEN u.birthday IS NOT NULL THEN DATE_PART('year', AGE(NOW(), u.birthday))
                            ELSE NULL
-                           END)   AS age,
-               ee.school_name     AS schoolName,
-               ee.edu_level       AS eduLevel,
+                           END)     AS age,
+               ee.school_name       AS schoolName,
+               ee.edu_level         AS eduLevel,
                (SELECT CASE
                            WHEN u.start_working_time IS NOT NULL
                                THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
                            ELSE NULL
-                           END)   AS workExperience,
-               es.status          AS employStatus,
-               u.self_evaluation  AS selfEvaluation,
+                           END)     AS workExperience,
+               es.status            AS employStatus,
+               u.self_evaluation    AS selfEvaluation,
                ev.phone,
-               ev.wechat_id       AS wechatId,
+               ev.wechat_id         AS wechatId,
                ev.qq,
                ev.email,
-               dd1.name           AS countryName,
-               dd2.name           AS provinceName,
-               dd3.name           AS cityName,
-               dd4.name           AS districtName,
+               dd1.name             AS countryName,
+               dd2.name             AS provinceName,
+               dd3.name             AS cityName,
+               dd4.name             AS districtName,
                ev.address,
-               we.id              AS weId,
-               we.enterprise_name AS enterpriseName,
-               we.department_name AS departmentName,
-               we.position_name   AS positionName,
-               we.start_time      AS startTime,
-               we.end_time        AS endTime,
+               we.id                AS weId,
+               we.enterprise_name   AS enterpriseName,
+               we.department_name   AS departmentName,
+               we.position_name     AS positionName,
+               we.start_time        AS startTime,
+               we.end_time          AS endTime,
                we.content,
                we.performance,
-               pe.id              AS peId,
-               pe.project_name    AS projectName,
-               pe.project_role    AS projectRole,
-               pe.project_content AS projectContent
+               pe.id                AS peId,
+               pe.project_name      AS projectName,
+               pe.project_role      AS projectRole,
+               pe.project_content   AS projectContent
         FROM yy_user AS u
                  LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
                  LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
@@ -458,44 +470,46 @@
     <select id="detailsPreview" parameterType="java.lang.Long" resultMap="detailMap">
         SELECT hj.id,
                u.avatar,
-               nv.last_name       AS lastName,
-               nv.first_name      AS firstName,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
+               u.gender,
+               u.personal_signature AS personalSignature,
                (SELECT CASE
                            WHEN u.birthday IS NOT NULL THEN DATE_PART('year', AGE(NOW(), u.birthday))
                            ELSE NULL
-                           END)   AS age,
-               ee.edu_level       AS eduLevel,
+                           END)     AS age,
+               ee.edu_level         AS eduLevel,
                (SELECT CASE
                            WHEN u.start_working_time IS NOT NULL
                                THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
                            ELSE NULL
-                           END)   AS workExperience,
-               ep.min_salary      AS minExpectedSalary,
-               ep.max_salary      AS maxExpectedSalary,
+                           END)     AS workExperience,
+               ep.min_salary        AS minExpectedSalary,
+               ep.max_salary        AS maxExpectedSalary,
                hj.award,
-               es.status          AS employStatus,
+               es.status            AS employStatus,
                hj.description,
                ev.phone,
-               ev.wechat_id       AS wechatId,
+               ev.wechat_id         AS wechatId,
                ev.qq,
                ev.email,
-               dd1.name           AS countryName,
-               dd2.name           AS provinceName,
-               dd3.name           AS cityName,
-               dd4.name           AS districtName,
+               dd1.name             AS countryName,
+               dd2.name             AS provinceName,
+               dd3.name             AS cityName,
+               dd4.name             AS districtName,
                ev.address,
-               we.id              AS weId,
-               we.enterprise_name AS enterpriseName,
-               we.department_name AS departmentName,
-               we.position_name   AS positionName,
-               we.start_time      AS startTime,
-               we.end_time        AS endTime,
+               we.id                AS weId,
+               we.enterprise_name   AS enterpriseName,
+               we.department_name   AS departmentName,
+               we.position_name     AS positionName,
+               we.start_time        AS startTime,
+               we.end_time          AS endTime,
                we.content,
                we.performance,
-               pe.id              AS peId,
-               pe.project_name    AS projectName,
-               pe.project_role    AS projectRole,
-               pe.project_content AS projectContent
+               pe.id                AS peId,
+               pe.project_name      AS projectName,
+               pe.project_role      AS projectRole,
+               pe.project_content   AS projectContent
         FROM hunt_job AS hj
                  LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
                  LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0

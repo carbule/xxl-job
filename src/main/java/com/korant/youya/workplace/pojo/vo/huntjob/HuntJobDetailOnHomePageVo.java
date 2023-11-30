@@ -41,6 +41,16 @@ public class HuntJobDetailOnHomePageVo {
     private String firstName;
 
     /**
+     * 用户性别
+     */
+    private Integer gender;
+
+    /**
+     * 个性签名
+     */
+    private String personalSignature;
+
+    /**
      * 年龄
      */
     private Integer age;

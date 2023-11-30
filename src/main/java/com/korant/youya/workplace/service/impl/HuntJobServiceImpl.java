@@ -138,6 +138,8 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
             throw new YouyaException("请先完成实名认证");
         Integer accountStatus = user.getAccountStatus();
         if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+        Integer gender = user.getGender();
+        if (null == gender) throw new YouyaException("请完善个人信息中性别");
         LocalDate birthday = user.getBirthday();
         if (null == birthday) throw new YouyaException("请完善个人信息中出生日期");
         boolean exists = educationExperienceMapper.exists(new LambdaQueryWrapper<EducationExperience>().eq(EducationExperience::getUid, userId).eq(EducationExperience::getIsDelete, 0));

@@ -33,6 +33,11 @@ public class HuntJobListOnHomePageVo {
     private String firstName;
 
     /**
+     * 用户性别
+     */
+    private Integer gender;
+
+    /**
      * 个性签名
      */
     private String personalSignature;
