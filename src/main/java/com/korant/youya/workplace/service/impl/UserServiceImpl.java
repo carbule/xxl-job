@@ -296,9 +296,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (null == o) {
             String code = verificationCodeGenerator();
             if (!HuaWeiUtil.sendVerificationCode(code, phone)) throw new YouyaException("短信验证码发送失败，请稍后再试");
-//            if (!redisUtil.set(key, code, 600)) throw new YouyaException("获取验证码失败，请稍后再试");
-            //todo 暂时不过期
-            if (!redisUtil.set(key, code)) throw new YouyaException("获取验证码失败，请稍后再试");
+            if (!redisUtil.set(key, code, 600)) throw new YouyaException("获取验证码失败，请稍后再试");
         } else throw new YouyaException("验证码10分钟内有效，请勿频繁获取短信验证码");
     }
 
