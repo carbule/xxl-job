@@ -1,101 +1,71 @@
 package com.korant.youya.workplace.pojo.vo.huntjob;
 
-import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @ClassName HuntJobDetailVo
  * @Description
  * @Author chenyiqiang
- * @Date 2023/11/21 20:11
+ * @Date 2023/11/30 16:21
  * @Version 1.0
  */
 @Data
 public class HuntJobDetailVo {
 
     /**
-     * 求职id
+     * 主键
      */
     private Long id;
 
     /**
-     * 用户头像
+     * 意向职位id
      */
-    private String avatar;
+    private Long positionId;
 
     /**
-     * 用户姓氏
+     * 行业名称
      */
-    private String lastName;
+    private String industryName;
 
     /**
-     * 用户名
+     * 领域名称
      */
-    private String firstName;
+    private String sectorName;
 
     /**
-     * 年龄
+     * 职位名称
      */
-    private Integer age;
+    private String positionName;
 
     /**
-     * 学历
+     * 行业编码
      */
-    @Dict(categoryCode = "education")
-    private Integer eduLevel;
+    private String industryCode;
 
     /**
-     * 工作年限
+     * 领域编码
      */
-    private Integer workExperience;
+    private String sectorCode;
 
     /**
-     * 期望最低工资
+     * 职位编码
      */
-    private Integer minExpectedSalary;
+    private String positionCode;
 
     /**
-     * 期望最大工资
+     * 最低薪资
      */
-    private Integer maxExpectedSalary;
+    private Integer minSalary;
 
     /**
-     * 奖励金额
+     * 最高薪资
      */
-    private Integer award;
+    private Integer maxSalary;
 
     /**
-     * 求职状态
+     * 期望区域id
      */
-    @Dict(categoryCode = "employ_status")
-    private Integer employStatus;
-
-    /**
-     * 求职说明
-     */
-    private String description;
-
-    /**
-     * 用户手机号
-     */
-    private String phone;
-
-    /**
-     * 用户微信号
-     */
-    private String wechatId;
-
-    /**
-     * 用户QQ号
-     */
-    private String qq;
-
-    /**
-     * 用户邮箱
-     */
-    private String email;
+    private Long areaId;
 
     /**
      * 国家名称
@@ -118,12 +88,42 @@ public class HuntJobDetailVo {
     private String districtName;
 
     /**
-     * 详细地址
+     * 国家编码
      */
-    private String address;
+    private String countryCode;
 
     /**
-     * 工作履历
+     * 省份编码
      */
-    private List<WorkExperienceVo> workExperienceVoList;
+    private String provinceCode;
+
+    /**
+     * 市级编码
+     */
+    private String cityCode;
+
+    /**
+     * 行政区编码
+     */
+    private String districtCode;
+
+    /**
+     * 推荐奖励
+     */
+    private Integer award;
+
+    /**
+     * 面试奖励分配比例
+     */
+    private Integer interviewRewardRate;
+
+    /**
+     * 入职奖励分配比例
+     */
+    private Integer onboardRewardRate;
+
+    /**
+     * 转正奖励分配比例
+     */
+    private Integer fullMemberRewardRate;
 }

@@ -9,6 +9,8 @@ import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 
+import java.util.List;
+
 /**
  * <p>
  * 求职表 服务类
@@ -56,11 +58,25 @@ public interface HuntJobService extends IService<HuntJob> {
     void checkUserInfo();
 
     /**
-     * 求职预览
+     * 查询个人意向职位列表
      *
      * @return
      */
-    HuntJobPreviewVo preview();
+    List<PersonalExpectedPositionListVo> queryPersonalExpectedPositionList();
+
+    /**
+     * 查询个人意向区域列表
+     *
+     * @return
+     */
+    List<PersonalExpectedWorkAreaListVo> queryPersonalExpectedWorkAreaList();
+
+    /**
+     * 求职发布预览
+     *
+     * @return
+     */
+    HuntJobPublishPreviewVo publishPreview();
 
     /**
      * 创建求职信息
@@ -75,6 +91,14 @@ public interface HuntJobService extends IService<HuntJob> {
      * @param modifyDto
      */
     void modify(HuntJobModifyDto modifyDto);
+
+    /**
+     * 根据id预览求职详细信息
+     *
+     * @param id
+     * @return
+     */
+    HuntJobDetailsPreviewVo detailsPreview(Long id);
 
     /**
      * 根据id查询求职信息详情

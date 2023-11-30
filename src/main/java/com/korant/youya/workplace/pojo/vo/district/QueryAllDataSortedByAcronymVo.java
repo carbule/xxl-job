@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @ClassName QueryAllDataSortedByAcronymVo
@@ -24,5 +23,5 @@ public class QueryAllDataSortedByAcronymVo {
     /**
      * 国内所有地区数据按缩略词排序
      */
-    private Map<String, List<DistrictDataVo>> districtDataMap;
+    private List<List<DistrictDataVo>> districtDataList;
 }

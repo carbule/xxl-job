@@ -147,14 +147,36 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     }
 
     /**
-     * 求职预览
+     * 查询个人意向职位列表
      *
      * @return
      */
     @Override
-    public HuntJobPreviewVo preview() {
+    public List<PersonalExpectedPositionListVo> queryPersonalExpectedPositionList() {
         Long userId = SpringSecurityUtil.getUserId();
-        return huntJobMapper.preview(userId);
+        return huntJobMapper.queryPersonalExpectedPositionList(userId);
+    }
+
+    /**
+     * 查询个人意向区域列表
+     *
+     * @return
+     */
+    @Override
+    public List<PersonalExpectedWorkAreaListVo> queryPersonalExpectedWorkAreaList() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return huntJobMapper.queryPersonalExpectedWorkAreaList(userId);
+    }
+
+    /**
+     * 求职发布预览
+     *
+     * @return
+     */
+    @Override
+    public HuntJobPublishPreviewVo publishPreview() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return huntJobMapper.publishPreview(userId);
     }
 
     /**
@@ -184,7 +206,6 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         huntJob.setUid(userInfo.getId());
         huntJob.setStatus(HuntJobStatusEnum.PUBLISHED.getStatus());
         huntJob.setRefreshTime(LocalDateTime.now());
-        huntJob.setRefreshTime(LocalDateTime.now());
         huntJobMapper.insert(huntJob);
     }
 
@@ -199,7 +220,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, id).eq(HuntJob::getIsDelete, 0));
         if (null == huntJob) throw new YouyaException("求职信息不存在");
         Integer status = huntJob.getStatus();
-        if (HuntJobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
+        if (HuntJobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
         Integer award = modifyDto.getAward();
         if (null != award) {
             Integer interviewRewardRate = modifyDto.getInterviewRewardRate();
@@ -215,6 +236,18 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     }
 
     /**
+     * 根据id预览求职详细信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public HuntJobDetailsPreviewVo detailsPreview(Long id) {
+        Long userId = SpringSecurityUtil.getUserId();
+        return huntJobMapper.detailsPreview(userId, id);
+    }
+
+    /**
      * 根据id查询求职信息详情
      *
      * @param id
@@ -222,8 +255,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      */
     @Override
     public HuntJobDetailVo detail(Long id) {
-        Long userId = SpringSecurityUtil.getUserId();
-        return huntJobMapper.detail(userId, id);
+        return huntJobMapper.detail(id);
     }
 
     /**

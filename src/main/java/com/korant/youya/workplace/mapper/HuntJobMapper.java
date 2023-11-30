@@ -60,12 +60,36 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
     List<HuntJobPersonalListVo> queryPersonalList(@Param("userId") Long userId, @Param("status") Integer status, @Param("personalListDto") HuntJobQueryPersonalListDto personalListDto);
 
     /**
+     * 查询个人意向职位列表
+     *
+     * @param userId
+     * @return
+     */
+    List<PersonalExpectedPositionListVo> queryPersonalExpectedPositionList(@Param("userId") Long userId);
+
+    /**
+     * 查询个人意向区域列表
+     *
+     * @param userId
+     * @return
+     */
+    List<PersonalExpectedWorkAreaListVo> queryPersonalExpectedWorkAreaList(@Param("userId") Long userId);
+
+    /**
      * 求职预览
      *
      * @param userId
      * @return
      */
-    HuntJobPreviewVo preview(@Param("userId") Long userId);
+    HuntJobPublishPreviewVo publishPreview(@Param("userId") Long userId);
+
+    /**
+     * 根据id查询求职信息详情
+     *
+     * @param id
+     * @return
+     */
+    HuntJobDetailVo detail(@Param("id") Long id);
 
     /**
      * 修改求职信息
@@ -76,10 +100,10 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
     int modify(@Param("modifyDto") HuntJobModifyDto modifyDto);
 
     /**
-     * 根据id查询求职信息详情
+     * 根据id预览求职详细信息
      *
      * @param id
      * @return
      */
-    HuntJobDetailVo detail(@Param("userId") Long userId, @Param("id") Long id);
+    HuntJobDetailsPreviewVo detailsPreview(@Param("userId") Long userId, @Param("id") Long id);
 }

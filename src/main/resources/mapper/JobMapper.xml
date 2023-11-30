@@ -2,4 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.JobMapper">
 
+    <update id="modify" parameterType="com.korant.youya.workplace.pojo.dto.job.JobModifyDto">
+        UPDATE job
+        SET industry_code           = #{modifyDto.industryCode},
+            sector_code             = #{modifyDto.sectorCode},
+            position_code           = #{modifyDto.positionCode},
+            edu_requirements        = #{modifyDto.eduRequirements},
+            work_experience         = #{modifyDto.workExperience},
+            min_salary              = #{modifyDto.minSalary},
+            max_salary              = #{modifyDto.maxSalary},
+            job_desc                = #{modifyDto.jobDesc},
+            other_info              = #{modifyDto.otherInfo},
+            province_code           = #{modifyDto.provinceCode},
+            city_code               = #{modifyDto.cityCode},
+            district_code           = #{modifyDto.districtCode},
+            detail_address          = #{modifyDto.detailAddress},
+            award                   = #{modifyDto.award},
+            interview_reward_rate   = #{modifyDto.interviewRewardRate},
+            onboard_reward_rate     = #{modifyDto.onboardRewardRate},
+            full_member_reward_rate = #{modifyDto.fullMemberRewardRate},
+            update_time             = CURRENT_TIMESTAMP
+        WHERE id = #{modifyDto.id}
+    </update>
 </mapper>

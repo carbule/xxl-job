@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -63,8 +64,11 @@ public class DistrictDataServiceImpl extends ServiceImpl<DistrictDataMapper, Dis
             List<DistrictDataVo> list = map.get(s.getAcronym());
             list.add(s);
         });
+        List<List<DistrictDataVo>> list = new ArrayList<>();
+        Set<Map.Entry<String, List<DistrictDataVo>>> entries = map.entrySet();
+        entries.forEach(s -> list.add(s.getValue()));
         QueryAllDataSortedByAcronymVo acronymVo = new QueryAllDataSortedByAcronymVo();
-        acronymVo.setDistrictDataMap(map);
+        acronymVo.setDistrictDataList(list);
         return acronymVo;
     }
 

@@ -6,14 +6,19 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @ClassName HuntJobPreviewVo
+ * @ClassName HuntJobDetailsPreviewVo
  * @Description
  * @Author chenyiqiang
- * @Date 2023/11/27 15:24
+ * @Date 2023/11/21 20:11
  * @Version 1.0
  */
 @Data
-public class HuntJobPreviewVo {
+public class HuntJobDetailsPreviewVo {
+
+    /**
+     * 求职id
+     */
+    private Long id;
 
     /**
      * 用户头像
@@ -26,7 +31,7 @@ public class HuntJobPreviewVo {
     private String lastName;
 
     /**
-     * 用户名字
+     * 用户名
      */
     private String firstName;
 
@@ -34,11 +39,6 @@ public class HuntJobPreviewVo {
      * 年龄
      */
     private Integer age;
-
-    /**
-     * 学校名称
-     */
-    private String schoolName;
 
     /**
      * 学历
@@ -52,10 +52,30 @@ public class HuntJobPreviewVo {
     private Integer workExperience;
 
     /**
+     * 期望最低工资
+     */
+    private Integer minExpectedSalary;
+
+    /**
+     * 期望最大工资
+     */
+    private Integer maxExpectedSalary;
+
+    /**
+     * 奖励金额
+     */
+    private Integer award;
+
+    /**
      * 求职状态
      */
     @Dict(categoryCode = "employ_status")
     private Integer employStatus;
+
+    /**
+     * 求职说明
+     */
+    private String description;
 
     /**
      * 用户手机号

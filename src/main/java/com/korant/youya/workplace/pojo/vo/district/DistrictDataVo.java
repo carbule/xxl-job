@@ -28,6 +28,11 @@ public class DistrictDataVo {
     private String code;
 
     /**
+     * 地区等级
+     */
+    private Integer level;
+
+    /**
      * 缩略词
      */
     private String acronym;

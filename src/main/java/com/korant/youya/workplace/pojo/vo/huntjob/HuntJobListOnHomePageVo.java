@@ -53,11 +53,6 @@ public class HuntJobListOnHomePageVo {
     private Integer maxExpectedSalary;
 
     /**
-     * 国家名称
-     */
-    private String countryName;
-
-    /**
      * 省份名称
      */
     private String provinceName;

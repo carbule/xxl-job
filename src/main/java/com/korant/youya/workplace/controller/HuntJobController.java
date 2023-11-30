@@ -13,6 +13,8 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
  * 求职表 前端控制器
@@ -89,15 +91,37 @@ public class HuntJobController {
     }
 
     /**
-     * 求职预览
+     * 查询个人意向职位列表
      *
      * @return
      */
-    @GetMapping("/preview")
+    @GetMapping("/queryPersonalExpectedPositionList")
+    public R<?> queryPersonalExpectedPositionList() {
+        List<PersonalExpectedPositionListVo> positionList = huntJobService.queryPersonalExpectedPositionList();
+        return R.success(positionList);
+    }
+
+    /**
+     * 查询个人意向区域列表
+     *
+     * @return
+     */
+    @GetMapping("/queryPersonalExpectedWorkAreaList")
+    public R<?> queryPersonalExpectedWorkAreaList() {
+        List<PersonalExpectedWorkAreaListVo> workAreaList = huntJobService.queryPersonalExpectedWorkAreaList();
+        return R.success(workAreaList);
+    }
+
+    /**
+     * 求职发布预览
+     *
+     * @return
+     */
+    @GetMapping("/publishPreview")
     @ExplanationDict
-    public R<?> preview() {
-        HuntJobPreviewVo previewVo = huntJobService.preview();
-        return R.success(previewVo);
+    public R<?> publishPreview() {
+        HuntJobPublishPreviewVo publishPreviewVo = huntJobService.publishPreview();
+        return R.success(publishPreviewVo);
     }
 
     /**
@@ -120,6 +144,18 @@ public class HuntJobController {
     public R<?> modify(@RequestBody @Valid HuntJobModifyDto modifyDto) {
         huntJobService.modify(modifyDto);
         return R.ok();
+    }
+
+    /**
+     * 根据id预览求职详细信息
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/detailsPreview/{id}")
+    public R<?> detailsPreview(@PathVariable("id") Long id) {
+        HuntJobDetailsPreviewVo detailsPreviewVo = huntJobService.detailsPreview(id);
+        return R.success(detailsPreviewVo);
     }
 
     /**
