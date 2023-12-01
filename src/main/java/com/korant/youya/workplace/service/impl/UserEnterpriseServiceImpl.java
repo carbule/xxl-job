@@ -1,15 +1,19 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.constants.RedisConstant;
+import com.korant.youya.workplace.enums.role.RoleEnum;
 import com.korant.youya.workplace.enums.userenterprise.UserEnterpriseLimitStatus;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.EnterpriseTodoMapper;
 import com.korant.youya.workplace.mapper.RoleMapper;
 import com.korant.youya.workplace.mapper.UserEnterpriseMapper;
 import com.korant.youya.workplace.mapper.UserRoleMapper;
+import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.userenterprise.UserEnterpriseQueryListDto;
 import com.korant.youya.workplace.pojo.dto.userenterprise.UserEnterpriseRemoveDto;
 import com.korant.youya.workplace.pojo.dto.userenterprise.UserEnterpriseTransferDto;
@@ -18,6 +22,7 @@ import com.korant.youya.workplace.pojo.po.UserEnterprise;
 import com.korant.youya.workplace.pojo.po.UserRole;
 import com.korant.youya.workplace.pojo.vo.userenterprise.UserEnterpriseColleagueInfoVo;
 import com.korant.youya.workplace.service.UserEnterpriseService;
+import com.korant.youya.workplace.utils.RedisUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -48,6 +53,9 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
     @Resource
     private EnterpriseTodoMapper enterpriseTodoMapper;
 
+    @Resource
+    private RedisUtil redisUtil;
+
     /**
      * @Description 解除关联企业绑定
      * @Param
@@ -76,6 +84,12 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
                         .eq(EnterpriseTodo::getUid, userId)
                         .set(EnterpriseTodo::getIsDelete, 1));
 
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        LoginUser loginUser = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
+        loginUser.setEnterpriseId(null);
+        //更新用户缓存
+        redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
+
     }
 
     /**
@@ -93,6 +107,9 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
         //TODO 管理员角色相关后续考虑
         if (role !=null && role == 2) throw new YouyaException("管理员无法退出公司！");
 
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        LoginUser loginUser = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
+
         //TODO 退出公司后 已发布职位发布人自动转为公司管理员
         if (role !=null && role == 1) {
             //解除hr角色关系
@@ -100,6 +117,7 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
                     new LambdaUpdateWrapper<UserRole>()
                             .eq(UserRole::getUid, userId)
                             .set(UserRole::getIsDelete, 1));
+            loginUser.setRole(null);
         }
 
         //解除公司人员关系
@@ -108,6 +126,10 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
                         .eq(UserEnterprise::getUid, userId)
                         .eq(UserEnterprise::getEnterpriseId, id)
                         .set(UserEnterprise::getIsDelete, 1));
+        loginUser.setEnterpriseId(null);
+
+        //更新用户缓存
+        redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
 
         //提交过的申请删除
         enterpriseTodoMapper.update(null,
@@ -127,17 +149,26 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
     @Transactional(rollbackFor = Exception.class)
     public void removeUser(UserEnterpriseRemoveDto userEnterpriseRemoveDto) {
 
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userEnterpriseRemoveDto.getUid());
+        LoginUser loginUser = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
+        if (loginUser.getRole() == null || !loginUser.getRole().equals(RoleEnum.ADMIN.getRole()))
+            throw new YouyaException("您不是管理员，无权操作！");
+
         //解除hr跟公司的绑定
         userEnterpriseMapper.update(null,
                 new LambdaUpdateWrapper<UserEnterprise>()
                         .eq(UserEnterprise::getUid, userEnterpriseRemoveDto.getUid())
                         .set(UserEnterprise::getIsDelete, 1));
+        loginUser.setEnterpriseId(null);
 
         //TODO 删除当前用户的hr角色
         userRoleMapper.update(null,
                 new LambdaUpdateWrapper<UserRole>()
                         .eq(UserRole::getUid, userEnterpriseRemoveDto.getUid())
                         .set(UserRole::getIsDelete, 1));
+        loginUser.setRole(null);
+        //更新用户缓存
+        redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
 
         //提交过的申请删除
         enterpriseTodoMapper.update(null,
@@ -184,13 +215,22 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
 
         Long userId = SpringSecurityUtil.getUserId();
 
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        LoginUser loginUser = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
+        if (loginUser.getRole() == null || !loginUser.getRole().equals(RoleEnum.ADMIN.getRole()))
+            throw new YouyaException("您不是管理员，无权操作！");
         //转让者角色变为hr
         userRoleMapper.update(null,
                 new LambdaUpdateWrapper<UserRole>()
                         .eq(UserRole::getUid, userId)
                         .eq(UserRole::getIsDelete, 0)
                         .set(UserRole::getRid, 1));
+        loginUser.setRole(RoleEnum.HR.getRole());
+        //更新用户缓存
+        redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
 
+        String TransfereeCacheKey = String.format(RedisConstant.YY_USER_CACHE, userEnterpriseQueryListDto.getUid());
+        LoginUser Transferee = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
         //被转让者变成公司的管理员
         //先删除被转让者的角色
         userRoleMapper.update(null,
@@ -203,6 +243,9 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
         userRole.setUid(userEnterpriseQueryListDto.getUid());
         userRole.setRid(2L);
         userRoleMapper.insert(userRole);
+        Transferee.setRole(RoleEnum.ADMIN.getRole());
+        //更新被转让者用户缓存
+        redisUtil.set(TransfereeCacheKey, JSONObject.toJSONString(Transferee));
 
         //被转让者提交过的申请删除
         enterpriseTodoMapper.update(null,
@@ -238,6 +281,5 @@ public class UserEnterpriseServiceImpl extends ServiceImpl<UserEnterpriseMapper,
             }
         }
     }
-
 
 }

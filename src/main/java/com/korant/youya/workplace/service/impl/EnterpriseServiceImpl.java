@@ -7,16 +7,20 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
+import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
+import com.korant.youya.workplace.enums.role.RoleEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
+import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.service.EnterpriseService;
 import com.korant.youya.workplace.utils.HuaWeiUtil;
 import com.korant.youya.workplace.utils.ObsUtil;
+import com.korant.youya.workplace.utils.RedisUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import com.obs.services.model.PutObjectResult;
 import jakarta.annotation.Resource;
@@ -61,6 +65,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
     @Resource
     private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     public static final String ENTERPRISE_BUCKET = "enterprise";
 
@@ -123,11 +130,15 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         enterprise.setAuthStatus(EnterpriseAuthStatusEnum.AUTH_IN_PROGRESS.getStatus());
         enterpriseMapper.insert(enterprise);
 
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        LoginUser loginUser = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
+
         //企业人员关联
         UserEnterprise userEnterprise = new UserEnterprise();
         userEnterprise.setUid(userId);
         userEnterprise.setEnterpriseId(enterprise.getId());
         userEnterpriseMapper.insert(userEnterprise);
+        loginUser.setEnterpriseId(enterprise.getId());
 
         //TODO 注册企业的人自动成为管理员
         //赋予用户管理员角色
@@ -135,6 +146,10 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         userRole.setUid(userEnterprise.getUid());
         userRole.setRid(2L);
         userRoleMapper.insert(userRole);
+        loginUser.setRole(RoleEnum.ADMIN.getRole());
+
+        //更新用户缓存
+        redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
 
     }
 
@@ -344,6 +359,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         userRoleMapper.update(null, new LambdaUpdateWrapper<UserRole>()
                 .eq(UserRole::getUid, userId)
                 .set(UserRole::getIsDelete, 1));
+
+        //TODO 更新Redis用户缓存
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        LoginUser loginUser = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
+        loginUser.setEnterpriseId(null);
+        loginUser.setRole(null);
+        redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
 
     }
 

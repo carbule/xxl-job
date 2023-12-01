@@ -1,13 +1,17 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.enterprisetodo.EnterpriseTodoOperateStatus;
+import com.korant.youya.workplace.enums.role.RoleEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
+import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.enterprisetodo.EnterpriseTodoCreateDto;
 import com.korant.youya.workplace.pojo.dto.enterprisetodo.EnterpriseTodoListDto;
 import com.korant.youya.workplace.pojo.po.*;
@@ -16,6 +20,7 @@ import com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseEmployeeListV
 import com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseTodoDetailVo;
 import com.korant.youya.workplace.pojo.vo.enterprisetodo.EnterpriseTodoListVo;
 import com.korant.youya.workplace.service.EnterpriseTodoService;
+import com.korant.youya.workplace.utils.RedisUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
@@ -52,6 +57,9 @@ public class EnterpriseTodoServiceImpl extends ServiceImpl<EnterpriseTodoMapper,
 
     @Resource
     private RoleMapper roleMapper;
+
+    @Resource
+    private RedisUtil redisUtil;
 
 
     /**
@@ -179,10 +187,14 @@ public class EnterpriseTodoServiceImpl extends ServiceImpl<EnterpriseTodoMapper,
                         .eq(EnterpriseTodo::getId, id)
                         .set(EnterpriseTodo::getOperate, EnterpriseTodoOperateStatus.OPERATE_SUCCESS.getStatus()));
 
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, enterpriseTodo.getUid());
+        LoginUser loginUser = JSONObject.parseObject(String.valueOf(redisUtil.get(cacheKey)), LoginUser.class);
+
         UserEnterprise userEnterprise = new UserEnterprise();
         userEnterprise.setEnterpriseId(enterpriseTodo.getEnterpriseId());
         userEnterprise.setUid(enterpriseTodo.getUid());
         userEnterpriseMapper.insert(userEnterprise);
+        loginUser.setEnterpriseId(enterpriseTodo.getEnterpriseId());
 
         //TODO 角色权限未知
         //如果是hr申请 则给他分配hr角色
@@ -191,7 +203,11 @@ public class EnterpriseTodoServiceImpl extends ServiceImpl<EnterpriseTodoMapper,
             userRole.setUid(enterpriseTodo.getUid());
             userRole.setRid(1L);
             userRoleMapper.insert(userRole);
+            loginUser.setRole(RoleEnum.HR.getRole());
         }
+
+        //更新用户缓存
+        redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
 
     }
 
