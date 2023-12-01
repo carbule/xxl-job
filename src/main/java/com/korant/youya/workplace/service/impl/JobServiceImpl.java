@@ -1,19 +1,23 @@
 package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.job.JobAuditStatusEnum;
 import com.korant.youya.workplace.enums.job.JobStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
+import com.korant.youya.workplace.mapper.DistrictDataMapper;
 import com.korant.youya.workplace.mapper.EnterpriseMapper;
 import com.korant.youya.workplace.mapper.JobMapper;
+import com.korant.youya.workplace.mapper.JobWelfareLabelMapper;
 import com.korant.youya.workplace.pojo.Location;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
 import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.po.Job;
+import com.korant.youya.workplace.pojo.po.JobWelfareLabel;
 import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
 import com.korant.youya.workplace.service.JobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -21,6 +25,12 @@ import com.korant.youya.workplace.utils.TencentMapUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -39,6 +49,12 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     @Resource
     private EnterpriseMapper enterpriseMapper;
 
+    @Resource
+    private JobWelfareLabelMapper jobWelfareLabelMapper;
+
+    @Resource
+    private DistrictDataMapper districtDataMapper;
+
     private static final String CHINA_CODE = "100000";
 
     /**
@@ -47,6 +63,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      * @param createDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(JobCreateDto createDto) {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
@@ -66,8 +83,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             int totalAllocationRatio = interviewRewardRate + onboardRewardRate + fullMemberRewardRate;
             if (100 != totalAllocationRatio) throw new YouyaException("面试奖励比例加入职奖励比例必须满足100%");
         }
-        String address = createDto.getProvinceName() + createDto.getCityName() + createDto.getDistrictName();
-        Location location = TencentMapUtil.geocode(address);
+        String address = districtDataMapper.searchAddressByCode(createDto.getProvinceCode(), createDto.getCityCode(), createDto.getDistrictCode());
+        String detailAddress = address + createDto.getDetailAddress();
+        Location location = TencentMapUtil.geocode(detailAddress);
         if (null == location) throw new YouyaException("地址解析失败，请重新填写地址信息");
         Long userId = loginUser.getId();
         Job job = new Job();
@@ -80,6 +98,16 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         job.setLongitude(location.getLng());
         job.setLatitude(location.getLat());
         jobMapper.insert(job);
+        List<Long> welfareLabelIdList = createDto.getWelfareLabelIdList();
+        if (welfareLabelIdList.size() > 0) {
+            List<JobWelfareLabel> list = new ArrayList<>();
+            welfareLabelIdList.forEach(s -> {
+                JobWelfareLabel jobWelfareLabel = new JobWelfareLabel();
+                jobWelfareLabel.setId(IdWorker.getId()).setJobId(job.getId()).setLabelId(s).setCreateTime(LocalDateTime.now()).setIsDelete(0);
+                list.add(jobWelfareLabel);
+            });
+            jobWelfareLabelMapper.batchInsert(list);
+        }
     }
 
     /**
@@ -88,6 +116,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      * @param modifyDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modify(JobModifyDto modifyDto) {
         Long userId = SpringSecurityUtil.getUserId();
         Long id = modifyDto.getId();
@@ -109,8 +138,41 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             int totalAllocationRatio = interviewRewardRate + onboardRewardRate + fullMemberRewardRate;
             if (100 != totalAllocationRatio) throw new YouyaException("面试奖励比例加入职奖励比例必须满足100%");
         }
-        //todo 缺少腾讯地图经纬度
+        String oldAddress = districtDataMapper.searchAddressByCode(job.getProvinceCode(), job.getCityCode(), job.getDistrictCode());
+        String oldDetailAddress = oldAddress + job.getDetailAddress();
+        String newAddress = districtDataMapper.searchAddressByCode(modifyDto.getProvinceCode(), modifyDto.getCityCode(), modifyDto.getDistrictCode());
+        String newDetailAddress = newAddress + modifyDto.getDetailAddress();
+        if (!oldDetailAddress.equals(newDetailAddress)) {
+            Location location = TencentMapUtil.geocode(newDetailAddress);
+            if (null == location) throw new YouyaException("地址解析失败，请重新填写地址信息");
+            modifyDto.setLongitude(location.getLng());
+            modifyDto.setLatitude(location.getLat());
+        }
         jobMapper.modify(modifyDto);
+        List<Long> oldWelfareLabelIdList = jobWelfareLabelMapper.selectWelfareLabelIdListByJobId(job.getId());
+        List<Long> newWelfareLabelIdList = modifyDto.getWelfareLabelIdList();
+
+        //找出新增的福利标签
+        List<Long> addedIdList = newWelfareLabelIdList.stream()
+                .filter(e -> !oldWelfareLabelIdList.contains(e))
+                .collect(Collectors.toList());
+        if (addedIdList.size() > 0) {
+            List<JobWelfareLabel> list = new ArrayList<>();
+            addedIdList.forEach(s -> {
+                JobWelfareLabel jobWelfareLabel = new JobWelfareLabel();
+                jobWelfareLabel.setId(IdWorker.getId()).setJobId(job.getId()).setLabelId(s).setCreateTime(LocalDateTime.now()).setIsDelete(0);
+                list.add(jobWelfareLabel);
+            });
+            jobWelfareLabelMapper.batchInsert(list);
+        }
+
+        //找出删除的福利标签
+        List<Long> removedIdList = oldWelfareLabelIdList.stream()
+                .filter(e -> !newWelfareLabelIdList.contains(e))
+                .collect(Collectors.toList());
+        if (removedIdList.size() > 0) {
+            jobWelfareLabelMapper.batchModify(job.getId(), removedIdList);
+        }
     }
 
     /**

@@ -2,4 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EnterpriseWelfareLabelMapper">
 
+    <!--  查询所有企业福利标签列表  -->
+    <select id="queryAllData"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprisewelfarelabel.EnterpriseWelfareLabelDataVo">
+        SELECT id,
+               name
+        FROM enterprise_welfare_label
+        WHERE is_delete = 0
+    </select>
 </mapper>

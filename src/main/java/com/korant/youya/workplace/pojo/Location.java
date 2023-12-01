@@ -12,7 +12,13 @@ import lombok.Data;
 @Data
 public class Location {
 
+    /**
+     * 经度
+     */
     private float lng;
 
+    /**
+     * 纬度
+     */
     private float lat;
 }

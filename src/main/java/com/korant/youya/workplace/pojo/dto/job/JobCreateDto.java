@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @ClassName JobCreateDto
  * @Description
@@ -67,24 +69,6 @@ public class JobCreateDto {
     private String otherInfo;
 
     /**
-     * 省份名称
-     */
-    @NotBlank(message = "省份名称不能为空")
-    private String provinceName;
-
-    /**
-     * 市级名称
-     */
-    @NotBlank(message = "市级名称不能为空")
-    private String cityName;
-
-    /**
-     * 行政区名称
-     */
-    @NotBlank(message = "行政区名称不能为空")
-    private String districtName;
-
-    /**
      * 省份编码
      */
     @NotBlank(message = "省份编码不能为空")
@@ -127,4 +111,9 @@ public class JobCreateDto {
      * 转正奖励分配比例
      */
     private Integer fullMemberRewardRate;
+
+    /**
+     * 福利标签集合
+     */
+    private List<Long> welfareLabelIdList;
 }

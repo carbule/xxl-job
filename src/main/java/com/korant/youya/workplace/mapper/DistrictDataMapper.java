@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.DistrictData;
 import com.korant.youya.workplace.pojo.vo.district.DistrictDataTreeVo;
 import com.korant.youya.workplace.pojo.vo.district.DistrictDataVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -30,4 +31,14 @@ public interface DistrictDataMapper extends BaseMapper<DistrictData> {
      * @return
      */
     List<DistrictDataVo> queryAllDataSortedByAcronym();
+
+    /**
+     * 根据省市县code查询地址
+     *
+     * @param provinceCode
+     * @param cityCode
+     * @param districtCode
+     * @return
+     */
+    String searchAddressByCode(@Param("provinceCode") String provinceCode, @Param("cityCode") String cityCode, @Param("districtCode") String districtCode);
 }

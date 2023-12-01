@@ -21,4 +21,22 @@
         FROM district_data
         where name != '不限' AND is_delete = 0;
     </select>
+
+    <!--  根据省市县code查询地址  -->
+    <select id="searchAddressByCode" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT string_agg(name, '')
+        FROM (
+                 SELECT name
+                 FROM district_data
+                 WHERE code = #{provinceCode}
+                 UNION ALL
+                 SELECT name
+                 FROM district_data
+                 WHERE code = #{cityCode}
+                 UNION ALL
+                 SELECT name
+                 FROM district_data
+                 WHERE code = #{districtCode}
+             ) AS address
+    </select>
 </mapper>

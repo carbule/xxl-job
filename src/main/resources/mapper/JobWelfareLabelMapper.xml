@@ -2,4 +2,37 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.JobWelfareLabelMapper">
 
+    <!-- 批量添加职位福利标签 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO job_welfare_label(id, job_id, label_id, create_time, is_delete)
+        VALUES
+        <foreach collection="list" item="param" index="index" separator=",">
+            (
+            #{param.id},
+            #{param.jobId},
+            #{param.labelId},
+            #{param.createTime},
+            #{param.isDelete}
+            )
+        </foreach>
+    </insert>
+
+    <!--  根据职位id查询福利标签id  -->
+    <select id="selectWelfareLabelIdListByJobId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT label_id
+        FROM job_welfare_label
+        WHERE job_id = #{jobId}
+          AND is_delete = 0
+    </select>
+
+    <!--  根据职位id批量修改  -->
+    <update id="batchModify" parameterType="java.util.List">
+        UPDATE job_welfare_label
+        SET is_delete = 0
+        WHERE job_id = #{jobId}
+        AND label_id IN
+        <foreach item="param" collection="list" open="(" separator="," close=")">
+            #{param}
+        </foreach>
+    </update>
 </mapper>

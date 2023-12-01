@@ -142,8 +142,8 @@
                 AND ep.position_code = #{listDto.positionCode}
             </if>
         </where>
-        )AS t1 WHERE NOT EXISTS (SELECT 1 FROM shield_enterprise AS se WHERE t1.uid = se.uid AND se.enterprise_id =
-        #{enterpriseId});
+        )AS t1 WHERE NOT EXISTS (SELECT 1 FROM yy_user_blocked_enterprise AS se WHERE t1.uid = se.uid AND
+        se.enterprise_id = #{enterpriseId} AND se.is_delete = 0);
     </select>
 
     <!--  查询首页求职列表  -->
@@ -208,24 +208,29 @@
             ORDER BY hj.refresh_time DESC, hj.create_time DESC LIMIT #{listDto.pageSize}
             OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
         </where>
-        )AS t1 WHERE NOT EXISTS (SELECT 1 FROM shield_enterprise AS se WHERE t1.uid = se.uid AND se.enterprise_id =
-        #{enterpriseId});
+        )AS t1 WHERE NOT EXISTS (SELECT 1 FROM yy_user_blocked_enterprise AS se WHERE t1.uid = se.uid AND
+        se.enterprise_id = #{enterpriseId} AND se.is_delete = 0);
     </select>
 
     <!--  根据求职id查询首页求职信息详情  -->
     <select id="queryDetailOnHomePageById" parameterType="java.lang.Long" resultMap="queryDetailOnHomePageByIdMap">
         SELECT hj.id,
-               u.id                  AS uid,
+               u.id                 AS uid,
                u.avatar,
-               nv.last_name          AS lastName,
-               nv.first_name         AS firstName,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
                u.gender,
-               u.personal_signature  AS personalSignature,
+               u.personal_signature AS personalSignature,
                (SELECT CASE
                            WHEN u.birthday IS NOT NULL THEN DATE_PART('year', AGE(NOW(), u.birthday))
                            ELSE NULL
-                           END)      AS age,
-               ee.edu_level          AS eduLevel,
+                           END)     AS age,
+               (SELECT edu_level
+                FROM education_experience
+                WHERE uid = u.id
+                  AND is_delete = 0
+                ORDER BY end_time DESC, start_time
+                    DESC               LIMIT 1)                    AS eduLevel,
                (SELECT CASE
                            WHEN u.start_working_time IS NOT NULL
                                THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
@@ -247,38 +252,36 @@
                ev.address,
                (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
                 FROM attention_hunt_job
-                WHERE uid = #{userId}
-                  AND hunt_id = #{id}
-                  AND is_delete = 0) AS isCollected,
-               we.id                 AS weId,
-               we.enterprise_name    AS enterpriseName,
-               we.department_name    AS departmentName,
-               we.position_name      AS positionName,
-               we.start_time         AS startTime,
-               we.end_time           AS endTime,
-               we.content,
-               we.performance,
-               pe.id                 AS peId,
-               pe.project_name       AS projectName,
-               pe.project_role       AS projectRole,
-               pe.project_content    AS projectContent
+                WHERE uid =
+               #{userId}
+            AND hunt_id =
+               #{id}
+            AND is_delete = 0) AS isCollected,
+            we.id AS weId,
+            we.enterprise_name AS enterpriseName,
+            we.department_name AS departmentName,
+            we.position_name AS positionName,
+            we.start_time AS startTime,
+            we.end_time AS endTime,
+            we.content,
+            we.performance,
+            pe.id AS peId,
+            pe.project_name AS projectName,
+            pe.project_role AS projectRole,
+            pe.project_content AS projectContent
         FROM hunt_job AS hj
-                 LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
-                 LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
-                 LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
-                 LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
-                 LEFT JOIN everyone_visible_info AS ev ON u.id = ev.uid AND ev.is_delete = 0
-                 LEFT JOIN district_data dd1 ON dd1.code = ev.country_code AND dd1.is_delete = 0
-                 LEFT JOIN district_data dd2 ON dd2.code = ev.province_code AND dd2.is_delete = 0
-                 LEFT JOIN district_data dd3 ON dd3.code = ev.city_code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON dd4.code = ev.district_code AND dd4.is_delete = 0
-                 LEFT JOIN (SELECT *
-                            FROM education_experience
-                            WHERE uid = #{userId}
-                              AND is_delete = 0
-                            ORDER BY end_time DESC, start_time DESC LIMIT 1) AS ee ON u.id = ee.uid
-                 LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
-                 LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
+            LEFT JOIN yy_user AS u
+        ON hj.uid = u.id AND u.is_delete = 0
+            LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+            LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+            LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+            LEFT JOIN everyone_visible_info AS ev ON u.id = ev.uid AND ev.is_delete = 0
+            LEFT JOIN district_data dd1 ON dd1.code = ev.country_code AND dd1.is_delete = 0
+            LEFT JOIN district_data dd2 ON dd2.code = ev.province_code AND dd2.is_delete = 0
+            LEFT JOIN district_data dd3 ON dd3.code = ev.city_code AND dd3.is_delete = 0
+            LEFT JOIN district_data dd4 ON dd4.code = ev.district_code AND dd4.is_delete = 0
+            LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
+            LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE hj.id = #{id}
           AND u.is_delete = 0
     </select>
