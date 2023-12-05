@@ -3,9 +3,9 @@ package com.korant.youya.workplace.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
 import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
+import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.Job;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageDetailVo;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo;
+import com.korant.youya.workplace.pojo.vo.job.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -48,10 +48,36 @@ public interface JobMapper extends BaseMapper<Job> {
     JobHomePageDetailVo queryHomePageDetailById(@Param("userId") Long userId, @Param("id") Long id);
 
     /**
+     * 根据职位信息中的企业id查询企业信息详情
+     *
+     * @param id
+     * @return
+     */
+    EnterDetailVo queryEnterpriseDetailById(@Param("id") Long id);
+
+    /**
+     * 查询用户个人职位列表
+     *
+     * @param userId
+     * @param enterpriseId
+     * @param personalListDto
+     * @return
+     */
+    List<JobPersonalListVo> queryPersonalList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("personalListDto") JobQueryPersonalListDto personalListDto);
+
+    /**
      * 修改职位信息
      *
      * @param modifyDto
      * @return
      */
     int modify(@Param("modifyDto") JobModifyDto modifyDto);
+
+    /**
+     * 根据id查询职位信息详情
+     *
+     * @param id
+     * @return
+     */
+    JobDetailVo detail(@Param("id") Long id);
 }

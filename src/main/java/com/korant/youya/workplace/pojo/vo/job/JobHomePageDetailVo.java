@@ -37,6 +37,12 @@ public class JobHomePageDetailVo {
     private String enterpriseName;
 
     /**
+     * 企业类型
+     */
+    @Dict(categoryCode = "enterprise_type")
+    private Integer entType;
+
+    /**
      * 企业规模
      */
     @Dict(categoryCode = "enterprise_scale")

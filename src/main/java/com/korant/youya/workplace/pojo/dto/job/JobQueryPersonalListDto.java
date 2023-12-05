@@ -1,5 +1,7 @@
 package com.korant.youya.workplace.pojo.dto.job;
 
+import com.korant.youya.workplace.pojo.PageParam;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -10,5 +12,11 @@ import lombok.Data;
  * @Version 1.0
  */
 @Data
-public class JobQueryPersonalListDto {
+public class JobQueryPersonalListDto extends PageParam {
+
+    /**
+     * 状态
+     */
+    @NotNull(message = "职位状态不能为空")
+    private Integer status;
 }

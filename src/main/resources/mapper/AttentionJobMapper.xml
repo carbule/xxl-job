@@ -2,4 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.AttentionJobMapper">
 
+    <!--  查询用户职位关注列表  -->
+    <select id="queryPersonalList"
+            resultType="com.korant.youya.workplace.pojo.vo.attentionjob.AttentionJobPersonalListVo">
+        SELECT aj.id,
+               j.id                                                     AS jobId,
+               e.id                                                     AS enterpriseId,
+               e.logo,
+               e.name                                                   AS enterpriseName,
+               e.scale,
+               p.name                                                   AS positionName,
+               j.edu_requirements                                       AS eduRequirements,
+               j.work_experience                                        AS workExperience,
+               j.min_salary                                             AS minSalary,
+               j.max_salary                                             AS maxSalary,
+               dd1.name                                                 AS cityName,
+               dd2.name                                                 AS districtName,
+               (SELECT CASE WHEN j.award IS NOT NULL THEN 1 ELSE 0 END) AS isAwardExist
+        FROM attention_job AS aj
+                 LEFT JOIN job AS j ON aj.job_id = j.id
+                 LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
+                 LEFT JOIN district_data dd1 ON j.city_code = dd1.code AND dd1.is_delete = 0
+                 LEFT JOIN district_data dd2 ON j.district_code = dd2.code AND dd2.is_delete = 0
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+        WHERE aj.uid = #{userId}
+          AND aj.is_delete = 0
+          AND j.is_delete = 0
+        ORDER BY aj.create_time DESC LIMIT #{personalListDto.pageSize}
+        OFFSET (#{personalListDto.pageNumber} -1) * #{personalListDto.pageSize}
+    </select>
 </mapper>

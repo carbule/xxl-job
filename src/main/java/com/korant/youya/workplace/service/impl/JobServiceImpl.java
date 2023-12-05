@@ -19,10 +19,7 @@ import com.korant.youya.workplace.pojo.po.AttentionJob;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.po.Job;
 import com.korant.youya.workplace.pojo.po.JobWelfareLabel;
-import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageDetailVo;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo;
-import com.korant.youya.workplace.pojo.vo.job.JobPersonalListVo;
+import com.korant.youya.workplace.pojo.vo.job.*;
 import com.korant.youya.workplace.service.JobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import com.korant.youya.workplace.utils.TencentMapUtil;
@@ -95,6 +92,17 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     }
 
     /**
+     * 根据职位信息中的企业id查询企业信息详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public EnterDetailVo queryEnterpriseDetailById(Long id) {
+        return jobMapper.queryEnterpriseDetailById(id);
+    }
+
+    /**
      * 收藏或取消收藏职位信息
      *
      * @param id
@@ -122,7 +130,18 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      */
     @Override
     public Page<JobPersonalListVo> queryPersonalList(JobQueryPersonalListDto personalListDto) {
-        return null;
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) return null;
+        Long userId = loginUser.getId();
+        Integer status = personalListDto.getStatus();
+        int pageNumber = personalListDto.getPageNumber();
+        int pageSize = personalListDto.getPageSize();
+        Long count = jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getEnterpriseId, enterpriseId).eq(Job::getUid, userId).eq(Job::getStatus, status).eq(Job::getIsDelete, 0));
+        List<JobPersonalListVo> list = jobMapper.queryPersonalList(userId, enterpriseId, personalListDto);
+        Page<JobPersonalListVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
     }
 
     /**
@@ -160,7 +179,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         BeanUtils.copyProperties(createDto, job);
         job.setEnterpriseId(enterpriseId);
         job.setUid(userId);
-        job.setStatus(JobStatusEnum.UNPUBLISHED.getStatus());
+        job.setStatus(JobStatusEnum.PUBLISHED.getStatus());
         job.setAuditStatus(JobAuditStatusEnum.UNAUDITED.getStatus());
         job.setCountryCode(CHINA_CODE);
         job.setLongitude(location.getLng());
@@ -251,7 +270,46 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      */
     @Override
     public JobDetailVo detail(Long id) {
-        return null;
+        return jobMapper.detail(id);
+    }
+
+    /**
+     * 根据id发布职位
+     *
+     * @param id
+     */
+    @Override
+    public void publish(Long id) {
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, id).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        Long uid = job.getUid();
+        Long userId = SpringSecurityUtil.getUserId();
+        if (!uid.equals(userId)) throw new YouyaException("非法操作");
+        Integer status = job.getStatus();
+        if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("职位已发布");
+        job.setStatus(JobStatusEnum.PUBLISHED.getStatus());
+        job.setAuditStatus(JobAuditStatusEnum.UNAUDITED.getStatus());
+        jobMapper.updateById(job);
+    }
+
+    /**
+     * 根据id关闭职位
+     *
+     * @param id
+     */
+    @Override
+    public void close(Long id) {
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, id).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        Long uid = job.getUid();
+        Long userId = SpringSecurityUtil.getUserId();
+        if (!uid.equals(userId)) throw new YouyaException("非法操作");
+        Integer status = job.getStatus();
+        if (JobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("职位已关闭");
+        Integer auditStatus = job.getAuditStatus();
+        if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus) throw new YouyaException("审核中的职位无法关闭");
+        job.setStatus(JobStatusEnum.UNPUBLISHED.getStatus());
+        jobMapper.updateById(job);
     }
 
     /**
@@ -261,6 +319,14 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      */
     @Override
     public void delete(Long id) {
-
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, id).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        Long uid = job.getUid();
+        Long userId = SpringSecurityUtil.getUserId();
+        if (!uid.equals(userId)) throw new YouyaException("非法操作");
+        Integer status = job.getStatus();
+        if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("发布中的职位不可删除");
+        job.setIsDelete(1);
+        jobMapper.updateById(job);
     }
 }

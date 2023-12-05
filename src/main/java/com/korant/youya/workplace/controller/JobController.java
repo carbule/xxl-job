@@ -7,10 +7,7 @@ import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
 import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
 import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
-import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageDetailVo;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo;
-import com.korant.youya.workplace.pojo.vo.job.JobPersonalListVo;
+import com.korant.youya.workplace.pojo.vo.job.*;
 import com.korant.youya.workplace.service.JobService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -59,6 +56,19 @@ public class JobController {
     }
 
     /**
+     * 根据职位信息中的企业id查询企业信息详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/queryEnterpriseDetailById/{id}")
+    @ExplanationDict
+    public R<?> queryEnterpriseDetailById(@PathVariable("id") Long id) {
+        EnterDetailVo enterpriseDetailVo = jobService.queryEnterpriseDetailById(id);
+        return R.success(enterpriseDetailVo);
+    }
+
+    /**
      * 收藏或取消收藏职位信息
      *
      * @param id
@@ -77,6 +87,7 @@ public class JobController {
      * @return
      */
     @PostMapping("/queryPersonalList")
+    @ExplanationDict
     public R<?> queryPersonalList(@RequestBody @Valid JobQueryPersonalListDto personalListDto) {
         Page<JobPersonalListVo> page = jobService.queryPersonalList(personalListDto);
         return R.success(page);
@@ -111,10 +122,33 @@ public class JobController {
      *
      * @return
      */
-    @PostMapping("/detail/{id}")
+    @GetMapping("/detail/{id}")
+    @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         JobDetailVo jobDetailVo = jobService.detail(id);
         return R.success(jobDetailVo);
+    }
+
+    /**
+     * 根据id发布职位
+     *
+     * @return
+     */
+    @GetMapping("/publish/{id}")
+    public R<?> publish(@PathVariable("id") Long id) {
+        jobService.publish(id);
+        return R.ok();
+    }
+
+    /**
+     * 根据id关闭职位
+     *
+     * @return
+     */
+    @GetMapping("/close/{id}")
+    public R<?> close(@PathVariable("id") Long id) {
+        jobService.close(id);
+        return R.ok();
     }
 
     /**
@@ -122,7 +156,7 @@ public class JobController {
      *
      * @return
      */
-    @PostMapping("/delete/{id}")
+    @GetMapping("/delete/{id}")
     public R<?> delete(@PathVariable("id") Long id) {
         jobService.delete(id);
         return R.ok();

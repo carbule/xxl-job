@@ -7,10 +7,7 @@ import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
 import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.Job;
-import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageDetailVo;
-import com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo;
-import com.korant.youya.workplace.pojo.vo.job.JobPersonalListVo;
+import com.korant.youya.workplace.pojo.vo.job.*;
 
 /**
  * <p>
@@ -37,6 +34,14 @@ public interface JobService extends IService<Job> {
      * @return
      */
     JobHomePageDetailVo queryHomePageDetailById(Long id);
+
+    /**
+     * 根据职位信息中的企业id查询企业信息详情
+     *
+     * @param id
+     * @return
+     */
+    EnterDetailVo queryEnterpriseDetailById(Long id);
 
     /**
      * 收藏或取消收藏职位信息
@@ -74,6 +79,20 @@ public interface JobService extends IService<Job> {
      * @return
      */
     JobDetailVo detail(Long id);
+
+    /**
+     * 根据id发布职位
+     *
+     * @param id
+     */
+    void publish(Long id);
+
+    /**
+     * 根据id关闭职位
+     *
+     * @param id
+     */
+    void close(Long id);
 
     /**
      * 根据id删除职位

@@ -1,7 +1,12 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.attentionhuntjob.AttentionHuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
+import com.korant.youya.workplace.pojo.vo.attentionhuntjob.AttentionHuntJobPersonalListVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,12 @@ import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
  */
 public interface AttentionHuntJobMapper extends BaseMapper<AttentionHuntJob> {
 
+    /**
+     * 查询用户求职关注列表
+     *
+     * @param userId
+     * @param personalListDto
+     * @return
+     */
+    List<AttentionHuntJobPersonalListVo> queryPersonalList(@Param("userId") Long userId, @Param("personalListDto") AttentionHuntJobQueryPersonalListDto personalListDto);
 }

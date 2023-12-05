@@ -77,8 +77,7 @@ public class UserBlockedEnterpriseServiceImpl extends ServiceImpl<UserBlockedEnt
             blockedEnterprise.setUid(userId).setEnterpriseId(enterpriseId);
             userBlockedEnterpriseMapper.insert(blockedEnterprise);
         } else {
-            userBlockedEnterprise.setIsDelete(1);
-            userBlockedEnterpriseMapper.updateById(userBlockedEnterprise);
+            userBlockedEnterpriseMapper.deleteById(userBlockedEnterprise);
         }
     }
 
@@ -106,9 +105,6 @@ public class UserBlockedEnterpriseServiceImpl extends ServiceImpl<UserBlockedEnt
      */
     @Override
     public void delete(Long id) {
-        UserBlockedEnterprise userBlockedEnterprise = userBlockedEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserBlockedEnterprise>().eq(UserBlockedEnterprise::getId, id).eq(UserBlockedEnterprise::getIsDelete, 0));
-        if (null == userBlockedEnterprise) throw new YouyaException("企业屏蔽信息不存在");
-        userBlockedEnterprise.setIsDelete(1);
-        userBlockedEnterpriseMapper.updateById(userBlockedEnterprise);
+        userBlockedEnterpriseMapper.deleteById(id);
     }
 }

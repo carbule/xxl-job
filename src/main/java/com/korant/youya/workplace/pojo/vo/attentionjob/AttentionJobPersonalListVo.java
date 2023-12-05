@@ -1,22 +1,43 @@
-package com.korant.youya.workplace.pojo.vo.job;
+package com.korant.youya.workplace.pojo.vo.attentionjob;
 
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
 /**
- * @ClassName JobPersonalListVo
+ * @ClassName AttentionJobPersonalListVo
  * @Description
  * @Author chenyiqiang
- * @Date 2023/12/4 11:54
+ * @Date 2023/12/5 16:26
  * @Version 1.0
  */
 @Data
-public class JobPersonalListVo {
+public class AttentionJobPersonalListVo {
 
     /**
      * 主键
      */
     private Long id;
+
+    /**
+     * 职位id
+     */
+    private Long jobId;
+
+    /**
+     * 企业logo
+     */
+    private String logo;
+
+    /**
+     * 企业名称
+     */
+    private String enterpriseName;
+
+    /**
+     * 企业规模
+     */
+    @Dict(categoryCode = "enterprise_scale")
+    private Integer scale;
 
     /**
      * 职位名称
@@ -54,11 +75,6 @@ public class JobPersonalListVo {
      * 行政区名称
      */
     private String districtName;
-
-    /**
-     * 审核状态
-     */
-    private Integer auditStatus;
 
     /**
      * 是否存在推荐奖励
