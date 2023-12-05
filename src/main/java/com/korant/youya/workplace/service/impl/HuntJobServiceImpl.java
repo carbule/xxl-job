@@ -14,7 +14,7 @@ import com.korant.youya.workplace.mapper.UserMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
 import com.korant.youya.workplace.pojo.po.EducationExperience;
@@ -61,15 +61,15 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @return
      */
     @Override
-    public Page<HuntJobListOnHomePageVo> queryListOnHomePage(HuntJobQueryListDto listDto) {
+    public Page<HuntJobHomePageListVo> queryHomePageList(HuntJobQueryHomePageListDto listDto) {
         LoginUser userInfo = SpringSecurityUtil.getUserInfo();
         Long userId = userInfo.getId();
         Long enterpriseId = userInfo.getEnterpriseId();
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         int count = huntJobMapper.queryHomePageListCount(userId, enterpriseId, listDto);
-        List<HuntJobListOnHomePageVo> list = huntJobMapper.queryListOnHomePage(userId, enterpriseId, listDto);
-        Page<HuntJobListOnHomePageVo> page = new Page<>();
+        List<HuntJobHomePageListVo> list = huntJobMapper.queryHomePageList(userId, enterpriseId, listDto);
+        Page<HuntJobHomePageListVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }
@@ -81,9 +81,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @return
      */
     @Override
-    public HuntJobDetailOnHomePageVo queryDetailOnHomePageById(Long id) {
+    public HuntJobHomePageDetailVo queryHomePageDetailById(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
-        return huntJobMapper.queryDetailOnHomePageById(userId, id);
+        return huntJobMapper.queryHomePageDetailById(userId, id);
     }
 
     /**

@@ -5,7 +5,7 @@ import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.service.HuntJobService;
@@ -36,9 +36,9 @@ public class HuntJobController {
      * @param listDto
      * @return
      */
-    @PostMapping("/queryListOnHomePage")
-    public R<?> queryListOnHomePage(@RequestBody @Valid HuntJobQueryListDto listDto) {
-        Page<HuntJobListOnHomePageVo> page = huntJobService.queryListOnHomePage(listDto);
+    @PostMapping("/queryHomePageList")
+    public R<?> queryListOnHomePage(@RequestBody @Valid HuntJobQueryHomePageListDto listDto) {
+        Page<HuntJobHomePageListVo> page = huntJobService.queryHomePageList(listDto);
         return R.success(page);
     }
 
@@ -48,11 +48,11 @@ public class HuntJobController {
      * @param id
      * @return
      */
-    @GetMapping("/queryDetailOnHomePageById/{id}")
+    @GetMapping("/queryHomePageDetailById/{id}")
     @ExplanationDict
-    public R<?> queryDetailOnHomePageById(@PathVariable("id") Long id) {
-        HuntJobDetailOnHomePageVo detailOnHomePageVo = huntJobService.queryDetailOnHomePageById(id);
-        return R.success(detailOnHomePageVo);
+    public R<?> queryHomePageDetailById(@PathVariable("id") Long id) {
+        HuntJobHomePageDetailVo homePageDetailVo = huntJobService.queryHomePageDetailById(id);
+        return R.success(homePageDetailVo);
     }
 
     /**

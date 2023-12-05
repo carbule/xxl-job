@@ -2,7 +2,7 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
@@ -28,7 +28,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param listDto
      * @return
      */
-    int queryHomePageListCount(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryListDto listDto);
+    int queryHomePageListCount(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
 
     /**
      * 查询首页求职列表
@@ -38,7 +38,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param listDto
      * @return
      */
-    List<HuntJobListOnHomePageVo> queryListOnHomePage(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryListDto listDto);
+    List<HuntJobHomePageListVo> queryHomePageList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
 
     /**
      * 根据求职id查询首页求职信息详情
@@ -47,7 +47,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param id
      * @return
      */
-    HuntJobDetailOnHomePageVo queryDetailOnHomePageById(@Param("userId") Long userId, @Param("id") Long id);
+    HuntJobHomePageDetailVo queryHomePageDetailById(@Param("userId") Long userId, @Param("id") Long id);
 
     /**
      * 查询用户个人求职列表

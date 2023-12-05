@@ -1,10 +1,16 @@
 package com.korant.youya.workplace.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
 import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
+import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
+import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.Job;
 import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
+import com.korant.youya.workplace.pojo.vo.job.JobHomePageDetailVo;
+import com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo;
+import com.korant.youya.workplace.pojo.vo.job.JobPersonalListVo;
 
 /**
  * <p>
@@ -15,6 +21,37 @@ import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
  * @since 2023-11-14
  */
 public interface JobService extends IService<Job> {
+
+    /**
+     * 查询首页职位信息列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<JobHomePageListVo> queryHomePageList(JobQueryHomePageListDto listDto);
+
+    /**
+     * 根据求职id查询首页职位信息详情
+     *
+     * @param id
+     * @return
+     */
+    JobHomePageDetailVo queryHomePageDetailById(Long id);
+
+    /**
+     * 收藏或取消收藏职位信息
+     *
+     * @param id
+     */
+    void collect(Long id);
+
+    /**
+     * 查询用户个人职位列表
+     *
+     * @param personalListDto
+     * @return
+     */
+    Page<JobPersonalListVo> queryPersonalList(JobQueryPersonalListDto personalListDto);
 
     /**
      * 创建职位信息

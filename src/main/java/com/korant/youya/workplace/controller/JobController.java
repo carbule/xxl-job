@@ -1,9 +1,16 @@
 package com.korant.youya.workplace.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
 import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
+import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
+import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
+import com.korant.youya.workplace.pojo.vo.job.JobHomePageDetailVo;
+import com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo;
+import com.korant.youya.workplace.pojo.vo.job.JobPersonalListVo;
 import com.korant.youya.workplace.service.JobService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -24,6 +31,56 @@ public class JobController {
 
     @Resource
     private JobService jobService;
+
+    /**
+     * 查询首页职位信息列表
+     *
+     * @param listDto
+     * @return
+     */
+    @PostMapping("/queryHomePageList")
+    @ExplanationDict
+    public R<?> queryHomePageList(@RequestBody @Valid JobQueryHomePageListDto listDto) {
+        Page<JobHomePageListVo> page = jobService.queryHomePageList(listDto);
+        return R.success(page);
+    }
+
+    /**
+     * 根据求职id查询首页职位信息详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/queryHomePageDetailById/{id}")
+    @ExplanationDict
+    public R<?> queryHomePageDetailById(@PathVariable("id") Long id) {
+        JobHomePageDetailVo homePageDetailVo = jobService.queryHomePageDetailById(id);
+        return R.success(homePageDetailVo);
+    }
+
+    /**
+     * 收藏或取消收藏职位信息
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/collect/{id}")
+    public R<?> collect(@PathVariable("id") Long id) {
+        jobService.collect(id);
+        return R.ok();
+    }
+
+    /**
+     * 查询用户个人职位列表
+     *
+     * @param personalListDto
+     * @return
+     */
+    @PostMapping("/queryPersonalList")
+    public R<?> queryPersonalList(@RequestBody @Valid JobQueryPersonalListDto personalListDto) {
+        Page<JobPersonalListVo> page = jobService.queryPersonalList(personalListDto);
+        return R.success(page);
+    }
 
     /**
      * 创建职位信息

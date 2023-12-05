@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
@@ -27,7 +27,7 @@ public interface HuntJobService extends IService<HuntJob> {
      * @param listDto
      * @return
      */
-    Page<HuntJobListOnHomePageVo> queryListOnHomePage(HuntJobQueryListDto listDto);
+    Page<HuntJobHomePageListVo> queryHomePageList(HuntJobQueryHomePageListDto listDto);
 
     /**
      * 根据求职id查询首页求职信息详情
@@ -35,7 +35,7 @@ public interface HuntJobService extends IService<HuntJob> {
      * @param id
      * @return
      */
-    HuntJobDetailOnHomePageVo queryDetailOnHomePageById(Long id);
+    HuntJobHomePageDetailVo queryHomePageDetailById(Long id);
 
     /**
      * 收藏或取消收藏求职信息

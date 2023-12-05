@@ -2,23 +2,27 @@ package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.job.JobAuditStatusEnum;
 import com.korant.youya.workplace.enums.job.JobStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
-import com.korant.youya.workplace.mapper.DistrictDataMapper;
-import com.korant.youya.workplace.mapper.EnterpriseMapper;
-import com.korant.youya.workplace.mapper.JobMapper;
-import com.korant.youya.workplace.mapper.JobWelfareLabelMapper;
+import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.Location;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
 import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
+import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
+import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
+import com.korant.youya.workplace.pojo.po.AttentionJob;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.po.Job;
 import com.korant.youya.workplace.pojo.po.JobWelfareLabel;
 import com.korant.youya.workplace.pojo.vo.job.JobDetailVo;
+import com.korant.youya.workplace.pojo.vo.job.JobHomePageDetailVo;
+import com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo;
+import com.korant.youya.workplace.pojo.vo.job.JobPersonalListVo;
 import com.korant.youya.workplace.service.JobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import com.korant.youya.workplace.utils.TencentMapUtil;
@@ -53,9 +57,73 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     private JobWelfareLabelMapper jobWelfareLabelMapper;
 
     @Resource
+    private AttentionJobMapper attentionJobMapper;
+
+    @Resource
     private DistrictDataMapper districtDataMapper;
 
     private static final String CHINA_CODE = "100000";
+
+    /**
+     * 查询首页职位信息列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<JobHomePageListVo> queryHomePageList(JobQueryHomePageListDto listDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        int count = jobMapper.queryHomePageListCount(userId, listDto);
+        List<JobHomePageListVo> list = jobMapper.queryHomePageList(userId, listDto);
+        Page<JobHomePageListVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 根据求职id查询首页职位信息详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public JobHomePageDetailVo queryHomePageDetailById(Long id) {
+        Long userId = SpringSecurityUtil.getUserId();
+        return jobMapper.queryHomePageDetailById(userId, id);
+    }
+
+    /**
+     * 收藏或取消收藏职位信息
+     *
+     * @param id
+     */
+    @Override
+    public void collect(Long id) {
+        Long userId = SpringSecurityUtil.getUserId();
+        boolean exists = attentionJobMapper.exists(new LambdaQueryWrapper<AttentionJob>().eq(AttentionJob::getUid, userId).eq(AttentionJob::getJobId, id));
+        //取消收藏
+        if (exists) {
+            attentionJobMapper.delete(new LambdaQueryWrapper<AttentionJob>().eq(AttentionJob::getUid, userId).eq(AttentionJob::getJobId, id));
+        } else {//收藏
+            AttentionJob a = new AttentionJob();
+            a.setUid(userId);
+            a.setJobId(id);
+            attentionJobMapper.insert(a);
+        }
+    }
+
+    /**
+     * 查询用户个人职位列表
+     *
+     * @param personalListDto
+     * @return
+     */
+    @Override
+    public Page<JobPersonalListVo> queryPersonalList(JobQueryPersonalListDto personalListDto) {
+        return null;
+    }
 
     /**
      * 创建职位信息

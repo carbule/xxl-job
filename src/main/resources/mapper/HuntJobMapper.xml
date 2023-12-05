@@ -52,7 +52,7 @@
     </resultMap>
 
     <resultMap id="queryDetailOnHomePageByIdMap"
-               type="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailOnHomePageVo">
+               type="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobHomePageDetailVo">
         <id column="id" property="id"/>
         <result column="uid" property="uid"/>
         <result column="avatar" property="avatar"/>
@@ -123,20 +123,8 @@
         <where>
             hj.status = 1
             AND hj.is_delete = 0
-            <if test="listDto.provinceCode != ''">
-                AND ewa.province_code = #{listDto.provinceCode}
-            </if>
             <if test="listDto.cityCode != ''">
                 AND ewa.city_code = #{listDto.cityCode}
-            </if>
-            <if test="listDto.districtCode != ''">
-                AND ewa.district_code = #{listDto.districtCode}
-            </if>
-            <if test="listDto.industryCode != ''">
-                AND ep.industry_code = #{listDto.industryCode}
-            </if>
-            <if test="listDto.sectorCode != ''">
-                AND ep.sector_code = #{listDto.sectorCode}
             </if>
             <if test="listDto.positionCode != ''">
                 AND ep.position_code = #{listDto.positionCode}
@@ -147,7 +135,7 @@
     </select>
 
     <!--  查询首页求职列表  -->
-    <select id="queryListOnHomePage" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobListOnHomePageVo">
+    <select id="queryHomePageList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobHomePageListVo">
         SELECT t1.id,
         t1.avatar,
         t1.lastName,
@@ -187,20 +175,8 @@
         <where>
             hj.status = 1
             AND hj.is_delete = 0
-            <if test="listDto.provinceCode != ''">
-                AND ewa.province_code = #{listDto.provinceCode}
-            </if>
             <if test="listDto.cityCode != ''">
                 AND ewa.city_code = #{listDto.cityCode}
-            </if>
-            <if test="listDto.districtCode != ''">
-                AND ewa.district_code = #{listDto.districtCode}
-            </if>
-            <if test="listDto.industryCode != ''">
-                AND ep.industry_code = #{listDto.industryCode}
-            </if>
-            <if test="listDto.sectorCode != ''">
-                AND ep.sector_code = #{listDto.sectorCode}
             </if>
             <if test="listDto.positionCode != ''">
                 AND ep.position_code = #{listDto.positionCode}
@@ -213,7 +189,7 @@
     </select>
 
     <!--  根据求职id查询首页求职信息详情  -->
-    <select id="queryDetailOnHomePageById" parameterType="java.lang.Long" resultMap="queryDetailOnHomePageByIdMap">
+    <select id="queryHomePageDetailById" parameterType="java.lang.Long" resultMap="queryDetailOnHomePageByIdMap">
         SELECT hj.id,
                u.id                 AS uid,
                u.avatar,
@@ -269,9 +245,7 @@
             pe.project_name AS projectName,
             pe.project_role AS projectRole,
             pe.project_content AS projectContent
-        FROM hunt_job AS hj
-            LEFT JOIN yy_user AS u
-        ON hj.uid = u.id AND u.is_delete = 0
+        FROM hunt_job AS hj LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
             LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
             LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
             LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
@@ -283,7 +257,6 @@
             LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
             LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE hj.id = #{id}
-          AND u.is_delete = 0
     </select>
 
     <!--  查询用户个人求职列表  -->

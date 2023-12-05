@@ -6,14 +6,14 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @ClassName HuntJobDetailOnHomePageVo
+ * @ClassName HuntJobHomePageDetailVo
  * @Description
  * @Author chenyiqiang
  * @Date 2023/8/24 16:35
  * @Version 1.0
  */
 @Data
-public class HuntJobDetailOnHomePageVo {
+public class HuntJobHomePageDetailVo {
 
     /**
      * 求职id
