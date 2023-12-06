@@ -3,7 +3,6 @@ package com.korant.youya.workplace.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.mapper.PositionMapper;
 import com.korant.youya.workplace.pojo.po.Position;
-import com.korant.youya.workplace.pojo.vo.position.PositionData;
 import com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo;
 import com.korant.youya.workplace.service.PositionService;
 import jakarta.annotation.Resource;
@@ -46,29 +45,6 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
     }
 
     /**
-     * 查询所有行位
-     *
-     * @return
-     */
-    @Override
-    public List<PositionData> queryIndustry() {
-        List<PositionData> positionDataList = positionMapper.queryIndustry();
-        return positionDataList;
-    }
-
-    /**
-     * 根据行位查询所有领域
-     *
-     * @return
-     */
-    @Override
-    public List<PositionData> querySector(String code) {
-
-        List<PositionData> positionDataList = positionMapper.querySector(code);
-        return positionDataList;
-    }
-
-    /**
      * 从集合中筛选出子节点
      *
      * @param dataTreeVo
@@ -93,5 +69,4 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
             recursivePositionsFromList(child, positionDataTreeVoList);
         }
     }
-
 }

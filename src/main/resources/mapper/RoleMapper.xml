@@ -2,15 +2,4 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.RoleMapper">
 
-    <select id="getRoleByUserAndEnterprise" resultType="java.lang.Long">
-        SELECT
-            yur.rid
-        FROM
-            yy_user_role yur
-                LEFT JOIN    yy_user_enterprise yue ON yur.uid = yue.uid AND yue.is_delete = 0
-        WHERE yur.is_delete = 0
-            AND yur.uid = #{userId}
-            AND yue.enterprise_id = #{id}
-    </select>
-
 </mapper>

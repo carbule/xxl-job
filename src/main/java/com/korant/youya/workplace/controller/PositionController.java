@@ -1,12 +1,10 @@
 package com.korant.youya.workplace.controller;
 
 import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.vo.position.PositionData;
 import com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo;
 import com.korant.youya.workplace.service.PositionService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,27 +35,4 @@ public class PositionController {
         List<PositionDataTreeVo> positionDataTreeVoList = positionService.queryAllData();
         return R.success(positionDataTreeVoList);
     }
-
-    /**
-     * 查询所有行位
-     *
-     * @return
-     */
-    @GetMapping("/queryIndustry")
-    public R<?> queryIndustry() {
-        List<PositionData> positionDataList = positionService.queryIndustry();
-        return R.success(positionDataList);
-    }
-
-    /**
-     * 根据行位查询所有领域和职位
-     *
-     * @return
-     */
-    @GetMapping("/querySectorAndPosition/{code}")
-    public R<?> querySector(@PathVariable("code") String code) {
-        List<PositionData> positionDataList = positionService.querySector(code);
-        return R.success(positionDataList);
-    }
-
 }

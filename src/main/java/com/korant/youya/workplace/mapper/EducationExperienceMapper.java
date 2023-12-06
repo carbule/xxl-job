@@ -1,13 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperienceModifyDto;
 import com.korant.youya.workplace.pojo.po.EducationExperience;
-import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceDetailVo;
-import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * <p>
@@ -19,35 +13,4 @@ import java.util.List;
  */
 public interface EducationExperienceMapper extends BaseMapper<EducationExperience> {
 
-    /**
-     * 查询教育经历信息列表
-     *
-     * @param
-     * @return
-     */
-    List<EducationExperienceListVo> queryEducationExperienceListByUserId(@Param("userId") Long userId, @Param("pageNumber") int pageNumber, @Param("pageSize") int pageSize);
-
-    /**
-     * 查询教育经历信息详情
-     *
-     * @param
-     * @return
-     */
-    EducationExperienceDetailVo detail(@Param("id") Long id);
-
-    /**
-     * 查询全部教育经历信息列表
-     *
-     * @param
-     * @return
-     */
-    List<EducationExperienceListVo> queryList(@Param("userId") Long userId);
-
-    /**
-     * 修改教育经历信息
-     *
-     * @param
-     * @return
-     */
-    int modify(@Param("educationExperienceModifyDto") EducationExperienceModifyDto educationExperienceModifyDto);
 }

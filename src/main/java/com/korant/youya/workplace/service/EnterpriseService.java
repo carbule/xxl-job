@@ -1,16 +1,7 @@
 package com.korant.youya.workplace.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.Enterprise;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseDetailVo;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseHrAndEmployeeTotalVo;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByNameVo;
-import com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByUserVo;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * <p>
@@ -21,94 +12,4 @@ import java.util.List;
  * @since 2023-11-14
  */
 public interface EnterpriseService extends IService<Enterprise> {
-
-    /**
-     * 获取营业执照信息
-     *
-     * @param file
-     * @return
-     */
-    JSONObject getBusinessLicenseInfo(MultipartFile file);
-
-    /**
-     * 创建企业
-     *
-     * @param createDto
-     * @return
-     */
-    void create(EnterpriseCreateDto createDto);
-
-    /**
-     * 修改企业logo
-     *
-     * @param
-     * @return
-     */
-    void modifyLogo(EnterpriseModifyLogoDto modifyLogoDto);
-
-    /**
-     * 修改企业
-     *
-     * @param
-     * @return
-     */
-    void modify(EnterpriseModifyDto modifyDto);
-
-    /**
-     * 根据当前登陆用户查询企业信息
-     *
-     * @param
-     * @return
-     */
-    EnterpriseInfoByUserVo queryEnterpriseInfoByUser();
-
-    /**
-     * 查询企业详细信息
-     *
-     * @return
-     */
-    EnterpriseDetailVo detail(Long id);
-
-    /**
-     * 变更企业
-     *
-     * @param
-     * @return
-     */
-    void changeEnterpriseInfo(EnterpriseChangeDto changeDto);
-
-    /**
-     * 关联企业-根据企业名称查询企业
-     *
-     * @return
-     */
-    List<EnterpriseInfoByNameVo> getEnterpriseByName(EnterpriseQueryListDto enterpriseQueryListDto);
-
-    /**
-     * 查询企业hr跟员工总数
-     *
-     * @return
-     */
-    EnterpriseHrAndEmployeeTotalVo getHrAndEmployeeTotal(Long id);
-
-    /**
-     * 查询企业审核未通过原因
-     *
-     * @return
-     */
-    String getRefuseReason(Long id);
-
-    /**
-     * 重新提交公司认证信息
-     *
-     * @return
-     */
-    void resubmit(EnterpriseChangeDto enterpriseChangeDto);
-
-    /**
-     * 撤销企业认证申请
-     *
-     * @return
-     */
-    void revoke(Long id);
 }

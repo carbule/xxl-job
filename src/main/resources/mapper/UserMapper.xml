@@ -1,38 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.UserMapper">
-    <update id="resumePersonModify">
-        UPDATE
-            yy_user
-        SET avatar                  = #{resumePersonModifyDto.avatar},
-            last_name               = #{resumePersonModifyDto.lastName},
-            first_name              = #{resumePersonModifyDto.firstName},
-            gender                  = #{resumePersonModifyDto.gender},
-            birthday                = #{resumePersonModifyDto.birthday},
-            start_working_time      = #{resumePersonModifyDto.startWorkingTime},
-            political_outlook       = #{resumePersonModifyDto.politicalOutlook},
-            personal_signature      = #{resumePersonModifyDto.personalSignature},
-            self_evaluation         = #{resumePersonModifyDto.selfEvaluation},
-            update_time             = CURRENT_TIMESTAMP
-        WHERE id = #{userId}
-    </update>
 
-    <update id="modifyResumeContactDetail">
-        UPDATE yy_user
-        SET country_code            = #{resumeContactModifyDto.countryCode},
-            province_code           = #{resumeContactModifyDto.provinceCode},
-            city_code               = #{resumeContactModifyDto.cityCode},
-            district_code           = #{resumeContactModifyDto.districtCode},
-            address                 = #{resumeContactModifyDto.address},
-            phone                   = #{resumeContactModifyDto.phone},
-            email                   = #{resumeContactModifyDto.email},
-            qq                      = #{resumeContactModifyDto.qq},
-            wechat_id               = #{resumeContactModifyDto.wechatId},
-            update_time             = CURRENT_TIMESTAMP
-        WHERE id = #{userId}
-    </update>
-
-    <select id="selectUserToLoginById" parameterType="java.lang.Long" resultType="com.korant.youya.workplace.pojo.LoginUser">
+    <!--  根据id查询登录用户  -->
+    <select id="selectUserToLoginById" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.LoginUser">
         SELECT u.id,
                u.phone,
                u.identity_card         AS identityCard,
@@ -49,6 +21,7 @@
           AND u.is_delete = 0
     </select>
 
+    <!--  根据手机号查询登录用户  -->
     <select id="selectUserToLoginByPhoneNumber" parameterType="java.lang.String"
             resultType="com.korant.youya.workplace.pojo.LoginUser">
         SELECT u.id,
@@ -67,162 +40,34 @@
           AND u.is_delete = 0
     </select>
 
-    <select id="resumePersonDetail" resultType="com.korant.youya.workplace.pojo.vo.user.ResumePersonInfoVo">
-        SELECT
-            u.avatar,
-            u.last_name            AS lastName,
-            u.first_name           AS firstName,
-            u.gender,
-            u.birthday,
-            u.start_working_time    AS  startWorkingTime,
-            u.political_outlook     AS  politicalOutlook,
-            u.personal_signature    AS  personalSignature,
-            u.self_evaluation       AS  selfEvaluation,
-            u.authentication_status AS  authenticationStatus,
-            e.name                  AS  userEnterprise
-        FROM yy_user AS u
-                 LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
-                 LEFT JOIN enterprise AS e ON ue.enterprise_id = e.id AND e.is_delete = 0
-        WHERE u.id = #{userId}
-          AND u.is_delete = 0
-    </select>
+    <update id="resumePersonModify">
+        UPDATE
+            yy_user
+        SET avatar             = #{resumePersonModifyDto.avatar},
+            last_name          = #{resumePersonModifyDto.lastName},
+            first_name         = #{resumePersonModifyDto.firstName},
+            gender             = #{resumePersonModifyDto.gender},
+            birthday           = #{resumePersonModifyDto.birthday},
+            start_working_time = #{resumePersonModifyDto.startWorkingTime},
+            political_outlook  = #{resumePersonModifyDto.politicalOutlook},
+            personal_signature = #{resumePersonModifyDto.personalSignature},
+            self_evaluation    = #{resumePersonModifyDto.selfEvaluation},
+            update_time        = CURRENT_TIMESTAMP
+        WHERE id = #{userId}
+    </update>
 
-    <resultMap id="resumePreview" type="com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo">
-        <id property="id" column="id" />
-        <result property="avatar" column="avatar" />
-        <result property="lastName" column="lastName" />
-        <result property="firstName" column="firstName" />
-        <result property="gender" column="gender" />
-        <result property="age" column="age" />
-        <result property="seniority" column="seniority" />
-        <result property="politicalOutlook" column="politicalOutlook" />
-        <result property="personalSignature" column="personalSignature" />
-        <result property="selfEvaluation" column="selfEvaluation" />
-        <result property="authenticationStatus" column="authenticationStatus" />
-        <result property="phone" column="phone" />
-        <result property="email" column="email" />
-        <result property="qq" column="qq" />
-        <result property="wechatId" column="wechatId" />
-        <result property="employStatus" column="status" />
-        <result property="countryName" column="countryName" />
-        <result property="provinceName" column="provinceName" />
-        <result property="cityName" column="cityName" />
-        <result property="districtName" column="districtName" />
-        <result property="address" column="address" />
-        <collection property="educationExperienceList" ofType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceListVo">
-            <id property="id" column="eeId" />
-            <result property="schoolName" column="schoolName" />
-            <result property="eduLevel" column="eduLevel" />
-            <result property="startTime" column="startTime" />
-            <result property="endTime" column="endTime" />
-            <result property="specialityName" column="specialityName" />
-            <result property="degreeName" column="degreeName" />
-        </collection>
-        <collection property="honorCertificateList" ofType="com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateListDto">
-            <id property="id" column="hcId" />
-            <result property="certificateName" column="certificateName" />
-            <result property="obtainTime" column="obtainTime" />
-            <result property="fileName" column="hcFileName" />
-            <result property="md5FileName" column="hcMd5FileName" />
-        </collection>
-        <collection property="attachmentList" ofType="com.korant.youya.workplace.pojo.vo.attachment.AttachmentListVo">
-            <id property="id" column="aId" />
-            <result property="fileName" column="aFileName" />
-            <result property="md5FileName" column="aMd5FileName" />
-        </collection>
-    </resultMap>
-
-    <select id="resumePersonPreview"
-            resultType="com.korant.youya.workplace.pojo.vo.employstatus.ResumePreviewVo"
-            resultMap="resumePreview" >
-        SELECT
-            u.id,
-            u.avatar,
-            u.last_name                                  AS lastName,
-            u.first_name                                 AS firstName,
-            u.gender,
-            DATE_PART('year', AGE(NOW(), u.birthday))    AS age,
-            DATE_PART('year', AGE(NOW(), u.start_working_time))    AS seniority,
-            u.political_outlook                          AS  politicalOutlook,
-            u.personal_signature                         AS  personalSignature,
-            u.self_evaluation                            AS  selfEvaluation,
-            u.authentication_status                      AS  authenticationStatus,
-            u.phone,
-            u.email,
-            u.qq,
-            u.wechat_id                                 AS wechatId,
-            es.status,
-            dp1.name                                    AS countryName,
-            dp2.name                                    AS provinceName,
-            dp3.name                                    AS cityName,
-            dp4.name                                    AS districtName,
-            u.address,
-            ee.id                                       AS eeId,
-            ee.school_name                              AS schoolName,
-            ee.edu_level                                AS eduLevel,
-            ee.start_time                               AS startTime,
-            ee.end_time                                 AS endTime,
-            ee.speciality_name                          AS specialityName,
-            ee.degree_name                              AS degreeName,
-            hc.id                                       AS hcId,
-            hc.certificate_name                         AS certificateName,
-            hc.obtain_time                              AS obtainTime,
-            hc.file_name                                AS hcFileName,
-            hc.md5_file_name                            AS hcMd5FileName,
-            a.id                                        AS aId,
-            a.file_name                                 AS aFileName,
-            a.md5_file_name                             AS aMd5FileName
-        FROM yy_user AS u
-                 LEFT JOIN   district_data dp1 ON dp1.code = u.country_code      AND dp1.is_delete = 0
-                 LEFT JOIN   district_data dp2 ON dp2.code = u.province_code     AND dp2.is_delete = 0
-                 LEFT JOIN   district_data dp3 ON dp3.code = u.city_code         AND dp3.is_delete = 0
-                 LEFT JOIN   district_data dp4 ON dp4.code = u.district_code     AND dp4.is_delete = 0
-                 LEFT JOIN   employ_status es ON es.uid = u.id                   AND es.is_delete = 0
-                 LEFT JOIN   education_experience ee ON ee.uid = u.id            AND ee.is_delete = 0
-                 LEFT JOIN   honor_certificate hc ON hc.uid = u.id               AND hc.is_delete = 0
-                 LEFT JOIN   attachment a ON a.uid = u.id                        AND a.is_delete = 0
-        WHERE u.id = #{userId}
-          AND u.is_delete = 0
-    </select>
-
-    <select id="resumeContactDetail" resultType="com.korant.youya.workplace.pojo.vo.user.ResumeContactInfoVo">
-        SELECT
-            u.phone,
-            u.email,
-            u.qq,
-            u.wechat_id                AS wechatId,
-            u.country_code             AS countryCode,
-            dp1.name                   AS countryName,
-            u.province_code            AS provinceCode,
-            dp2.name                   AS provinceName,
-            u.city_code                AS cityCode,
-            dp3.name                   AS cityName,
-            u.district_code            AS districtCode,
-            dp4.name                   AS districtName,
-            u.address
-        FROM yy_user AS u
-                 LEFT JOIN   district_data dp1 ON dp1.code = u.country_code      AND dp1.is_delete = 0
-                 LEFT JOIN   district_data dp2 ON dp2.code = u.province_code     AND dp2.is_delete = 0
-                 LEFT JOIN   district_data dp3 ON dp3.code = u.city_code         AND dp3.is_delete = 0
-                 LEFT JOIN   district_data dp4 ON dp4.code = u.district_code     AND dp4.is_delete = 0
-        WHERE u.id = #{userId}
-          AND u.is_delete = 0
-    </select>
-
-    <select id="getUserCurrentlyInfo" resultType="com.korant.youya.workplace.pojo.vo.user.UserCurrentlyInfo">
-        SELECT
-            u.id,
-            u.avatar,
-            u.last_name                                  AS lastName,
-            u.first_name                                 AS firstName,
-            u.personal_signature                         AS  personalSignature,
-            u.authentication_status                      AS  authenticationStatus,
-            r.role_name                                       AS role
-        FROM
-            yy_user AS u
-                LEFT JOIN yy_user_role yur ON u.id = yur.uid AND yur.is_delete = 0
-                LEFT JOIN yy_role AS r ON yur.rid = r.id AND r.is_delete = 0
-        WHERE u.id = #{userId}
-          AND u.is_delete = 0
-    </select>
+    <update id="modifyResumeContactDetail">
+        UPDATE yy_user
+        SET country_code  = #{resumeContactModifyDto.countryCode},
+            province_code = #{resumeContactModifyDto.provinceCode},
+            city_code     = #{resumeContactModifyDto.cityCode},
+            district_code = #{resumeContactModifyDto.districtCode},
+            address       = #{resumeContactModifyDto.address},
+            phone         = #{resumeContactModifyDto.phone},
+            email         = #{resumeContactModifyDto.email},
+            qq            = #{resumeContactModifyDto.qq},
+            wechat_id     = #{resumeContactModifyDto.wechatId},
+            update_time   = CURRENT_TIMESTAMP
+        WHERE id = #{userId}
+    </update>
 </mapper>
