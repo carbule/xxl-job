@@ -1,21 +1,16 @@
-package com.korant.youya.workplace.pojo;
+package com.korant.youya.workplace.pojo.vo.user;
 
 import lombok.Data;
 
 /**
- * @ClassName UserCache
+ * @ClassName LoginUserVo
  * @Description
  * @Author chenyiqiang
- * @Date 2023/9/6 15:31
+ * @Date 2023/12/6 16:21
  * @Version 1.0
  */
 @Data
-public class LoginUser {
-
-    /**
-     * id
-     */
-    private Long id;
+public class LoginUserVo {
 
     /**
      * 用户头像
@@ -33,16 +28,6 @@ public class LoginUser {
     private String firstName;
 
     /**
-     * 用户手机号
-     */
-    private String phone;
-
-    /**
-     * 用户身份证号
-     */
-    private String identityCard;
-
-    /**
      * 个性签名
      */
     private String personalSignature;
@@ -51,16 +36,6 @@ public class LoginUser {
      * 实名认证状态
      */
     private Integer authenticationStatus;
-
-    /**
-     * 账号状态 0-未冻结 1-已冻结
-     */
-    private Integer accountStatus;
-
-    /**
-     * 企业id
-     */
-    private Long enterpriseId;
 
     /**
      * 角色

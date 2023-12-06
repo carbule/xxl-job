@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.user.LoginUserVo;
+import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
+import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
 
 /**
  * <p>
@@ -73,18 +76,37 @@ public interface UserService extends IService<User> {
     void cancel();
 
     /**
-     * 在线简历-修改个人信息
+     * 查询个人基本信息
      *
-     * @param
      * @return
      */
-    void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto);
+    UserPersonalBasicInfoVo queryPersonalBasicInfo();
 
     /**
-     * 在线简历-编辑联系方式
+     * 修改个人基本信息
+     *
+     * @param modifyDto
+     */
+    void modifyUserPersonalBasicInfo(ModifyUserPersonalBasicInfoDto modifyDto);
+
+    /**
+     * 查询用户联系方式
      *
      * @return
      */
-    void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto);
+    UserContactInfoVo queryUserContactInfo();
 
+    /**
+     * 修改联系方式
+     *
+     * @param modifyDto
+     */
+    void modifyUserContactInfo(ModifyUserContactInfoDto modifyDto);
+
+    /**
+     * 查询登录用户信息
+     *
+     * @return
+     */
+    LoginUserVo queryLoginUserInfo();
 }

@@ -6,8 +6,12 @@
     <select id="selectUserToLoginById" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.LoginUser">
         SELECT u.id,
+               u.avatar,
+               u.last_name             AS lastName,
+               u.first_name            AS firstName,
                u.phone,
                u.identity_card         AS identityCard,
+               u.personal_signature    AS personalSignature,
                u.authentication_status AS authenticationStatus,
                u.account_status        AS accountStatus,
                r.role_name             AS role,
@@ -25,8 +29,12 @@
     <select id="selectUserToLoginByPhoneNumber" parameterType="java.lang.String"
             resultType="com.korant.youya.workplace.pojo.LoginUser">
         SELECT u.id,
+               u.avatar,
+               u.last_name             AS lastName,
+               u.first_name            AS firstName,
                u.phone,
                u.identity_card         AS identityCard,
+               u.personal_signature    AS personalSignature,
                u.authentication_status AS authenticationStatus,
                u.account_status        AS accountStatus,
                r.role_name             AS role,
@@ -40,33 +48,81 @@
           AND u.is_delete = 0
     </select>
 
-    <update id="resumePersonModify">
-        UPDATE
-            yy_user
-        SET avatar             = #{resumePersonModifyDto.avatar},
-            last_name          = #{resumePersonModifyDto.lastName},
-            first_name         = #{resumePersonModifyDto.firstName},
-            gender             = #{resumePersonModifyDto.gender},
-            birthday           = #{resumePersonModifyDto.birthday},
-            start_working_time = #{resumePersonModifyDto.startWorkingTime},
-            political_outlook  = #{resumePersonModifyDto.politicalOutlook},
-            personal_signature = #{resumePersonModifyDto.personalSignature},
-            self_evaluation    = #{resumePersonModifyDto.selfEvaluation},
+    <!--  查询个人基本信息  -->
+    <select id="queryPersonalBasicInfo" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo">
+        SELECT avatar,
+               last_name             AS lastName,
+               first_name            AS firstName,
+               gender,
+               birthday,
+               start_working_time    AS startWorkingTime,
+               political_outlook     AS politicalOutlook,
+               personal_signature    AS personalSignature,
+               self_evaluation       AS selfEvaluation,
+               (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+                FROM yy_user_enterprise
+                WHERE uid = #{userId}
+                  AND is_delete = 0) AS isAssociated
+        FROM yy_user
+        WHERE id = #{userId}
+          AND is_delete = 0
+    </select>
+
+    <!--  修改个人基本信息  -->
+    <update id="modifyUserPersonalBasicInfo"
+            parameterType="com.korant.youya.workplace.pojo.dto.user.ModifyUserPersonalBasicInfoDto">
+        UPDATE yy_user
+        SET avatar             = #{modifyDto.avatar},
+            last_name          = #{modifyDto.lastName},
+            first_name         = #{modifyDto.firstName},
+            gender             = #{modifyDto.gender},
+            birthday           = #{modifyDto.birthday},
+            start_working_time = #{modifyDto.startWorkingTime},
+            political_outlook  = #{modifyDto.politicalOutlook},
+            personal_signature = #{modifyDto.personalSignature},
+            self_evaluation    = #{modifyDto.selfEvaluation},
             update_time        = CURRENT_TIMESTAMP
         WHERE id = #{userId}
     </update>
 
-    <update id="modifyResumeContactDetail">
+    <!--  查询用户联系方式  -->
+    <select id="queryUserContactInfo" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo">
+        SELECT u.phone,
+               u.email,
+               u.qq,
+               u.wechat_id     AS wechatId,
+               d1.name         AS countryName,
+               d2.name         AS provinceName,
+               d3.name         AS cityName,
+               d4.name         AS districtName,
+               u.country_code  AS countryCode,
+               u.province_code AS provinceCode,
+               u.city_code     AS cityCode,
+               u.district_code AS districtCode,
+               u.address
+        FROM yy_user AS u
+                 LEFT JOIN district_data d1 ON d1.code = u.country_code AND d1.is_delete = 0
+                 LEFT JOIN district_data d2 ON d2.code = u.province_code AND d2.is_delete = 0
+                 LEFT JOIN district_data d3 ON d3.code = u.city_code AND d3.is_delete = 0
+                 LEFT JOIN district_data d4 ON d4.code = u.district_code AND d4.is_delete = 0
+        WHERE u.id = #{userId}
+          AND u.is_delete = 0
+    </select>
+
+    <!--  修改用户联系方式  -->
+    <update id="modifyUserContactInfo"
+            parameterType="com.korant.youya.workplace.pojo.dto.user.ModifyUserContactInfoDto">
         UPDATE yy_user
-        SET country_code  = #{resumeContactModifyDto.countryCode},
-            province_code = #{resumeContactModifyDto.provinceCode},
-            city_code     = #{resumeContactModifyDto.cityCode},
-            district_code = #{resumeContactModifyDto.districtCode},
-            address       = #{resumeContactModifyDto.address},
-            phone         = #{resumeContactModifyDto.phone},
-            email         = #{resumeContactModifyDto.email},
-            qq            = #{resumeContactModifyDto.qq},
-            wechat_id     = #{resumeContactModifyDto.wechatId},
+        SET wechat_id     = #{modifyDto.wechatId},
+            qq            = #{modifyDto.qq},
+            email         = #{modifyDto.email},
+            country_code  = #{modifyDto.countryCode},
+            province_code = #{modifyDto.provinceCode},
+            city_code     = #{modifyDto.cityCode},
+            district_code = #{modifyDto.districtCode},
+            address       = #{modifyDto.address},
             update_time   = CURRENT_TIMESTAMP
         WHERE id = #{userId}
     </update>

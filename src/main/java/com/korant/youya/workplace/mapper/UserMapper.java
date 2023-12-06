@@ -2,9 +2,11 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
-import com.korant.youya.workplace.pojo.dto.user.ResumeContactModifyDto;
-import com.korant.youya.workplace.pojo.dto.user.ResumePersonModifyDto;
+import com.korant.youya.workplace.pojo.dto.user.ModifyUserContactInfoDto;
+import com.korant.youya.workplace.pojo.dto.user.ModifyUserPersonalBasicInfoDto;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -33,7 +35,37 @@ public interface UserMapper extends BaseMapper<User> {
      */
     LoginUser selectUserToLoginByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
-    Integer resumePersonModify(@Param("userId") Long userId, @Param("resumePersonModifyDto") ResumePersonModifyDto resumePersonModifyDto);
+    /**
+     * 查询个人基本信息
+     *
+     * @param userId
+     * @return
+     */
+    UserPersonalBasicInfoVo queryPersonalBasicInfo(@Param("userId") Long userId);
 
-    Integer modifyResumeContactDetail(@Param("userId") Long userId, @Param("resumeContactModifyDto") ResumeContactModifyDto resumeContactModifyDto);
+    /**
+     * 修改个人基本信息
+     *
+     * @param userId
+     * @param modifyDto
+     * @return
+     */
+    int modifyUserPersonalBasicInfo(@Param("userId") Long userId, @Param("modifyDto") ModifyUserPersonalBasicInfoDto modifyDto);
+
+    /**
+     * 查询用户联系方式
+     *
+     * @param userId
+     * @return
+     */
+    UserContactInfoVo queryUserContactInfo(@Param("userId") Long userId);
+
+    /**
+     * 修改用户联系方式
+     *
+     * @param userId
+     * @param modifyDto
+     * @return
+     */
+    int modifyUserContactInfo(@Param("userId") Long userId, @Param("modifyDto") ModifyUserContactInfoDto modifyDto);
 }

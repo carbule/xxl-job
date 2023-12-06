@@ -89,7 +89,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                             log.error("请求路径：{},用户未注册或已注销", requestURI);
                             returnJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "9999", "用户未注册或已注销");
                         } else {
-                            redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
+                            redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser), 7200);
                             Integer accountStatus = loginUser.getAccountStatus();
                             if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) {
                                 log.error("请求路径：{},账号:{}已被冻结", requestURI, id);

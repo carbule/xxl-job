@@ -2,7 +2,10 @@ package com.korant.youya.workplace.controller;
 
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
+import com.korant.youya.workplace.pojo.vo.user.LoginUserVo;
+import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
+import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -103,5 +106,65 @@ public class UserController {
     public R<?> cancel() {
         userService.cancel();
         return R.ok();
+    }
+
+    /**
+     * 查询个人基本信息
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryPersonalBasicInfo")
+    public R<?> queryPersonalBasicInfo() {
+        UserPersonalBasicInfoVo personalBasicInfoVo = userService.queryPersonalBasicInfo();
+        return R.success(personalBasicInfoVo);
+    }
+
+    /**
+     * 修改个人基本信息
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/modifyPersonalBasicInfo")
+    public R<?> modifyPersonalInfo(@RequestBody @Valid ModifyUserPersonalBasicInfoDto modifyDto) {
+        userService.modifyUserPersonalBasicInfo(modifyDto);
+        return R.ok();
+    }
+
+    /**
+     * 查询用户联系方式
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryUserContactInfo")
+    public R<?> queryUserContactInfo() {
+        UserContactInfoVo contactInfoVo = userService.queryUserContactInfo();
+        return R.success(contactInfoVo);
+    }
+
+    /**
+     * 修改联系方式
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/modifyContactInfo")
+    public R<?> modifyContactInfo(@RequestBody @Valid ModifyUserContactInfoDto modifyDto) {
+        userService.modifyUserContactInfo(modifyDto);
+        return R.ok();
+    }
+
+    /**
+     * 查询登录用户信息
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryLoginUserInfo")
+    public R<?> queryCurrentUserInfo() {
+        LoginUserVo loginUserVo = userService.queryLoginUserInfo();
+        return R.success(loginUserVo);
     }
 }

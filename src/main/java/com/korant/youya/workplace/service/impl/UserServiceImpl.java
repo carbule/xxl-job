@@ -13,7 +13,10 @@ import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.*;
+import com.korant.youya.workplace.pojo.vo.user.LoginUserVo;
+import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
 import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
+import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
 import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.utils.*;
 import jakarta.annotation.Resource;
@@ -96,7 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String idKey = String.format(RedisConstant.YY_USER_ID, phoneNumber);
             redisUtil.set(idKey, id.toString());
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
-            redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
+            redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser), 7200);
             UserLoginVo userLoginVo = new UserLoginVo();
             userLoginVo.setToken(token);
             userLoginVo.setRole(loginUser.getRole());
@@ -120,7 +123,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 //todo token暂时不设置过期时间
 //        redisUtil.set(key, token, 7200);
                 redisUtil.set(key, token);
-                redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
+                redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser), 7200);
                 UserLoginVo userLoginVo = new UserLoginVo();
                 userLoginVo.setToken(token);
                 userLoginVo.setRole(loginUser.getRole());
@@ -178,7 +181,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 String idKey = String.format(RedisConstant.YY_USER_ID, phoneNumber);
                 redisUtil.set(idKey, id.toString());
                 String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
-                redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
+                redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser), 7200);
                 UserLoginVo userLoginVo = new UserLoginVo();
                 userLoginVo.setToken(token);
                 userLoginVo.setRole(loginUser.getRole());
@@ -202,7 +205,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     //todo token暂时不设置过期时间
 //        redisUtil.set(key, token, 7200);
                     redisUtil.set(key, token);
-                    redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser));
+                    redisUtil.set(cacheKey, JSONObject.toJSONString(loginUser), 7200);
                     UserLoginVo userLoginVo = new UserLoginVo();
                     userLoginVo.setToken(token);
                     userLoginVo.setRole(loginUser.getRole());
@@ -358,14 +361,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
+     * 查询个人基本信息
+     *
      * @return
-     * @Description 在线简历-修改个人信息
-     * @Param
-     **/
+     */
+    @Override
+    public UserPersonalBasicInfoVo queryPersonalBasicInfo() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.queryPersonalBasicInfo(userId);
+    }
+
+    /**
+     * 修改个人基本信息
+     *
+     * @param modifyDto
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void resumePersonModify(ResumePersonModifyDto resumePersonModifyDto) {
-        Long userId = SpringSecurityUtil.getUserId();
+    public void modifyUserPersonalBasicInfo(ModifyUserPersonalBasicInfoDto modifyDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        if (UserAuthenticationStatusEnum.CERTIFIED.getStatus() == loginUser.getAuthenticationStatus()) {
+            String lastName = loginUser.getLastName();
+            String firstName = loginUser.getFirstName();
+            if (!lastName.equals(modifyDto.getLastName()) || !firstName.equals(modifyDto.getFirstName()))
+                throw new YouyaException("已完成实名认证,姓名不可更改");
+        }
         UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
         if (null == userPrivacy) {
             userPrivacy = new UserPrivacy();
@@ -387,16 +408,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 Integer namePublicStatus = userPrivacy.getNamePublicStatus();
                 switch (namePublicStatus) {
                     case 1:
-                        userNameVisibleInfo.setLastName(resumePersonModifyDto.getLastName());
-                        userNameVisibleInfo.setFirstName(resumePersonModifyDto.getFirstName());
+                        userNameVisibleInfo.setLastName(modifyDto.getLastName());
+                        userNameVisibleInfo.setFirstName(modifyDto.getFirstName());
                         break;
                     case 2:
                         userNameVisibleInfo.setFirstName(null);
-                        userNameVisibleInfo.setLastName(resumePersonModifyDto.getLastName());
+                        userNameVisibleInfo.setLastName(modifyDto.getLastName());
                         break;
                     case 3:
                         userNameVisibleInfo.setLastName(null);
-                        userNameVisibleInfo.setFirstName(resumePersonModifyDto.getFirstName());
+                        userNameVisibleInfo.setFirstName(modifyDto.getFirstName());
                         break;
                     default:
                         break;
@@ -404,18 +425,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 userNameVisibleInfoMapper.updateById(userNameVisibleInfo);
             }
         }
-        userMapper.resumePersonModify(userId, resumePersonModifyDto);
-
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        if (!redisUtil.del(cacheKey)) throw new YouyaException("修改个人基本信息失败");
+        userMapper.modifyUserPersonalBasicInfo(userId, modifyDto);
     }
 
     /**
-     * 在线简历-编辑联系方式
+     * 查询用户联系方式
      *
      * @return
      */
     @Override
-    public void modifyResumeContactDetail(ResumeContactModifyDto resumeContactModifyDto) {
+    public UserContactInfoVo queryUserContactInfo() {
         Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.queryUserContactInfo(userId);
+    }
+
+    /**
+     * 修改用户联系方式
+     *
+     * @param modifyDto
+     */
+    @Override
+    public void modifyUserContactInfo(ModifyUserContactInfoDto modifyDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
         if (null == userPrivacy) {
             userPrivacy = new UserPrivacy();
@@ -447,40 +481,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             Integer addressPublicStatus = userPrivacy.getAddressPublicStatus();
             switch (phonePublicStatus) {
                 case 1:
-                    everyoneVisibleInfo.setPhone(resumeContactModifyDto.getPhone());
+                    everyoneVisibleInfo.setPhone(loginUser.getPhone());
                     break;
                 case 2:
-                    recruiterVisibleInfo.setPhone(resumeContactModifyDto.getPhone());
+                    recruiterVisibleInfo.setPhone(loginUser.getPhone());
                     break;
                 default:
                     break;
             }
             switch (wechatPublicStatus) {
                 case 1:
-                    everyoneVisibleInfo.setWechatId(resumeContactModifyDto.getWechatId());
+                    everyoneVisibleInfo.setWechatId(modifyDto.getWechatId());
                     break;
                 case 2:
-                    recruiterVisibleInfo.setWechatId(resumeContactModifyDto.getWechatId());
+                    recruiterVisibleInfo.setWechatId(modifyDto.getWechatId());
                     break;
                 default:
                     break;
             }
             switch (qqPublicStatus) {
                 case 1:
-                    everyoneVisibleInfo.setQq(resumeContactModifyDto.getQq());
+                    everyoneVisibleInfo.setQq(modifyDto.getQq());
                     break;
                 case 2:
-                    recruiterVisibleInfo.setQq(resumeContactModifyDto.getQq());
+                    recruiterVisibleInfo.setQq(modifyDto.getQq());
                     break;
                 default:
                     break;
             }
             switch (emailPublicStatus) {
                 case 1:
-                    everyoneVisibleInfo.setEmail(resumeContactModifyDto.getEmail());
+                    everyoneVisibleInfo.setEmail(modifyDto.getEmail());
                     break;
                 case 2:
-                    recruiterVisibleInfo.setEmail(resumeContactModifyDto.getEmail());
+                    recruiterVisibleInfo.setEmail(modifyDto.getEmail());
                     break;
                 default:
                     break;
@@ -488,17 +522,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             switch (addressPublicStatus) {
                 case 1:
                     everyoneVisibleInfo.setCountryCode(CHINA_CODE);
-                    everyoneVisibleInfo.setProvinceCode(resumeContactModifyDto.getProvinceCode());
-                    everyoneVisibleInfo.setCityCode(resumeContactModifyDto.getCityCode());
-                    everyoneVisibleInfo.setDistrictCode(resumeContactModifyDto.getDistrictCode());
-                    everyoneVisibleInfo.setAddress(resumeContactModifyDto.getAddress());
+                    everyoneVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
+                    everyoneVisibleInfo.setCityCode(modifyDto.getCityCode());
+                    everyoneVisibleInfo.setDistrictCode(modifyDto.getDistrictCode());
+                    everyoneVisibleInfo.setAddress(modifyDto.getAddress());
                     break;
                 case 2:
                     recruiterVisibleInfo.setCountryCode(CHINA_CODE);
-                    recruiterVisibleInfo.setProvinceCode(resumeContactModifyDto.getProvinceCode());
-                    recruiterVisibleInfo.setCityCode(resumeContactModifyDto.getCityCode());
-                    recruiterVisibleInfo.setDistrictCode(resumeContactModifyDto.getDistrictCode());
-                    recruiterVisibleInfo.setAddress(resumeContactModifyDto.getAddress());
+                    recruiterVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
+                    recruiterVisibleInfo.setCityCode(modifyDto.getCityCode());
+                    recruiterVisibleInfo.setDistrictCode(modifyDto.getDistrictCode());
+                    recruiterVisibleInfo.setAddress(modifyDto.getAddress());
                     break;
                 default:
                     break;
@@ -506,9 +540,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             everyoneVisibleInfoMapper.updateById(everyoneVisibleInfo);
             recruiterVisibleInfoMapper.updateById(recruiterVisibleInfo);
         }
-        resumeContactModifyDto.setCountryCode(CHINA_CODE);
-        userMapper.modifyResumeContactDetail(userId, resumeContactModifyDto);
+        modifyDto.setCountryCode(CHINA_CODE);
+        userMapper.modifyUserContactInfo(userId, modifyDto);
+    }
 
+    /**
+     * 查询登录用户信息
+     *
+     * @return
+     */
+    @Override
+    public LoginUserVo queryLoginUserInfo() {
+        LoginUser userInfo = SpringSecurityUtil.getUserInfo();
+        LoginUserVo loginUserVo = new LoginUserVo();
+        BeanUtils.copyProperties(userInfo, loginUserVo);
+        return loginUserVo;
     }
 
     /**
