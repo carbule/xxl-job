@@ -4,7 +4,7 @@
 
     <!--  查询用户求职关注列表  -->
     <select id="queryPersonalList"
-            resultType="com.korant.youya.workplace.pojo.vo.attentionhuntjob.AttentionHuntJobPersonalListVo">
+            resultType="com.korant.youya.workplace.pojo.vo.attentionhuntjob.AttentionHuntJobPersonalVo">
         SELECT ahj.id,
                hj.id                AS huntJobId,
                u.avatar,

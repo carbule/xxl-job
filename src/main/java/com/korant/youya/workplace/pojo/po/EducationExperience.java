@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -52,13 +53,13 @@ public class EducationExperience implements Serializable {
      * 开始时间
      */
     @TableField("start_time")
-    private String startTime;
+    private LocalDate startTime;
 
     /**
      * 结束时间
      */
     @TableField("end_time")
-    private String endTime;
+    private LocalDate endTime;
 
     /**
      * 专业名称

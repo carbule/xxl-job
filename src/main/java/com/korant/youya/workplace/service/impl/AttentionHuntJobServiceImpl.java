@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.mapper.AttentionHuntJobMapper;
 import com.korant.youya.workplace.pojo.dto.attentionhuntjob.AttentionHuntJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
-import com.korant.youya.workplace.pojo.vo.attentionhuntjob.AttentionHuntJobPersonalListVo;
+import com.korant.youya.workplace.pojo.vo.attentionhuntjob.AttentionHuntJobPersonalVo;
 import com.korant.youya.workplace.service.AttentionHuntJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -35,13 +35,13 @@ public class AttentionHuntJobServiceImpl extends ServiceImpl<AttentionHuntJobMap
      * @return
      */
     @Override
-    public Page<AttentionHuntJobPersonalListVo> queryPersonalList(AttentionHuntJobQueryPersonalListDto personalListDto) {
+    public Page<AttentionHuntJobPersonalVo> queryPersonalList(AttentionHuntJobQueryPersonalListDto personalListDto) {
         Long userId = SpringSecurityUtil.getUserId();
         int pageNumber = personalListDto.getPageNumber();
         int pageSize = personalListDto.getPageSize();
         Long count = attentionHuntJobMapper.selectCount(new LambdaQueryWrapper<AttentionHuntJob>().eq(AttentionHuntJob::getUid, userId).eq(AttentionHuntJob::getIsDelete, 0));
-        List<AttentionHuntJobPersonalListVo> list = attentionHuntJobMapper.queryPersonalList(userId, personalListDto);
-        Page<AttentionHuntJobPersonalListVo> page = new Page<>();
+        List<AttentionHuntJobPersonalVo> list = attentionHuntJobMapper.queryPersonalList(userId, personalListDto);
+        Page<AttentionHuntJobPersonalVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }

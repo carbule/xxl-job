@@ -3,14 +3,14 @@ package com.korant.youya.workplace.pojo.vo.huntjob;
 import lombok.Data;
 
 /**
- * @ClassName PersonalExpectedPositionListVo
+ * @ClassName PersonalExpectedPositionVo
  * @Description
  * @Author chenyiqiang
  * @Date 2023/11/30 9:58
  * @Version 1.0
  */
 @Data
-public class PersonalExpectedPositionListVo {
+public class PersonalExpectedPositionVo {
 
     /**
      * 主键

@@ -38,7 +38,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param listDto
      * @return
      */
-    List<HuntJobHomePageListVo> queryHomePageList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
+    List<HuntJobHomePageVo> queryHomePageList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
 
     /**
      * 根据求职id查询首页求职信息详情
@@ -57,7 +57,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param personalListDto
      * @return
      */
-    List<HuntJobPersonalListVo> queryPersonalList(@Param("userId") Long userId, @Param("status") Integer status, @Param("personalListDto") HuntJobQueryPersonalListDto personalListDto);
+    List<HuntJobPersonalVo> queryPersonalList(@Param("userId") Long userId, @Param("status") Integer status, @Param("personalListDto") HuntJobQueryPersonalListDto personalListDto);
 
     /**
      * 查询个人意向职位列表
@@ -65,7 +65,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param userId
      * @return
      */
-    List<PersonalExpectedPositionListVo> queryPersonalExpectedPositionList(@Param("userId") Long userId);
+    List<PersonalExpectedPositionVo> queryPersonalExpectedPositionList(@Param("userId") Long userId);
 
     /**
      * 查询个人意向区域列表
@@ -73,7 +73,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param userId
      * @return
      */
-    List<PersonalExpectedWorkAreaListVo> queryPersonalExpectedWorkAreaList(@Param("userId") Long userId);
+    List<PersonalExpectedWorkAreaVo> queryPersonalExpectedWorkAreaList(@Param("userId") Long userId);
 
     /**
      * 求职预览

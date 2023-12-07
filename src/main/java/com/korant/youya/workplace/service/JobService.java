@@ -56,7 +56,7 @@ public interface JobService extends IService<Job> {
      * @param personalListDto
      * @return
      */
-    Page<JobPersonalListVo> queryPersonalList(JobQueryPersonalListDto personalListDto);
+    Page<JobPersonalVo> queryPersonalList(JobQueryPersonalListDto personalListDto);
 
     /**
      * 创建职位信息

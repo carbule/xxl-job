@@ -27,7 +27,7 @@ public interface HuntJobService extends IService<HuntJob> {
      * @param listDto
      * @return
      */
-    Page<HuntJobHomePageListVo> queryHomePageList(HuntJobQueryHomePageListDto listDto);
+    Page<HuntJobHomePageVo> queryHomePageList(HuntJobQueryHomePageListDto listDto);
 
     /**
      * 根据求职id查询首页求职信息详情
@@ -50,7 +50,7 @@ public interface HuntJobService extends IService<HuntJob> {
      * @param personalListDto
      * @return
      */
-    Page<HuntJobPersonalListVo> queryPersonalList(HuntJobQueryPersonalListDto personalListDto);
+    Page<HuntJobPersonalVo> queryPersonalList(HuntJobQueryPersonalListDto personalListDto);
 
     /**
      * 校验用户信息
@@ -62,14 +62,14 @@ public interface HuntJobService extends IService<HuntJob> {
      *
      * @return
      */
-    List<PersonalExpectedPositionListVo> queryPersonalExpectedPositionList();
+    List<PersonalExpectedPositionVo> queryPersonalExpectedPositionList();
 
     /**
      * 查询个人意向区域列表
      *
      * @return
      */
-    List<PersonalExpectedWorkAreaListVo> queryPersonalExpectedWorkAreaList();
+    List<PersonalExpectedWorkAreaVo> queryPersonalExpectedWorkAreaList();
 
     /**
      * 求职发布预览

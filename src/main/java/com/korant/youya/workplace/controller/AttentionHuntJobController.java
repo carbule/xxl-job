@@ -3,7 +3,7 @@ package com.korant.youya.workplace.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.attentionhuntjob.AttentionHuntJobQueryPersonalListDto;
-import com.korant.youya.workplace.pojo.vo.attentionhuntjob.AttentionHuntJobPersonalListVo;
+import com.korant.youya.workplace.pojo.vo.attentionhuntjob.AttentionHuntJobPersonalVo;
 import com.korant.youya.workplace.service.AttentionHuntJobService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -32,7 +32,7 @@ public class AttentionHuntJobController {
      */
     @PostMapping("/queryPersonalList")
     public R<?> queryPersonalList(@RequestBody @Valid AttentionHuntJobQueryPersonalListDto personalListDto) {
-        Page<AttentionHuntJobPersonalListVo> page = attentionHuntJobService.queryPersonalList(personalListDto);
+        Page<AttentionHuntJobPersonalVo> page = attentionHuntJobService.queryPersonalList(personalListDto);
         return R.success(page);
     }
 

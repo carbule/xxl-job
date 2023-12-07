@@ -63,7 +63,7 @@ public interface JobMapper extends BaseMapper<Job> {
      * @param personalListDto
      * @return
      */
-    List<JobPersonalListVo> queryPersonalList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("personalListDto") JobQueryPersonalListDto personalListDto);
+    List<JobPersonalVo> queryPersonalList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("personalListDto") JobQueryPersonalListDto personalListDto);
 
     /**
      * 修改职位信息

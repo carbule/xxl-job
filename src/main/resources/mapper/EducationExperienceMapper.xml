@@ -2,4 +2,32 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EducationExperienceMapper">
 
+    <!--  修改教育经历信息  -->
+    <update id="modify"
+            parameterType="com.korant.youya.workplace.pojo.dto.educationexperience.EducationExperienceModifyDto">
+        UPDATE education_experience
+        SET school_name     = #{modifyDto.schoolName},
+            edu_level       = #{modifyDto.eduLevel},
+            start_time      = #{modifyDto.startTime},
+            end_time        = #{modifyDto.endTime},
+            speciality_name = #{modifyDto.specialityName},
+            degree_name     = #{modifyDto.degreeName},
+            update_time     = CURRENT_TIMESTAMP
+        WHERE id = #{modifyDto.id}
+    </update>
+
+    <!--  查询教育经历信息详情  -->
+    <select id="detail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceDetailVo">
+        SELECT id,
+               school_name     AS schoolName,
+               edu_level       AS eduLevel,
+               start_time      AS startTime,
+               end_time        AS endTime,
+               speciality_name AS specialityName,
+               degree_name     AS degreeName
+        FROM education_experience
+        WHERE id = #{id}
+          AND is_delete = 0
+    </select>
 </mapper>

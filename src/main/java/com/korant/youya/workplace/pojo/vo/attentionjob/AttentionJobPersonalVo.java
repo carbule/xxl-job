@@ -4,14 +4,14 @@ import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
 /**
- * @ClassName AttentionJobPersonalListVo
+ * @ClassName AttentionJobPersonalVo
  * @Description
  * @Author chenyiqiang
  * @Date 2023/12/5 16:26
  * @Version 1.0
  */
 @Data
-public class AttentionJobPersonalListVo {
+public class AttentionJobPersonalVo {
 
     /**
      * 主键

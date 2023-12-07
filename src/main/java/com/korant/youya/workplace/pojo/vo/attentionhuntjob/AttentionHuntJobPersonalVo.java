@@ -1,21 +1,26 @@
-package com.korant.youya.workplace.pojo.vo.huntjob;
+package com.korant.youya.workplace.pojo.vo.attentionhuntjob;
 
 import lombok.Data;
 
 /**
- * @ClassName HuntJobHomePageListVo
+ * @ClassName AttentionHuntJobPersonalVo
  * @Description
  * @Author chenyiqiang
- * @Date 2023/8/8 17:20
+ * @Date 2023/12/5 17:13
  * @Version 1.0
  */
 @Data
-public class HuntJobHomePageListVo {
+public class AttentionHuntJobPersonalVo {
+
+    /**
+     * 主键
+     */
+    private Long id;
 
     /**
      * 求职id
      */
-    private Long id;
+    private Long huntJobId;
 
     /**
      * 用户头像

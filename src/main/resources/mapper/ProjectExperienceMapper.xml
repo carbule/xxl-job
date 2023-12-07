@@ -2,4 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.ProjectExperienceMapper">
 
+    <!--  修改项目经验信息  -->
+    <update id="modify"
+            parameterType="com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceModifyDto">
+        UPDATE project_experience
+        SET project_name    = #{modifyDto.projectName},
+            project_role    = #{modifyDto.projectRole},
+            project_content = #{modifyDto.projectContent},
+            update_time     = CURRENT_TIMESTAMP
+        WHERE id = #{modifyDto.id}
+    </update>
+
+    <!--  查询项目经验信息详情  -->
+    <select id="detail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceDetailVo">
+        SELECT pe.id,
+               we.id              AS weId,
+               we.enterprise_name AS enterpriseName,
+               pe.project_name    AS projectName,
+               pe.project_role    AS projectRole,
+               pe.project_content AS projectContent
+        FROM project_experience pe
+                 LEFT JOIN work_experience we ON we.id = pe.we_id AND we.is_delete = 0
+        WHERE pe.id = #{id}
+          AND pe.is_delete = 0
+    </select>
 </mapper>

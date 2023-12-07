@@ -4,7 +4,7 @@
 
     <!--  查询用户职位关注列表  -->
     <select id="queryPersonalList"
-            resultType="com.korant.youya.workplace.pojo.vo.attentionjob.AttentionJobPersonalListVo">
+            resultType="com.korant.youya.workplace.pojo.vo.attentionjob.AttentionJobPersonalVo">
         SELECT aj.id,
                j.id                                                     AS jobId,
                e.id                                                     AS enterpriseId,

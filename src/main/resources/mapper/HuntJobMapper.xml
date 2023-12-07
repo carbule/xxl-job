@@ -135,7 +135,7 @@
     </select>
 
     <!--  查询首页求职列表  -->
-    <select id="queryHomePageList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobHomePageListVo">
+    <select id="queryHomePageList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobHomePageVo">
         SELECT t1.id,
         t1.avatar,
         t1.lastName,
@@ -260,7 +260,7 @@
     </select>
 
     <!--  查询用户个人求职列表  -->
-    <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonalListVo">
+    <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonalVo">
         SELECT hj.id,
                p.name        AS positionName,
                dd1.name      AS provinceName,
@@ -286,7 +286,7 @@
 
     <!--  查询个人意向职位列表  -->
     <select id="queryPersonalExpectedPositionList" parameterType="java.lang.Long"
-            resultType="com.korant.youya.workplace.pojo.vo.huntjob.PersonalExpectedPositionListVo">
+            resultType="com.korant.youya.workplace.pojo.vo.huntjob.PersonalExpectedPositionVo">
         SELECT ep.id,
                p1.name          AS industryName,
                p2.name          AS sectorName,
@@ -307,7 +307,7 @@
 
     <!--  查询个人意向区域列表  -->
     <select id="queryPersonalExpectedWorkAreaList" parameterType="java.lang.Long"
-            resultType="com.korant.youya.workplace.pojo.vo.huntjob.PersonalExpectedWorkAreaListVo">
+            resultType="com.korant.youya.workplace.pojo.vo.huntjob.PersonalExpectedWorkAreaVo">
         SELECT ewa.id,
                d1.name           AS countryName,
                d2.name           AS provinceName,

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.attentionjob.AttentionJobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.AttentionJob;
-import com.korant.youya.workplace.pojo.vo.attentionjob.AttentionJobPersonalListVo;
+import com.korant.youya.workplace.pojo.vo.attentionjob.AttentionJobPersonalVo;
 
 /**
  * <p>
@@ -22,7 +22,7 @@ public interface AttentionJobService extends IService<AttentionJob> {
      * @param personalListDto
      * @return
      */
-    Page<AttentionJobPersonalListVo> queryPersonalList(AttentionJobQueryPersonalListDto personalListDto);
+    Page<AttentionJobPersonalVo> queryPersonalList(AttentionJobQueryPersonalListDto personalListDto);
 
     /**
      * 取消职位关注

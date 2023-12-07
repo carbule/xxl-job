@@ -61,15 +61,15 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @return
      */
     @Override
-    public Page<HuntJobHomePageListVo> queryHomePageList(HuntJobQueryHomePageListDto listDto) {
+    public Page<HuntJobHomePageVo> queryHomePageList(HuntJobQueryHomePageListDto listDto) {
         LoginUser userInfo = SpringSecurityUtil.getUserInfo();
         Long userId = userInfo.getId();
         Long enterpriseId = userInfo.getEnterpriseId();
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
         int count = huntJobMapper.queryHomePageListCount(userId, enterpriseId, listDto);
-        List<HuntJobHomePageListVo> list = huntJobMapper.queryHomePageList(userId, enterpriseId, listDto);
-        Page<HuntJobHomePageListVo> page = new Page<>();
+        List<HuntJobHomePageVo> list = huntJobMapper.queryHomePageList(userId, enterpriseId, listDto);
+        Page<HuntJobHomePageVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }
@@ -113,14 +113,14 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @return
      */
     @Override
-    public Page<HuntJobPersonalListVo> queryPersonalList(HuntJobQueryPersonalListDto personalListDto) {
+    public Page<HuntJobPersonalVo> queryPersonalList(HuntJobQueryPersonalListDto personalListDto) {
         Long userId = SpringSecurityUtil.getUserId();
         Integer status = personalListDto.getStatus();
         int pageNumber = personalListDto.getPageNumber();
         int pageSize = personalListDto.getPageSize();
         Long count = huntJobMapper.selectCount(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getUid, userId).eq(HuntJob::getStatus, status).eq(HuntJob::getIsDelete, 0));
-        List<HuntJobPersonalListVo> list = huntJobMapper.queryPersonalList(userId, status, personalListDto);
-        Page<HuntJobPersonalListVo> page = new Page<>();
+        List<HuntJobPersonalVo> list = huntJobMapper.queryPersonalList(userId, status, personalListDto);
+        Page<HuntJobPersonalVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }
@@ -154,7 +154,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @return
      */
     @Override
-    public List<PersonalExpectedPositionListVo> queryPersonalExpectedPositionList() {
+    public List<PersonalExpectedPositionVo> queryPersonalExpectedPositionList() {
         Long userId = SpringSecurityUtil.getUserId();
         return huntJobMapper.queryPersonalExpectedPositionList(userId);
     }
@@ -165,7 +165,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @return
      */
     @Override
-    public List<PersonalExpectedWorkAreaListVo> queryPersonalExpectedWorkAreaList() {
+    public List<PersonalExpectedWorkAreaVo> queryPersonalExpectedWorkAreaList() {
         Long userId = SpringSecurityUtil.getUserId();
         return huntJobMapper.queryPersonalExpectedWorkAreaList(userId);
     }

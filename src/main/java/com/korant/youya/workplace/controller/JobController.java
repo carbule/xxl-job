@@ -89,7 +89,7 @@ public class JobController {
     @PostMapping("/queryPersonalList")
     @ExplanationDict
     public R<?> queryPersonalList(@RequestBody @Valid JobQueryPersonalListDto personalListDto) {
-        Page<JobPersonalListVo> page = jobService.queryPersonalList(personalListDto);
+        Page<JobPersonalVo> page = jobService.queryPersonalList(personalListDto);
         return R.success(page);
     }
 

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.attentionjob.AttentionJobQueryPersonalListDto;
-import com.korant.youya.workplace.pojo.vo.attentionjob.AttentionJobPersonalListVo;
+import com.korant.youya.workplace.pojo.vo.attentionjob.AttentionJobPersonalVo;
 import com.korant.youya.workplace.service.AttentionJobService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -34,7 +34,7 @@ public class AttentionJobController {
     @PostMapping("/queryPersonalList")
     @ExplanationDict
     public R<?> queryPersonalList(@RequestBody @Valid AttentionJobQueryPersonalListDto personalListDto) {
-        Page<AttentionJobPersonalListVo> page = attentionJobService.queryPersonalList(personalListDto);
+        Page<AttentionJobPersonalVo> page = attentionJobService.queryPersonalList(personalListDto);
         return R.success(page);
     }
 

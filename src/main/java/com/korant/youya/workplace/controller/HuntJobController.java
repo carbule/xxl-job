@@ -38,7 +38,7 @@ public class HuntJobController {
      */
     @PostMapping("/queryHomePageList")
     public R<?> queryListOnHomePage(@RequestBody @Valid HuntJobQueryHomePageListDto listDto) {
-        Page<HuntJobHomePageListVo> page = huntJobService.queryHomePageList(listDto);
+        Page<HuntJobHomePageVo> page = huntJobService.queryHomePageList(listDto);
         return R.success(page);
     }
 
@@ -75,7 +75,7 @@ public class HuntJobController {
      */
     @PostMapping("/queryPersonalList")
     public R<?> queryPersonalList(@RequestBody @Valid HuntJobQueryPersonalListDto personalListDto) {
-        Page<HuntJobPersonalListVo> page = huntJobService.queryPersonalList(personalListDto);
+        Page<HuntJobPersonalVo> page = huntJobService.queryPersonalList(personalListDto);
         return R.success(page);
     }
 
@@ -97,7 +97,7 @@ public class HuntJobController {
      */
     @GetMapping("/queryPersonalExpectedPositionList")
     public R<?> queryPersonalExpectedPositionList() {
-        List<PersonalExpectedPositionListVo> positionList = huntJobService.queryPersonalExpectedPositionList();
+        List<PersonalExpectedPositionVo> positionList = huntJobService.queryPersonalExpectedPositionList();
         return R.success(positionList);
     }
 
@@ -108,7 +108,7 @@ public class HuntJobController {
      */
     @GetMapping("/queryPersonalExpectedWorkAreaList")
     public R<?> queryPersonalExpectedWorkAreaList() {
-        List<PersonalExpectedWorkAreaListVo> workAreaList = huntJobService.queryPersonalExpectedWorkAreaList();
+        List<PersonalExpectedWorkAreaVo> workAreaList = huntJobService.queryPersonalExpectedWorkAreaList();
         return R.success(workAreaList);
     }
 

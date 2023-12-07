@@ -2,4 +2,43 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.WorkExperienceMapper">
 
+    <!--  查询个人工作履历列表  -->
+    <select id="queryPersonalList"
+            resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePersonalVo">
+        SELECT id,
+               enterprise_name AS enterpriseName
+        FROM work_experience
+        WHERE uid = #{userId}
+          AND is_delete = 0
+    </select>
+
+    <!--  修改工作履历信息  -->
+    <update id="modify" parameterType="com.korant.youya.workplace.pojo.dto.workexperience.WorkExperienceModifyDto">
+        UPDATE work_experience
+        SET enterprise_name = #{modifyDto.enterpriseName},
+            department_name = #{modifyDto.departmentName},
+            position_name   = #{modifyDto.positionName},
+            start_time      = #{modifyDto.startTime},
+            end_time        = #{modifyDto.endTime},
+            content         =#{modifyDto.content},
+            performance     =#{modifyDto.performance},
+            update_time     = CURRENT_TIMESTAMP
+        WHERE id = #{modifyDto.id}
+    </update>
+
+    <!--  查询工作履历信息详情  -->
+    <select id="detail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceDetailVo">
+        SELECT id,
+               enterprise_name AS enterpriseName,
+               department_name AS departmentName,
+               position_name   AS positionName,
+               start_time      AS startTime,
+               end_time        AS endTime,
+               content,
+               performance
+        FROM work_experience
+        WHERE id = #{id}
+          AND is_delete = 0
+    </select>
 </mapper>

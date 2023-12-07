@@ -209,7 +209,7 @@
     </select>
 
     <!--  查询用户个人职位列表  -->
-    <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.job.JobPersonalListVo">
+    <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.job.JobPersonalVo">
         SELECT j.id,
                p.name                                                   AS positionName,
                j.edu_requirements                                       AS eduRequirements,

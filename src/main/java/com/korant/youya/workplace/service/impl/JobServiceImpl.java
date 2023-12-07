@@ -129,7 +129,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      * @return
      */
     @Override
-    public Page<JobPersonalListVo> queryPersonalList(JobQueryPersonalListDto personalListDto) {
+    public Page<JobPersonalVo> queryPersonalList(JobQueryPersonalListDto personalListDto) {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
         if (null == enterpriseId) return null;
@@ -138,8 +138,8 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         int pageNumber = personalListDto.getPageNumber();
         int pageSize = personalListDto.getPageSize();
         Long count = jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getEnterpriseId, enterpriseId).eq(Job::getUid, userId).eq(Job::getStatus, status).eq(Job::getIsDelete, 0));
-        List<JobPersonalListVo> list = jobMapper.queryPersonalList(userId, enterpriseId, personalListDto);
-        Page<JobPersonalListVo> page = new Page<>();
+        List<JobPersonalVo> list = jobMapper.queryPersonalList(userId, enterpriseId, personalListDto);
+        Page<JobPersonalVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }
