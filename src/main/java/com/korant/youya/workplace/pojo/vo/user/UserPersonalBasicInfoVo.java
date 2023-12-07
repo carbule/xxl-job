@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.pojo.vo.user;
 
+import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -47,6 +48,7 @@ public class UserPersonalBasicInfoVo {
     /**
      * 政治面貌
      */
+    @Dict(categoryCode = "political_outlook")
     private Integer politicalOutlook;
 
     /**

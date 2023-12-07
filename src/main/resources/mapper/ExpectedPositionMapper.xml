@@ -1,4 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.ExpectedPositionMapper">
+
+    <!--  根据意向id查询意向职位id  -->
+    <select id="selectListByStatusId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT id
+        FROM expected_position
+        WHERE status_id = #{statusId}
+          AND is_delete = 0
+    </select>
+
+    <!--  批量修改意向职位  -->
+    <update id="batchModify" parameterType="java.util.List">
+        UPDATE expected_position
+        SET update_time = CURRENT_TIMESTAMP,
+        is_delete = 1
+        WHERE id IN
+        <foreach collection="list" item="param" index="index" separator="," open="(" close=")">
+            (#{param})
+        </foreach>
+    </update>
+
+    <!--  批量新增意向职位  -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO expected_position(id, status_id, industry_code, sector_code, position_code, min_salary, max_salary,
+        create_time,is_delete)
+        VALUES
+        <foreach collection="list" item="param" index="index" separator=",">
+            (
+            #{param.id},
+            #{param.statusId},
+            #{param.industryCode},
+            #{param.sectorCode},
+            #{param.positionCode},
+            #{param.minSalary},
+            #{param.maxSalary},
+            CURRENT_TIMESTAMP,
+            0
+            )
+        </foreach>
+    </insert>
 </mapper>

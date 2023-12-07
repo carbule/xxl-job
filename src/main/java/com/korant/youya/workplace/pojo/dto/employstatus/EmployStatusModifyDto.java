@@ -1,10 +1,10 @@
 package com.korant.youya.workplace.pojo.dto.employstatus;
 
+import com.korant.youya.workplace.pojo.ValidList;
 import com.korant.youya.workplace.pojo.dto.expectedposition.ExpectedPositionModifyDto;
 import com.korant.youya.workplace.pojo.dto.expectedworkarea.ExpectedWorkAreaModifyDto;
+import jakarta.validation.Valid;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @ClassName EmployStatusModifyDto
@@ -24,10 +24,12 @@ public class EmployStatusModifyDto {
     /**
      * 意向职位
      */
-    private List<ExpectedPositionModifyDto> positionModifyDtoList;
+    @Valid
+    private ValidList<ExpectedPositionModifyDto> positionModifyDtoList;
 
     /**
      * 期望工作区域
      */
-    private List<ExpectedWorkAreaModifyDto> workAreaModifyDtoList;
+    @Valid
+    private ValidList<ExpectedWorkAreaModifyDto> workAreaModifyDtoList;
 }

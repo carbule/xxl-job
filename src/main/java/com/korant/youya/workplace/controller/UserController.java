@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.controller;
 
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.vo.user.LoginUserVo;
@@ -115,6 +116,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/queryPersonalBasicInfo")
+    @ExplanationDict
     public R<?> queryPersonalBasicInfo() {
         UserPersonalBasicInfoVo personalBasicInfoVo = userService.queryPersonalBasicInfo();
         return R.success(personalBasicInfoVo);

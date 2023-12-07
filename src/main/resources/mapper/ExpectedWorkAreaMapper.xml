@@ -2,4 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.ExpectedWorkAreaMapper">
 
+    <!--  根据意向id查询意向区域id  -->
+    <select id="selectListByStatusId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT id
+        FROM expected_work_area
+        WHERE status_id = #{statusId}
+          AND is_delete = 0
+    </select>
+
+    <!--  批量修改意向区域  -->
+    <update id="batchModify" parameterType="java.util.List">
+        UPDATE expected_work_area
+        SET update_time = CURRENT_TIMESTAMP,
+        is_delete = 1
+        WHERE id IN
+        <foreach collection="list" item="param" index="index" separator="," open="(" close=")">
+            (#{param})
+        </foreach>
+    </update>
+
+    <!--  批量新增意向区域  -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO expected_work_area(id, status_id, country_code, province_code, city_code, district_code,
+        create_time,is_delete)
+        VALUES
+        <foreach collection="list" item="param" index="index" separator=",">
+            (
+            #{param.id},
+            #{param.statusId},
+            #{param.countryCode},
+            #{param.provinceCode},
+            #{param.cityCode},
+            #{param.districtCode},
+            CURRENT_TIMESTAMP,
+            0
+            )
+        </foreach>
+    </insert>
 </mapper>

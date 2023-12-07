@@ -12,4 +12,12 @@ import com.korant.youya.workplace.pojo.po.ExpectedPosition;
  * @since 2023-11-17
  */
 public interface ExpectedPositionService extends IService<ExpectedPosition> {
+
+    /**
+     * 删除意向职位前校验
+     *
+     * @param id
+     * @return
+     */
+    boolean checkBeforeDelete(Long id);
 }

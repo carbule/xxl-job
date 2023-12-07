@@ -13,4 +13,11 @@ import com.korant.youya.workplace.pojo.po.ExpectedWorkArea;
  */
 public interface ExpectedWorkAreaService extends IService<ExpectedWorkArea> {
 
+    /**
+     * 删除意向区域前校验
+     *
+     * @param id
+     * @return
+     */
+    boolean checkBeforeDelete(Long id);
 }

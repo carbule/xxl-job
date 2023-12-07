@@ -1,14 +1,13 @@
 package com.korant.youya.workplace.controller;
 
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.employstatus.EmployStatusModifyDto;
+import com.korant.youya.workplace.pojo.vo.employstatus.PersonalHuntJobIntentionVo;
 import com.korant.youya.workplace.service.EmployStatusService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -24,6 +23,18 @@ public class EmployStatusController {
 
     @Resource
     private EmployStatusService employStatusService;
+
+    /**
+     * 查询个人求职意向
+     *
+     * @return
+     */
+    @GetMapping("/queryPersonalHuntJobIntention")
+    @ExplanationDict
+    public R<?> queryPersonalHuntJobIntention() {
+        PersonalHuntJobIntentionVo personalHuntJobIntentionVo = employStatusService.queryPersonalHuntJobIntention();
+        return R.success(personalHuntJobIntentionVo);
+    }
 
     /**
      * 修改求职意向
