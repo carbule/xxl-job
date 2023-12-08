@@ -55,11 +55,6 @@ spring:
           max-idle: 10 # 连接池中的最大空闲连接
           min-idle: 5 # 连接池中的最小空闲连接
           max-wait: 5000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
-        cluster:
-          refresh:
-            adaptive: true
-            #10秒自动刷新一次
-            period: 10
       connect-timeout: 300 # 连接超时时间（毫秒）
 
 mybatis-plus:

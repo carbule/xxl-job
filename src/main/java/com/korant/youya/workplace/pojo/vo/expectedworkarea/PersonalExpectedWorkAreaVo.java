@@ -1,16 +1,16 @@
-package com.korant.youya.workplace.pojo.vo.employstatus;
+package com.korant.youya.workplace.pojo.vo.expectedworkarea;
 
 import lombok.Data;
 
 /**
- * @ClassName ExpectedWorkAreaVo
+ * @ClassName PersonalExpectedWorkAreaVo
  * @Description
  * @Author chenyiqiang
  * @Date 2023/12/7 14:56
  * @Version 1.0
  */
 @Data
-public class ExpectedWorkAreaVo {
+public class PersonalExpectedWorkAreaVo {
 
     /**
      * 期望区域id

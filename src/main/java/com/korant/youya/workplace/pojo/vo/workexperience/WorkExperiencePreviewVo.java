@@ -1,18 +1,19 @@
-package com.korant.youya.workplace.pojo.vo.huntjob;
+package com.korant.youya.workplace.pojo.vo.workexperience;
 
+import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewVo;
 import lombok.Data;
 
 import java.util.List;
 
 /**
- * @ClassName WorkExperienceVo
+ * @ClassName WorkExperiencePreviewVo
  * @Description
  * @Author chenyiqiang
  * @Date 2023/11/27 15:58
  * @Version 1.0
  */
 @Data
-public class WorkExperienceVo {
+public class WorkExperiencePreviewVo {
 
     /**
      * 主键
@@ -57,5 +58,5 @@ public class WorkExperienceVo {
     /**
      * 项目经验
      */
-    private List<ProjectExperienceVo> projectExperienceVoList;
+    private List<ProjectExperiencePreviewVo> projectExperienceVoList;
 }

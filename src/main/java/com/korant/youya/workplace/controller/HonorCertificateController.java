@@ -1,7 +1,11 @@
 package com.korant.youya.workplace.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.dto.honorcertificate.HonorCertificateCreateDto;
+import com.korant.youya.workplace.service.HonorCertificateService;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -15,4 +19,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/honorCertificate")
 public class HonorCertificateController {
 
+    @Resource
+    private HonorCertificateService honorCertificateService;
+
+    /**
+     * 创建荣誉证书信息
+     *
+     * @return
+     */
+    @PostMapping("/create")
+    public R<?> create(@RequestBody @Valid HonorCertificateCreateDto createDto) {
+        honorCertificateService.create(createDto);
+        return R.ok();
+    }
+
+    /**
+     * 删除荣誉证书信息
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/delete/{id}")
+    public R<?> delete(@PathVariable("id") Long id) {
+        honorCertificateService.delete(id);
+        return R.ok();
+    }
 }

@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.pojo.vo.huntjob;
 
 import com.korant.youya.workplace.annotations.Dict;
+import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import lombok.Data;
 
 import java.util.List;
@@ -135,5 +136,5 @@ public class HuntJobDetailsPreviewVo {
     /**
      * 工作履历
      */
-    private List<WorkExperienceVo> workExperienceVoList;
+    private List<WorkExperiencePreviewVo> workExperienceVoList;
 }

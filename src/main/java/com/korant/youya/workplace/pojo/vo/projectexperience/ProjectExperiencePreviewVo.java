@@ -1,16 +1,16 @@
-package com.korant.youya.workplace.pojo.vo.huntjob;
+package com.korant.youya.workplace.pojo.vo.projectexperience;
 
 import lombok.Data;
 
 /**
- * @ClassName ProjectExperienceVo
+ * @ClassName ProjectExperiencePreviewVo
  * @Description
  * @Author chenyiqiang
  * @Date 2023/11/27 16:00
  * @Version 1.0
  */
 @Data
-public class ProjectExperienceVo {
+public class ProjectExperiencePreviewVo {
 
     /**
      * 主键

@@ -1,6 +1,8 @@
 package com.korant.youya.workplace.pojo.vo.employstatus;
 
 import com.korant.youya.workplace.annotations.Dict;
+import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
+import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import lombok.Data;
 
 import java.util.List;
@@ -29,10 +31,10 @@ public class PersonalHuntJobIntentionVo {
     /**
      * 意向职位集
      */
-    private List<ExpectedPositionVo> expectedPositionVoList;
+    private List<PersonalExpectedPositionVo> expectedPositionVoList;
 
     /**
      * 意向区域集
      */
-    private List<ExpectedWorkAreaVo> expectedWorkAreaVoList;
+    private List<PersonalExpectedWorkAreaVo> expectedWorkAreaVoList;
 }

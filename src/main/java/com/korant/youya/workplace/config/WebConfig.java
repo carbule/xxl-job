@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.YearMonthDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.YearMonthSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -17,6 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -52,6 +55,10 @@ public class WebConfig implements WebMvcConfigurer {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         simpleModule.addSerializer(LocalDate.class, new LocalDateSerializer(dateFormatter));
         simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(dateFormatter));
+
+        DateTimeFormatter yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        simpleModule.addSerializer(YearMonth.class, new YearMonthSerializer(yearMonthFormatter));
+        simpleModule.addDeserializer(YearMonth.class, new YearMonthDeserializer(yearMonthFormatter));
 
         //添加此配置
         objectMapper.registerModule(simpleModule);

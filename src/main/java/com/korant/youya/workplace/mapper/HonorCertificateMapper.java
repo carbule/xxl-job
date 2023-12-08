@@ -12,5 +12,4 @@ import com.korant.youya.workplace.pojo.po.HonorCertificate;
  * @since 2023-11-14
  */
 public interface HonorCertificateMapper extends BaseMapper<HonorCertificate> {
-
 }

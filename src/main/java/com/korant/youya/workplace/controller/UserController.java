@@ -3,10 +3,7 @@ package com.korant.youya.workplace.controller;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
-import com.korant.youya.workplace.pojo.vo.user.LoginUserVo;
-import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
-import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
-import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -168,5 +165,29 @@ public class UserController {
     public R<?> queryCurrentUserInfo() {
         LoginUserVo loginUserVo = userService.queryLoginUserInfo();
         return R.success(loginUserVo);
+    }
+
+    /**
+     * 简历详情
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/resumeDetail")
+    public R<?> resumeDetail() {
+        ResumeDetailVo resumeDetailVo = userService.resumeDetail();
+        return R.success(resumeDetailVo);
+    }
+
+    /**
+     * 简历预览
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/resumePreview")
+    public R<?> resumePreview() {
+        ResumePreviewVo resumePreviewVo = userService.resumePreview();
+        return R.success(resumePreviewVo);
     }
 }

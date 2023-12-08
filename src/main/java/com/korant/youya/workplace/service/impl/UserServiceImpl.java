@@ -13,10 +13,7 @@ import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.*;
-import com.korant.youya.workplace.pojo.vo.user.LoginUserVo;
-import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
-import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
-import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.utils.*;
 import jakarta.annotation.Resource;
@@ -555,6 +552,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LoginUserVo loginUserVo = new LoginUserVo();
         BeanUtils.copyProperties(userInfo, loginUserVo);
         return loginUserVo;
+    }
+
+    /**
+     * 简历详情
+     *
+     * @return
+     */
+    @Override
+    public ResumeDetailVo resumeDetail() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.resumeDetail(userId);
+    }
+
+    /**
+     * 简历预览
+     *
+     * @return
+     */
+    @Override
+    public ResumePreviewVo resumePreview() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.resumePreview(userId);
     }
 
     /**

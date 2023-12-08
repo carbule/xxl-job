@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
-import com.korant.youya.workplace.pojo.vo.user.LoginUserVo;
-import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
-import com.korant.youya.workplace.pojo.vo.user.UserLoginVo;
-import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.*;
 
 /**
  * <p>
@@ -109,4 +106,18 @@ public interface UserService extends IService<User> {
      * @return
      */
     LoginUserVo queryLoginUserInfo();
+
+    /**
+     * 简历详情
+     *
+     * @return
+     */
+    ResumeDetailVo resumeDetail();
+
+    /**
+     * 简历预览
+     *
+     * @return
+     */
+    ResumePreviewVo resumePreview();
 }

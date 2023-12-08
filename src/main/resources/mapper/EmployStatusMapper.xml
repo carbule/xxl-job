@@ -7,7 +7,7 @@
         <id column="id" property="id"/>
         <result column="status" property="status"/>
         <collection property="expectedPositionVoList" javaType="java.util.List"
-                    ofType="com.korant.youya.workplace.pojo.vo.employstatus.ExpectedPositionVo">
+                    ofType="com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo">
             <id column="positionId" property="positionId"/>
             <result column="industryName" property="industryName"/>
             <result column="sectorName" property="sectorName"/>
@@ -19,7 +19,7 @@
             <result column="maxSalary" property="maxSalary"/>
         </collection>
         <collection property="expectedWorkAreaVoList" javaType="java.util.List"
-                    ofType="com.korant.youya.workplace.pojo.vo.employstatus.ExpectedWorkAreaVo">
+                    ofType="com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo">
             <id column="areaId" property="areaId"/>
             <result column="countryName" property="countryName"/>
             <result column="provinceName" property="provinceName"/>
