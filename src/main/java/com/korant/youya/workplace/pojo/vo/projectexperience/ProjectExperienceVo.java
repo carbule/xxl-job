@@ -20,7 +20,7 @@ public class ProjectExperienceVo {
     /**
      * 企业名称
      */
-    private String enterpriseName;
+    private String projectEnterpriseName;
 
     /**
      * 项目名称

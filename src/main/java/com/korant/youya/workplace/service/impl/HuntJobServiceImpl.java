@@ -20,6 +20,8 @@ import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
 import com.korant.youya.workplace.pojo.po.EducationExperience;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
+import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.service.HuntJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;

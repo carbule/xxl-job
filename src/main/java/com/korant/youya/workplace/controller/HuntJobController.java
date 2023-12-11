@@ -7,6 +7,8 @@ import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
+import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
+import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.service.HuntJobService;
 import jakarta.annotation.Resource;

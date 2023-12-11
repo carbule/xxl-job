@@ -3,6 +3,7 @@ package com.korant.youya.workplace.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.po.Position;
 import com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo;
+import com.korant.youya.workplace.pojo.vo.position.PositionDataVo;
 
 import java.util.List;
 
@@ -22,4 +23,19 @@ public interface PositionService extends IService<Position> {
      * @return
      */
     List<PositionDataTreeVo> queryAllData();
+
+    /**
+     * 查询所有行业
+     *
+     * @return
+     */
+    List<PositionDataVo> queryAllIndustries();
+
+    /**
+     * 根据行业code查询所有职位
+     *
+     * @param industryCode
+     * @return
+     */
+    List<PositionDataTreeVo> queryPositionsByIndustryCode(String industryCode);
 }

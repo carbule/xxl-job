@@ -1,6 +1,5 @@
 package com.korant.youya.workplace.pojo.vo.educationexperience;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
@@ -35,13 +34,11 @@ public class EducationExperienceDetailVo {
     /**
      * 开始时间
      */
-    @JsonFormat(pattern = "yyyy-MM")
     private LocalDate startTime;
 
     /**
      * 结束时间
      */
-    @JsonFormat(pattern = "yyyy-MM")
     private LocalDate endTime;
 
     /**

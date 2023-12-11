@@ -24,12 +24,13 @@
         <result column="districtName" property="districtName"/>
         <result column="address" property="address"/>
         <collection property="workExperienceVoList" javaType="java.util.List"
-                    ofType="com.korant.youya.workplace.pojo.vo.huntjob.WorkExperienceVo"
+                    ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
                     resultMap="WorkExperienceVoMap">
         </collection>
     </resultMap>
 
-    <resultMap id="WorkExperienceVoMap" type="com.korant.youya.workplace.pojo.vo.huntjob.WorkExperienceVo">
+    <resultMap id="WorkExperienceVoMap"
+               type="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo">
         <id column="weId" property="weId"/>
         <result column="enterpriseName" property="enterpriseName"/>
         <result column="departmentName" property="departmentName"/>
@@ -39,12 +40,13 @@
         <result column="content" property="content"/>
         <result column="performance" property="performance"/>
         <collection property="projectExperienceVoList" javaType="java.util.List"
-                    ofType="com.korant.youya.workplace.pojo.vo.huntjob.ProjectExperienceVo"
+                    ofType="com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewVo"
                     resultMap="ProjectExperienceVoMap">
         </collection>
     </resultMap>
 
-    <resultMap id="ProjectExperienceVoMap" type="com.korant.youya.workplace.pojo.vo.huntjob.ProjectExperienceVo">
+    <resultMap id="ProjectExperienceVoMap"
+               type="com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewVo">
         <id column="peId" property="peId"/>
         <result column="projectName" property="projectName"/>
         <result column="projectRole" property="projectRole"/>
@@ -79,7 +81,7 @@
         <result column="address" property="address"/>
         <result column="isCollected" property="isCollected"/>
         <collection property="workExperienceVoList" javaType="java.util.List"
-                    ofType="com.korant.youya.workplace.pojo.vo.huntjob.WorkExperienceVo"
+                    ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
                     resultMap="WorkExperienceVoMap">
         </collection>
     </resultMap>
@@ -109,7 +111,7 @@
         <result column="districtName" property="districtName"/>
         <result column="address" property="address"/>
         <collection property="workExperienceVoList" javaType="java.util.List"
-                    ofType="com.korant.youya.workplace.pojo.vo.huntjob.WorkExperienceVo"
+                    ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
                     resultMap="WorkExperienceVoMap">
         </collection>
     </resultMap>
@@ -245,7 +247,8 @@
             pe.project_name AS projectName,
             pe.project_role AS projectRole,
             pe.project_content AS projectContent
-        FROM hunt_job AS hj LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
+        FROM hunt_job AS hj LEFT JOIN yy_user AS u
+        ON hj.uid = u.id AND u.is_delete = 0
             LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
             LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
             LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
@@ -286,8 +289,8 @@
 
     <!--  查询个人意向职位列表  -->
     <select id="queryPersonalExpectedPositionList" parameterType="java.lang.Long"
-            resultType="com.korant.youya.workplace.pojo.vo.huntjob.PersonalExpectedPositionVo">
-        SELECT ep.id,
+            resultType="com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo">
+        SELECT ep.id            AS positionId,
                p1.name          AS industryName,
                p2.name          AS sectorName,
                p3.name          AS positionName,
@@ -307,8 +310,8 @@
 
     <!--  查询个人意向区域列表  -->
     <select id="queryPersonalExpectedWorkAreaList" parameterType="java.lang.Long"
-            resultType="com.korant.youya.workplace.pojo.vo.huntjob.PersonalExpectedWorkAreaVo">
-        SELECT ewa.id,
+            resultType="com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo">
+        SELECT ewa.id            AS areaId,
                d1.name           AS countryName,
                d2.name           AS provinceName,
                d3.name           AS cityName,

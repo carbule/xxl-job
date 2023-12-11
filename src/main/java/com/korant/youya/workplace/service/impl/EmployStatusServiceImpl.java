@@ -41,6 +41,8 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
     @Resource
     private ExpectedWorkAreaMapper expectedWorkAreaMapper;
 
+    private static final String CHINA_CODE = "100000";
+
     /**
      * 查询个人求职意向
      *
@@ -139,6 +141,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
                 addWorkAreaList.forEach(s -> {
                     s.setId(IdWorker.getId());
                     s.setStatusId(statusId);
+                    s.setCountryCode(CHINA_CODE);
                 });
                 expectedWorkAreaMapper.batchInsert(addWorkAreaList);
             }

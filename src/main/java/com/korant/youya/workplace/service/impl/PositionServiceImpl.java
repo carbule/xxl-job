@@ -1,9 +1,12 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.PositionMapper;
 import com.korant.youya.workplace.pojo.po.Position;
 import com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo;
+import com.korant.youya.workplace.pojo.vo.position.PositionDataVo;
 import com.korant.youya.workplace.service.PositionService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,29 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
                 recursivePositionsFromList(s, positionDataTreeVos)
         );
         return topPositions;
+    }
+
+    /**
+     * 查询所有行业
+     *
+     * @return
+     */
+    @Override
+    public List<PositionDataVo> queryAllIndustries() {
+        return positionMapper.queryAllIndustries();
+    }
+
+    /**
+     * 根据行业code查询所有职位
+     *
+     * @param industryCode
+     * @return
+     */
+    @Override
+    public List<PositionDataTreeVo> queryPositionsByIndustryCode(String industryCode) {
+        Position position = positionMapper.selectOne(new LambdaQueryWrapper<Position>().eq(Position::getCode, industryCode).eq(Position::getIsDelete, 0));
+        if (null == position) throw new YouyaException("行业不存在");
+        return positionMapper.queryPositionsByIndustryId(position.getId());
     }
 
     /**

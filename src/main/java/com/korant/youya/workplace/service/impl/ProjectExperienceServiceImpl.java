@@ -9,6 +9,7 @@ import com.korant.youya.workplace.pojo.dto.projectexperience.ProjectExperienceMo
 import com.korant.youya.workplace.pojo.po.ProjectExperience;
 import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceDetailVo;
 import com.korant.youya.workplace.service.ProjectExperienceService;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -34,8 +35,10 @@ public class ProjectExperienceServiceImpl extends ServiceImpl<ProjectExperienceM
      */
     @Override
     public void create(ProjectExperienceCreateDto createDto) {
+        Long userId = SpringSecurityUtil.getUserId();
         ProjectExperience projectExperience = new ProjectExperience();
         BeanUtils.copyProperties(createDto, projectExperience);
+        projectExperience.setUid(userId);
         projectExperienceMapper.insert(projectExperience);
     }
 

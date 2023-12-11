@@ -37,6 +37,12 @@ public class ProjectExperience implements Serializable {
     private Long weId;
 
     /**
+     * 用户id
+     */
+    @TableField("uid")
+    private Long uid;
+
+    /**
      * 项目名称
      */
     @TableField("project_name")

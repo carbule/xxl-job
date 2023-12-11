@@ -26,7 +26,6 @@ public class ExpectedWorkAreaModifyDto {
     /**
      * 国家编码
      */
-    @NotBlank(message = "国家编码不能为空")
     private String countryCode;
 
     /**
@@ -38,12 +37,10 @@ public class ExpectedWorkAreaModifyDto {
     /**
      * 市级编码
      */
-    @NotBlank(message = "市级编码不能为空")
     private String cityCode;
 
     /**
      * 行政区编码
      */
-    @NotBlank(message = "行政区编码不能为空")
     private String districtCode;
 }

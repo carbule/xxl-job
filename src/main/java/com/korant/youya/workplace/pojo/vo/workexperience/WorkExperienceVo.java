@@ -17,7 +17,7 @@ public class WorkExperienceVo {
     /**
      * 主键
      */
-    private Long wkId;
+    private Long weId;
 
     /**
      * 企业名称
@@ -32,7 +32,7 @@ public class WorkExperienceVo {
     /**
      * 职位名称
      */
-    private String positionName;
+    private String expectedPositionName;
 
     /**
      * 开始时间

@@ -2,12 +2,58 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.PositionMapper">
 
+    <resultMap id="queryPositionsByIndustryCodeMap"
+               type="com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo">
+        <id column="id" property="id"/>
+        <result column="pid" property="pid"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <collection property="children" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo">
+            <id column="p2Id" property="id"/>
+            <result column="p2Pid" property="pid"/>
+            <result column="p2Name" property="name"/>
+            <result column="p2Code" property="code"/>
+        </collection>
+    </resultMap>
+
     <!--  查询所有职位数据  -->
     <select id="queryAllData" resultType="com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo">
-        SELECT
-            id, pid, name, code
+        SELECT id,
+               pid,
+               name,
+               code
         FROM position
         WHERE is_delete = 0
         ORDER BY create_time
+    </select>
+
+    <!--  查询所有行业  -->
+    <select id="queryAllIndustries" resultType="com.korant.youya.workplace.pojo.vo.position.PositionDataVo">
+        SELECT id,
+               pid,
+               name,
+               code
+        FROM position
+        WHERE level = 1
+          AND is_delete = 0
+        ORDER BY create_time
+    </select>
+
+    <!--  根据行业id查询所有职位  -->
+    <select id="queryPositionsByIndustryId" resultMap="queryPositionsByIndustryCodeMap">
+        SELECT p1.id,
+               p1.pid,
+               p1.name,
+               p1.code,
+               p2.id   AS p2Id,
+               p2.pid  AS p2Pid,
+               p2.name AS p2Name,
+               p2.code AS p2Code
+        FROM position p1
+                 LEFT JOIN position p2 ON p1.id = p2.pid AND p2.is_delete = 0
+        WHERE p1.pid = #{industryId}
+          AND p1.is_delete = 0
+        ORDER BY p1.create_time
     </select>
 </mapper>

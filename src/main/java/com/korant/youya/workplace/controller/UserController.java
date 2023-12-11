@@ -174,6 +174,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/resumeDetail")
+    @ExplanationDict
     public R<?> resumeDetail() {
         ResumeDetailVo resumeDetailVo = userService.resumeDetail();
         return R.success(resumeDetailVo);
@@ -186,6 +187,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/resumePreview")
+    @ExplanationDict
     public R<?> resumePreview() {
         ResumePreviewVo resumePreviewVo = userService.resumePreview();
         return R.success(resumePreviewVo);

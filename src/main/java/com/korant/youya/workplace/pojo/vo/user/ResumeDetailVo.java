@@ -1,8 +1,10 @@
 package com.korant.youya.workplace.pojo.vo.user;
 
+import com.korant.youya.workplace.annotations.Dict;
 import com.korant.youya.workplace.pojo.vo.attachment.AttachmentVo;
 import com.korant.youya.workplace.pojo.vo.educationexperience.EducationExperienceVo;
-import com.korant.youya.workplace.pojo.vo.employstatus.EmployStatusVo;
+import com.korant.youya.workplace.pojo.vo.expectedposition.ExpectedPositionVo;
+import com.korant.youya.workplace.pojo.vo.expectedworkarea.ExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.honorcertificate.HonorCertificateVo;
 import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperienceVo;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceVo;
@@ -91,9 +93,25 @@ public class ResumeDetailVo {
     private String address;
 
     /**
-     * 求职意向
+     * 个性签名
      */
-    private EmployStatusVo employStatusVo;
+    private String personalSignature;
+
+    /**
+     * 状态
+     */
+    @Dict(categoryCode = "employ_status")
+    private Integer employStatus;
+
+    /**
+     * 意向职位集
+     */
+    private List<ExpectedPositionVo> expectedPositionVoList;
+
+    /**
+     * 意向区域集
+     */
+    private List<ExpectedWorkAreaVo> expectedWorkAreaVoList;
 
     /**
      * 工作履历集

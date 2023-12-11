@@ -56,7 +56,7 @@ public class WorkExperiencePreviewVo {
     private String performance;
 
     /**
-     * 项目经验
+     * 项目经验集
      */
     private List<ProjectExperiencePreviewVo> projectExperienceVoList;
 }
