@@ -43,12 +43,6 @@ public class EnterpriseTodo implements Serializable {
     private Long uid;
 
     /**
-     * 工号
-     */
-    @TableField("employee_id")
-    private String employeeId;
-
-    /**
      * 事项类型 1-hr认证 2-员工认证
      */
     @TableField("event_type")

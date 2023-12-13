@@ -299,4 +299,13 @@
                  LEFT JOIN enterprise_welfare_label AS ewl ON jwl.label_id = ewl.id AND ewl.is_delete = 0
         WHERE j.id = #{id}
     </select>
+
+    <!--  强制移交职位信息  -->
+    <update id="compulsoryTransferJob" parameterType="java.lang.Long">
+        UPDATE job
+        SET uid         = #{userId},
+            update_time = CURRENT_TIMESTAMP
+        WHERE uid = #{id}
+          AND is_delete = 0
+    </update>
 </mapper>

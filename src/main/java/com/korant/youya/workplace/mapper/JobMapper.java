@@ -80,4 +80,12 @@ public interface JobMapper extends BaseMapper<Job> {
      * @return
      */
     JobDetailVo detail(@Param("id") Long id);
+
+    /**
+     * 强制移交职位信息
+     *
+     * @param id
+     * @param userId
+     */
+    int compulsoryTransferJob(@Param("id") Long id, @Param("userId") Long userId);
 }
