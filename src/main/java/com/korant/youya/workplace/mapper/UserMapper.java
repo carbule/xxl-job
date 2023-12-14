@@ -86,4 +86,12 @@ public interface UserMapper extends BaseMapper<User> {
      * @return
      */
     ResumePreviewVo resumePreview(@Param("userId") Long userId);
+
+    /**
+     * 根据用户id查询用户角色
+     *
+     * @param userId
+     * @return
+     */
+    String queryUserRoleById(@Param("userId") Long userId);
 }

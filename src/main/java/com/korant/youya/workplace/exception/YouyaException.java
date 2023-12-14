@@ -14,7 +14,7 @@ public class YouyaException extends RuntimeException implements Serializable {
         super(message);
     }
 
-    public YouyaException(String message, int statusCode) {
+    public YouyaException(int statusCode, String message) {
         super(message);
         this.statusCode = statusCode;
     }

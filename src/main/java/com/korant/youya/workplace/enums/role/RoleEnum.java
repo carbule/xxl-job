@@ -9,6 +9,7 @@ package com.korant.youya.workplace.enums.role;
  */
 public enum RoleEnum {
 
+    EMPLOYEE("employee"),
     HR("hr"),
     ADMIN("admin");
 

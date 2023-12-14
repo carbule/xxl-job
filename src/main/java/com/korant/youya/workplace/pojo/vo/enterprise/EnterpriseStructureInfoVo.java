@@ -16,6 +16,11 @@ import java.util.List;
 public class EnterpriseStructureInfoVo {
 
     /**
+     * 企业id
+     */
+    private Long id;
+
+    /**
      * 企业类型
      */
     @Dict(categoryCode = "enterprise_type")
@@ -77,6 +82,16 @@ public class EnterpriseStructureInfoVo {
      * 联系地址
      */
     private String contactAddress;
+
+    /**
+     * hr总人数
+     */
+    private Integer hrNumber;
+
+    /**
+     * 员工总人数
+     */
+    private Integer employeeNumber;
 
     /**
      * hr头像

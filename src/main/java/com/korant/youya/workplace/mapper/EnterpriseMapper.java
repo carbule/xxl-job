@@ -38,6 +38,26 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
     List<EmployeeVo> queryEmployeeList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryEmployeeListDto") QueryEmployeeListDto queryEmployeeListDto);
 
     /**
+     * 查询企业hr数量
+     *
+     * @param userId
+     * @param enterpriseId
+     * @param queryHRListDto
+     * @return
+     */
+    int queryHRListCount(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryHRListDto") QueryHRListDto queryHRListDto);
+
+    /**
+     * 查询企业hr列表
+     *
+     * @param userId
+     * @param enterpriseId
+     * @param queryHRListDto
+     * @return
+     */
+    List<HRVo> queryHRList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryHRListDto") QueryHRListDto queryHRListDto);
+
+    /**
      * 查询企业代办事项
      *
      * @param enterpriseId
@@ -45,6 +65,14 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
      * @return
      */
     List<EnterprisePendingApprovalVo> queryPendingApprovalList(@Param("enterpriseId") Long enterpriseId, @Param("queryPendingApprovalListDto") QueryPendingApprovalListDto queryPendingApprovalListDto);
+
+    /**
+     * 根据企业id查找管理员id
+     *
+     * @param enterpriseId
+     * @return
+     */
+    Long queryAdminIdByEnterpriseId(@Param("enterpriseId") Long enterpriseId);
 
     /**
      * 根据企业名称查询企业

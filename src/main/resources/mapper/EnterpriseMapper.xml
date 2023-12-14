@@ -2,6 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.EnterpriseMapper">
 
+    <resultMap id="queryEnterpriseStructureInfoByAdminMap"
+               type="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseStructureInfoVo">
+        <id column="id" property="id"/>
+        <result column="entType" property="entType"/>
+        <result column="scale" property="scale"/>
+        <result column="financingStage" property="financingStage"/>
+        <result column="website" property="website"/>
+        <result column="introduction" property="introduction"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="countryName" property="countryName"/>
+        <result column="provinceName" property="provinceName"/>
+        <result column="cityName" property="cityName"/>
+        <result column="districtName" property="districtName"/>
+        <result column="contactAddress" property="contactAddress"/>
+        <collection property="hrAvatarList" javaType="java.util.List" ofType="java.lang.String">
+            <id column="hrAvatar"/>
+        </collection>
+        <collection property="employeeAvatarList" javaType="java.util.List" ofType="java.lang.String">
+            <id column="employeeAvatar"/>
+        </collection>
+    </resultMap>
+
     <!--  查询企业员工数量  -->
     <select id="queryEmployeeListCount" resultType="java.lang.Integer">
         SELECT COUNT(1)
@@ -33,6 +56,48 @@
         OFFSET (#{queryEmployeeListDto.pageNumber} -1) * #{queryEmployeeListDto.pageSize}
     </select>
 
+    <!--  查询企业hr数量  -->
+    <select id="queryHRListCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM yy_user_enterprise AS ue
+        LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
+        LEFT JOIN yy_user_role AS ur ON ue.uid = ur.uid AND ur.is_delete = 0
+        LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+        <where>
+            ue.uid != #{userId}
+            AND ue.enterprise_id = #{enterpriseId}
+            <if test="">
+                AND (u.last_name || u.first_name) LIKE concat('%', #{queryHRListDto.name}, '%')
+            </if>
+            AND r.role_name = 'hr'
+            AND ue.is_delete = 0
+        </where>
+    </select>
+
+    <!--  查询企业hr列表  -->
+    <select id="queryHRList" resultType="com.korant.youya.workplace.pojo.vo.enterprise.HRVo">
+        SELECT u.id,
+        u.avatar,
+        u.last_name AS lastName,
+        u.first_name AS firstName,
+        u.phone
+        FROM yy_user_enterprise AS ue
+        LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
+        LEFT JOIN yy_user_role AS ur ON ue.uid = ur.uid AND ur.is_delete = 0
+        LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+        <where>
+            ue.uid != #{userId}
+            AND ue.enterprise_id = #{enterpriseId}
+            <if test="">
+                AND (u.last_name || u.first_name) LIKE concat('%', #{queryHRListDto.name}, '%')
+            </if>
+            AND r.role_name = 'hr'
+            AND ue.is_delete = 0
+            ORDER BY ue.create_time DESC LIMIT #{queryEmployeeListDto.pageSize}
+            OFFSET (#{queryEmployeeListDto.pageNumber} -1) * #{queryEmployeeListDto.pageSize}
+        </where>
+    </select>
+
     <!--  查询企业代办事项  -->
     <select id="queryPendingApprovalList"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterprisePendingApprovalVo">
@@ -50,6 +115,18 @@
           AND et.is_delete = 0
         ORDER BY et.create_time DESC LIMIT #{queryPendingApprovalListDto.pageSize}
         OFFSET (#{queryPendingApprovalListDto.pageNumber} -1) * #{queryPendingApprovalListDto.pageSize}
+    </select>
+
+    <!--  根据企业id查找管理员id  -->
+    <select id="queryAdminIdByEnterpriseId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT u.id
+        FROM yy_user_enterprise AS ue
+                 LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
+                 LEFT JOIN yy_user_role AS ur ON ue.uid = ur.uid AND ur.is_delete = 0
+                 LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+        WHERE ue.enterprise_id = #{enterpriseId}
+          AND ue.is_delete = 0
+          AND r.role_name = 'admin'
     </select>
 
     <!--  根据企业名称查询企业  -->
@@ -98,6 +175,7 @@
                e.ent_type        AS entType,
                e.scale,
                e.financing_stage AS financingStage,
+               auth_status       AS authStatus,
                u.avatar,
                u.last_name       AS lastName,
                u.first_name      AS firstName,
@@ -117,7 +195,7 @@
           AND e.is_delete = 0
     </select>
 
-    <!--  根据当前登陆用户查询企业信息  -->
+    <!--  根据管理员身份查询企业信息  -->
     <select id="queryEnterpriseInfoByAdmin" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByLoginUserVo">
         SELECT id,
@@ -125,7 +203,8 @@
                logo,
                ent_type        AS entType,
                scale,
-               financing_stage AS financingStage
+               financing_stage AS financingStage,
+               auth_status     AS authStatus
         FROM enterprise
         WHERE id = #{enterpriseId}
           AND is_delete = 0
@@ -133,21 +212,101 @@
 
     <!--  根据管理员身份查询企业结构信息  -->
     <select id="queryEnterpriseStructureInfoByAdmin"
-            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseStructureInfoVo">
-
+            resultMap="queryEnterpriseStructureInfoByAdminMap">
+        SELECT e.id,
+               e.ent_type              AS entType,
+               e.scale,
+               e.financing_stage       AS financingStage,
+               e.website,
+               e.introduction,
+               e.phone,
+               e.email,
+               dd1.name                AS countryName,
+               dd2.name                AS provinceName,
+               dd3.name                AS cityName,
+               dd4.name                AS districtName,
+               e.contact_address       AS contactAddress,
+               (SELECT COUNT(1)
+                FROM yy_user AS u
+                         LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
+                         LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
+                         LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+                WHERE ue.enterprise_id = #{enterpriseId}
+                  AND r.role_name = 'hr'
+                  AND u.is_delete = 0) AS hrNumber,
+               (SELECT COUNT(1)
+                FROM yy_user AS u
+                         LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
+                         LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
+                         LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+                WHERE ue.enterprise_id = #{enterpriseId}
+                  AND r.role_name = 'employee'
+                  AND u.is_delete = 0) AS employeeNumber,
+               t1.avatar               AS hrAvatar,
+               t2.avatar               AS employeeAvatar
+        FROM enterprise AS e
+                 LEFT JOIN district_data dd1 ON e.country_code = dd1.code AND dd1.is_delete = 0
+                 LEFT JOIN district_data dd2 ON e.province_code = dd2.code AND dd2.is_delete = 0
+                 LEFT JOIN district_data dd3 ON e.city_code = dd3.code AND dd3.is_delete = 0
+                 LEFT JOIN district_data dd4 ON e.district_code = dd4.code AND dd4.is_delete = 0
+                 LEFT JOIN (
+            SELECT u.avatar,
+                   ue.enterprise_id AS enterpriseId
+            FROM yy_user AS u
+                     LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
+                     LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
+                     LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+            WHERE ue.enterprise_id = #{enterpriseId}
+              AND r.role_name = 'hr'
+              AND u.is_delete = 0
+            ORDER BY ue.create_time DESC LIMIT 5
+        ) AS t1 ON e.id = t1.enterpriseId
+                 LEFT JOIN (
+            SELECT u.avatar,
+                   ue.enterprise_id AS enterpriseId
+            FROM yy_user AS u
+                     LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0
+                     LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
+                     LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+            WHERE ue.enterprise_id = #{enterpriseId}
+              AND r.role_name = 'employee'
+              AND u.is_delete = 0
+            ORDER BY ue.create_time DESC LIMIT 5
+        ) AS t2 ON e.id = t2.enterpriseId
+        WHERE e.id = #{enterpriseId}
+          AND e.is_delete = 0
     </select>
 
     <!--  根据hr身份查询企业结构信息  -->
     <select id="queryEnterpriseStructureInfoByHR"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseStructureInfoVo">
-
+        SELECT e.id,
+               e.ent_type        AS entType,
+               e.scale,
+               e.financing_stage AS financingStage,
+               e.website,
+               e.introduction,
+               e.phone,
+               e.email,
+               dd1.name          AS countryName,
+               dd2.name          AS provinceName,
+               dd3.name          AS cityName,
+               dd4.name          AS districtName,
+               e.contact_address AS contactAddress
+        FROM enterprise AS e
+                 LEFT JOIN district_data dd1 ON e.country_code = dd1.code AND dd1.is_delete = 0
+                 LEFT JOIN district_data dd2 ON e.province_code = dd2.code AND dd2.is_delete = 0
+                 LEFT JOIN district_data dd3 ON e.city_code = dd3.code AND dd3.is_delete = 0
+                 LEFT JOIN district_data dd4 ON e.district_code = dd4.code AND dd4.is_delete = 0
+        WHERE e.id = #{enterpriseId}
+          AND e.is_delete = 0
     </select>
 
     <!--  查询企业基础信息  -->
     <select id="queryEnterpriseBasicInfo" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseBasicInfoVo">
         SELECT e.id,
-               e.entType         AS entType,
+               e.ent_type        AS entType,
                e.scale,
                e.financing_stage AS financingStage,
                e.website,
@@ -169,6 +328,7 @@
                  LEFT JOIN district_data dd3 ON e.city_code = dd3.code AND dd3.is_delete = 0
                  LEFT JOIN district_data dd4 ON e.district_code = dd4.code AND dd4.is_delete = 0
         WHERE e.id = #{enterpriseId}
-          AND is_delete = 0
+          AND e.is_delete = 0
     </select>
+
 </mapper>

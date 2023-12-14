@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
 import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
+import com.korant.youya.workplace.enums.enterprisechangetodo.EnterpriseChangeTodoOperateEnum;
+import com.korant.youya.workplace.enums.enterprisechangetodo.EnterpriseChangeTodoTypeEnum;
 import com.korant.youya.workplace.enums.enterprisetodo.EnterpriseTodoEventTypeEnum;
 import com.korant.youya.workplace.enums.enterprisetodo.EnterpriseTodoOperateEnum;
 import com.korant.youya.workplace.enums.role.RoleEnum;
@@ -59,6 +61,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     private EnterpriseTodoMapper enterpriseTodoMapper;
 
     @Resource
+    private EnterpriseChangeTodoMapper enterpriseChangeTodoMapper;
+
+    @Resource
     private RoleMapper roleMapper;
 
     @Resource
@@ -68,11 +73,14 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     private JobMapper jobMapper;
 
     @Resource
+    private UserMapper userMapper;
+
+    @Resource
     private RedisUtil redisUtil;
 
     public static final String ENTERPRISE_BUCKET = "enterprise";
 
-    private static final String DEFAULT_LOGO = "https://resources.youyai.cn/picture/firmLogo.jpg";
+    private static final String DEFAULT_LOGO = "https://resources.youyai.cn/svg/door-open.svg";
 
     /**
      * 查询企业员工列表
@@ -91,6 +99,27 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         int count = enterpriseMapper.queryEmployeeListCount(userId, enterpriseId);
         List<EmployeeVo> list = enterpriseMapper.queryEmployeeList(userId, enterpriseId, queryEmployeeListDto);
         Page<EmployeeVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询企业HR列表
+     *
+     * @param queryHRListDto
+     * @return
+     */
+    @Override
+    public Page<HRVo> queryHRList(QueryHRListDto queryHRListDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) return null;
+        int pageNumber = queryHRListDto.getPageNumber();
+        int pageSize = queryHRListDto.getPageSize();
+        int count = enterpriseMapper.queryHRListCount(userId, enterpriseId, queryHRListDto);
+        List<HRVo> list = enterpriseMapper.queryHRList(userId, enterpriseId, queryHRListDto);
+        Page<HRVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }
@@ -140,6 +169,14 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             userRoleMapper.insert(userRole);
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, uid);
             redisUtil.del(cacheKey);
+        } else {
+            Role role = roleMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, RoleEnum.EMPLOYEE.getRole()).eq(Role::getIsDelete, 0));
+            if (null == role) throw new YouyaException("预设角色缺失");
+            UserRole userRole = new UserRole();
+            userRole.setUid(uid).setRid(role.getId());
+            userRoleMapper.insert(userRole);
+            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, uid);
+            redisUtil.del(cacheKey);
         }
         UserEnterprise userEnterprise = new UserEnterprise();
         userEnterprise.setUid(uid).setEnterpriseId(enterpriseId);
@@ -169,17 +206,23 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     /**
      * 撤销申请
      *
-     * @param enterpriseId
+     * @param id
      */
     @Override
-    public void revoke(Long enterpriseId) {
+    @Transactional(rollbackFor = Exception.class)
+    public void revoke(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
-        EnterpriseTodo enterpriseTodo = enterpriseTodoMapper.selectOne(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getEnterpriseId, enterpriseId).eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getIsDelete, 0));
-        if (null == enterpriseTodo) throw new YouyaException("加入申请不存在");
-        Integer operate = enterpriseTodo.getOperate();
-        if (EnterpriseTodoOperateEnum.AGREE.getOperate() == operate) throw new YouyaException("申请已同意无法撤销");
-        enterpriseTodo.setIsDelete(1);
-        enterpriseTodoMapper.updateById(enterpriseTodo);
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, id).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        Integer authStatus = enterprise.getAuthStatus();
+        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, id).eq(UserEnterprise::getIsDelete, 0));
+        if (null == userEnterprise) throw new YouyaException("企业管理员缺失");
+        if (!userEnterprise.getUid().equals(userId)) throw new YouyaException("非法操作");
+        if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() == authStatus) throw new YouyaException("企业已认证无法撤销");
+        enterprise.setIsDelete(1);
+        enterpriseMapper.updateById(enterprise);
+        userEnterprise.setIsDelete(1);
+        userEnterpriseMapper.updateById(userEnterprise);
     }
 
     /**
@@ -214,6 +257,69 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             if (!redisUtil.del(cacheKey)) throw new YouyaException("强制移除员工失败，请稍后再试");
             userEnterprise.setIsDelete(1);
             userEnterpriseMapper.updateById(userEnterprise);
+        }
+    }
+
+    /**
+     * 转让管理员
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transferAdministrator(TransferAdministratorDto transferAdministratorDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        Long transferUserId = transferAdministratorDto.getUserId();
+        if (userId.equals(transferUserId)) throw new YouyaException("禁止自我转让");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, transferUserId).eq(User::getIsDelete, 0));
+        if (null == user) throw new YouyaException("转让用户未注册");
+        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, transferUserId).eq(UserEnterprise::getIsDelete, 0));
+        if (null == userEnterprise) throw new YouyaException("用户未加入企业");
+        String role = loginUser.getRole();
+        if (!RoleEnum.HR.getRole().equals(role)) throw new YouyaException("该用户不是HR角色，不可转让");
+        UserRole admin = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
+        UserRole hr = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
+        if (null == admin || null == hr) throw new YouyaException("未找到关联角色，转让失败");
+        Role adminRole = roleMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, RoleEnum.ADMIN.getRole()).eq(Role::getIsDelete, 0));
+        Role hrRole = roleMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, RoleEnum.HR.getRole()).eq(Role::getIsDelete, 0));
+        if (null == adminRole || null == hrRole) throw new YouyaException("预设角色缺失");
+        admin.setRid(hrRole.getId());
+        hr.setRid(adminRole.getId());
+        userRoleMapper.updateById(admin);
+        userRoleMapper.updateById(hr);
+        String adminCacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        String hrCacheKey = String.format(RedisConstant.YY_USER_CACHE, transferUserId);
+        if (!redisUtil.del(adminCacheKey) || !redisUtil.del(hrCacheKey)) throw new YouyaException("转让失败，请稍后再试");
+    }
+
+    /**
+     * 退出企业
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void exit() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String role = loginUser.getRole();
+        if (RoleEnum.ADMIN.getRole().equals(role)) throw new YouyaException("请先转让管理员再退出");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        Long userId = loginUser.getId();
+        boolean exists = jobMapper.exists(new LambdaQueryWrapper<Job>().eq(Job::getEnterpriseId, enterpriseId).eq(Job::getUid, userId).eq(Job::getIsDelete, 0));
+        if (exists) {
+            Long adminId = enterpriseMapper.queryAdminIdByEnterpriseId(enterpriseId);
+            if (null == adminId) throw new YouyaException("管理员缺失，无法转让职位");
+            jobMapper.compulsoryTransferJob(userId, adminId);
+        }
+        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0));
+        if (null != userEnterprise) {
+            userEnterprise.setIsDelete(1);
+            userEnterpriseMapper.updateById(userEnterprise);
+        }
+        UserRole userRole = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
+        if (null != userRole) {
+            userRole.setIsDelete(1);
+            userRoleMapper.updateById(userRole);
+            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+            if (!redisUtil.del(cacheKey)) throw new YouyaException("退出企业失败，请稍后再试");
         }
     }
 
@@ -255,14 +361,14 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     public void create(EnterpriseCreateDto createDto) {
         Long userId = SpringSecurityUtil.getUserId();
         if (userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0)))
-            throw new YouyaException("您已绑定过企业");
+            throw new YouyaException("您已绑定过企业或企业创建正在审批中");
         String socialCreditCode = createDto.getSocialCreditCode();
         boolean exists = enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getSocialCreditCode, socialCreditCode).eq(Enterprise::getIsDelete, 0));
         if (exists) throw new YouyaException("该企业已被创建");
         LocalDate establishDate = createDto.getEstablishDate();
         Date date = Date.from(establishDate.atStartOfDay(ZoneId.of("Asia/Shanghai")).toInstant());
         long between = DateUtil.between(date, new Date(), DateUnit.DAY);
-        if (between < 365) throw new YouyaException("成立时间未届满一年的企业不可注册");
+        if (between < 365) throw new YouyaException(200, "成立时间未届满一年的企业不可注册");
         Enterprise enterprise = new Enterprise();
         BeanUtils.copyProperties(createDto, enterprise);
         enterprise.setLogo(DEFAULT_LOGO);
@@ -312,6 +418,10 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     public void modifyLogo(EnterpriseModifyLogoDto modifyLogoDto) {
+        Long id = modifyLogoDto.getId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (!id.equals(enterpriseId)) throw new YouyaException("非法操作");
         enterpriseMapper.modifyLogo(modifyLogoDto);
     }
 
@@ -322,6 +432,10 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     public void modify(EnterpriseModifyDto modifyDto) {
+        Long id = modifyDto.getId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (!id.equals(enterpriseId)) throw new YouyaException("非法操作");
         enterpriseMapper.modify(modifyDto);
     }
 
@@ -340,22 +454,36 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             EnterpriseTodo enterpriseTodo = enterpriseTodoMapper.selectOne(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getEventType, EnterpriseTodoEventTypeEnum.HR.getType()).eq(EnterpriseTodo::getIsDelete, 0));
             //未加入
             if (null != enterpriseTodo) {
-                return enterpriseMapper.queryEnterpriseInfoByHR(userId, enterpriseTodo.getEnterpriseId());
+                EnterpriseInfoByLoginUserVo loginUserVo = enterpriseMapper.queryEnterpriseInfoByHR(userId, enterpriseTodo.getEnterpriseId());
+                loginUserVo.setRole(RoleEnum.HR.getRole());
+                return loginUserVo;
             } else {
                 //没有认证也没有加入
                 return null;
             }
         } else {
-            String role = loginUser.getRole();
+            Long enterpriseId = userEnterprise.getEnterpriseId();
+            Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
+            if (null == enterprise) return null;
+            Integer authStatus = enterprise.getAuthStatus();
             //管理员
-            if (RoleEnum.ADMIN.getRole().equals(role)) {
-                return enterpriseMapper.queryEnterpriseInfoByAdmin(userEnterprise.getEnterpriseId());
-            } else if (RoleEnum.HR.getRole().equals(role)) {
-                //hr
-                return enterpriseMapper.queryEnterpriseInfoByHR(userId, userEnterprise.getEnterpriseId());
+            if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus) {
+                EnterpriseInfoByLoginUserVo loginUserVo = enterpriseMapper.queryEnterpriseInfoByAdmin(enterpriseId);
+                loginUserVo.setRole(RoleEnum.ADMIN.getRole());
+                return loginUserVo;
             } else {
-                //普通员工
-                return null;
+                String role = userMapper.queryUserRoleById(userId);
+                if (RoleEnum.ADMIN.getRole().equals(role)) {
+                    EnterpriseInfoByLoginUserVo loginUserVo = enterpriseMapper.queryEnterpriseInfoByAdmin(enterpriseId);
+                    loginUserVo.setRole(RoleEnum.ADMIN.getRole());
+                    return loginUserVo;
+                } else if (RoleEnum.HR.getRole().equals(role)) {
+                    EnterpriseInfoByLoginUserVo loginUserVo = enterpriseMapper.queryEnterpriseInfoByHR(userId, enterpriseId);
+                    loginUserVo.setRole(RoleEnum.HR.getRole());
+                    return loginUserVo;
+                } else {
+                    return null;
+                }
             }
         }
     }
@@ -366,7 +494,6 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      * @return
      */
     @Override
-    //todo 未写完
     public EnterpriseStructureInfoVo queryEnterpriseStructureInfo() {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
@@ -390,5 +517,45 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
         return enterpriseMapper.queryEnterpriseBasicInfo(enterpriseId);
+    }
+
+    /**
+     * 变更企业名称
+     *
+     * @param changeNameDto
+     */
+    @Override
+    public void changeName(EnterpriseChangeNameDto changeNameDto) {
+        Long id = changeNameDto.getEnterpriseId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (!id.equals(enterpriseId)) throw new YouyaException("非法操作");
+        boolean exists = enterpriseChangeTodoMapper.exists(new LambdaQueryWrapper<EnterpriseChangeTodo>().eq(EnterpriseChangeTodo::getEnterpriseId, id).eq(EnterpriseChangeTodo::getType, EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType()).eq(EnterpriseChangeTodo::getOperate, EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseChangeTodo::getIsDelete, 0));
+        if (exists) throw new YouyaException("已有正在审核中的变更申请");
+        EnterpriseChangeTodo changeTodo = new EnterpriseChangeTodo();
+        BeanUtils.copyProperties(changeNameDto, changeTodo);
+        changeTodo.setType(EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType());
+        changeTodo.setOperate(EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate());
+        enterpriseChangeTodoMapper.insert(changeTodo);
+    }
+
+    /**
+     * 变更企业地址
+     *
+     * @param changeAddressDto
+     */
+    @Override
+    public void changeAddress(EnterpriseChangeAddressDto changeAddressDto) {
+        Long id = changeAddressDto.getId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (!id.equals(enterpriseId)) throw new YouyaException("非法操作");
+        boolean exists = enterpriseChangeTodoMapper.exists(new LambdaQueryWrapper<EnterpriseChangeTodo>().eq(EnterpriseChangeTodo::getEnterpriseId, id).eq(EnterpriseChangeTodo::getType, EnterpriseChangeTodoTypeEnum.ADDRESS_CHANGE.getType()).eq(EnterpriseChangeTodo::getOperate, EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseChangeTodo::getIsDelete, 0));
+        if (exists) throw new YouyaException("已有正在审核中的变更申请");
+        EnterpriseChangeTodo changeTodo = new EnterpriseChangeTodo();
+        BeanUtils.copyProperties(changeAddressDto, changeTodo);
+        changeTodo.setType(EnterpriseChangeTodoTypeEnum.ADDRESS_CHANGE.getType());
+        changeTodo.setOperate(EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate());
+        enterpriseChangeTodoMapper.insert(changeTodo);
     }
 }

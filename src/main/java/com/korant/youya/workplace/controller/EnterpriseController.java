@@ -37,9 +37,22 @@ public class EnterpriseController {
      * @return
      */
     @PostMapping("/queryEmployeeList")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> queryEmployeeList(@RequestBody @Valid QueryEmployeeListDto queryEmployeeListDto) {
         Page<EmployeeVo> page = enterpriseService.queryEmployeeList(queryEmployeeListDto);
+        return R.success(page);
+    }
+
+    /**
+     * 查询企业HR列表
+     *
+     * @param queryHRListDto
+     * @return
+     */
+    @PostMapping("/queryHRList")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> queryHRList(@RequestBody @Valid QueryHRListDto queryHRListDto) {
+        Page<HRVo> page = enterpriseService.queryHRList(queryHRListDto);
         return R.success(page);
     }
 
@@ -50,7 +63,7 @@ public class EnterpriseController {
      * @return
      */
     @PostMapping("/queryPendingApprovalList")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> queryPendingApprovalList(@RequestBody @Valid QueryPendingApprovalListDto queryPendingApprovalListDto) {
         Page<EnterprisePendingApprovalVo> page = enterpriseService.queryPendingApprovalList(queryPendingApprovalListDto);
         return R.success(page);
@@ -62,7 +75,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/agree/{id}")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> agree(@PathVariable("id") Long id) {
         enterpriseService.agree(id);
         return R.ok();
@@ -74,7 +87,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/refuse/{id}")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> refuse(@PathVariable("id") Long id) {
         enterpriseService.refuse(id);
         return R.ok();
@@ -85,9 +98,9 @@ public class EnterpriseController {
      *
      * @return
      */
-    @GetMapping("/revoke/{enterpriseId}")
-    public R<?> revoke(@PathVariable("enterpriseId") Long enterpriseId) {
-        enterpriseService.revoke(enterpriseId);
+    @GetMapping("/revoke/{id}")
+    public R<?> revoke(@PathVariable("id") Long id) {
+        enterpriseService.revoke(id);
         return R.ok();
     }
 
@@ -97,7 +110,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/checkEmployeeHavePositions/{id}")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> checkEmployeeHavePositions(@PathVariable("id") Long id) {
         boolean result = enterpriseService.checkEmployeeHavePositions(id);
         return R.success(result);
@@ -109,9 +122,33 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/forceRemoveEmployee/{id}")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> forceRemoveEmployee(@PathVariable("id") Long id) {
         enterpriseService.forceRemoveEmployee(id);
+        return R.ok();
+    }
+
+    /**
+     * 转让管理员
+     *
+     * @return
+     */
+    @PostMapping("/transferAdministrator")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> transferAdministrator(@RequestBody @Valid TransferAdministratorDto transferAdministratorDto) {
+        enterpriseService.transferAdministrator(transferAdministratorDto);
+        return R.ok();
+    }
+
+    /**
+     * 退出企业
+     *
+     * @return
+     */
+    @GetMapping("/exit")
+    @PreAuthorize("hasAnyRole('hr','admin')")
+    public R<?> exit() {
+        enterpriseService.exit();
         return R.ok();
     }
 
@@ -170,7 +207,7 @@ public class EnterpriseController {
      * @return
      */
     @PostMapping("/modifyLogo")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> modifyLogo(@RequestBody @Valid EnterpriseModifyLogoDto modifyLogoDto) {
         enterpriseService.modifyLogo(modifyLogoDto);
         return R.ok();
@@ -183,7 +220,7 @@ public class EnterpriseController {
      * @return
      */
     @PostMapping("/modify")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     public R<?> modify(@RequestBody @Valid EnterpriseModifyDto modifyDto) {
         enterpriseService.modify(modifyDto);
         return R.ok();
@@ -196,6 +233,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/queryEnterpriseInfoByLoginUser")
+    @ExplanationDict
     public R<?> queryEnterpriseInfoByLoginUser() {
         EnterpriseInfoByLoginUserVo infoByUserVo = enterpriseService.queryEnterpriseInfoByLoginUser();
         return R.success(infoByUserVo);
@@ -225,5 +263,33 @@ public class EnterpriseController {
     public R<?> queryEnterpriseBasicInfo() {
         EnterpriseBasicInfoVo basicInfoVo = enterpriseService.queryEnterpriseBasicInfo();
         return R.success(basicInfoVo);
+    }
+
+    //todo 缺查询公司证照信息
+
+    /**
+     * 变更企业名称
+     *
+     * @param
+     * @returnb'gen
+     */
+    @PostMapping("/changeName")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> changeName(@RequestBody @Valid EnterpriseChangeNameDto changeNameDto) {
+        enterpriseService.changeName(changeNameDto);
+        return R.ok();
+    }
+
+    /**
+     * 变更企业地址
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/changeAddress")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> changeAddress(@RequestBody @Valid EnterpriseChangeAddressDto changeAddressDto) {
+        enterpriseService.changeAddress(changeAddressDto);
+        return R.ok();
     }
 }

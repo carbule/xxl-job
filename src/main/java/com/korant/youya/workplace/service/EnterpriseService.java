@@ -29,6 +29,14 @@ public interface EnterpriseService extends IService<Enterprise> {
     Page<EmployeeVo> queryEmployeeList(QueryEmployeeListDto queryEmployeeListDto);
 
     /**
+     * 查询企业HR列表
+     *
+     * @param queryHRListDto
+     * @return
+     */
+    Page<HRVo> queryHRList(QueryHRListDto queryHRListDto);
+
+    /**
      * 查询待审批列表
      *
      * @param queryPendingApprovalListDto
@@ -53,9 +61,9 @@ public interface EnterpriseService extends IService<Enterprise> {
     /**
      * 撤销申请
      *
-     * @param enterpriseId
+     * @param id
      */
-    void revoke(Long enterpriseId);
+    void revoke(Long id);
 
     /**
      * 校验员工是否有职位
@@ -71,6 +79,16 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @param id
      */
     void forceRemoveEmployee(Long id);
+
+    /**
+     * 转让管理员
+     */
+    void transferAdministrator(TransferAdministratorDto transferAdministratorDto);
+
+    /**
+     * 退出企业
+     */
+    void exit();
 
     /**
      * 获取营业执照信息
@@ -136,4 +154,18 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @return
      */
     EnterpriseBasicInfoVo queryEnterpriseBasicInfo();
+
+    /**
+     * 变更企业名称
+     *
+     * @param changeNameDto
+     */
+    void changeName(EnterpriseChangeNameDto changeNameDto);
+
+    /**
+     * 变更企业地址
+     *
+     * @param changeAddressDto
+     */
+    void changeAddress(EnterpriseChangeAddressDto changeAddressDto);
 }
