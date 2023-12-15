@@ -192,4 +192,26 @@ public class UserController {
         ResumePreviewVo resumePreviewVo = userService.resumePreview();
         return R.success(resumePreviewVo);
     }
+
+    /**
+     * 申请关联企业
+     *
+     * @return
+     */
+    @PostMapping("/applyAffiliatedEnterprise")
+    public R<?> applyAffiliatedEnterprise(@RequestBody @Valid ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto) {
+        userService.affiliatedEnterprise(applyAffiliatedEnterpriseDto);
+        return R.ok();
+    }
+
+    /**
+     * 解除关联企业
+     *
+     * @return
+     */
+    @GetMapping("/relieveAffiliated")
+    public R<?> relieveAffiliated() {
+        userService.relieveAffiliated();
+        return R.ok();
+    }
 }

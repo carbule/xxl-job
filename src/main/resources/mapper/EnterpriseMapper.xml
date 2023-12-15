@@ -17,6 +17,9 @@
         <result column="cityName" property="cityName"/>
         <result column="districtName" property="districtName"/>
         <result column="contactAddress" property="contactAddress"/>
+        <result column="hrNumber" property="hrNumber"/>
+        <result column="employeeNumber" property="employeeNumber"/>
+        <result column="contactAddress" property="contactAddress"/>
         <collection property="hrAvatarList" javaType="java.util.List" ofType="java.lang.String">
             <id column="hrAvatar"/>
         </collection>
@@ -66,7 +69,7 @@
         <where>
             ue.uid != #{userId}
             AND ue.enterprise_id = #{enterpriseId}
-            <if test="">
+            <if test="queryHRListDto.name != ''">
                 AND (u.last_name || u.first_name) LIKE concat('%', #{queryHRListDto.name}, '%')
             </if>
             AND r.role_name = 'hr'
@@ -88,13 +91,13 @@
         <where>
             ue.uid != #{userId}
             AND ue.enterprise_id = #{enterpriseId}
-            <if test="">
+            <if test="queryHRListDto.name != ''">
                 AND (u.last_name || u.first_name) LIKE concat('%', #{queryHRListDto.name}, '%')
             </if>
             AND r.role_name = 'hr'
             AND ue.is_delete = 0
-            ORDER BY ue.create_time DESC LIMIT #{queryEmployeeListDto.pageSize}
-            OFFSET (#{queryEmployeeListDto.pageNumber} -1) * #{queryEmployeeListDto.pageSize}
+            ORDER BY ue.create_time DESC LIMIT #{queryHRListDto.pageSize}
+            OFFSET (#{queryHRListDto.pageNumber} -1) * #{queryHRListDto.pageSize}
         </where>
     </select>
 
@@ -128,6 +131,41 @@
           AND ue.is_delete = 0
           AND r.role_name = 'admin'
     </select>
+
+    <!--  查询企业创建失败详情  -->
+    <select id="queryCreateFailureDetail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseCreateFailureDetailVo">
+        SELECT e.id,
+               t.reason,
+               e.power_of_attorney AS powerOfAttorney,
+               e.business_license  AS businessLicense
+        FROM enterprise AS e
+                 LEFT JOIN (SELECT enterprise_id AS enterpriseId,
+                                   refuse_reason AS reason
+                            FROM enterprise_audit_record
+                            WHERE enterprise_id = #{enterpriseId}
+                              AND operate = 1
+                              AND is_delete = 0
+                            ORDER BY create_time DESC LIMIT 1
+        ) AS t ON e.id = t.enterpriseId
+        WHERE e.id = #{enterpriseId}
+          AND is_delete = 0
+    </select>
+
+    <!--  重新提交企业信息  -->
+    <update id="resubmit" parameterType="com.korant.youya.workplace.pojo.dto.enterprise.EnterpriseResubmitDto">
+        UPDATE enterprise
+        SET name               = #{resubmitDto.name},
+            social_credit_code = #{resubmitDto.socialCreditCode},
+            establish_date     = #{resubmitDto.establishDate},
+            corporation        = #{resubmitDto.corporation},
+            register_address   = #{resubmitDto.registerAddress},
+            power_of_attorney  = #{resubmitDto.powerOfAttorney},
+            business_license   = #{resubmitDto.businessLicense},
+            auth_status        = 0,
+            update_time        = CURRENT_TIMESTAMP
+        WHERE id = #{resubmitDto.id}
+    </update>
 
     <!--  根据企业名称查询企业  -->
     <select id="queryEnterpriseByName" resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseByNameVo">
@@ -166,7 +204,7 @@
         WHERE id = #{modifyDto.id}
     </update>
 
-    <!--  根据企业id查询企业信息  -->
+    <!--  根据hr身份查询企业信息  -->
     <select id="queryEnterpriseInfoByHR" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByLoginUserVo">
         SELECT e.id,
@@ -185,13 +223,14 @@
                             FROM enterprise_todo
                             WHERE enterprise_id = #{enterpriseId}
                               AND uid = #{userId}
+                              AND operate != 1
                               AND is_delete = 0) AS et ON e.id = et.enterprise_id
                  LEFT JOIN yy_user_enterprise AS ue ON e.id = ue.enterprise_id AND ue.is_delete = 0
                  LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
                  LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
                  LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
         WHERE e.id = #{enterpriseId}
-          AND r.role_name = 'hr'
+          AND r.role_name = 'admin'
           AND e.is_delete = 0
     </select>
 
@@ -331,4 +370,19 @@
           AND e.is_delete = 0
     </select>
 
+    <!--  查询企业营业执照信息  -->
+    <select id="queryEnterpriseBusinessLicense" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseBusinessLicenseVo">
+        SELECT id,
+               name,
+               logo,
+               social_credit_code AS socialCreditCode,
+               establish_date     AS establishDate,
+               corporation,
+               register_address   AS registerAddress,
+               business_license   AS businessLicense
+        FROM enterprise
+        WHERE id = #{enterpriseId}
+          AND is_delete = 0
+    </select>
 </mapper>

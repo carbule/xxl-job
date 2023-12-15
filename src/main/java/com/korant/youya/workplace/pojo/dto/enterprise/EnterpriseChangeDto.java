@@ -7,14 +7,14 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * @ClassName EnterpriseChangeAddressDto
+ * @ClassName EnterpriseChangeDto
  * @Description
  * @Author chenyiqiang
- * @Date 2023/12/14 16:50
+ * @Date 2023/12/15 10:45
  * @Version 1.0
  */
 @Data
-public class EnterpriseChangeAddressDto {
+public class EnterpriseChangeDto {
 
     /**
      * 企业id
@@ -62,4 +62,10 @@ public class EnterpriseChangeAddressDto {
      */
     @NotBlank(message = "营业执照不能为空")
     private String businessLicense;
+
+    /**
+     * 变更类型 1-名称变更 2-地址变更
+     */
+    @NotNull(message = "变更类型不能为空")
+    private Integer changeType;
 }

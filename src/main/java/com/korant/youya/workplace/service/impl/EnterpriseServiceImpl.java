@@ -14,6 +14,7 @@ import com.korant.youya.workplace.enums.enterprisechangetodo.EnterpriseChangeTod
 import com.korant.youya.workplace.enums.enterprisetodo.EnterpriseTodoEventTypeEnum;
 import com.korant.youya.workplace.enums.enterprisetodo.EnterpriseTodoOperateEnum;
 import com.korant.youya.workplace.enums.role.RoleEnum;
+import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
@@ -275,10 +276,11 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         if (null == user) throw new YouyaException("转让用户未注册");
         UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, transferUserId).eq(UserEnterprise::getIsDelete, 0));
         if (null == userEnterprise) throw new YouyaException("用户未加入企业");
-        String role = loginUser.getRole();
+        String role = userMapper.queryUserRoleById(transferUserId);
+        if (StringUtils.isBlank(role)) throw new YouyaException("该用户不是HR角色，不可转让");
         if (!RoleEnum.HR.getRole().equals(role)) throw new YouyaException("该用户不是HR角色，不可转让");
         UserRole admin = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
-        UserRole hr = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
+        UserRole hr = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, transferUserId).eq(UserRole::getIsDelete, 0));
         if (null == admin || null == hr) throw new YouyaException("未找到关联角色，转让失败");
         Role adminRole = roleMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, RoleEnum.ADMIN.getRole()).eq(Role::getIsDelete, 0));
         Role hrRole = roleMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, RoleEnum.HR.getRole()).eq(Role::getIsDelete, 0));
@@ -359,7 +361,11 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(EnterpriseCreateDto createDto) {
-        Long userId = SpringSecurityUtil.getUserId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Integer authenticationStatus = loginUser.getAuthenticationStatus();
+        if (!authenticationStatus.equals(UserAuthenticationStatusEnum.CERTIFIED.getStatus()))
+            throw new YouyaException("请先完成实名认证");
+        Long userId = loginUser.getId();
         if (userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0)))
             throw new YouyaException("您已绑定过企业或企业创建正在审批中");
         String socialCreditCode = createDto.getSocialCreditCode();
@@ -381,6 +387,53 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
+     * 查询企业创建失败详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public EnterpriseCreateFailureDetailVo queryCreateFailureDetail(Long id) {
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, id).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        Integer authStatus = enterprise.getAuthStatus();
+        if (EnterpriseAuthStatusEnum.AUTH_FAIL.getStatus() != authStatus) return null;
+        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, id).eq(UserEnterprise::getIsDelete, 0));
+        if (null == userEnterprise) throw new YouyaException("企业管理员缺失");
+        Long userId = SpringSecurityUtil.getUserId();
+        if (!userEnterprise.getUid().equals(userId)) throw new YouyaException("非法操作");
+        EnterpriseCreateFailureDetailVo createFailureDetailVo = enterpriseMapper.queryCreateFailureDetail(id);
+        String businessLicense = createFailureDetailVo.getBusinessLicense();
+        String businessLicenseEncode = URLEncoder.encode(businessLicense, StandardCharsets.UTF_8);
+        String businessLicenseCdnPath = "https://ent.youyai.cn/" + businessLicenseEncode;
+        createFailureDetailVo.setBusinessLicense(businessLicenseCdnPath);
+        String powerOfAttorney = createFailureDetailVo.getPowerOfAttorney();
+        String powerOfAttorneyEncode = URLEncoder.encode(powerOfAttorney, StandardCharsets.UTF_8);
+        String powerOfAttorneyCdnPath = "https://ent.youyai.cn/" + powerOfAttorneyEncode;
+        createFailureDetailVo.setPowerOfAttorney(powerOfAttorneyCdnPath);
+        return createFailureDetailVo;
+    }
+
+    /**
+     * 重新提交企业信息
+     *
+     * @param resubmitDto
+     */
+    @Override
+    public void resubmit(EnterpriseResubmitDto resubmitDto) {
+        Long id = resubmitDto.getId();
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, id).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        Integer authStatus = enterprise.getAuthStatus();
+        if (EnterpriseAuthStatusEnum.AUTH_FAIL.getStatus() != authStatus) throw new YouyaException("企业只有审核失败状态下才能重新提交");
+        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, id).eq(UserEnterprise::getIsDelete, 0));
+        if (null == userEnterprise) throw new YouyaException("企业管理员缺失");
+        Long userId = SpringSecurityUtil.getUserId();
+        if (!userEnterprise.getUid().equals(userId)) throw new YouyaException("非法操作");
+        enterpriseMapper.resubmit(resubmitDto);
+    }
+
+    /**
      * 根据企业名称查询企业
      *
      * @param nameDto
@@ -398,10 +451,14 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     public void join(EnterpriseJoinDto joinDto) {
-        Long userId = SpringSecurityUtil.getUserId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Integer authenticationStatus = loginUser.getAuthenticationStatus();
+        if (!authenticationStatus.equals(UserAuthenticationStatusEnum.CERTIFIED.getStatus()))
+            throw new YouyaException("请先完成实名认证");
+        Long userId = loginUser.getId();
         if (userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0)))
             throw new YouyaException("您已绑定过企业");
-        if (enterpriseTodoMapper.exists(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getEventType, EnterpriseTodoEventTypeEnum.HR.getType()).eq(EnterpriseTodo::getIsDelete, 0)))
+        if (enterpriseTodoMapper.exists(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getEventType, EnterpriseTodoEventTypeEnum.HR.getType()).eq(EnterpriseTodo::getOperate, EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseTodo::getIsDelete, 0)))
             throw new YouyaException("您当前有待审核的认证");
         Long enterpriseId = joinDto.getEnterpriseId();
         if (!enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0)))
@@ -451,7 +508,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0));
         //未认证
         if (null == userEnterprise) {
-            EnterpriseTodo enterpriseTodo = enterpriseTodoMapper.selectOne(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getEventType, EnterpriseTodoEventTypeEnum.HR.getType()).eq(EnterpriseTodo::getIsDelete, 0));
+            EnterpriseTodo enterpriseTodo = enterpriseTodoMapper.selectOne(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getEventType, EnterpriseTodoEventTypeEnum.HR.getType()).eq(EnterpriseTodo::getOperate, EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseTodo::getIsDelete, 0));
             //未加入
             if (null != enterpriseTodo) {
                 EnterpriseInfoByLoginUserVo loginUserVo = enterpriseMapper.queryEnterpriseInfoByHR(userId, enterpriseTodo.getEnterpriseId());
@@ -520,42 +577,61 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * 变更企业名称
+     * 查询企业营业执照信息
      *
-     * @param changeNameDto
+     * @return
      */
     @Override
-    public void changeName(EnterpriseChangeNameDto changeNameDto) {
-        Long id = changeNameDto.getEnterpriseId();
+    public EnterpriseBusinessLicenseVo queryEnterpriseBusinessLicense() {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
-        if (!id.equals(enterpriseId)) throw new YouyaException("非法操作");
-        boolean exists = enterpriseChangeTodoMapper.exists(new LambdaQueryWrapper<EnterpriseChangeTodo>().eq(EnterpriseChangeTodo::getEnterpriseId, id).eq(EnterpriseChangeTodo::getType, EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType()).eq(EnterpriseChangeTodo::getOperate, EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseChangeTodo::getIsDelete, 0));
-        if (exists) throw new YouyaException("已有正在审核中的变更申请");
-        EnterpriseChangeTodo changeTodo = new EnterpriseChangeTodo();
-        BeanUtils.copyProperties(changeNameDto, changeTodo);
-        changeTodo.setType(EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType());
-        changeTodo.setOperate(EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate());
-        enterpriseChangeTodoMapper.insert(changeTodo);
+        EnterpriseBusinessLicenseVo enterpriseBusinessLicense = enterpriseMapper.queryEnterpriseBusinessLicense(enterpriseId);
+        String businessLicense = enterpriseBusinessLicense.getBusinessLicense();
+        String encode = URLEncoder.encode(businessLicense, StandardCharsets.UTF_8);
+        String cdnPath = "https://ent.youyai.cn/" + encode;
+        enterpriseBusinessLicense.setBusinessLicense(cdnPath);
+        return enterpriseBusinessLicense;
     }
 
     /**
-     * 变更企业地址
+     * 变更企业信息
      *
-     * @param changeAddressDto
+     * @param changeDto
      */
     @Override
-    public void changeAddress(EnterpriseChangeAddressDto changeAddressDto) {
-        Long id = changeAddressDto.getId();
+    public void changeEnterprise(EnterpriseChangeDto changeDto) {
+        Integer changeType = changeDto.getChangeType();
+        if (EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType() != changeType && EnterpriseChangeTodoTypeEnum.ADDRESS_CHANGE.getType() != changeType)
+            throw new YouyaException("非法的变更类型");
+        Long id = changeDto.getEnterpriseId();
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
         if (!id.equals(enterpriseId)) throw new YouyaException("非法操作");
-        boolean exists = enterpriseChangeTodoMapper.exists(new LambdaQueryWrapper<EnterpriseChangeTodo>().eq(EnterpriseChangeTodo::getEnterpriseId, id).eq(EnterpriseChangeTodo::getType, EnterpriseChangeTodoTypeEnum.ADDRESS_CHANGE.getType()).eq(EnterpriseChangeTodo::getOperate, EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseChangeTodo::getIsDelete, 0));
-        if (exists) throw new YouyaException("已有正在审核中的变更申请");
-        EnterpriseChangeTodo changeTodo = new EnterpriseChangeTodo();
-        BeanUtils.copyProperties(changeAddressDto, changeTodo);
-        changeTodo.setType(EnterpriseChangeTodoTypeEnum.ADDRESS_CHANGE.getType());
-        changeTodo.setOperate(EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate());
-        enterpriseChangeTodoMapper.insert(changeTodo);
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, id).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        String socialCreditCode = enterprise.getSocialCreditCode();
+        if (socialCreditCode.equals(changeDto.getSocialCreditCode()))
+            throw new YouyaException(200, "统一社会信用码不一致，请重新上传");
+        //名称变更
+        if (EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType() == changeType) {
+            boolean exists = enterpriseChangeTodoMapper.exists(new LambdaQueryWrapper<EnterpriseChangeTodo>().eq(EnterpriseChangeTodo::getEnterpriseId, id).eq(EnterpriseChangeTodo::getType, EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType()).eq(EnterpriseChangeTodo::getOperate, EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseChangeTodo::getIsDelete, 0));
+            if (exists) throw new YouyaException("已有正在审核中的名称变更申请");
+            if (enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().ne(Enterprise::getId, id).eq(Enterprise::getName, changeDto.getName()).eq(Enterprise::getIsDelete, 0)))
+                throw new YouyaException("更名企业名称已存在");
+            EnterpriseChangeTodo changeTodo = new EnterpriseChangeTodo();
+            BeanUtils.copyProperties(changeDto, changeTodo);
+            changeTodo.setType(EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType());
+            changeTodo.setOperate(EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate());
+            enterpriseChangeTodoMapper.insert(changeTodo);
+        } else {
+            //地址变更
+            boolean exists = enterpriseChangeTodoMapper.exists(new LambdaQueryWrapper<EnterpriseChangeTodo>().eq(EnterpriseChangeTodo::getEnterpriseId, id).eq(EnterpriseChangeTodo::getType, EnterpriseChangeTodoTypeEnum.ADDRESS_CHANGE.getType()).eq(EnterpriseChangeTodo::getOperate, EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseChangeTodo::getIsDelete, 0));
+            if (exists) throw new YouyaException("已有正在审核中的地址变更申请");
+            EnterpriseChangeTodo changeTodo = new EnterpriseChangeTodo();
+            BeanUtils.copyProperties(changeDto, changeTodo);
+            changeTodo.setType(EnterpriseChangeTodoTypeEnum.ADDRESS_CHANGE.getType());
+            changeTodo.setOperate(EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate());
+            enterpriseChangeTodoMapper.insert(changeTodo);
+        }
     }
 }

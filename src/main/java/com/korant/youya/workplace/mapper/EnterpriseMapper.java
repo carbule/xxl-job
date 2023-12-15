@@ -75,6 +75,22 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
     Long queryAdminIdByEnterpriseId(@Param("enterpriseId") Long enterpriseId);
 
     /**
+     * 查询企业创建失败详情
+     *
+     * @param id
+     * @return
+     */
+    EnterpriseCreateFailureDetailVo queryCreateFailureDetail(@Param("enterpriseId") Long id);
+
+    /**
+     * 重新提交企业信息
+     *
+     * @param resubmitDto
+     * @return
+     */
+    int resubmit(@Param("resubmitDto") EnterpriseResubmitDto resubmitDto);
+
+    /**
      * 根据企业名称查询企业
      *
      * @param nameDto
@@ -138,4 +154,12 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
      * @return
      */
     EnterpriseBasicInfoVo queryEnterpriseBasicInfo(@Param("enterpriseId") Long enterpriseId);
+
+    /**
+     * 查询企业营业执照信息
+     *
+     * @param enterpriseId
+     * @return
+     */
+    EnterpriseBusinessLicenseVo queryEnterpriseBusinessLicense(@Param("enterpriseId") Long enterpriseId);
 }

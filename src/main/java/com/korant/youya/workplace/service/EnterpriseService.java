@@ -106,6 +106,21 @@ public interface EnterpriseService extends IService<Enterprise> {
     void create(EnterpriseCreateDto createDto);
 
     /**
+     * 查询企业创建失败详情
+     *
+     * @param id
+     * @return
+     */
+    EnterpriseCreateFailureDetailVo queryCreateFailureDetail(Long id);
+
+    /**
+     * 重新提交企业信息
+     *
+     * @param resubmitDto
+     */
+    void resubmit(EnterpriseResubmitDto resubmitDto);
+
+    /**
      * 根据企业名称查询企业
      *
      * @param nameDto
@@ -156,16 +171,16 @@ public interface EnterpriseService extends IService<Enterprise> {
     EnterpriseBasicInfoVo queryEnterpriseBasicInfo();
 
     /**
-     * 变更企业名称
+     * 查询企业营业执照信息
      *
-     * @param changeNameDto
+     * @return
      */
-    void changeName(EnterpriseChangeNameDto changeNameDto);
+    EnterpriseBusinessLicenseVo queryEnterpriseBusinessLicense();
 
     /**
-     * 变更企业地址
+     * 变更企业信息
      *
-     * @param changeAddressDto
+     * @param changeDto
      */
-    void changeAddress(EnterpriseChangeAddressDto changeAddressDto);
+    void changeEnterprise(EnterpriseChangeDto changeDto);
 }

@@ -120,4 +120,16 @@ public interface UserService extends IService<User> {
      * @return
      */
     ResumePreviewVo resumePreview();
+
+    /**
+     * 申请关联企业
+     *
+     * @param applyAffiliatedEnterpriseDto
+     */
+    void affiliatedEnterprise(ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto);
+
+    /**
+     * 解除关联企业
+     */
+    void relieveAffiliated();
 }

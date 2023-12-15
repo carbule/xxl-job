@@ -7,20 +7,20 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * @ClassName EnterpriseChangeAddressDto
+ * @ClassName EnterpriseResubmitDto
  * @Description
  * @Author chenyiqiang
- * @Date 2023/12/14 16:50
+ * @Date 2023/12/15 16:08
  * @Version 1.0
  */
 @Data
-public class EnterpriseChangeAddressDto {
+public class EnterpriseResubmitDto {
 
     /**
      * 企业id
      */
     @NotNull(message = "企业id不能为空")
-    private Long enterpriseId;
+    private Long id;
 
     /**
      * 企业名称

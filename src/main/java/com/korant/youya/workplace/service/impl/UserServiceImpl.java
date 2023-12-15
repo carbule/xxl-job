@@ -4,6 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.constants.RedisConstant;
+import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
+import com.korant.youya.workplace.enums.enterprisetodo.EnterpriseTodoEventTypeEnum;
+import com.korant.youya.workplace.enums.enterprisetodo.EnterpriseTodoOperateEnum;
+import com.korant.youya.workplace.enums.role.RoleEnum;
 import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.enums.userprivacy.NameVisibleTypeEnum;
@@ -54,6 +58,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private RecruiterVisibleInfoMapper recruiterVisibleInfoMapper;
+
+    @Resource
+    private EnterpriseMapper enterpriseMapper;
+
+    @Resource
+    private UserEnterpriseMapper userEnterpriseMapper;
+
+    @Resource
+    private EnterpriseTodoMapper enterpriseTodoMapper;
+
+    @Resource
+    private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private RoleMapper roleMapper;
 
     @Resource
     private RedisUtil redisUtil;
@@ -444,6 +463,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param modifyDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modifyUserContactInfo(ModifyUserContactInfoDto modifyDto) {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
@@ -574,6 +594,61 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public ResumePreviewVo resumePreview() {
         Long userId = SpringSecurityUtil.getUserId();
         return userMapper.resumePreview(userId);
+    }
+
+    /**
+     * 申请关联企业
+     *
+     * @param applyAffiliatedEnterpriseDto
+     */
+    @Override
+    public void affiliatedEnterprise(ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Integer authenticationStatus = loginUser.getAuthenticationStatus();
+        if (!authenticationStatus.equals(UserAuthenticationStatusEnum.CERTIFIED.getStatus()))
+            throw new YouyaException("请先完成实名认证");
+        Long userId = loginUser.getId();
+        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getId, userId).eq(UserEnterprise::getIsDelete, 0));
+        if (null != userEnterprise) throw new YouyaException("您已关联企业，无法申请");
+        Long enterpriseId = applyAffiliatedEnterpriseDto.getEnterpriseId();
+        if (enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0)))
+            throw new YouyaException("企业未创建");
+        if (enterpriseTodoMapper.exists(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getEnterpriseId, enterpriseId).eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getOperate, EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseTodo::getIsDelete, 0)))
+            throw new YouyaException("您当前已有关联申请等待审核中");
+        EnterpriseTodo enterpriseTodo = new EnterpriseTodo();
+        enterpriseTodo.setEnterpriseId(enterpriseId).setUid(userId).setEventType(EnterpriseTodoEventTypeEnum.EMPLOYEE.getType()).setOperate(EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate());
+        enterpriseTodoMapper.insert(enterpriseTodo);
+    }
+
+    /**
+     * 解除关联企业
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void relieveAffiliated() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String role = loginUser.getRole();
+        if (StringUtils.isBlank(role)) throw new YouyaException("您当前未关联企业");
+        if (RoleEnum.ADMIN.getRole().equals(role)) {
+            throw new YouyaException(200, "抱歉，您是该公司管理员，请切换至公司端解除关联！");
+        } else if (RoleEnum.HR.getRole().equals(role)) {
+            throw new YouyaException(200, "抱歉，您是该公司HR，请切换至公司端解除关联！");
+        } else {
+            Long userId = loginUser.getId();
+            Long enterpriseId = loginUser.getEnterpriseId();
+            UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0));
+            if (null != userEnterprise) {
+                userEnterprise.setIsDelete(1);
+                userEnterpriseMapper.updateById(userEnterprise);
+            }
+            UserRole userRole = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
+            if (null != userRole) {
+                userRole.setIsDelete(1);
+                userRoleMapper.updateById(userRole);
+            }
+            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+            if (!redisUtil.del(cacheKey)) throw new YouyaException("解除关联企业失败，请稍后再试");
+        }
     }
 
     /**

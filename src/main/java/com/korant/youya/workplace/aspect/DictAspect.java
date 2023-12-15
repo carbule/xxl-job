@@ -73,16 +73,22 @@ public class DictAspect {
                         try {
                             field.setAccessible(true);
                             Object obj = field.get(data);
-                            JSONArray array = jsonObject.getJSONArray(fieldName);
-                            JSONArray jsonArray = new JSONArray((List) obj);
-                            for (int i = 0; i < jsonArray.size(); i++) {
-                                Object o = jsonArray.get(i);
-                                JSONObject arrayJSONObject = array.getJSONObject(i);
-                                for (Field allField : getAllFields(o)) {
-                                    String textValue = getTextValue(allField, o);
-                                    if (StringUtils.isNotBlank(textValue)) {
-                                        String allFieldName = allField.getName();
-                                        arrayJSONObject.put(allFieldName + CommonConstant.DICT_TEXT_SUFFIX, textValue);
+                            if (obj != null) {
+                                JSONArray array = jsonObject.getJSONArray(fieldName);
+                                JSONArray jsonArray = new JSONArray((List) obj);
+                                for (int i = 0; i < jsonArray.size(); i++) {
+                                    Object o = jsonArray.get(i);
+                                    if (o != null) {
+                                        if (!(o instanceof String) && !(o instanceof Integer) && !(o instanceof Double) && !(o instanceof Float) && !(o instanceof Boolean) && !(o instanceof Character) && !(o instanceof Byte) && !(o instanceof Short) && !(o instanceof Long)) {
+                                            JSONObject arrayJSONObject = array.getJSONObject(i);
+                                            for (Field allField : getAllFields(o)) {
+                                                String textValue = getTextValue(allField, o);
+                                                if (StringUtils.isNotBlank(textValue)) {
+                                                    String allFieldName = allField.getName();
+                                                    arrayJSONObject.put(allFieldName + CommonConstant.DICT_TEXT_SUFFIX, textValue);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

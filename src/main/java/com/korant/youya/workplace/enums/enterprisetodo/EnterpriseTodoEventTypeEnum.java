@@ -10,7 +10,7 @@ package com.korant.youya.workplace.enums.enterprisetodo;
 public enum EnterpriseTodoEventTypeEnum {
 
     HR(1),
-    STAFF(2);
+    EMPLOYEE(2);
 
     private int type;
 

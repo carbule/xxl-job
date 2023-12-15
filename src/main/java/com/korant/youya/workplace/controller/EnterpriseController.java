@@ -177,6 +177,30 @@ public class EnterpriseController {
     }
 
     /**
+     * 查询企业创建失败详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/queryCreateFailureDetail/{id}")
+    public R<?> queryCreateFailureDetail(@PathVariable("id") Long id) {
+        EnterpriseCreateFailureDetailVo createFailureDetailVo = enterpriseService.queryCreateFailureDetail(id);
+        return R.success(createFailureDetailVo);
+    }
+
+    /**
+     * 重新提交企业信息
+     *
+     * @param resubmitDto
+     * @return
+     */
+    @PostMapping("/resubmit")
+    public R<?> resubmit(@RequestBody @Valid EnterpriseResubmitDto resubmitDto) {
+        enterpriseService.resubmit(resubmitDto);
+        return R.success(resubmitDto);
+    }
+
+    /**
      * 根据企业名称查询企业
      *
      * @param nameDto
@@ -195,7 +219,7 @@ public class EnterpriseController {
      * @return
      */
     @PostMapping("/join")
-    public R<?> create(@RequestBody @Valid EnterpriseJoinDto joinDto) {
+    public R<?> join(@RequestBody @Valid EnterpriseJoinDto joinDto) {
         enterpriseService.join(joinDto);
         return R.ok();
     }
@@ -265,31 +289,29 @@ public class EnterpriseController {
         return R.success(basicInfoVo);
     }
 
-    //todo 缺查询公司证照信息
-
     /**
-     * 变更企业名称
+     * 查询企业营业执照信息
      *
      * @param
      * @returnb'gen
      */
-    @PostMapping("/changeName")
-    @PreAuthorize("hasRole('admin')")
-    public R<?> changeName(@RequestBody @Valid EnterpriseChangeNameDto changeNameDto) {
-        enterpriseService.changeName(changeNameDto);
-        return R.ok();
+    @GetMapping("/queryEnterpriseBusinessLicense")
+    @PreAuthorize("hasAnyRole('hr','admin')")
+    public R<?> queryEnterpriseBusinessLicense() {
+        EnterpriseBusinessLicenseVo businessLicenseVo = enterpriseService.queryEnterpriseBusinessLicense();
+        return R.success(businessLicenseVo);
     }
 
     /**
-     * 变更企业地址
+     * 变更企业信息
      *
      * @param
-     * @return
+     * @returnb'gen
      */
-    @PostMapping("/changeAddress")
+    @PostMapping("/changeEnterprise")
     @PreAuthorize("hasRole('admin')")
-    public R<?> changeAddress(@RequestBody @Valid EnterpriseChangeAddressDto changeAddressDto) {
-        enterpriseService.changeAddress(changeAddressDto);
+    public R<?> changeEnterprise(@RequestBody @Valid EnterpriseChangeDto changeDto) {
+        enterpriseService.changeEnterprise(changeDto);
         return R.ok();
     }
 }
