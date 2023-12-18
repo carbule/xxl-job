@@ -105,6 +105,30 @@ public class EnterpriseController {
     }
 
     /**
+     * 变更为hr
+     *
+     * @return
+     */
+    @GetMapping("/changeHR/{id}")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> changeHR(@PathVariable("id") Long id) {
+        enterpriseService.changeHR(id);
+        return R.ok();
+    }
+
+    /**
+     * 变更为员工
+     *
+     * @return
+     */
+    @GetMapping("/changeEmployee/{id}")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> changeEmployee(@PathVariable("id") Long id) {
+        enterpriseService.changeEmployee(id);
+        return R.ok();
+    }
+
+    /**
      * 校验员工是否有职位
      *
      * @return

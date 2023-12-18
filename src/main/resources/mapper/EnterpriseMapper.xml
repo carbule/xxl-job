@@ -36,7 +36,6 @@
                  LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
         WHERE ue.uid != #{userId}
           AND ue.enterprise_id = #{enterpriseId}
-          AND r.role_name = 'hr'
           AND ue.is_delete = 0
     </select>
 
@@ -46,14 +45,14 @@
                u.avatar,
                u.last_name  AS lastName,
                u.first_name AS firstName,
-               u.phone
+               u.phone,
+               r.role_name  AS roleName
         FROM yy_user_enterprise AS ue
                  LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
                  LEFT JOIN yy_user_role AS ur ON ue.uid = ur.uid AND ur.is_delete = 0
                  LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
         WHERE ue.uid != #{userId}
           AND ue.enterprise_id = #{enterpriseId}
-          AND r.role_name = 'hr'
           AND ue.is_delete = 0
         ORDER BY ue.create_time DESC LIMIT #{queryEmployeeListDto.pageSize}
         OFFSET (#{queryEmployeeListDto.pageNumber} -1) * #{queryEmployeeListDto.pageSize}

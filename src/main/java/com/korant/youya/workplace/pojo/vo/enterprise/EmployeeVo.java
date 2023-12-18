@@ -36,4 +36,9 @@ public class EmployeeVo {
      * 用户手机号
      */
     private String phone;
+
+    /**
+     * 员工角色
+     */
+    private String roleName;
 }

@@ -227,6 +227,64 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
+     * 变更为hr
+     *
+     * @param id
+     */
+    @Override
+    public void changeHR(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("未找到企业信息");
+        if (!enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0)))
+            throw new YouyaException("企业未创建");
+        if (userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, id).eq(UserEnterprise::getIsDelete, 0)))
+            throw new YouyaException("该用户暂未加入企业");
+        Role role = roleMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, RoleEnum.HR.getRole()).eq(Role::getIsDelete, 0));
+        if (null == role) throw new YouyaException("预设角色缺失");
+        UserRole userRole = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, id).eq(UserRole::getIsDelete, 0));
+        if (null == userRole) {
+            userRole = new UserRole();
+            userRole.setUid(id).setRid(role.getId());
+            userRoleMapper.insert(userRole);
+        } else {
+            userRole.setRid(role.getId());
+            userRoleMapper.updateById(userRole);
+        }
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
+        if (!redisUtil.del(cacheKey)) throw new YouyaException("变更失败，请稍后再试");
+    }
+
+    /**
+     * 变更为员工
+     *
+     * @param id
+     */
+    @Override
+    public void changeEmployee(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("未找到企业信息");
+        if (!enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0)))
+            throw new YouyaException("企业未创建");
+        if (userEnterpriseMapper.exists(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, id).eq(UserEnterprise::getIsDelete, 0)))
+            throw new YouyaException("该用户暂未加入企业");
+        Role role = roleMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, RoleEnum.EMPLOYEE.getRole()).eq(Role::getIsDelete, 0));
+        if (null == role) throw new YouyaException("预设角色缺失");
+        UserRole userRole = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, id).eq(UserRole::getIsDelete, 0));
+        if (null == userRole) {
+            userRole = new UserRole();
+            userRole.setUid(id).setRid(role.getId());
+            userRoleMapper.insert(userRole);
+        } else {
+            userRole.setRid(role.getId());
+            userRoleMapper.updateById(userRole);
+        }
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
+        if (!redisUtil.del(cacheKey)) throw new YouyaException("变更失败，请稍后再试");
+    }
+
+    /**
      * 校验员工是否有职位
      *
      * @param id
@@ -607,7 +665,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
         if (!id.equals(enterpriseId)) throw new YouyaException("非法操作");
-        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, id).eq(Enterprise::getIsDelete, 0));
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, id).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0));
         if (null == enterprise) throw new YouyaException("企业未创建");
         String socialCreditCode = enterprise.getSocialCreditCode();
         if (socialCreditCode.equals(changeDto.getSocialCreditCode()))

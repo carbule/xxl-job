@@ -66,6 +66,20 @@ public interface EnterpriseService extends IService<Enterprise> {
     void revoke(Long id);
 
     /**
+     * 变更为hr
+     *
+     * @param id
+     */
+    void changeHR(Long id);
+
+    /**
+     * 变更为员工
+     *
+     * @param id
+     */
+    void changeEmployee(Long id);
+
+    /**
      * 校验员工是否有职位
      *
      * @param id

@@ -92,6 +92,12 @@ public class EnterpriseChangeTodo implements Serializable {
     private Integer operate;
 
     /**
+     * 拒绝理由
+     */
+    @TableField("refuse_reason")
+    private String refuseReason;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
