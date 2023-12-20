@@ -27,6 +27,7 @@
         <commons-pool.version>2.11.1</commons-pool.version>
         <fastjson.version>2.0.36</fastjson.version>
         <jwt.version>4.2.0</jwt.version>
+        <zxing.verison>3.5.2</zxing.verison>
         <commons.version>3.6</commons.version>
         <hutool.version>5.8.20</hutool.version>
         <pinyin4j.version>2.5.1</pinyin4j.version>
@@ -132,9 +133,27 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>${zxing.verison}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>${zxing.verison}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.0</version>
         </dependency>
 
         <dependency>

@@ -22,18 +22,18 @@ import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.service.EnterpriseService;
-import com.korant.youya.workplace.utils.HuaWeiUtil;
-import com.korant.youya.workplace.utils.ObsUtil;
-import com.korant.youya.workplace.utils.RedisUtil;
-import com.korant.youya.workplace.utils.SpringSecurityUtil;
+import com.korant.youya.workplace.utils.*;
 import com.obs.services.model.PutObjectResult;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -50,6 +50,7 @@ import java.util.List;
  * @since 2023-11-14
  */
 @Service
+@Slf4j
 public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterprise> implements EnterpriseService {
 
     @Resource
@@ -63,6 +64,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
     @Resource
     private EnterpriseChangeTodoMapper enterpriseChangeTodoMapper;
+
+    @Resource
+    private EnterpriseInvitationQrCodeMapper enterpriseInvitationQrCodeMapper;
 
     @Resource
     private RoleMapper roleMapper;
@@ -79,7 +83,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     @Resource
     private RedisUtil redisUtil;
 
-    public static final String ENTERPRISE_BUCKET = "enterprise";
+    @Value("${enterprise_qrcode_url}")
+    private String enterpriseQrcodeUrl;
+
+    private static final String ENTERPRISE_BUCKET = "enterprise";
+
+    //todo 暂时先用头像的 后面更换
+    private static final String ENTERPRISE_QRCODE_BUCKET = "avatar";
 
     private static final String DEFAULT_LOGO = "https://resources.youyai.cn/svg/door-open.svg";
 
@@ -692,4 +702,36 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             enterpriseChangeTodoMapper.insert(changeTodo);
         }
     }
+
+    /**
+     * 获取邀请二维码
+     *
+     * @return
+     */
+    @Override
+    public String getInvitationQrcode() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) return null;
+        try {
+            InputStream inputStream = QrCodeUtil.getQrCode(enterpriseQrcodeUrl + enterpriseId, 180, 180);
+            String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);
+            PutObjectResult result = ObsUtil.putObject(bucketName, "jpg", inputStream);
+            if (null == result) throw new YouyaException("上传文件失败");
+            String etag = result.getEtag();
+            String objectUrl = result.getObjectUrl();
+            String objectKey = result.getObjectKey();
+            if (StringUtils.isBlank(etag) && StringUtils.isBlank(objectUrl)) throw new YouyaException("上传文件失败");
+            String encode = URLEncoder.encode(objectKey, StandardCharsets.UTF_8);
+            EnterpriseInvitationQrCode invitationQrCode = new EnterpriseInvitationQrCode();
+            invitationQrCode.setEnterpriseId(enterpriseId);
+            invitationQrCode.setMd5FileName(objectKey);
+            enterpriseInvitationQrCodeMapper.insert(invitationQrCode);
+            return "https://" + ObsBucketConfig.getCdn(ENTERPRISE_QRCODE_BUCKET) + "/" + encode;
+        } catch (Exception e) {
+            log.error("企业：{},获取邀请二维码失败,异常信息:{}", enterpriseId, e);
+            throw new YouyaException("获取邀请二维码失败，请稍后再试");
+        }
+    }
+
 }

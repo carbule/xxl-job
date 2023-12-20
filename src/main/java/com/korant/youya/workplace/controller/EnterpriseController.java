@@ -338,4 +338,16 @@ public class EnterpriseController {
         enterpriseService.changeEnterprise(changeDto);
         return R.ok();
     }
+
+    /**
+     * 获取邀请二维码
+     *
+     * @param
+     * @returnb'gen
+     */
+    @GetMapping("/getInvitationQrcode")
+    public R<?> getInvitationQrcode() {
+        String url = enterpriseService.getInvitationQrcode();
+        return R.success(url);
+    }
 }

@@ -46,6 +46,12 @@ obs-bucket:
       code: activity
       policy: public
       cdn: activity.youyai.cn
+    #企业邀请二维码bucket
+    configuration_5:
+      name: youya-enterprise-qrcode
+      code: enterprise_qrcode
+      policy: public
+      cdn: qrcode.youyai.cn
 
 #小程序appId
 appId: wxac76b91987ca9f96

@@ -197,4 +197,11 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @param changeDto
      */
     void changeEnterprise(EnterpriseChangeDto changeDto);
+
+    /**
+     * 获取邀请二维码
+     *
+     * @return
+     */
+    String getInvitationQrcode();
 }

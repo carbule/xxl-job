@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.utils;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.obs.services.BasicObsCredentialsProvider;
 import com.obs.services.ObsClient;
@@ -164,7 +165,6 @@ public class ObsUtil {
                 messageDigest.update(buffer, 0, bytesRead);
             }
             base64Md5 = ServiceUtils.toBase64(messageDigest.digest());
-            System.out.println("base64Md5计算值：" + base64Md5);
             String originalFilename = file.getOriginalFilename();
             String fileSuffix = Objects.requireNonNull(originalFilename).substring(originalFilename.lastIndexOf("."));
             String s = base64Md5.replaceAll("/", "");
@@ -180,6 +180,33 @@ public class ObsUtil {
                 }
             }
         }
+        return fileName;
+    }
+
+    /**
+     * 获取输入流base64名称
+     *
+     * @param inputStream
+     * @param contentType
+     * @return
+     */
+    public static String getInputStreamBase64Name(InputStream inputStream, String contentType) {
+        String fileName = "";
+        String base64Md5;
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            byte[] buffer = new byte[16384];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer, 0, buffer.length)) != -1) {
+                messageDigest.update(buffer, 0, bytesRead);
+            }
+            base64Md5 = ServiceUtils.toBase64(messageDigest.digest());
+            String s = base64Md5.replaceAll("/", "");
+            fileName = s + "." + contentType;
+        } catch (Exception e) {
+            log.error("obs上传文件时生成MD5文件名称失败，异常信息：", e);
+        }
+
         return fileName;
     }
 
@@ -216,6 +243,32 @@ public class ObsUtil {
                     e.printStackTrace();
                 }
             }
+        }
+        return null;
+    }
+
+    /**
+     * 上传文件
+     *
+     * @param bucketName
+     * @param inputStream
+     */
+    public static PutObjectResult putObject(String bucketName, String contentType, InputStream inputStream) {
+        try {
+            PutObjectRequest request = new PutObjectRequest();
+            request.setBucketName(bucketName);
+            request.setObjectKey(IdWorker.getId() + "." + contentType);
+            request.setInput(inputStream);
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentType(contentType);
+            request.setMetadata(objectMetadata);
+            PutObjectResult putObjectResult = obsClient.putObject(request);
+            log.info("putObjectResult:{}", putObjectResult);
+            return putObjectResult;
+        } catch (YouyaException ye) {
+            throw ye;
+        } catch (Exception e) {
+            log.error("obs上传文件失败，异常信息：", e);
         }
         return null;
     }
