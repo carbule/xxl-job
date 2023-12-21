@@ -40,4 +40,13 @@
             )
         </foreach>
     </insert>
+
+    <!--  根据用户id查询意向职位数量  -->
+    <select id="selectCountByUserId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM employ_status AS e
+                 LEFT JOIN expected_position AS ep ON e.id = ep.status_id AND ep.is_delete = 0
+        WHERE e.uid = #{userId}
+          AND e.is_delete = 0
+    </select>
 </mapper>

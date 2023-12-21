@@ -38,4 +38,12 @@ public interface ExpectedPositionMapper extends BaseMapper<ExpectedPosition> {
      * @param list
      */
     int batchInsert(@Param("list") List<ExpectedPositionModifyDto> list);
+
+    /**
+     * 根据用户id查询意向职位数量
+     *
+     * @param userId
+     * @return
+     */
+    int selectCountByUserId(@Param("userId") Long userId);
 }

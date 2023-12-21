@@ -7,10 +7,7 @@ import com.korant.youya.workplace.enums.huntjob.HuntJobStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
-import com.korant.youya.workplace.mapper.AttentionHuntJobMapper;
-import com.korant.youya.workplace.mapper.EducationExperienceMapper;
-import com.korant.youya.workplace.mapper.HuntJobMapper;
-import com.korant.youya.workplace.mapper.UserMapper;
+import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
 import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
@@ -55,6 +52,12 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
 
     @Resource
     private AttentionHuntJobMapper attentionHuntJobMapper;
+
+    @Resource
+    private ExpectedPositionMapper expectedPositionMapper;
+
+    @Resource
+    private ExpectedWorkAreaMapper expectedWorkAreaMapper;
 
     /**
      * 查询首页求职信息列表
@@ -148,6 +151,10 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (!exists) throw new YouyaException("请至少补充一条教育经历");
         LocalDate startWorkingTime = user.getStartWorkingTime();
         if (null == startWorkingTime) throw new YouyaException("请完善个人信息中开始工作时间");
+        int positionCount = expectedPositionMapper.selectCountByUserId(userId);
+        if (positionCount <= 0) throw new YouyaException("请至少添加一条意向职位");
+        int workAreaCount = expectedWorkAreaMapper.selectCountByUserId(userId);
+        if (workAreaCount <= 0) throw new YouyaException("请至少添加一条意向区域");
     }
 
     /**

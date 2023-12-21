@@ -101,6 +101,7 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
                 addWorkAreaList.forEach(s -> {
                     s.setId(IdWorker.getId());
                     s.setStatusId(statusId);
+                    s.setCountryCode(CHINA_CODE);
                 });
                 expectedWorkAreaMapper.batchInsert(addWorkAreaList);
             }

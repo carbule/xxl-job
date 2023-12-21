@@ -40,4 +40,12 @@ public interface ExpectedWorkAreaMapper extends BaseMapper<ExpectedWorkArea> {
      * @return
      */
     int batchInsert(@Param("list") List<ExpectedWorkAreaModifyDto> list);
+
+    /**
+     * 根据用户id查询意向区域数量
+     *
+     * @param userId
+     * @return
+     */
+    int selectCountByUserId(@Param("userId") Long userId);
 }

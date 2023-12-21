@@ -92,7 +92,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserLoginVo loginByWechatCode(UserLoginByWechatCodeDto wechatCodeDto) {
         String code = wechatCodeDto.getCode();
         log.info("code:{}", code);
-        String accessToken = WeChatUtil.getAccessToken();
+        String accessToken = WeChatUtil.getMiniProgramAccessToken();
         log.info("accessToken:{}", accessToken);
         if (StringUtils.isBlank(accessToken)) throw new YouyaException("accessToken为空");
         String phoneNumber = WeChatUtil.getPhoneNumber(accessToken, code);

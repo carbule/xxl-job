@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -704,15 +705,21 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
-     * 获取邀请二维码
+     * 获取企业分享信息
      *
      * @return
      */
     @Override
-    public String getInvitationQrcode() {
+    @Transactional(rollbackFor = Exception.class)
+    //todo 缺少推入延迟队列删除
+    public EnterpriseSharedInfoVo getSharedInfo() {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
         if (null == enterpriseId) return null;
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        Integer authStatus = enterprise.getAuthStatus();
+        if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus) throw new YouyaException("请等待企业审核通过后再使用");
         try {
             InputStream inputStream = QrCodeUtil.getQrCode(enterpriseQrcodeUrl + enterpriseId, 180, 180);
             String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);
@@ -727,11 +734,43 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             invitationQrCode.setEnterpriseId(enterpriseId);
             invitationQrCode.setMd5FileName(objectKey);
             enterpriseInvitationQrCodeMapper.insert(invitationQrCode);
-            return "https://" + ObsBucketConfig.getCdn(ENTERPRISE_QRCODE_BUCKET) + "/" + encode;
+            String qrcodeUrl = "https://" + ObsBucketConfig.getCdn(ENTERPRISE_QRCODE_BUCKET) + "/" + encode;
+            EnterpriseSharedInfoVo sharedInfoVo = new EnterpriseSharedInfoVo();
+            sharedInfoVo.setAvatar(loginUser.getAvatar());
+            sharedInfoVo.setLastName(loginUser.getLastName());
+            sharedInfoVo.setFirstName(loginUser.getFirstName());
+            sharedInfoVo.setEnterpriseName(enterprise.getName());
+            sharedInfoVo.setQrcodeUrl(qrcodeUrl);
+            return sharedInfoVo;
         } catch (Exception e) {
             log.error("企业：{},获取邀请二维码失败,异常信息:{}", enterpriseId, e);
             throw new YouyaException("获取邀请二维码失败，请稍后再试");
         }
     }
 
+    /**
+     * 上传分享图片
+     *
+     * @param file
+     */
+    @Override
+    //todo 缺少推入延迟队列删除
+    public String uploadShareImage(MultipartFile file) {
+        if (null == file) throw new YouyaException("分享图片不能为空");
+        InputStream inputStream = null;
+        try {
+            inputStream = file.getInputStream();
+        } catch (IOException e) {
+            throw new YouyaException("文件流获取失败");
+        }
+        String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);
+        PutObjectResult result = ObsUtil.putObject(bucketName, "jpg", inputStream);
+        if (null == result) throw new YouyaException("上传文件失败");
+        String etag = result.getEtag();
+        String objectUrl = result.getObjectUrl();
+        String objectKey = result.getObjectKey();
+        if (StringUtils.isBlank(etag) && StringUtils.isBlank(objectUrl)) throw new YouyaException("上传文件失败");
+        String encode = URLEncoder.encode(objectKey, StandardCharsets.UTF_8);
+        return "https://" + ObsBucketConfig.getCdn(ENTERPRISE_QRCODE_BUCKET) + "/" + encode;
+    }
 }

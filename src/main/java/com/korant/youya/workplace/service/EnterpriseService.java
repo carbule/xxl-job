@@ -199,9 +199,16 @@ public interface EnterpriseService extends IService<Enterprise> {
     void changeEnterprise(EnterpriseChangeDto changeDto);
 
     /**
-     * 获取邀请二维码
+     * 获取企业分享信息
      *
      * @return
      */
-    String getInvitationQrcode();
+    EnterpriseSharedInfoVo getSharedInfo();
+
+    /**
+     * 上传分享图片
+     *
+     * @param file
+     */
+    String uploadShareImage(MultipartFile file);
 }

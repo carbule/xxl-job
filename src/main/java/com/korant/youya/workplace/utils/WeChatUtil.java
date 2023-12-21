@@ -21,26 +21,39 @@ public class WeChatUtil {
     private final static String APP_ID = "wxac76b91987ca9f96";
     //小程序appSecret
     private final static String APP_SECRET = "280f7c2a134eb1577dfa0f75aed8a1b9";
+    //知明贤公众号
+    private final static String OFFICIAL_ACCOUNT = "wx0583bd04a25d0695";
+    //知明贤公众号secret
+    private final static String OFFICIAL_ACCOUNT_SECRET = "b51329f481bf3a0a081eb61654ccd631";
 
-    //accessToken
-    private static String ACCESS_TOKEN;
 
-    /**
-     * 获取accessToken
-     *
-     * @return
-     */
-    public static String getAccessToken() {
-        return ACCESS_TOKEN;
+    //小程序accessToken
+    private static String MINI_PROGRAM_ACCESS_TOKEN;
+    //公众号accessToken
+    private static String OFFICIAL_ACCOUNT_ACCESS_TOKEN;
+    //JsApiTicket
+    private static String JSAPI_TICKET;
+
+
+    public static String getMiniProgramAccessToken() {
+        return MINI_PROGRAM_ACCESS_TOKEN;
+    }
+
+    public static String getOfficialAccountAccessToken() {
+        return OFFICIAL_ACCOUNT_ACCESS_TOKEN;
+    }
+
+    public static String getJsapiTicket() {
+        return JSAPI_TICKET;
     }
 
     /**
-     * 获取接口调用凭据
+     * 获取小程序接口调用凭据
      * access_token 的有效期目前为 2 个小时，需定时刷新，重复获取将导致上次获取的 access_token 失效；
      *
      * @return
      */
-    public static String refreshAccessToken() {
+    public static String refreshMiniProgramAccessToken() {
         String GRANT_TYPE = "client_credential";
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("grant_type", GRANT_TYPE);
@@ -54,11 +67,62 @@ public class WeChatUtil {
             String access_token = jsonObject.getString("access_token");
             int expires_in = jsonObject.getIntValue("expires_in");
             if (StringUtils.isNotBlank(access_token)) {
-                ACCESS_TOKEN = access_token;
+                MINI_PROGRAM_ACCESS_TOKEN = access_token;
                 return access_token;
             }
         }
         throw new YouyaException("获取微信接口调用凭据失败");
+    }
+
+    /**
+     * 获取公众号接口调用凭据
+     * access_token 的有效期目前为 2 个小时，需定时刷新，重复获取将导致上次获取的 access_token 失效；
+     *
+     * @return
+     */
+    public static String refreshOfficialAccountAccessToken() {
+        String GRANT_TYPE = "client_credential";
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("grant_type", GRANT_TYPE);
+        paramMap.put("appid", OFFICIAL_ACCOUNT);
+        paramMap.put("secret", OFFICIAL_ACCOUNT_SECRET);
+        paramMap.put("force_refresh", false);
+        String response = HttpClientUtil.sentPost("https://api.weixin.qq.com/cgi-bin/stable_token", paramMap);
+        if (StringUtils.isNotBlank(response)) {
+            log.info("[getAccessToken] response:{}", response);
+            JSONObject jsonObject = JSONObject.parseObject(response);
+            String access_token = jsonObject.getString("access_token");
+            int expires_in = jsonObject.getIntValue("expires_in");
+            if (StringUtils.isNotBlank(access_token)) {
+                OFFICIAL_ACCOUNT_ACCESS_TOKEN = access_token;
+                return access_token;
+            }
+        }
+        throw new YouyaException("获取微信接口调用凭据失败");
+    }
+
+    /**
+     * 获取微信Jsapi调用凭据
+     * access_token 的有效期目前为 2 个小时，需定时刷新，重复获取将导致上次获取的 access_token 失效；
+     *
+     * @return
+     */
+    public static String refreshJsapiTicket() {
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("access_token", OFFICIAL_ACCOUNT_ACCESS_TOKEN);
+        paramMap.put("type", "jsapi");
+        String response = HttpClientUtil.sentGet("https://api.weixin.qq.com/cgi-bin/ticket/getticket", paramMap);
+        if (StringUtils.isNotBlank(response)) {
+            log.info("[getJsapiTicket] response:{}", response);
+            JSONObject jsonObject = JSONObject.parseObject(response);
+            String ticket = jsonObject.getString("ticket");
+            int expires_in = jsonObject.getIntValue("expires_in");
+            if (StringUtils.isNotBlank(ticket)) {
+                JSAPI_TICKET = ticket;
+                return ticket;
+            }
+        }
+        throw new YouyaException("获取微信Jsapi调用凭据失败");
     }
 
     /**
@@ -121,7 +185,9 @@ public class WeChatUtil {
 //        String code = "ae49cfbb8870f74c883aca9bfdec2e5d2e0e63c2655483e746218e33476be9bf";
         //72_TIta8DY1Ahx5fhGhEhx97EwlelGmYoS0mMX3WrbZbacEop8MwYp48AcjqjjPNKr7pxS_fUhiVllRQvM_NvN8XsD1kvMorxWr3gXizc-BejuDcsqMP0nyC0p92WEBANdAJARQD
         //72_TIta8DY1Ahx5fhGhEhx97EwlelGmYoS0mMX3WrbZbacEop8MwYp48AcjqjjPNKr7pxS_fUhiVllRQvM_NvN8XsD1kvMorxWr3gXizc-BejuDcsqMP0nyC0p92WEBANdAJARQD
-        String accessToken = refreshAccessToken();
-        System.out.println(accessToken);
+//        String accessToken = refreshMiniProgramAccessToken();
+//        System.out.println(accessToken);
+        String s = refreshOfficialAccountAccessToken();
+        System.out.println(s);
     }
 }

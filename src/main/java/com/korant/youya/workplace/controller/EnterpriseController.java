@@ -340,14 +340,28 @@ public class EnterpriseController {
     }
 
     /**
-     * 获取邀请二维码
+     * 获取企业分享信息
      *
      * @param
      * @returnb'gen
      */
-    @GetMapping("/getInvitationQrcode")
-    public R<?> getInvitationQrcode() {
-        String url = enterpriseService.getInvitationQrcode();
-        return R.success(url);
+    @GetMapping("/getEnterpriseSharedInfo")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> getSharedInfo() {
+        EnterpriseSharedInfoVo enterpriseSharedInfoVo = enterpriseService.getSharedInfo();
+        return R.success(enterpriseSharedInfoVo);
+    }
+
+    /**
+     * 上传分享图片
+     *
+     * @param
+     * @returnb'gen
+     */
+    @PostMapping("/uploadShareImage")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> uploadShareImage(MultipartFile file) {
+        String imageUrl = enterpriseService.uploadShareImage(file);
+        return R.success(imageUrl);
     }
 }
