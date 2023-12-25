@@ -21,6 +21,14 @@ import java.util.List;
 public interface EnterpriseService extends IService<Enterprise> {
 
     /**
+     * 查询企业hr列表
+     *
+     * @param queryHRListDto
+     * @return
+     */
+    Page<HRVo> queryHRList(QueryHRListDto queryHRListDto);
+
+    /**
      * 查询企业员工列表
      *
      * @param queryEmployeeListDto
@@ -29,34 +37,12 @@ public interface EnterpriseService extends IService<Enterprise> {
     Page<EmployeeVo> queryEmployeeList(QueryEmployeeListDto queryEmployeeListDto);
 
     /**
-     * 查询企业HR列表
+     * 查询转让人员列表
      *
      * @param queryHRListDto
      * @return
      */
-    Page<HRVo> queryHRList(QueryHRListDto queryHRListDto);
-
-    /**
-     * 查询待审批列表
-     *
-     * @param queryPendingApprovalListDto
-     * @return
-     */
-    Page<EnterprisePendingApprovalVo> queryPendingApprovalList(QueryPendingApprovalListDto queryPendingApprovalListDto);
-
-    /**
-     * 同意事项
-     *
-     * @param id
-     */
-    void agree(Long id);
-
-    /**
-     * 拒绝事项
-     *
-     * @param id
-     */
-    void refuse(Long id);
+    Page<TransferPersonnelVo> queryTransferPersonnelList(QueryTransferPersonnelListDto queryHRListDto);
 
     /**
      * 撤销申请
@@ -211,4 +197,26 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @param file
      */
     String uploadShareImage(MultipartFile file);
+
+    /**
+     * 根据二维码id查询企业信息
+     *
+     * @param qrcodeIdDto
+     * @return
+     */
+    EnterpriseInfoByQrcodeIdVo queryEnterpriseInfoByQrcodeId(QueryEnterpriseInfoByQrcodeIdDto qrcodeIdDto);
+
+    /**
+     * 删除邀请二维码
+     *
+     * @param id
+     */
+    void deleteInvitationQrcode(Long id);
+
+    /**
+     * 删除分享图片
+     *
+     * @param objectKey
+     */
+    void deleteShareImage(String objectKey);
 }

@@ -67,11 +67,6 @@ public class EnterpriseInfoByLoginUserVo {
     private String firstName;
 
     /**
-     * 审核状态
-     */
-    private Integer operate;
-
-    /**
      * 角色信息
      */
     private String role;

@@ -31,6 +31,19 @@ public class EnterpriseController {
     private EnterpriseService enterpriseService;
 
     /**
+     * 查询企业hr列表
+     *
+     * @param queryHRListDto
+     * @return
+     */
+    @PostMapping("/queryHRList")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> queryHRList(@RequestBody @Valid QueryHRListDto queryHRListDto) {
+        Page<HRVo> page = enterpriseService.queryHRList(queryHRListDto);
+        return R.success(page);
+    }
+
+    /**
      * 查询企业员工列表
      *
      * @param queryEmployeeListDto
@@ -44,53 +57,16 @@ public class EnterpriseController {
     }
 
     /**
-     * 查询企业HR列表
+     * 查询转让人员列表
      *
      * @param queryHRListDto
      * @return
      */
-    @PostMapping("/queryHRList")
+    @PostMapping("/queryTransferPersonnelList")
     @PreAuthorize("hasRole('admin')")
-    public R<?> queryHRList(@RequestBody @Valid QueryHRListDto queryHRListDto) {
-        Page<HRVo> page = enterpriseService.queryHRList(queryHRListDto);
+    public R<?> queryTransferPersonnelList(@RequestBody @Valid QueryTransferPersonnelListDto queryHRListDto) {
+        Page<TransferPersonnelVo> page = enterpriseService.queryTransferPersonnelList(queryHRListDto);
         return R.success(page);
-    }
-
-    /**
-     * 查询待审批列表
-     *
-     * @param queryPendingApprovalListDto
-     * @return
-     */
-    @PostMapping("/queryPendingApprovalList")
-    @PreAuthorize("hasRole('admin')")
-    public R<?> queryPendingApprovalList(@RequestBody @Valid QueryPendingApprovalListDto queryPendingApprovalListDto) {
-        Page<EnterprisePendingApprovalVo> page = enterpriseService.queryPendingApprovalList(queryPendingApprovalListDto);
-        return R.success(page);
-    }
-
-    /**
-     * 同意事项
-     *
-     * @return
-     */
-    @GetMapping("/agree/{id}")
-    @PreAuthorize("hasRole('admin')")
-    public R<?> agree(@PathVariable("id") Long id) {
-        enterpriseService.agree(id);
-        return R.ok();
-    }
-
-    /**
-     * 拒绝事项
-     *
-     * @return
-     */
-    @GetMapping("/refuse/{id}")
-    @PreAuthorize("hasRole('admin')")
-    public R<?> refuse(@PathVariable("id") Long id) {
-        enterpriseService.refuse(id);
-        return R.ok();
     }
 
     /**
@@ -170,7 +146,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/exit")
-    @PreAuthorize("hasAnyRole('hr','admin')")
+    @PreAuthorize("hasAnyRole('admin','hr','employee')")
     public R<?> exit() {
         enterpriseService.exit();
         return R.ok();
@@ -293,7 +269,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/queryEnterpriseStructureInfo")
-    @PreAuthorize("hasAnyRole('hr','admin')")
+    @PreAuthorize("hasAnyRole('admin','hr','employee')")
     @ExplanationDict
     public R<?> queryEnterpriseStructureInfo() {
         EnterpriseStructureInfoVo structureInfoVo = enterpriseService.queryEnterpriseStructureInfo();
@@ -306,7 +282,7 @@ public class EnterpriseController {
      * @return
      */
     @GetMapping("/queryEnterpriseBasicInfo")
-    @PreAuthorize("hasAnyRole('hr','admin')")
+    @PreAuthorize("hasAnyRole('admin','hr','employee')")
     @ExplanationDict
     public R<?> queryEnterpriseBasicInfo() {
         EnterpriseBasicInfoVo basicInfoVo = enterpriseService.queryEnterpriseBasicInfo();
@@ -320,7 +296,7 @@ public class EnterpriseController {
      * @returnb'gen
      */
     @GetMapping("/queryEnterpriseBusinessLicense")
-    @PreAuthorize("hasAnyRole('hr','admin')")
+    @PreAuthorize("hasAnyRole('admin','hr')")
     public R<?> queryEnterpriseBusinessLicense() {
         EnterpriseBusinessLicenseVo businessLicenseVo = enterpriseService.queryEnterpriseBusinessLicense();
         return R.success(businessLicenseVo);
@@ -363,5 +339,17 @@ public class EnterpriseController {
     public R<?> uploadShareImage(MultipartFile file) {
         String imageUrl = enterpriseService.uploadShareImage(file);
         return R.success(imageUrl);
+    }
+
+    /**
+     * 根据二维码id查询企业信息
+     *
+     * @param
+     * @returnb'gen
+     */
+    @PostMapping("/queryEnterpriseInfoByQrcodeId")
+    public R<?> queryEnterpriseInfoByQrcodeId(@RequestBody @Valid QueryEnterpriseInfoByQrcodeIdDto qrcodeIdDto) {
+        EnterpriseInfoByQrcodeIdVo enterpriseInfoByQrcodeIdVo = enterpriseService.queryEnterpriseInfoByQrcodeId(qrcodeIdDto);
+        return R.success(enterpriseInfoByQrcodeIdVo);
     }
 }

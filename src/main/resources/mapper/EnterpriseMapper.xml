@@ -28,6 +28,38 @@
         </collection>
     </resultMap>
 
+    <!--  查询企业hr数量  -->
+    <select id="queryHRListCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM yy_user_enterprise AS ue
+                 LEFT JOIN yy_user_role AS ur ON ue.uid = ur.uid AND ur.is_delete = 0
+                 LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+        WHERE ue.uid != #{userId}
+          AND ue.enterprise_id = #{enterpriseId}
+          AND r.role_name = 'hr'
+          AND ue.is_delete = 0
+    </select>
+
+    <!--  查询企业hr列表  -->
+    <select id="queryHRList" resultType="com.korant.youya.workplace.pojo.vo.enterprise.HRVo">
+        SELECT u.id,
+               u.avatar,
+               u.last_name  AS lastName,
+               u.first_name AS firstName,
+               u.phone,
+               r.role_name  AS roleName
+        FROM yy_user_enterprise AS ue
+                 LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
+                 LEFT JOIN yy_user_role AS ur ON ue.uid = ur.uid AND ur.is_delete = 0
+                 LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+        WHERE ue.uid != #{userId}
+          AND ue.enterprise_id = #{enterpriseId}
+          AND r.role_name = 'hr'
+          AND ue.is_delete = 0
+        ORDER BY ue.create_time DESC LIMIT #{queryHRListDto.pageSize}
+        OFFSET (#{queryHRListDto.pageNumber} -1) * #{queryHRListDto.pageSize}
+    </select>
+
     <!--  查询企业员工数量  -->
     <select id="queryEmployeeListCount" resultType="java.lang.Integer">
         SELECT COUNT(1)
@@ -36,6 +68,7 @@
                  LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
         WHERE ue.uid != #{userId}
           AND ue.enterprise_id = #{enterpriseId}
+          AND r.role_name = 'employee'
           AND ue.is_delete = 0
     </select>
 
@@ -53,13 +86,14 @@
                  LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
         WHERE ue.uid != #{userId}
           AND ue.enterprise_id = #{enterpriseId}
+          AND r.role_name = 'employee'
           AND ue.is_delete = 0
         ORDER BY ue.create_time DESC LIMIT #{queryEmployeeListDto.pageSize}
         OFFSET (#{queryEmployeeListDto.pageNumber} -1) * #{queryEmployeeListDto.pageSize}
     </select>
 
-    <!--  查询企业hr数量  -->
-    <select id="queryHRListCount" resultType="java.lang.Integer">
+    <!--  查询转让人员数量  -->
+    <select id="queryTransferPersonnelCount" resultType="java.lang.Integer">
         SELECT COUNT(1)
         FROM yy_user_enterprise AS ue
         LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
@@ -76,8 +110,8 @@
         </where>
     </select>
 
-    <!--  查询企业hr列表  -->
-    <select id="queryHRList" resultType="com.korant.youya.workplace.pojo.vo.enterprise.HRVo">
+    <!--  查询转让人员列表  -->
+    <select id="queryTransferPersonnelList" resultType="com.korant.youya.workplace.pojo.vo.enterprise.TransferPersonnelVo">
         SELECT u.id,
         u.avatar,
         u.last_name AS lastName,
@@ -90,33 +124,14 @@
         <where>
             ue.uid != #{userId}
             AND ue.enterprise_id = #{enterpriseId}
-            <if test="queryHRListDto.name != ''">
-                AND (u.last_name || u.first_name) LIKE concat('%', #{queryHRListDto.name}, '%')
+            <if test="queryTransferPersonnelListDto.name != ''">
+                AND (u.last_name || u.first_name) LIKE concat('%', #{queryTransferPersonnelListDto.name}, '%')
             </if>
             AND r.role_name = 'hr'
             AND ue.is_delete = 0
-            ORDER BY ue.create_time DESC LIMIT #{queryHRListDto.pageSize}
-            OFFSET (#{queryHRListDto.pageNumber} -1) * #{queryHRListDto.pageSize}
+            ORDER BY ue.create_time DESC LIMIT #{queryTransferPersonnelListDto.pageSize}
+            OFFSET (#{queryTransferPersonnelListDto.pageNumber} -1) * #{queryTransferPersonnelListDto.pageSize}
         </where>
-    </select>
-
-    <!--  查询企业代办事项  -->
-    <select id="queryPendingApprovalList"
-            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterprisePendingApprovalVo">
-        SELECT et.id,
-               u.avatar,
-               u.last_name    AS lastName,
-               u.first_name   AS firstName,
-               u.phone,
-               et.event_type  AS eventType,
-               et.create_time AS createTime
-        FROM enterprise_todo AS et
-                 LEFT JOIN yy_user AS u ON et.uid = u.id AND u.is_delete = 0
-        WHERE et.enterprise_id = #{enterpriseId}
-          AND et.operate = 0
-          AND et.is_delete = 0
-        ORDER BY et.create_time DESC LIMIT #{queryPendingApprovalListDto.pageSize}
-        OFFSET (#{queryPendingApprovalListDto.pageNumber} -1) * #{queryPendingApprovalListDto.pageSize}
     </select>
 
     <!--  根据企业id查找管理员id  -->
@@ -215,15 +230,31 @@
                auth_status       AS authStatus,
                u.avatar,
                u.last_name       AS lastName,
-               u.first_name      AS firstName,
-               et.operate
+               u.first_name      AS firstName
         FROM enterprise AS e
-                 LEFT JOIN (SELECT *
-                            FROM enterprise_todo
-                            WHERE enterprise_id = #{enterpriseId}
-                              AND uid = #{userId}
-                              AND operate != 1
-                              AND is_delete = 0) AS et ON e.id = et.enterprise_id
+                 LEFT JOIN yy_user_enterprise AS ue ON e.id = ue.enterprise_id AND ue.is_delete = 0
+                 LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
+                 LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
+                 LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+        WHERE e.id = #{enterpriseId}
+          AND r.role_name = 'admin'
+          AND e.is_delete = 0
+    </select>
+
+    <!--  根据员工身份查询企业信息  -->
+    <select id="queryEnterpriseInfoByEmployee" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseInfoByLoginUserVo">
+        SELECT e.id,
+               e.name            AS enterpriseName,
+               e.logo,
+               e.ent_type        AS entType,
+               e.scale,
+               e.financing_stage AS financingStage,
+               auth_status       AS authStatus,
+               u.avatar,
+               u.last_name       AS lastName,
+               u.first_name      AS firstName
+        FROM enterprise AS e
                  LEFT JOIN yy_user_enterprise AS ue ON e.id = ue.enterprise_id AND ue.is_delete = 0
                  LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
                  LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
@@ -315,8 +346,8 @@
           AND e.is_delete = 0
     </select>
 
-    <!--  根据hr身份查询企业结构信息  -->
-    <select id="queryEnterpriseStructureInfoByHR"
+    <!--  根据hr身份或者员工身份查询企业结构信息  -->
+    <select id="queryEnterpriseStructureInfoByHROrEmployee"
             resultType="com.korant.youya.workplace.pojo.vo.enterprise.EnterpriseStructureInfoVo">
         SELECT e.id,
                e.ent_type        AS entType,

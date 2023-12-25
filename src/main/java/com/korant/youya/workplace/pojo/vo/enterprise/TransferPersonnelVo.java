@@ -3,24 +3,19 @@ package com.korant.youya.workplace.pojo.vo.enterprise;
 import lombok.Data;
 
 /**
- * @ClassName HRVo
+ * @ClassName TransferPersonnelVo
  * @Description
  * @Author chenyiqiang
- * @Date 2023/12/22 15:10
+ * @Date 2023/12/14 13:52
  * @Version 1.0
  */
 @Data
-public class HRVo {
+public class TransferPersonnelVo {
 
     /**
      * 用户id
      */
     private Long id;
-
-    /**
-     * 用户头像
-     */
-    private String avatar;
 
     /**
      * 用户姓氏
@@ -36,9 +31,4 @@ public class HRVo {
      * 用户手机号
      */
     private String phone;
-
-    /**
-     * 员工角色
-     */
-    private String roleName;
 }

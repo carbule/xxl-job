@@ -38,10 +38,10 @@ public class AccessTokenRunner implements ApplicationRunner {
                         WeChatUtil.refreshMiniProgramAccessToken();
                         break;
                     } catch (Exception e) {
-                        log.error("定时刷新AccessToken失败,异常信息:", e);
+                        log.error("定时刷新MiniProgramAccessToken失败,异常信息:", e);
                         retryCount++;
                         if (retryCount == maxRetries) {
-                            log.error("定时刷新AccessToken方法调用已达到最大重试次数");
+                            log.error("定时刷新MiniProgramAccessToken方法调用已达到最大重试次数");
                         } else {
                             log.error("正在进行第 " + retryCount + " 次重试");
                         }
@@ -60,13 +60,13 @@ public class AccessTokenRunner implements ApplicationRunner {
                 int retryCount = 0;
                 while (retryCount < maxRetries) {
                     try {
-                        WeChatUtil.refreshMiniProgramAccessToken();
+                        WeChatUtil.refreshOfficialAccountAccessToken();
                         break;
                     } catch (Exception e) {
-                        log.error("定时刷新AccessToken失败,异常信息:", e);
+                        log.error("定时刷新OfficialAccountAccessToken失败,异常信息:", e);
                         retryCount++;
                         if (retryCount == maxRetries) {
-                            log.error("定时刷新AccessToken方法调用已达到最大重试次数");
+                            log.error("定时刷新OfficialAccountAccessToken方法调用已达到最大重试次数");
                         } else {
                             log.error("正在进行第 " + retryCount + " 次重试");
                         }

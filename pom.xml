@@ -22,6 +22,7 @@
         <velocity.version>2.3</velocity.version>
         <druid.version>1.2.18</druid.version>
         <redisson.version>3.22.0</redisson.version>
+        <rabbitmq.version>2.7.0</rabbitmq.version>
         <obs.version>3.23.3</obs.version>
         <huawei-apigateway.version>3.2.0</huawei-apigateway.version>
         <commons-pool.version>2.11.1</commons-pool.version>
@@ -100,6 +101,12 @@
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
             <version>${redisson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+            <version>${rabbitmq.version}</version>
         </dependency>
 
         <dependency>

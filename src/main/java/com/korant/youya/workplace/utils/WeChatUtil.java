@@ -62,7 +62,7 @@ public class WeChatUtil {
         paramMap.put("force_refresh", false);
         String response = HttpClientUtil.sentPost("https://api.weixin.qq.com/cgi-bin/stable_token", paramMap);
         if (StringUtils.isNotBlank(response)) {
-            log.info("[getAccessToken] response:{}", response);
+            log.info("[getMiniProgramAccessToken] response:{}", response);
             JSONObject jsonObject = JSONObject.parseObject(response);
             String access_token = jsonObject.getString("access_token");
             int expires_in = jsonObject.getIntValue("expires_in");
@@ -89,7 +89,7 @@ public class WeChatUtil {
         paramMap.put("force_refresh", false);
         String response = HttpClientUtil.sentPost("https://api.weixin.qq.com/cgi-bin/stable_token", paramMap);
         if (StringUtils.isNotBlank(response)) {
-            log.info("[getAccessToken] response:{}", response);
+            log.info("[getOfficialAccountAccessToken] response:{}", response);
             JSONObject jsonObject = JSONObject.parseObject(response);
             String access_token = jsonObject.getString("access_token");
             int expires_in = jsonObject.getIntValue("expires_in");

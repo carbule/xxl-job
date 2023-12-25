@@ -19,6 +19,25 @@ import java.util.List;
 public interface EnterpriseMapper extends BaseMapper<Enterprise> {
 
     /**
+     * 查询企业hr数量
+     *
+     * @param userId
+     * @param enterpriseId
+     * @return
+     */
+    int queryHRListCount(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId);
+
+    /**
+     * 查询企业hr列表
+     *
+     * @param userId
+     * @param enterpriseId
+     * @param queryHRListDto
+     * @return
+     */
+    List<HRVo> queryHRList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryHRListDto") QueryHRListDto queryHRListDto);
+
+    /**
      * 查询企业员工数量
      *
      * @param userId
@@ -38,33 +57,24 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
     List<EmployeeVo> queryEmployeeList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryEmployeeListDto") QueryEmployeeListDto queryEmployeeListDto);
 
     /**
-     * 查询企业hr数量
+     * 查询转让人员数量
      *
      * @param userId
      * @param enterpriseId
      * @param queryHRListDto
      * @return
      */
-    int queryHRListCount(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryHRListDto") QueryHRListDto queryHRListDto);
+    int queryTransferPersonnelCount(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryHRListDto") QueryTransferPersonnelListDto queryHRListDto);
 
     /**
-     * 查询企业hr列表
+     * 查询转让人员列表
      *
      * @param userId
      * @param enterpriseId
-     * @param queryHRListDto
+     * @param queryTransferPersonnelListDto
      * @return
      */
-    List<HRVo> queryHRList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryHRListDto") QueryHRListDto queryHRListDto);
-
-    /**
-     * 查询企业代办事项
-     *
-     * @param enterpriseId
-     * @param queryPendingApprovalListDto
-     * @return
-     */
-    List<EnterprisePendingApprovalVo> queryPendingApprovalList(@Param("enterpriseId") Long enterpriseId, @Param("queryPendingApprovalListDto") QueryPendingApprovalListDto queryPendingApprovalListDto);
+    List<TransferPersonnelVo> queryTransferPersonnelList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("queryTransferPersonnelListDto") QueryTransferPersonnelListDto queryTransferPersonnelListDto);
 
     /**
      * 根据企业id查找管理员id
@@ -124,6 +134,15 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
     EnterpriseInfoByLoginUserVo queryEnterpriseInfoByHR(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId);
 
     /**
+     * 根据员工身份查询企业信息
+     *
+     * @param userId
+     * @param enterpriseId
+     * @return
+     */
+    EnterpriseInfoByLoginUserVo queryEnterpriseInfoByEmployee(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId);
+
+    /**
      * 根据管理员身份查询企业信息
      *
      * @param enterpriseId
@@ -140,12 +159,12 @@ public interface EnterpriseMapper extends BaseMapper<Enterprise> {
     EnterpriseStructureInfoVo queryEnterpriseStructureInfoByAdmin(@Param("enterpriseId") Long enterpriseId);
 
     /**
-     * 根据hr身份查询企业结构信息
+     * 根据hr身份或者员工身份查询企业结构信息
      *
      * @param enterpriseId
      * @return
      */
-    EnterpriseStructureInfoVo queryEnterpriseStructureInfoByHR(@Param("enterpriseId") Long enterpriseId);
+    EnterpriseStructureInfoVo queryEnterpriseStructureInfoByHROrEmployee(@Param("enterpriseId") Long enterpriseId);
 
     /**
      * 查询企业基础信息
