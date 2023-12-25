@@ -37,8 +37,7 @@ public interface DistrictDataMapper extends BaseMapper<DistrictData> {
      *
      * @param provinceCode
      * @param cityCode
-     * @param districtCode
      * @return
      */
-    String searchAddressByCode(@Param("provinceCode") String provinceCode, @Param("cityCode") String cityCode, @Param("districtCode") String districtCode);
+    String searchAddressByCode(@Param("provinceCode") String provinceCode, @Param("cityCode") String cityCode);
 }

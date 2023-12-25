@@ -72,11 +72,6 @@ public class EnterpriseBasicInfoVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 国家编码
      */
     private String countryCode;

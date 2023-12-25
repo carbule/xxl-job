@@ -31,9 +31,4 @@ public class ExpectedWorkAreaVo {
      * 市级名称
      */
     private String workAreaCityName;
-
-    /**
-     * 行政区名称
-     */
-    private String workAreaDistrictName;
 }

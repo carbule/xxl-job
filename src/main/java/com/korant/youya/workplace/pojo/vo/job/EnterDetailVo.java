@@ -77,11 +77,6 @@ public class EnterDetailVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 联系地址
      */
     private String contactAddress;

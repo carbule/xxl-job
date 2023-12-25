@@ -23,8 +23,8 @@
 
     <!--  批量新增意向区域  -->
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO expected_work_area(id, status_id, country_code, province_code, city_code, district_code,
-        create_time,is_delete)
+        INSERT INTO expected_work_area(id, status_id, country_code, province_code, city_code,
+        create_time, is_delete)
         VALUES
         <foreach collection="list" item="param" index="index" separator=",">
             (
@@ -33,7 +33,6 @@
             #{param.countryCode},
             #{param.provinceCode},
             #{param.cityCode},
-            #{param.districtCode},
             CURRENT_TIMESTAMP,
             0
             )

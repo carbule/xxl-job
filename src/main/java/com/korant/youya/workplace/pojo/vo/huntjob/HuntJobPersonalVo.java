@@ -33,11 +33,6 @@ public class HuntJobPersonalVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 期望最低工资
      */
     private Integer minExpectedSalary;

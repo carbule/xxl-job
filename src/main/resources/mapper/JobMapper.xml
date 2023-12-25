@@ -20,7 +20,6 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="detailAddress" property="detailAddress"/>
         <result column="longitude" property="longitude"/>
         <result column="latitude" property="latitude"/>
@@ -51,11 +50,9 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="countryCode" property="countryCode"/>
         <result column="provinceCode" property="provinceCode"/>
         <result column="cityCode" property="cityCode"/>
-        <result column="districtCode" property="districtCode"/>
         <result column="detailAddress" property="detailAddress"/>
         <result column="award" property="award"/>
         <result column="interviewRewardRate" property="interviewRewardRate"/>
@@ -99,7 +96,6 @@
         t1.minSalary,
         t1.maxSalary,
         t1.cityName,
-        t1.districtName,
         t1.isAwardExist
         FROM (SELECT j.id,
         e.id AS enterpriseId,
@@ -112,12 +108,10 @@
         j.min_salary AS minSalary,
         j.max_salary AS maxSalary,
         dd1.name AS cityName,
-        dd2.name AS districtName,
         (SELECT CASE WHEN j.award IS NOT NULL THEN 1 ELSE 0 END) AS isAwardExist
         FROM job AS j
         LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
         LEFT JOIN district_data dd1 ON j.city_code = dd1.code AND dd1.is_delete = 0
-        LEFT JOIN district_data dd2 ON j.district_code = dd2.code AND dd2.is_delete = 0
         LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
         <where>
             j.status = 1
@@ -155,7 +149,6 @@
                dd1.name              AS countryName,
                dd2.name              AS provinceName,
                dd3.name              AS cityName,
-               dd4.name              AS districtName,
                j.detail_address      AS detailAddress,
                j.longitude,
                j.latitude,
@@ -177,7 +170,6 @@
                  LEFT JOIN district_data dd1 ON j.country_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON j.province_code = dd2.code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON j.city_code = dd3.code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON j.district_code = dd4.code AND dd4.is_delete = 0
                  LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
                  LEFT JOIN job_welfare_label AS jwl ON j.id = jwl.job_id AND jwl.is_delete = 0
                  LEFT JOIN enterprise_welfare_label AS ewl ON jwl.label_id = ewl.id AND ewl.is_delete = 0
@@ -199,12 +191,10 @@
                e.email,
                dd1.name          AS provinceName,
                dd2.name          AS cityName,
-               dd3.name          AS districtName,
                e.contact_address AS contactAddress
         FROM enterprise AS e
                  LEFT JOIN district_data dd1 ON e.province_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON e.city_code = dd2.code AND dd2.is_delete = 0
-                 LEFT JOIN district_data dd3 ON e.district_code = dd3.code AND dd3.is_delete = 0
         WHERE e.id = #{id}
     </select>
 
@@ -217,13 +207,11 @@
                j.min_salary                                             AS minSalary,
                j.max_salary                                             AS maxSalary,
                dd1.name                                                 AS cityName,
-               dd2.name                                                 AS districtName,
                j.audit_status                                           AS auditStatus,
                (SELECT CASE WHEN j.award IS NOT NULL THEN 1 ELSE 0 END) AS isAwardExist
         FROM job AS j
                  LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
                  LEFT JOIN district_data dd1 ON j.city_code = dd1.code AND dd1.is_delete = 0
-                 LEFT JOIN district_data dd2 ON j.district_code = dd2.code AND dd2.is_delete = 0
                  LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
         WHERE j.enterprise_id = #{enterpriseId}
           AND j.uid = #{userId}
@@ -247,7 +235,6 @@
             other_info              = #{modifyDto.otherInfo},
             province_code           = #{modifyDto.provinceCode},
             city_code               = #{modifyDto.cityCode},
-            district_code           = #{modifyDto.districtCode},
             detail_address          = #{modifyDto.detailAddress},
             award                   = #{modifyDto.award},
             interview_reward_rate   = #{modifyDto.interviewRewardRate},
@@ -275,11 +262,9 @@
                dd1.name                  AS countryName,
                dd2.name                  AS provinceName,
                dd3.name                  AS cityName,
-               dd4.name                  AS districtName,
                j.country_code            AS countryCode,
                j.province_code           AS provinceCode,
                j.city_code               AS cityCode,
-               j.district_code           AS districtCode,
                j.detail_address          AS detailAddress,
                j.award,
                j.interview_reward_rate   AS interviewRewardRate,
@@ -294,7 +279,6 @@
                  LEFT JOIN district_data dd1 ON j.country_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON j.province_code = dd2.code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON j.city_code = dd3.code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON j.district_code = dd4.code AND dd4.is_delete = 0
                  LEFT JOIN job_welfare_label AS jwl ON j.id = jwl.job_id AND jwl.is_delete = 0
                  LEFT JOIN enterprise_welfare_label AS ewl ON jwl.label_id = ewl.id AND ewl.is_delete = 0
         WHERE j.id = #{id}

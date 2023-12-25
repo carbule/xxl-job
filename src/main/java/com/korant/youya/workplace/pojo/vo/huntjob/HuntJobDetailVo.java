@@ -103,11 +103,6 @@ public class HuntJobDetailVo {
     private String cityCode;
 
     /**
-     * 行政区编码
-     */
-    private String districtCode;
-
-    /**
      * 推荐奖励
      */
     private Integer award;

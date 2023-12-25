@@ -51,11 +51,6 @@ public class JobPersonalVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 审核状态
      */
     private Integer auditStatus;

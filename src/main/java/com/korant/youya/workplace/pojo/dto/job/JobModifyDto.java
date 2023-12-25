@@ -87,12 +87,6 @@ public class JobModifyDto {
     private String cityCode;
 
     /**
-     * 行政区编码
-     */
-    @NotBlank(message = "行政区编码不能为空")
-    private String districtCode;
-
-    /**
      * 详细地址
      */
     @NotBlank(message = "详细地址不能为空")

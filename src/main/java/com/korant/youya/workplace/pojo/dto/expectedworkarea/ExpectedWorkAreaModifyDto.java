@@ -38,9 +38,4 @@ public class ExpectedWorkAreaModifyDto {
      * 市级编码
      */
     private String cityCode;
-
-    /**
-     * 行政区编码
-     */
-    private String districtCode;
 }

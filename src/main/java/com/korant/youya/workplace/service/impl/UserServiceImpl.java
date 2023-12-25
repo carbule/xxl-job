@@ -541,14 +541,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     everyoneVisibleInfo.setCountryCode(CHINA_CODE);
                     everyoneVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
                     everyoneVisibleInfo.setCityCode(modifyDto.getCityCode());
-                    everyoneVisibleInfo.setDistrictCode(modifyDto.getDistrictCode());
                     everyoneVisibleInfo.setAddress(modifyDto.getAddress());
                     break;
                 case 2:
                     recruiterVisibleInfo.setCountryCode(CHINA_CODE);
                     recruiterVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
                     recruiterVisibleInfo.setCityCode(modifyDto.getCityCode());
-                    recruiterVisibleInfo.setDistrictCode(modifyDto.getDistrictCode());
                     recruiterVisibleInfo.setAddress(modifyDto.getAddress());
                     break;
                 default:

@@ -104,11 +104,6 @@ public class ResumePreviewVo {
     private String cityName;
 
     /**
-     * 行政区编码
-     */
-    private String districtName;
-
-    /**
      * 详细地址
      */
     private String address;

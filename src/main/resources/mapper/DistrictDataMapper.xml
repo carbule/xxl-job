@@ -33,10 +33,6 @@
                  SELECT name
                  FROM district_data
                  WHERE code = #{cityCode}
-                 UNION ALL
-                 SELECT name
-                 FROM district_data
-                 WHERE code = #{districtCode}
              ) AS address
     </select>
 </mapper>

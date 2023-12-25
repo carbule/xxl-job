@@ -99,11 +99,6 @@ public class JobDetailVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 国家编码
      */
     private String countryCode;
@@ -117,11 +112,6 @@ public class JobDetailVo {
      * 市级编码
      */
     private String cityCode;
-
-    /**
-     * 行政区编码
-     */
-    private String districtCode;
 
     /**
      * 详细地址

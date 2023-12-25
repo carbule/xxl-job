@@ -129,11 +129,6 @@ public class HuntJobHomePageDetailVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 详细地址
      */
     private String address;

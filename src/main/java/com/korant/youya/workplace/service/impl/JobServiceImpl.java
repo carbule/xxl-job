@@ -170,7 +170,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             int totalAllocationRatio = interviewRewardRate + onboardRewardRate + fullMemberRewardRate;
             if (100 != totalAllocationRatio) throw new YouyaException("面试奖励比例加入职奖励比例必须满足100%");
         }
-        String address = districtDataMapper.searchAddressByCode(createDto.getProvinceCode(), createDto.getCityCode(), createDto.getDistrictCode());
+        String address = districtDataMapper.searchAddressByCode(createDto.getProvinceCode(), createDto.getCityCode());
         String detailAddress = address + createDto.getDetailAddress();
         Location location = TencentMapUtil.geocode(detailAddress);
         if (null == location) throw new YouyaException("地址解析失败，请重新填写地址信息");
@@ -225,9 +225,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             int totalAllocationRatio = interviewRewardRate + onboardRewardRate + fullMemberRewardRate;
             if (100 != totalAllocationRatio) throw new YouyaException("面试奖励比例加入职奖励比例必须满足100%");
         }
-        String oldAddress = districtDataMapper.searchAddressByCode(job.getProvinceCode(), job.getCityCode(), job.getDistrictCode());
+        String oldAddress = districtDataMapper.searchAddressByCode(job.getProvinceCode(), job.getCityCode());
         String oldDetailAddress = oldAddress + job.getDetailAddress();
-        String newAddress = districtDataMapper.searchAddressByCode(modifyDto.getProvinceCode(), modifyDto.getCityCode(), modifyDto.getDistrictCode());
+        String newAddress = districtDataMapper.searchAddressByCode(modifyDto.getProvinceCode(), modifyDto.getCityCode());
         String newDetailAddress = newAddress + modifyDto.getDetailAddress();
         if (!oldDetailAddress.equals(newDetailAddress)) {
             Location location = TencentMapUtil.geocode(newDetailAddress);

@@ -253,13 +253,11 @@ public class UserPrivacyServiceImpl extends ServiceImpl<UserPrivacyMapper, UserP
                                 everyoneVisibleInfo.setCountryCode(user.getCountryCode());
                                 everyoneVisibleInfo.setProvinceCode(user.getProvinceCode());
                                 everyoneVisibleInfo.setCityCode(user.getCityCode());
-                                everyoneVisibleInfo.setDistrictCode(user.getDistrictCode());
                                 everyoneVisibleInfo.setAddress(user.getAddress());
 
                                 recruiterVisibleInfo.setCountryCode(null);
                                 recruiterVisibleInfo.setProvinceCode(null);
                                 recruiterVisibleInfo.setCityCode(null);
-                                recruiterVisibleInfo.setDistrictCode(null);
                                 recruiterVisibleInfo.setAddress(null);
                                 recruiterVisibleInfo.setAddress(null);
                                 break;
@@ -267,26 +265,22 @@ public class UserPrivacyServiceImpl extends ServiceImpl<UserPrivacyMapper, UserP
                                 everyoneVisibleInfo.setCountryCode(null);
                                 everyoneVisibleInfo.setProvinceCode(null);
                                 everyoneVisibleInfo.setCityCode(null);
-                                everyoneVisibleInfo.setDistrictCode(null);
                                 everyoneVisibleInfo.setAddress(null);
 
                                 recruiterVisibleInfo.setCountryCode(user.getCountryCode());
                                 recruiterVisibleInfo.setProvinceCode(user.getProvinceCode());
                                 recruiterVisibleInfo.setCityCode(user.getCityCode());
-                                recruiterVisibleInfo.setDistrictCode(user.getDistrictCode());
                                 recruiterVisibleInfo.setAddress(user.getAddress());
                                 break;
                             case 3:
                                 everyoneVisibleInfo.setCountryCode(null);
                                 everyoneVisibleInfo.setProvinceCode(null);
                                 everyoneVisibleInfo.setCityCode(null);
-                                everyoneVisibleInfo.setDistrictCode(null);
                                 everyoneVisibleInfo.setAddress(null);
 
                                 recruiterVisibleInfo.setCountryCode(null);
                                 recruiterVisibleInfo.setProvinceCode(null);
                                 recruiterVisibleInfo.setCityCode(null);
-                                recruiterVisibleInfo.setDistrictCode(null);
                                 recruiterVisibleInfo.setAddress(null);
                                 recruiterVisibleInfo.setAddress(null);
                                 break;

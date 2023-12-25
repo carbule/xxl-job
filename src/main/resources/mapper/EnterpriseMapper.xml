@@ -15,7 +15,6 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="contactAddress" property="contactAddress"/>
         <result column="hrNumber" property="hrNumber"/>
         <result column="employeeNumber" property="employeeNumber"/>
@@ -293,7 +292,6 @@
                dd1.name                AS countryName,
                dd2.name                AS provinceName,
                dd3.name                AS cityName,
-               dd4.name                AS districtName,
                e.contact_address       AS contactAddress,
                (SELECT COUNT(1)
                 FROM yy_user AS u
@@ -317,7 +315,6 @@
                  LEFT JOIN district_data dd1 ON e.country_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON e.province_code = dd2.code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON e.city_code = dd3.code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON e.district_code = dd4.code AND dd4.is_delete = 0
                  LEFT JOIN (
             SELECT u.avatar,
                    ue.enterprise_id AS enterpriseId
@@ -360,13 +357,11 @@
                dd1.name          AS countryName,
                dd2.name          AS provinceName,
                dd3.name          AS cityName,
-               dd4.name          AS districtName,
                e.contact_address AS contactAddress
         FROM enterprise AS e
                  LEFT JOIN district_data dd1 ON e.country_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON e.province_code = dd2.code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON e.city_code = dd3.code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON e.district_code = dd4.code AND dd4.is_delete = 0
         WHERE e.id = #{enterpriseId}
           AND e.is_delete = 0
     </select>
@@ -395,7 +390,6 @@
                  LEFT JOIN district_data dd1 ON e.country_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON e.province_code = dd2.code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON e.city_code = dd3.code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON e.district_code = dd4.code AND dd4.is_delete = 0
         WHERE e.id = #{enterpriseId}
           AND e.is_delete = 0
     </select>

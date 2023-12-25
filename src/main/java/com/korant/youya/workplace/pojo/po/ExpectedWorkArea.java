@@ -55,12 +55,6 @@ public class ExpectedWorkArea implements Serializable {
     private String cityCode;
 
     /**
-     * 行政区编码
-     */
-    @TableField("district_code")
-    private String districtCode;
-
-    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)

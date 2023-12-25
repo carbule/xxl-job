@@ -45,11 +45,6 @@ public class ModifyUserContactInfoDto {
     private String cityCode;
 
     /**
-     * 行政区编码
-     */
-    private String districtCode;
-
-    /**
      *  详细地址
      */
     private String address;

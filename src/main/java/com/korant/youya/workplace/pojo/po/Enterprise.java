@@ -140,12 +140,6 @@ public class Enterprise implements Serializable {
     private String cityCode;
 
     /**
-     * 行政区编码
-     */
-    @TableField("district_code")
-    private String districtCode;
-
-    /**
      * 联系地址
      */
     @TableField("contact_address")

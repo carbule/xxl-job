@@ -21,7 +21,6 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="address" property="address"/>
         <collection property="workExperienceVoList" javaType="java.util.List"
                     ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
@@ -77,7 +76,6 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="address" property="address"/>
         <result column="isCollected" property="isCollected"/>
         <collection property="workExperienceVoList" javaType="java.util.List"
@@ -108,7 +106,6 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="address" property="address"/>
         <collection property="workExperienceVoList" javaType="java.util.List"
                     ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
@@ -149,7 +146,6 @@
         t1.maxExpectedSalary,
         t1.provinceName,
         t1.cityName,
-        t1.districtName,
         t1.award
         FROM (SELECT hj.id,
         hj.uid,
@@ -163,7 +159,6 @@
         ep.max_salary AS maxExpectedSalary,
         dd1.name AS provinceName,
         dd2.name AS cityName,
-        dd3.name AS districtName,
         hj.award
         FROM hunt_job AS hj
         LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
@@ -171,7 +166,6 @@
         LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
         LEFT JOIN district_data dd1 ON dd1.code = ewa.province_code AND dd1.is_delete = 0
         LEFT JOIN district_data dd2 ON dd2.code = ewa.city_code AND dd2.is_delete = 0
-        LEFT JOIN district_data dd3 ON dd3.code = ewa.district_code AND dd3.is_delete = 0
         LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
         LEFT JOIN position AS p ON ep.position_code = p.code AND p.is_delete = 0
         <where>
@@ -226,7 +220,6 @@
                dd1.name              AS countryName,
                dd2.name              AS provinceName,
                dd3.name              AS cityName,
-               dd4.name              AS districtName,
                ev.address,
                (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
                 FROM attention_hunt_job
@@ -256,7 +249,6 @@
             LEFT JOIN district_data dd1 ON dd1.code = ev.country_code AND dd1.is_delete = 0
             LEFT JOIN district_data dd2 ON dd2.code = ev.province_code AND dd2.is_delete = 0
             LEFT JOIN district_data dd3 ON dd3.code = ev.city_code AND dd3.is_delete = 0
-            LEFT JOIN district_data dd4 ON dd4.code = ev.district_code AND dd4.is_delete = 0
             LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
             LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE hj.id = #{id}
@@ -268,7 +260,6 @@
                p.name        AS positionName,
                dd1.name      AS provinceName,
                dd2.name      AS cityName,
-               dd3.name      AS districtName,
                ep.min_salary AS minExpectedSalary,
                ep.max_salary AS maxExpectedSalary,
                hj.award,
@@ -279,7 +270,6 @@
                  LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
                  LEFT JOIN district_data AS dd1 ON ewa.province_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data AS dd2 ON ewa.city_code = dd2.code AND dd2.is_delete = 0
-                 LEFT JOIN district_data AS dd3 ON ewa.district_code = dd3.code AND dd3.is_delete = 0
         WHERE hj.uid = #{userId}
           AND hj.status = #{status}
           AND hj.is_delete = 0
@@ -315,17 +305,14 @@
                d1.name           AS countryName,
                d2.name           AS provinceName,
                d3.name           AS cityName,
-               d4.name           AS districtName,
                ewa.country_code  AS countryCode,
                ewa.province_code AS provinceCode,
-               ewa.city_code     AS cityCode,
-               ewa.district_code AS districtCode
+               ewa.city_code     AS cityCode
         FROM employ_status AS es
                  LEFT JOIN expected_work_area AS ewa ON es.id = ewa.status_id AND ewa.is_delete = 0
                  LEFT JOIN district_data AS d1 ON ewa.country_code = d1.code AND d1.is_delete = 0
                  LEFT JOIN district_data AS d2 ON ewa.province_code = d2.code AND d2.is_delete = 0
                  LEFT JOIN district_data AS d3 ON ewa.city_code = d3.code AND d3.is_delete = 0
-                 LEFT JOIN district_data AS d4 ON ewa.district_code = d4.code AND d4.is_delete = 0
         WHERE es.uid = #{userId}
           AND es.is_delete = 0
     </select>
@@ -357,7 +344,6 @@
                dd1.name             AS countryName,
                dd2.name             AS provinceName,
                dd3.name             AS cityName,
-               dd4.name             AS districtName,
                ev.address,
                we.id                AS weId,
                we.enterprise_name   AS enterpriseName,
@@ -378,7 +364,6 @@
                  LEFT JOIN district_data dd1 ON dd1.code = ev.country_code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON dd2.code = ev.province_code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON dd3.code = ev.city_code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON dd4.code = ev.district_code AND dd4.is_delete = 0
                  LEFT JOIN (SELECT *
                             FROM education_experience
                             WHERE uid = #{userId}
@@ -408,11 +393,9 @@
                dd1.name                   AS countryName,
                dd2.name                   AS provinceName,
                dd3.name                   AS cityName,
-               dd4.name                   AS districtName,
                ewa.country_code           AS countryCode,
                ewa.province_code          AS provinceCode,
                ewa.city_code              AS cityCode,
-               ewa.district_code          AS districtCode,
                hj.award,
                hj.interview_reward_rate   AS interviewRewardRate,
                hj.onboard_reward_rate     AS onboardRewardRate,
@@ -426,7 +409,6 @@
                  LEFT JOIN district_data dd1 ON dd1.code = ewa.country_code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON dd2.code = ewa.province_code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON dd3.code = ewa.city_code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON dd4.code = ewa.district_code AND dd4.is_delete = 0
         WHERE hj.id = #{id}
           AND hj.is_delete = 0
     </select>
@@ -475,7 +457,6 @@
                dd1.name             AS countryName,
                dd2.name             AS provinceName,
                dd3.name             AS cityName,
-               dd4.name             AS districtName,
                ev.address,
                we.id                AS weId,
                we.enterprise_name   AS enterpriseName,
@@ -498,7 +479,6 @@
                  LEFT JOIN district_data dd1 ON dd1.code = ev.country_code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON dd2.code = ev.province_code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON dd3.code = ev.city_code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON dd4.code = ev.district_code AND dd4.is_delete = 0
                  LEFT JOIN (SELECT *
                             FROM education_experience
                             WHERE uid = #{userId}

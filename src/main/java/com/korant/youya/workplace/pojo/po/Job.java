@@ -115,12 +115,6 @@ public class Job implements Serializable {
     private String cityCode;
 
     /**
-     * 行政区编码
-     */
-    @TableField("district_code")
-    private String districtCode;
-
-    /**
      * 详细地址
      */
     @TableField("detail_address")

@@ -15,7 +15,6 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="address" property="address"/>
         <result column="personalSignature" property="personalSignature"/>
         <result column="employStatus" property="employStatus"/>
@@ -34,7 +33,6 @@
             <result column="workAreaCountryName" property="workAreaCountryName"/>
             <result column="workAreaProvinceName" property="workAreaProvinceName"/>
             <result column="workAreaCityName" property="workAreaCityName"/>
-            <result column="workAreaDistrictName" property="workAreaDistrictName"/>
         </collection>
         <collection property="workExperienceVoList" javaType="java.util.List"
                     ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperienceVo">
@@ -98,7 +96,6 @@
         <result column="countryName" property="countryName"/>
         <result column="provinceName" property="provinceName"/>
         <result column="cityName" property="cityName"/>
-        <result column="districtName" property="districtName"/>
         <result column="address" property="address"/>
         <result column="personalSignature" property="personalSignature"/>
         <result column="selfEvaluation" property="selfEvaluation"/>
@@ -118,7 +115,6 @@
             <result column="workAreaCountryName" property="workAreaCountryName"/>
             <result column="workAreaProvinceName" property="workAreaProvinceName"/>
             <result column="workAreaCityName" property="workAreaCityName"/>
-            <result column="workAreaDistrictName" property="workAreaDistrictName"/>
         </collection>
         <collection property="workExperienceVoList" javaType="java.util.List"
                     ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
@@ -268,17 +264,14 @@
                d1.name         AS countryName,
                d2.name         AS provinceName,
                d3.name         AS cityName,
-               d4.name         AS districtName,
                u.country_code  AS countryCode,
                u.province_code AS provinceCode,
                u.city_code     AS cityCode,
-               u.district_code AS districtCode,
                u.address
         FROM yy_user AS u
                  LEFT JOIN district_data d1 ON d1.code = u.country_code AND d1.is_delete = 0
                  LEFT JOIN district_data d2 ON d2.code = u.province_code AND d2.is_delete = 0
                  LEFT JOIN district_data d3 ON d3.code = u.city_code AND d3.is_delete = 0
-                 LEFT JOIN district_data d4 ON d4.code = u.district_code AND d4.is_delete = 0
         WHERE u.id = #{userId}
           AND u.is_delete = 0
     </select>
@@ -293,7 +286,6 @@
             country_code  = #{modifyDto.countryCode},
             province_code = #{modifyDto.provinceCode},
             city_code     = #{modifyDto.cityCode},
-            district_code = #{modifyDto.districtCode},
             address       = #{modifyDto.address},
             update_time   = CURRENT_TIMESTAMP
         WHERE id = #{userId}
@@ -313,7 +305,6 @@
                d1.name                 AS countryName,
                d2.name                 AS provinceName,
                d3.name                 AS cityName,
-               d4.name                 AS districtName,
                u.address,
                u.personal_signature    AS personalSignature,
                es.status               AS employStatus,
@@ -327,7 +318,6 @@
                dd1.name                AS workAreaCountryName,
                dd2.name                AS workAreaProvinceName,
                dd3.name                AS workAreaCityName,
-               dd4.name                AS workAreaDistrictName,
                we.id                   AS weId,
                we.enterprise_name      AS enterpriseName,
                we.department_name      AS departmentName,
@@ -360,7 +350,6 @@
                  LEFT JOIN district_data d1 ON d1.code = u.country_code AND d1.is_delete = 0
                  LEFT JOIN district_data d2 ON d2.code = u.province_code AND d2.is_delete = 0
                  LEFT JOIN district_data d3 ON d3.code = u.city_code AND d3.is_delete = 0
-                 LEFT JOIN district_data d4 ON d4.code = u.district_code AND d4.is_delete = 0
                  LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
                  LEFT JOIN expected_position AS ep ON es.id = ep.status_id AND ep.is_delete = 0
                  LEFT JOIN position AS p1 ON ep.industry_code = p1.code AND p1.is_delete = 0
@@ -370,7 +359,6 @@
                  LEFT JOIN district_data dd1 ON dd1.code = ewa.country_code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON dd2.code = ewa.province_code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON dd3.code = ewa.city_code AND dd3.is_delete = 0
-                 LEFT JOIN district_data dd4 ON dd4.code = ewa.district_code AND dd4.is_delete = 0
                  LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
                  LEFT JOIN (SELECT pe1.id              AS peId,
                                    we1.enterprise_name AS projectEnterpriseName,
@@ -416,7 +404,6 @@
                d1.name                 AS countryName,
                d2.name                 AS provinceName,
                d3.name                 AS cityName,
-               d4.name                 AS districtName,
                u.address,
                u.personal_signature    AS personalSignature,
                u.self_evaluation       AS selfEvaluation,
@@ -431,7 +418,6 @@
                dd1.name                AS workAreaCountryName,
                dd2.name                AS workAreaProvinceName,
                dd3.name                AS workAreaCityName,
-               dd4.name                AS workAreaDistrictName,
                we.id                   AS weId,
                we.enterprise_name      AS enterpriseName,
                we.department_name      AS departmentName,
@@ -465,7 +451,6 @@
         ON d1.code = u.country_code AND d1.is_delete = 0
             LEFT JOIN district_data d2 ON d2.code = u.province_code AND d2.is_delete = 0
             LEFT JOIN district_data d3 ON d3.code = u.city_code AND d3.is_delete = 0
-            LEFT JOIN district_data d4 ON d4.code = u.district_code AND d4.is_delete = 0
             LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
             LEFT JOIN expected_position AS ep ON es.id = ep.status_id AND ep.is_delete = 0
             LEFT JOIN position AS p1 ON ep.industry_code = p1.code AND p1.is_delete = 0
@@ -475,7 +460,6 @@
             LEFT JOIN district_data dd1 ON dd1.code = ewa.country_code AND dd1.is_delete = 0
             LEFT JOIN district_data dd2 ON dd2.code = ewa.province_code AND dd2.is_delete = 0
             LEFT JOIN district_data dd3 ON dd3.code = ewa.city_code AND dd3.is_delete = 0
-            LEFT JOIN district_data dd4 ON dd4.code = ewa.district_code AND dd4.is_delete = 0
             LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
             LEFT JOIN (SELECT pe1.id AS peId,
             we1.enterprise_name AS projectEnterpriseName,
