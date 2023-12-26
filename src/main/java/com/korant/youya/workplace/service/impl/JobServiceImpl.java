@@ -21,9 +21,12 @@ import com.korant.youya.workplace.pojo.po.Job;
 import com.korant.youya.workplace.pojo.po.JobWelfareLabel;
 import com.korant.youya.workplace.pojo.vo.job.*;
 import com.korant.youya.workplace.service.JobService;
+import com.korant.youya.workplace.utils.JwtUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import com.korant.youya.workplace.utils.TencentMapUtil;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,15 +68,29 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      * 查询首页职位信息列表
      *
      * @param listDto
+     * @param request
      * @return
      */
     @Override
-    public Page<JobHomePageListVo> queryHomePageList(JobQueryHomePageListDto listDto) {
-        Long userId = SpringSecurityUtil.getUserId();
+    public Page<JobHomePageListVo> queryHomePageList(JobQueryHomePageListDto listDto, HttpServletRequest request) {
+        String token = request.getHeader("token");
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
-        int count = jobMapper.queryHomePageListCount(userId, listDto);
-        List<JobHomePageListVo> list = jobMapper.queryHomePageList(userId, listDto);
+        int count;
+        List<JobHomePageListVo> list;
+        if (StringUtils.isBlank(token)) {
+            count = jobMapper.queryHomePageListCount(listDto);
+            list = jobMapper.queryHomePageList(listDto);
+        } else {
+            Long userId = null;
+            try {
+                userId = JwtUtil.getId(token);
+            } catch (Exception e) {
+                throw new YouyaException("token校验失败");
+            }
+            count = jobMapper.queryHomePageListCountByUserId(userId, listDto);
+            list = jobMapper.queryHomePageListByUserId(userId, listDto);
+        }
         Page<JobHomePageListVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;

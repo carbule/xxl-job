@@ -586,4 +586,71 @@ public class RedisUtil {
             return 0;
         }
     }
+
+    /**
+     * zSet添加数据
+     *
+     * @param key
+     * @param value
+     * @param value
+     * @return
+     */
+    public boolean zetAdd(String key, String value, double score) {
+        try {
+            return redisTemplate.opsForZSet().add(key, value, score);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * 根据范围正序获取数据
+     *
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<?> getRangeList(String key, long start, long end) {
+        try {
+            return redisTemplate.opsForZSet().range(key, start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 根据范围倒序获取数据
+     *
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<?> getReverseRangeList(String key, long start, long end) {
+        try {
+            return redisTemplate.opsForZSet().reverseRange(key, start, end);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 更新zSet数据
+     *
+     * @param key
+     * @param value
+     * @param delta
+     * @return
+     */
+    public void incrementScore(String key, String value, double delta) {
+        try {
+            redisTemplate.opsForZSet().incrementScore(key, value, delta);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

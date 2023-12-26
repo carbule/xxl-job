@@ -19,7 +19,8 @@
                UPPER(LEFT (pinyin, 1)) AS acronym,
                RANK()                     OVER (PARTITION BY pinyin) AS rank
         FROM district_data
-        where name != '不限' AND is_delete = 0;
+        where level = 3
+          AND is_delete = 0;
     </select>
 
     <!--  根据省市县code查询地址  -->

@@ -115,6 +115,61 @@
 
     <!--  查询首页求职数量  -->
     <select id="queryHomePageListCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM hunt_job AS hj
+        LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
+        LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+        <where>
+            hj.status = 1
+            AND hj.is_delete = 0
+            <if test="listDto.cityCode != ''">
+                AND ewa.city_code = #{listDto.cityCode}
+            </if>
+            <if test="listDto.positionCode != ''">
+                AND ep.position_code = #{listDto.positionCode}
+            </if>
+        </where>
+    </select>
+
+    <!--  查询首页求职列表  -->
+    <select id="queryHomePageList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobHomePageVo">
+        SELECT hj.id,
+        hj.uid,
+        u.avatar,
+        nvi.last_name AS lastName,
+        nvi.first_name AS firstName,
+        u.gender,
+        u.personal_signature AS personalSignature,
+        p.name AS positionName,
+        ep.min_salary AS minExpectedSalary,
+        ep.max_salary AS maxExpectedSalary,
+        dd1.name AS provinceName,
+        dd2.name AS cityName,
+        hj.award
+        FROM hunt_job AS hj
+        LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
+        LEFT JOIN yy_user_name_visible_info AS nvi ON u.id = nvi.uid AND nvi.is_delete = 0
+        LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
+        LEFT JOIN district_data dd1 ON dd1.code = ewa.province_code AND dd1.is_delete = 0
+        LEFT JOIN district_data dd2 ON dd2.code = ewa.city_code AND dd2.is_delete = 0
+        LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+        LEFT JOIN position AS p ON ep.position_code = p.code AND p.is_delete = 0
+        <where>
+            hj.status = 1
+            AND hj.is_delete = 0
+            <if test="listDto.cityCode != ''">
+                AND ewa.city_code = #{listDto.cityCode}
+            </if>
+            <if test="listDto.positionCode != ''">
+                AND ep.position_code = #{listDto.positionCode}
+            </if>
+            ORDER BY hj.refresh_time DESC, hj.create_time DESC LIMIT #{listDto.pageSize}
+            OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+        </where>
+    </select>
+
+    <!--  查询首页求职数量  -->
+    <select id="queryHomePageListCountByUserId" resultType="java.lang.Integer">
         SELECT COUNT(t1.*) FROM (SELECT hj.uid
         FROM hunt_job AS hj
         LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
@@ -130,11 +185,11 @@
             </if>
         </where>
         )AS t1 WHERE NOT EXISTS (SELECT 1 FROM yy_user_blocked_enterprise AS se WHERE t1.uid = se.uid AND
-        se.enterprise_id = #{enterpriseId} AND se.is_delete = 0);
+        se.enterprise_id = #{enterpriseId} AND se.is_delete = 0)
     </select>
 
     <!--  查询首页求职列表  -->
-    <select id="queryHomePageList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobHomePageVo">
+    <select id="queryHomePageListByUserId" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobHomePageVo">
         SELECT t1.id,
         t1.avatar,
         t1.lastName,
@@ -181,7 +236,7 @@
             OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
         </where>
         )AS t1 WHERE NOT EXISTS (SELECT 1 FROM yy_user_blocked_enterprise AS se WHERE t1.uid = se.uid AND
-        se.enterprise_id = #{enterpriseId} AND se.is_delete = 0);
+        se.enterprise_id = #{enterpriseId} AND se.is_delete = 0)
     </select>
 
     <!--  根据求职id查询首页求职信息详情  -->

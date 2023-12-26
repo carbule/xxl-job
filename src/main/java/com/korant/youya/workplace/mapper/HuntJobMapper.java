@@ -25,12 +25,28 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
     /**
      * 查询首页求职数量
      *
+     * @param listDto
+     * @return
+     */
+    int queryHomePageListCount(@Param("listDto") HuntJobQueryHomePageListDto listDto);
+
+    /**
+     * 查询首页求职列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<HuntJobHomePageVo> queryHomePageList(@Param("listDto") HuntJobQueryHomePageListDto listDto);
+
+    /**
+     * 查询首页求职数量
+     *
      * @param userId
      * @param enterpriseId
      * @param listDto
      * @return
      */
-    int queryHomePageListCount(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
+    int queryHomePageListCountByUserId(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
 
     /**
      * 查询首页求职列表
@@ -40,7 +56,7 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @param listDto
      * @return
      */
-    List<HuntJobHomePageVo> queryHomePageList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
+    List<HuntJobHomePageVo> queryHomePageListByUserId(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId, @Param("listDto") HuntJobQueryHomePageListDto listDto);
 
     /**
      * 根据求职id查询首页求职信息详情

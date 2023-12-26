@@ -59,7 +59,7 @@ public class CodeGenerationUtil {
         //策略配置
         StrategyConfig.Builder strategyConfigBuilder = new StrategyConfig.Builder();
         //配置生成的表名 不配置生成所有的表
-        strategyConfigBuilder.addInclude("enterprise_invitation_qr_code");
+        strategyConfigBuilder.addInclude("yy_user_historical_location");
         //过滤表前缀
         strategyConfigBuilder.addTablePrefix("yy_");
 

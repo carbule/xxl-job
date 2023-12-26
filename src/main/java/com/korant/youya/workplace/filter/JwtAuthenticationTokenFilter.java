@@ -54,8 +54,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         PERMIT_URL.add("/user/loginBySMSVerificationCode");
         PERMIT_URL.add("/user/loginByPassword");
         PERMIT_URL.add("/user/getVerificationCode");
-//        PERMIT_URL.add("/job/queryHomePageList");
-//        PERMIT_URL.add("/huntJob/queryHomePageList");
+        PERMIT_URL.add("/job/queryHomePageList");
+        PERMIT_URL.add("/huntJob/queryHomePageList");
         PERMIT_URL.add("/wechat/js/sign");
     }
 
@@ -76,6 +76,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         if (StringUtils.isBlank(token)) {
             log.error("请求路径：{},未携带token", requestURI);
             returnJson(response, HttpServletResponse.SC_UNAUTHORIZED, "401", "请求未携带token");
+            return;
         }
         try {
             Long id = JwtUtil.getId(token);

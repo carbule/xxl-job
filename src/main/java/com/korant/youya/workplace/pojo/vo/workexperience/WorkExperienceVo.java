@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.pojo.vo.workexperience;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -37,11 +38,13 @@ public class WorkExperienceVo {
     /**
      * 开始时间
      */
+    @JsonFormat(pattern = "yyyy-MM")
     private LocalDate workExperienceStartTime;
 
     /**
      * 结束时间
      */
+    @JsonFormat(pattern = "yyyy-MM")
     private LocalDate workExperienceEndTime;
 
     /**

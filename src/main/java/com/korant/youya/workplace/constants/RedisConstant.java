@@ -11,4 +11,6 @@ public interface RedisConstant {
     String YY_USER_ID = "yy:user_id:%s";
 
     String YY_USER_CACHE = "yy:user_cache:%s";
+
+    String YY_USER_LOCATION = "yy:user_location";
 }

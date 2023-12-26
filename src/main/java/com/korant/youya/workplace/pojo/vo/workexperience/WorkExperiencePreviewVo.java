@@ -1,8 +1,10 @@
 package com.korant.youya.workplace.pojo.vo.workexperience;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewVo;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -38,12 +40,14 @@ public class WorkExperiencePreviewVo {
     /**
      * 开始时间
      */
-    private String startTime;
+    @JsonFormat(pattern = "yyyy-MM")
+    private LocalDate startTime;
 
     /**
      * 结束时间
      */
-    private String endTime;
+    @JsonFormat(pattern = "yyyy-MM")
+    private LocalDate endTime;
 
     /**
      * 工作内容

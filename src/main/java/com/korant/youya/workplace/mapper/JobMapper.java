@@ -23,11 +23,27 @@ public interface JobMapper extends BaseMapper<Job> {
     /**
      * 查询首页职位数量
      *
+     * @param listDto
+     * @return
+     */
+    int queryHomePageListCount(@Param("listDto") JobQueryHomePageListDto listDto);
+
+    /**
+     * 查询首页职位列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<JobHomePageListVo> queryHomePageList(@Param("listDto") JobQueryHomePageListDto listDto);
+
+    /**
+     * 查询首页职位数量
+     *
      * @param userId
      * @param listDto
      * @return
      */
-    int queryHomePageListCount(@Param("userId") Long userId, @Param("listDto") JobQueryHomePageListDto listDto);
+    int queryHomePageListCountByUserId(@Param("userId") Long userId, @Param("listDto") JobQueryHomePageListDto listDto);
 
     /**
      * 查询首页职位列表
@@ -36,7 +52,7 @@ public interface JobMapper extends BaseMapper<Job> {
      * @param listDto
      * @return
      */
-    List<JobHomePageListVo> queryHomePageList(@Param("userId") Long userId, @Param("listDto") JobQueryHomePageListDto listDto);
+    List<JobHomePageListVo> queryHomePageListByUserId(@Param("userId") Long userId, @Param("listDto") JobQueryHomePageListDto listDto);
 
     /**
      * 根据求职id查询首页职位信息详情

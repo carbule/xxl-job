@@ -10,6 +10,7 @@ import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.vo.job.*;
 import com.korant.youya.workplace.service.JobService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -33,12 +34,13 @@ public class JobController {
      * 查询首页职位信息列表
      *
      * @param listDto
+     * @param request
      * @return
      */
     @PostMapping("/queryHomePageList")
     @ExplanationDict
-    public R<?> queryHomePageList(@RequestBody @Valid JobQueryHomePageListDto listDto) {
-        Page<JobHomePageListVo> page = jobService.queryHomePageList(listDto);
+    public R<?> queryHomePageList(@RequestBody @Valid JobQueryHomePageListDto listDto, HttpServletRequest request) {
+        Page<JobHomePageListVo> page = jobService.queryHomePageList(listDto, request);
         return R.success(page);
     }
 

@@ -1,12 +1,18 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.mapper.DistrictDataMapper;
+import com.korant.youya.workplace.mapper.UserHistoricalLocationMapper;
 import com.korant.youya.workplace.pojo.po.DistrictData;
 import com.korant.youya.workplace.pojo.vo.district.DistrictDataTreeVo;
 import com.korant.youya.workplace.pojo.vo.district.DistrictDataVo;
 import com.korant.youya.workplace.pojo.vo.district.QueryAllDataSortedByAcronymVo;
+import com.korant.youya.workplace.pojo.vo.userhistoricallocation.UserHistoricalLocationVo;
 import com.korant.youya.workplace.service.DistrictDataService;
+import com.korant.youya.workplace.utils.RedisUtil;
+import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +36,12 @@ public class DistrictDataServiceImpl extends ServiceImpl<DistrictDataMapper, Dis
 
     @Resource
     private DistrictDataMapper districtDataMapper;
+
+    @Resource
+    private UserHistoricalLocationMapper userHistoricalLocationMapper;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     /**
      * 查询所有地区数据
@@ -56,6 +68,14 @@ public class DistrictDataServiceImpl extends ServiceImpl<DistrictDataMapper, Dis
      */
     @Override
     public QueryAllDataSortedByAcronymVo queryAllDataSortedByAcronym() {
+        Long userId = SpringSecurityUtil.getUserId();
+        List<UserHistoricalLocationVo> historicalLocationVoList = userHistoricalLocationMapper.queryHistoricalpositioning(userId);
+        Set<?> rangeList = redisUtil.getReverseRangeList(RedisConstant.YY_USER_LOCATION, 0, 4);
+        List<?> objects = new ArrayList<>(rangeList);
+        List<JSONObject> popularRegions = new ArrayList<>();
+        objects.forEach(s -> {
+            popularRegions.add(JSONObject.parseObject(s.toString()));
+        });
         List<DistrictDataVo> districtDataVoList = districtDataMapper.queryAllDataSortedByAcronym();
         Map<String, List<DistrictDataVo>> map = IntStream.rangeClosed('A', 'Z')
                 .mapToObj(c -> String.valueOf((char) c))
@@ -68,6 +88,8 @@ public class DistrictDataServiceImpl extends ServiceImpl<DistrictDataMapper, Dis
         Set<Map.Entry<String, List<DistrictDataVo>>> entries = map.entrySet();
         entries.forEach(s -> list.add(s.getValue()));
         QueryAllDataSortedByAcronymVo acronymVo = new QueryAllDataSortedByAcronymVo();
+        acronymVo.setHistoricalLocationList(historicalLocationVoList);
+        acronymVo.setPopularRegions(popularRegions);
         acronymVo.setDistrictDataList(list);
         return acronymVo;
     }

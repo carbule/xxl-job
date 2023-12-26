@@ -1,8 +1,9 @@
 package com.korant.youya.workplace.pojo.vo.district;
 
+import com.alibaba.fastjson.JSONObject;
+import com.korant.youya.workplace.pojo.vo.userhistoricallocation.UserHistoricalLocationVo;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,9 +17,14 @@ import java.util.List;
 public class QueryAllDataSortedByAcronymVo {
 
     /**
+     * 历史访问城市
+     */
+    private List<UserHistoricalLocationVo> historicalLocationList;
+
+    /**
      * 热门地区数据
      */
-    private List<DistrictDataVo> popularRegions = new ArrayList<>();
+    private List<JSONObject> popularRegions;
 
     /**
      * 国内所有地区数据按缩略词排序

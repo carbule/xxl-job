@@ -8,6 +8,7 @@ import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
 import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
 import com.korant.youya.workplace.pojo.po.Job;
 import com.korant.youya.workplace.pojo.vo.job.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -23,9 +24,10 @@ public interface JobService extends IService<Job> {
      * 查询首页职位信息列表
      *
      * @param listDto
+     * @param request
      * @return
      */
-    Page<JobHomePageListVo> queryHomePageList(JobQueryHomePageListDto listDto);
+    Page<JobHomePageListVo> queryHomePageList(JobQueryHomePageListDto listDto, HttpServletRequest request);
 
     /**
      * 根据求职id查询首页职位信息详情

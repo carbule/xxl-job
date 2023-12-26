@@ -12,6 +12,7 @@ import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkA
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.service.HuntJobService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,11 +37,12 @@ public class HuntJobController {
      * 查询首页求职信息列表
      *
      * @param listDto
+     * @param request
      * @return
      */
     @PostMapping("/queryHomePageList")
-    public R<?> queryListOnHomePage(@RequestBody @Valid HuntJobQueryHomePageListDto listDto) {
-        Page<HuntJobHomePageVo> page = huntJobService.queryHomePageList(listDto);
+    public R<?> queryListOnHomePage(@RequestBody @Valid HuntJobQueryHomePageListDto listDto, HttpServletRequest request) {
+        Page<HuntJobHomePageVo> page = huntJobService.queryHomePageList(listDto, request);
         return R.success(page);
     }
 

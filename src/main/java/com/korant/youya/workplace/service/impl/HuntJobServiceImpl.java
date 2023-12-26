@@ -21,8 +21,11 @@ import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPosit
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.service.HuntJobService;
+import com.korant.youya.workplace.utils.JwtUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -63,17 +66,32 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * 查询首页求职信息列表
      *
      * @param listDto
+     * @param request
      * @return
      */
     @Override
-    public Page<HuntJobHomePageVo> queryHomePageList(HuntJobQueryHomePageListDto listDto) {
-        LoginUser userInfo = SpringSecurityUtil.getUserInfo();
-        Long userId = userInfo.getId();
-        Long enterpriseId = userInfo.getEnterpriseId();
+    public Page<HuntJobHomePageVo> queryHomePageList(HuntJobQueryHomePageListDto listDto, HttpServletRequest request) {
+        String token = request.getHeader("token");
         int pageNumber = listDto.getPageNumber();
         int pageSize = listDto.getPageSize();
-        int count = huntJobMapper.queryHomePageListCount(userId, enterpriseId, listDto);
-        List<HuntJobHomePageVo> list = huntJobMapper.queryHomePageList(userId, enterpriseId, listDto);
+        int count;
+        List<HuntJobHomePageVo> list;
+        if (StringUtils.isBlank(token)) {
+            count = huntJobMapper.queryHomePageListCount(listDto);
+            list = huntJobMapper.queryHomePageList(listDto);
+        } else {
+            Long userId = null;
+            try {
+                userId = JwtUtil.getId(token);
+            } catch (Exception e) {
+                throw new YouyaException("token校验失败");
+            }
+            LoginUser loginUser = userMapper.selectUserToLoginById(userId);
+            if (null == loginUser) return null;
+            Long enterpriseId = loginUser.getEnterpriseId();
+            count = huntJobMapper.queryHomePageListCountByUserId(userId, enterpriseId, listDto);
+            list = huntJobMapper.queryHomePageListByUserId(userId, enterpriseId, listDto);
+        }
         Page<HuntJobHomePageVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;

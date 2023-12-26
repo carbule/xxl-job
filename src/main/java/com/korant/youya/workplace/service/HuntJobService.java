@@ -10,6 +10,7 @@ import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -27,9 +28,10 @@ public interface HuntJobService extends IService<HuntJob> {
      * 查询首页求职信息列表
      *
      * @param listDto
+     * @param request
      * @return
      */
-    Page<HuntJobHomePageVo> queryHomePageList(HuntJobQueryHomePageListDto listDto);
+    Page<HuntJobHomePageVo> queryHomePageList(HuntJobQueryHomePageListDto listDto, HttpServletRequest request);
 
     /**
      * 根据求职id查询首页求职信息详情
