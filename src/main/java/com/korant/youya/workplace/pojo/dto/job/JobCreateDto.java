@@ -2,6 +2,7 @@ package com.korant.youya.workplace.pojo.dto.job;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -61,11 +62,13 @@ public class JobCreateDto {
     /**
      * 职位描述
      */
+    @Size(max = 1000, message = "最多不得超过1000字")
     private String jobDesc;
 
     /**
      * 其他说明项
      */
+    @Size(max = 500, message = "最多不得超过500字")
     private String otherInfo;
 
     /**
