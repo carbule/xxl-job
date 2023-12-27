@@ -64,6 +64,8 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
 
     private static final String CHINA_CODE = "100000";
 
+    private static final String NANJING_CITY_CODE = "320100";
+
     /**
      * 查询首页职位信息列表
      *
@@ -79,6 +81,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         int count;
         List<JobHomePageListVo> list;
         if (StringUtils.isBlank(token)) {
+            listDto.setCityCode(NANJING_CITY_CODE);
             count = jobMapper.queryHomePageListCount(listDto);
             list = jobMapper.queryHomePageList(listDto);
         } else {

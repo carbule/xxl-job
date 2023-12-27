@@ -12,6 +12,8 @@ import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.enterprisechangetodo.EnterpriseChangeTodoOperateEnum;
 import com.korant.youya.workplace.enums.enterprisechangetodo.EnterpriseChangeTodoTypeEnum;
+import com.korant.youya.workplace.enums.job.JobAuditStatusEnum;
+import com.korant.youya.workplace.enums.job.JobStatusEnum;
 import com.korant.youya.workplace.enums.role.RoleEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
@@ -163,6 +165,32 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     }
 
     /**
+     * 转让职位
+     *
+     * @param transferJobDto
+     */
+    @Override
+    public void transferJob(TransferJobDto transferJobDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        Long jobId = transferJobDto.getJobId();
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        if (!userId.equals(job.getUid())) throw new YouyaException("非法操作");
+        Long transferUserId = transferJobDto.getUserId();
+        LoginUser user = userMapper.selectUserToLoginById(transferUserId);
+        if (null == user) throw new YouyaException("用户未注册或已注销");
+        Long enterpriseId = user.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("用户未关联企业，无法转让");
+        if (!enterpriseId.equals(loginUser.getEnterpriseId())) throw new YouyaException("该用户不是您所在企业员工");
+        Integer status = job.getStatus();
+        Integer auditStatus = job.getAuditStatus();
+        if (JobStatusEnum.PUBLISHED.getStatus() != status || JobAuditStatusEnum.AUDIT_SUCCESS.getStatus() != auditStatus)
+            throw new YouyaException("只有已发布且审核通过的职位才可以进行转让");
+        jobMapper.transferJob(jobId, transferUserId);
+    }
+
+    /**
      * 撤销申请
      *
      * @param id
@@ -278,11 +306,16 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                 Long userId = SpringSecurityUtil.getUserId();
                 jobMapper.compulsoryTransferJob(id, userId);
             }
-            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
-            if (!redisUtil.del(cacheKey)) throw new YouyaException("强制移除员工失败，请稍后再试");
             userEnterprise.setIsDelete(1);
             userEnterpriseMapper.updateById(userEnterprise);
         }
+        UserRole userRole = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, id).eq(UserRole::getIsDelete, 0));
+        if (null != userRole) {
+            userRole.setIsDelete(1);
+            userRoleMapper.updateById(userRole);
+        }
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
+        redisUtil.del(cacheKey);
     }
 
     /**

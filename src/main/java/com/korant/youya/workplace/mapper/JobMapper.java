@@ -104,4 +104,13 @@ public interface JobMapper extends BaseMapper<Job> {
      * @param userId
      */
     int compulsoryTransferJob(@Param("id") Long id, @Param("userId") Long userId);
+
+    /**
+     * 转让职位
+     *
+     * @param jobId
+     * @param transferUserId
+     * @return
+     */
+    int transferJob(@Param("jobId") Long jobId, @Param("transferUserId") Long transferUserId);
 }

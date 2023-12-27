@@ -17,7 +17,6 @@
                ep.max_salary        AS maxExpectedSalary,
                dd1.name             AS provinceName,
                dd2.name             AS cityName,
-               dd3.name             AS districtName,
                hj.award
         FROM attention_hunt_job AS ahj
                  LEFT JOIN hunt_job AS hj ON ahj.hunt_id = hj.id
@@ -26,7 +25,6 @@
                  LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
                  LEFT JOIN district_data dd1 ON dd1.code = ewa.province_code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON dd2.code = ewa.city_code AND dd2.is_delete = 0
-                 LEFT JOIN district_data dd3 ON dd3.code = ewa.district_code AND dd3.is_delete = 0
                  LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
                  LEFT JOIN position AS p ON ep.position_code = p.code AND p.is_delete = 0
         WHERE ahj.uid = #{userId}

@@ -380,11 +380,9 @@
                dd1.name          AS countryName,
                dd2.name          AS provinceName,
                dd3.name          AS cityName,
-               dd4.name          AS districtName,
                e.country_code    AS countryCode,
                e.province_code   AS provinceCode,
                e.city_code       AS cityCode,
-               e.district_code   AS districtCode,
                e.contact_address AS contactAddress
         FROM enterprise AS e
                  LEFT JOIN district_data dd1 ON e.country_code = dd1.code AND dd1.is_delete = 0

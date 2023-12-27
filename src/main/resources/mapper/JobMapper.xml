@@ -342,4 +342,12 @@
         WHERE uid = #{id}
           AND is_delete = 0
     </update>
+
+    <!--  转让职位  -->
+    <update id="transferJob" parameterType="java.lang.Long">
+        UPDATE job
+        SET uid         = #{transferUserId},
+            update_time = CURRENT_TIMESTAMP
+        WHERE id = #{jobId}
+    </update>
 </mapper>

@@ -39,6 +39,10 @@ public class UserHistoricalLocationServiceImpl extends ServiceImpl<UserHistorica
     @Resource
     private RedisUtil redisUtil;
 
+    private static final String NANJING_CITY_CODE = "320100";
+
+    private static final String NANJING_CITY_NAME = "南京市";
+
     /**
      * 创建用户历史定位信息
      *
@@ -73,6 +77,12 @@ public class UserHistoricalLocationServiceImpl extends ServiceImpl<UserHistorica
     @Override
     public UserHistoricalLocationVo queryLatestLocation() {
         Long userId = SpringSecurityUtil.getUserId();
-        return userHistoricalLocationMapper.queryLatestLocation(userId);
+        UserHistoricalLocationVo historicalLocationVo = userHistoricalLocationMapper.queryLatestLocation(userId);
+        if (null == historicalLocationVo) {
+            historicalLocationVo = new UserHistoricalLocationVo();
+            historicalLocationVo.setCityCode(NANJING_CITY_CODE);
+            historicalLocationVo.setCityName(NANJING_CITY_NAME);
+        }
+        return historicalLocationVo;
     }
 }

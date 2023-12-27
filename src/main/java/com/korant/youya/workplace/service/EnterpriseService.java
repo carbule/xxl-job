@@ -45,6 +45,13 @@ public interface EnterpriseService extends IService<Enterprise> {
     Page<TransferPersonnelVo> queryTransferPersonnelList(QueryTransferPersonnelListDto queryHRListDto);
 
     /**
+     * 转让职位
+     *
+     * @param transferJobDto
+     */
+    void transferJob(TransferJobDto transferJobDto);
+
+    /**
      * 撤销申请
      *
      * @param id

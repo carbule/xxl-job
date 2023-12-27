@@ -72,11 +72,6 @@ public class AttentionJobPersonalVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 是否存在推荐奖励
      */
     private Integer isAwardExist;

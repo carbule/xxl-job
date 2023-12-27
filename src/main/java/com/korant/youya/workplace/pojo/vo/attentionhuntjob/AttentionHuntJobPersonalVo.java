@@ -73,11 +73,6 @@ public class AttentionHuntJobPersonalVo {
     private String cityName;
 
     /**
-     * 行政区名称
-     */
-    private String districtName;
-
-    /**
      * 奖励金额
      */
     private Integer award;

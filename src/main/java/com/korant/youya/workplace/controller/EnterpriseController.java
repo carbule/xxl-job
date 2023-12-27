@@ -70,6 +70,19 @@ public class EnterpriseController {
     }
 
     /**
+     * 转让职位
+     *
+     * @param transferJobDto
+     * @return
+     */
+    @PostMapping("/transferJob")
+    @PreAuthorize("hasAnyRole('admin','hr')")
+    public R<?> transferJob(@RequestBody @Valid TransferJobDto transferJobDto) {
+        enterpriseService.transferJob(transferJobDto);
+        return R.ok();
+    }
+
+    /**
      * 撤销申请
      *
      * @return
