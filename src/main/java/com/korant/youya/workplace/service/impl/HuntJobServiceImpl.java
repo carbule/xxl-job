@@ -62,6 +62,8 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     @Resource
     private ExpectedWorkAreaMapper expectedWorkAreaMapper;
 
+    private static final String NANJING_CITY_CODE = "320100";
+
     /**
      * 查询首页求职信息列表
      *
@@ -77,6 +79,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         int count;
         List<HuntJobHomePageVo> list;
         if (StringUtils.isBlank(token)) {
+            listDto.setCityCode(NANJING_CITY_CODE);
             count = huntJobMapper.queryHomePageListCount(listDto);
             list = huntJobMapper.queryHomePageList(listDto);
         } else {

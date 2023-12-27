@@ -667,7 +667,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, id).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0));
         if (null == enterprise) throw new YouyaException("企业未创建");
         String socialCreditCode = enterprise.getSocialCreditCode();
-        if (socialCreditCode.equals(changeDto.getSocialCreditCode()))
+        if (!socialCreditCode.equals(changeDto.getSocialCreditCode()))
             throw new YouyaException(200, "统一社会信用码不一致，请重新上传");
         //名称变更
         if (EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType() == changeType) {
