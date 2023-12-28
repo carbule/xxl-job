@@ -1,9 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.korant.youya.workplace.pojo.po.CandidateInterview;
-import com.korant.youya.workplace.mapper.CandidateInterviewMapper;
-import com.korant.youya.workplace.service.CandidateInterviewService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.mapper.CandidateInterviewMapper;
+import com.korant.youya.workplace.pojo.po.CandidateInterview;
+import com.korant.youya.workplace.service.CandidateInterviewService;
 import org.springframework.stereotype.Service;
 
 /**

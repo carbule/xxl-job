@@ -28,7 +28,7 @@
         VALUES
         <foreach collection="list" item="param" index="index" separator=",">
             (
-            #{param.id},
+            #{param.positionId},
             #{param.statusId},
             #{param.industryCode},
             #{param.sectorCode},

@@ -16,7 +16,7 @@ public class ExpectedWorkAreaModifyDto {
     /**
      * 主键
      */
-    private Long id;
+    private Long areaId;
 
     /**
      * 意向id

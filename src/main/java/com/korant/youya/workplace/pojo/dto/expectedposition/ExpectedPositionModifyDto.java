@@ -17,7 +17,7 @@ public class ExpectedPositionModifyDto {
     /**
      * 主键
      */
-    private Long id;
+    private Long positionId;
 
     /**
      * 意向id

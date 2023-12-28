@@ -1,9 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.korant.youya.workplace.pojo.po.Candidate;
-import com.korant.youya.workplace.mapper.CandidateMapper;
-import com.korant.youya.workplace.service.CandidateService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.mapper.CandidateMapper;
+import com.korant.youya.workplace.pojo.po.Candidate;
+import com.korant.youya.workplace.service.CandidateService;
 import org.springframework.stereotype.Service;
 
 /**

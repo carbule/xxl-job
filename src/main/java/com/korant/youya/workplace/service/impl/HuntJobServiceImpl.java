@@ -334,7 +334,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, id).eq(HuntJob::getIsDelete, 0));
         if (null == huntJob) throw new YouyaException("求职信息不存在");
         Integer status = huntJob.getStatus();
-        if (HuntJobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可删除");
+        if (HuntJobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可删除");
         huntJob.setIsDelete(1);
         huntJobMapper.updateById(huntJob);
     }
