@@ -31,6 +31,12 @@ public class JobQrCode implements Serializable {
     private Long id;
 
     /**
+     * 父链接二维码id
+     */
+    @TableField("pid")
+    private Long pid;
+
+    /**
      * 职位id
      */
     @TableField("job_id")

@@ -31,6 +31,12 @@ public class HuntJobQrCode implements Serializable {
     private Long id;
 
     /**
+     * 父链接二维码id
+     */
+    @TableField("pid")
+    private Long pid;
+
+    /**
      * 求职id
      */
     @TableField("hunt_id")
