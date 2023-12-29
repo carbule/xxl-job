@@ -274,10 +274,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserPrivacy userPrivacy = new UserPrivacy();
         userPrivacy.setUid(id)
                 .setNamePublicStatus(NameVisibleTypeEnum.FULL_NAME.getValue())
-                .setPhonePublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
-                .setWechatPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
-                .setQqPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
-                .setEmailPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                .setPhonePublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_RECRUITERS.getValue())
+                .setWechatPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_RECRUITERS.getValue())
+                .setQqPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_RECRUITERS.getValue())
+                .setEmailPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_RECRUITERS.getValue())
                 .setAddressPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue());
         userPrivacyMapper.insert(userPrivacy);
         UserNameVisibleInfo userNameVisibleInfo = new UserNameVisibleInfo();
