@@ -5,14 +5,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 候选人面试记录表 前端控制器
+ * 转正记录表 前端控制器
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-12-28
+ * @since 2023-12-29
  */
 @RestController
-@RequestMapping("/candidateInterview")
-public class CandidateInterviewController {
+@RequestMapping("/confirmation")
+public class ConfirmationController {
 
 }

@@ -10,17 +10,17 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 
+ * 内部推荐表
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-12-28
+ * @since 2023-12-29
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("candidate")
-public class Candidate implements Serializable {
+@TableName("internal_recommend")
+public class InternalRecommend implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,25 +28,13 @@ public class Candidate implements Serializable {
      * 主键
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
-    private Integer id;
+    private Long id;
 
     /**
-     * HRid
+     * 求职id
      */
-    @TableField("hr")
-    private Long hr;
-
-    /**
-     * 候选人id
-     */
-    @TableField("candidate")
-    private Long candidate;
-
-    /**
-     * 推荐人id
-     */
-    @TableField("referee")
-    private Long referee;
+    @TableField("hunt_id")
+    private Long huntId;
 
     /**
      * 职位id
@@ -55,16 +43,22 @@ public class Candidate implements Serializable {
     private Long jobId;
 
     /**
-     * 类型 1-主动申请 2-推荐
+     * 推荐人id
      */
-    @TableField("type")
-    private Integer type;
+    @TableField("referee")
+    private Long referee;
 
     /**
-     * 申请流程环节 0-初始环节 1-面试 2-入职 3-转正
+     * HRid
      */
-    @TableField("process_link")
-    private Integer processLink;
+    @TableField("hr")
+    private Long hr;
+
+    /**
+     * 招聘流程实列id
+     */
+    @TableField("recruit_process_instance_id")
+    private Long recruitProcessInstanceId;
 
     /**
      * 创建时间

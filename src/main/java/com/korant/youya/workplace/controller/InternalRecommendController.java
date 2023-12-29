@@ -5,14 +5,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 候选人入职记录表 前端控制器
+ * 内部推荐表 前端控制器
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-12-28
+ * @since 2023-12-29
  */
 @RestController
-@RequestMapping("/candidateOnboarding")
-public class CandidateOnboardingController {
+@RequestMapping("/internalRecommend")
+public class InternalRecommendController {
 
 }

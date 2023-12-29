@@ -10,17 +10,17 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 候选人转正记录表
+ * 职位申请表
  * </p>
  *
  * @author chenyiqiang
- * @since 2023-12-28
+ * @since 2023-12-29
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("candidate_confirmation")
-public class CandidateConfirmation implements Serializable {
+@TableName("apply_job")
+public class ApplyJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,40 +31,28 @@ public class CandidateConfirmation implements Serializable {
     private Long id;
 
     /**
-     * 候选记录id
+     * 申请人id
      */
-    @TableField("candidate_id")
-    private Long candidateId;
+    @TableField("applicant")
+    private Long applicant;
 
     /**
-     * 转正时间
+     * 职位id
      */
-    @TableField("confirmation_time")
-    private LocalDateTime confirmationTime;
+    @TableField("job_id")
+    private Long jobId;
 
     /**
-     * 转正薪资
+     * 分享人id
      */
-    @TableField("salary")
-    private Integer salary;
+    @TableField("referee")
+    private Long referee;
 
     /**
-     * 备注
+     * 招聘流程实列id
      */
-    @TableField("note")
-    private String note;
-
-    /**
-     * 接受状态 0-待接受 1-拒绝 2-接受
-     */
-    @TableField("acceptance_status")
-    private Integer acceptanceStatus;
-
-    /**
-     * 完成状态 0-未完成 1-已取消 2-已完成
-     */
-    @TableField("completion_status")
-    private Integer completionStatus;
+    @TableField("recruit_process_instance_id")
+    private Long recruitProcessInstanceId;
 
     /**
      * 创建时间
