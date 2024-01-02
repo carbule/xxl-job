@@ -1,7 +1,12 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
+import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,20 @@ import com.korant.youya.workplace.pojo.po.InternalRecommend;
  */
 public interface InternalRecommendMapper extends BaseMapper<InternalRecommend> {
 
+    /**
+     * 查询用户被推荐职位数量
+     *
+     * @param userId
+     * @return
+     */
+    int queryListCount(@Param("userId") Long userId);
+
+    /**
+     * 查询用户被推荐职位列表
+     *
+     * @param userId
+     * @param listDto
+     * @return
+     */
+    List<InternalRecommendVo> queryList(@Param("userId") Long userId, @Param("listDto") InternalRecommendQueryListDto listDto);
 }

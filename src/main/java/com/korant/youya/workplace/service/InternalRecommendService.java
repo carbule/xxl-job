@@ -1,7 +1,10 @@
 package com.korant.youya.workplace.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
+import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendVo;
 
 /**
  * <p>
@@ -13,4 +16,11 @@ import com.korant.youya.workplace.pojo.po.InternalRecommend;
  */
 public interface InternalRecommendService extends IService<InternalRecommend> {
 
+    /**
+     * 查询用户被推荐职位列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<InternalRecommendVo> queryList(InternalRecommendQueryListDto listDto);
 }

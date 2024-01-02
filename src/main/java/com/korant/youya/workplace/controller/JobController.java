@@ -3,10 +3,7 @@ package com.korant.youya.workplace.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
-import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
-import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
-import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
+import com.korant.youya.workplace.pojo.dto.job.*;
 import com.korant.youya.workplace.pojo.vo.job.*;
 import com.korant.youya.workplace.service.JobService;
 import jakarta.annotation.Resource;
@@ -68,6 +65,18 @@ public class JobController {
     public R<?> queryEnterpriseDetailById(@PathVariable("id") Long id) {
         EnterDetailVo enterpriseDetailVo = jobService.queryEnterpriseDetailById(id);
         return R.success(enterpriseDetailVo);
+    }
+
+    /**
+     * 根据职位id发起职位申请
+     *
+     * @param applyDto
+     * @return
+     */
+    @PostMapping("/apply")
+    public R<?> apply(@RequestBody @Valid JobApplyDto applyDto) {
+        jobService.apply(applyDto);
+        return R.ok();
     }
 
     /**

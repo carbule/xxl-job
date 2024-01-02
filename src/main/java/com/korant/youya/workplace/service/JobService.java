@@ -2,10 +2,7 @@ package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
-import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
-import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
-import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
+import com.korant.youya.workplace.pojo.dto.job.*;
 import com.korant.youya.workplace.pojo.po.Job;
 import com.korant.youya.workplace.pojo.vo.job.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +41,13 @@ public interface JobService extends IService<Job> {
      * @return
      */
     EnterDetailVo queryEnterpriseDetailById(Long id);
+
+    /**
+     * 根据职位id发起职位申请
+     *
+     * @param applyDto
+     */
+    void apply(JobApplyDto applyDto);
 
     /**
      * 收藏或取消收藏职位信息

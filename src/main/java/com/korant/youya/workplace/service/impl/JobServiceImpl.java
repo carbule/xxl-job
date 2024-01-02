@@ -7,18 +7,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.job.JobAuditStatusEnum;
 import com.korant.youya.workplace.enums.job.JobStatusEnum;
+import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.Location;
 import com.korant.youya.workplace.pojo.LoginUser;
-import com.korant.youya.workplace.pojo.dto.job.JobCreateDto;
-import com.korant.youya.workplace.pojo.dto.job.JobModifyDto;
-import com.korant.youya.workplace.pojo.dto.job.JobQueryHomePageListDto;
-import com.korant.youya.workplace.pojo.dto.job.JobQueryPersonalListDto;
-import com.korant.youya.workplace.pojo.po.AttentionJob;
-import com.korant.youya.workplace.pojo.po.Enterprise;
-import com.korant.youya.workplace.pojo.po.Job;
-import com.korant.youya.workplace.pojo.po.JobWelfareLabel;
+import com.korant.youya.workplace.pojo.dto.job.*;
+import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.job.*;
 import com.korant.youya.workplace.service.JobService;
 import com.korant.youya.workplace.utils.JwtUtil;
@@ -58,6 +53,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
 
     @Resource
     private AttentionJobMapper attentionJobMapper;
+
+    @Resource
+    private ApplyJobMapper applyJobMapper;
 
     @Resource
     private DistrictDataMapper districtDataMapper;
@@ -120,6 +118,36 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     @Override
     public EnterDetailVo queryEnterpriseDetailById(Long id) {
         return jobMapper.queryEnterpriseDetailById(id);
+    }
+
+    /**
+     * 根据职位id发起职位申请
+     *
+     * @param applyDto
+     */
+    @Override
+    public void apply(JobApplyDto applyDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Integer authenticationStatus = loginUser.getAuthenticationStatus();
+        if (UserAuthenticationStatusEnum.CERTIFIED.getStatus() != authenticationStatus)
+            throw new YouyaException("请先完成实名认证");
+        Long jobId = applyDto.getJobId();
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        Integer status = job.getStatus();
+        Integer auditStatus = job.getAuditStatus();
+        if (JobStatusEnum.PUBLISHED.getStatus() != status || JobAuditStatusEnum.AUDIT_SUCCESS.getStatus() != auditStatus)
+            throw new YouyaException("职位暂未发布");
+        Long userId = loginUser.getId();
+        boolean exists = applyJobMapper.exists(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getJobId, jobId).eq(ApplyJob::getApplicant, userId).eq(ApplyJob::getIsDelete, 0));
+        if (exists) throw new YouyaException("您已申请过该职位，请勿重复申请");
+        ApplyJob applyJob = new ApplyJob();
+        applyJob.setJobId(jobId).setApplicant(userId);
+        Long referee = applyDto.getReferee();
+        if (null != referee) {
+            applyJob.setReferee(referee);
+        }
+        applyJobMapper.insert(applyJob);
     }
 
     /**
