@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
 import com.korant.youya.workplace.pojo.po.ApplyJob;
+import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
 import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobVo;
 
 /**
@@ -23,4 +24,12 @@ public interface ApplyJobService extends IService<ApplyJob> {
      * @return
      */
     Page<ApplyJobVo> queryList(ApplyJobQueryListDto listDto);
+
+    /**
+     * 查询用户已申请职位详情
+     *
+     * @param id
+     * @return
+     */
+    ApplyJobDetailVo detail(Long id);
 }

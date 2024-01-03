@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.mapper.InternalRecommendMapper;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
+import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendDetailVo;
 import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendVo;
 import com.korant.youya.workplace.service.InternalRecommendService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -43,5 +44,16 @@ public class InternalRecommendServiceImpl extends ServiceImpl<InternalRecommendM
         Page<InternalRecommendVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
+    }
+
+    /**
+     * 查询用户被推荐职位详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public InternalRecommendDetailVo detail(Long id) {
+        return internalRecommendMapper.detail(id);
     }
 }

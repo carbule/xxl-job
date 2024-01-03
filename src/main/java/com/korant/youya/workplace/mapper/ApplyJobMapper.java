@@ -3,6 +3,7 @@ package com.korant.youya.workplace.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
 import com.korant.youya.workplace.pojo.po.ApplyJob;
+import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
 import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -26,4 +27,12 @@ public interface ApplyJobMapper extends BaseMapper<ApplyJob> {
      * @return
      */
     List<ApplyJobVo> queryList(@Param("userId") Long userId, @Param("listDto") ApplyJobQueryListDto listDto);
+
+    /**
+     * 查询用户已申请职位详情
+     *
+     * @param id
+     * @return
+     */
+    ApplyJobDetailVo detail(@Param("id") Long id);
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
+import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendDetailVo;
 import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendVo;
 
 /**
@@ -23,4 +24,12 @@ public interface InternalRecommendService extends IService<InternalRecommend> {
      * @return
      */
     Page<InternalRecommendVo> queryList(InternalRecommendQueryListDto listDto);
+
+    /**
+     * 查询用户被推荐职位详情
+     *
+     * @param id
+     * @return
+     */
+    InternalRecommendDetailVo detail(Long id);
 }

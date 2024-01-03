@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korant.youya.workplace.mapper.CandidateMapper">
+
+    <!--  查询候选人数量  -->
+    <select id="queryListCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM apply_job AS aj
+        LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+        <where>
+            j.uid = #{userId}
+            <if test="listDto.positionCode != ''">
+                AND j.position_code = #{listDto.positionCode}
+            </if>
+            AND aj.is_delete = 0
+        </where>
+    </select>
+
+    <!--  查询候选人列表  -->
+    <select id="queryList" resultType="com.korant.youya.workplace.pojo.vo.candidate.CandidateVo">
+        SELECT aj.id,
+        aj.applicant,
+        u.avatar,
+        u.last_name AS lastName,
+        u.first_name AS firstName,
+        u.personal_signature AS personalSignature,
+        aj.recruit_process_instance_id AS recruitProcessInstanceId,
+        p.name AS positionName,
+        j.min_salary AS minSalary,
+        j.max_salary AS maxSalary,
+        aj.create_time AS applyTime
+        FROM apply_job AS aj
+        LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+        LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+        LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+        <where>
+            j.uid = #{userId}
+            <if test="listDto.positionCode != ''">
+                AND j.position_code = #{listDto.positionCode}
+            </if>
+            AND aj.is_delete = 0
+            ORDER BY aj.create_time DESC LIMIT #{listDto.pageSize}
+            OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+        </where>
+    </select>
+</mapper>

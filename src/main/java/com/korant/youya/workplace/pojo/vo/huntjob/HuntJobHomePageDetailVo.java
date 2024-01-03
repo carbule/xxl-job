@@ -139,6 +139,11 @@ public class HuntJobHomePageDetailVo {
     private Integer isCollected;
 
     /**
+     * 是否已内推
+     */
+    private Integer isRecommend;
+
+    /**
      * 工作履历
      */
     private List<WorkExperiencePreviewVo> workExperienceVoList;

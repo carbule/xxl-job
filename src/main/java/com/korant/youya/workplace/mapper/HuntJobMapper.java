@@ -68,6 +68,15 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
     HuntJobHomePageDetailVo queryHomePageDetailById(@Param("userId") Long userId, @Param("id") Long id);
 
     /**
+     * 查询hr列表
+     *
+     * @param userId
+     * @param enterpriseId
+     * @return
+     */
+    List<EnterpriseHRVo> queryHRList(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId);
+
+    /**
      * 查询用户个人求职列表
      *
      * @param userId

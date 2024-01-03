@@ -9,14 +9,8 @@ import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
-import com.korant.youya.workplace.pojo.po.AttentionHuntJob;
-import com.korant.youya.workplace.pojo.po.EducationExperience;
-import com.korant.youya.workplace.pojo.po.HuntJob;
-import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.dto.huntjob.*;
+import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
@@ -49,6 +43,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private InternalRecommendMapper internalRecommendMapper;
 
     @Resource
     private EducationExperienceMapper educationExperienceMapper;
@@ -110,6 +107,47 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     public HuntJobHomePageDetailVo queryHomePageDetailById(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
         return huntJobMapper.queryHomePageDetailById(userId, id);
+    }
+
+    /**
+     * 查询hr列表
+     *
+     * @return
+     */
+    @Override
+    public List<EnterpriseHRVo> queryHRList() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException(200, "您好！您尚未加入任何公司，请联系管理员，加入后即可帮助推荐！");
+        Long userId = loginUser.getId();
+        return huntJobMapper.queryHRList(userId, enterpriseId);
+    }
+
+    /**
+     * 内推
+     *
+     * @param recommendDto
+     */
+    @Override
+    public void recommend(HuntJobRecommendDto recommendDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long huntJobId = recommendDto.getHuntJobId();
+        HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, huntJobId).eq(HuntJob::getIsDelete, 0));
+        if (null == huntJob) throw new YouyaException("求职信息不存在");
+        Integer status = huntJob.getStatus();
+        if (HuntJobStatusEnum.PUBLISHED.getStatus() != status) throw new YouyaException("求职信息暂未发布");
+        Long hrId = recommendDto.getHr();
+        LoginUser hr = userMapper.selectUserToLoginById(hrId);
+        Long hrEnterpriseId = hr.getEnterpriseId();
+        if (null == hrEnterpriseId) throw new YouyaException("该用户暂未加入企业，无法向其推荐求职信息");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (!enterpriseId.equals(hrEnterpriseId)) throw new YouyaException("只能向本企业的HR推荐");
+        Long userId = loginUser.getId();
+        boolean exists = internalRecommendMapper.exists(new LambdaQueryWrapper<InternalRecommend>().eq(InternalRecommend::getReferee, userId).eq(InternalRecommend::getHuntId, huntJobId).eq(InternalRecommend::getHr, hrId).eq(InternalRecommend::getIsDelete, 0));
+        if (exists) throw new YouyaException("您已向该HR推荐过此求职信息，请勿重复推荐");
+        InternalRecommend internalRecommend = new InternalRecommend();
+        internalRecommend.setHuntId(huntJobId).setReferee(userId).setHr(hrId);
+        internalRecommendMapper.insert(internalRecommend);
     }
 
     /**

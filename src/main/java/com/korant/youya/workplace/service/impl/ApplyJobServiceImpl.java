@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.mapper.ApplyJobMapper;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
 import com.korant.youya.workplace.pojo.po.ApplyJob;
+import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
 import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobVo;
 import com.korant.youya.workplace.service.ApplyJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -44,5 +45,16 @@ public class ApplyJobServiceImpl extends ServiceImpl<ApplyJobMapper, ApplyJob> i
         Page<ApplyJobVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
+    }
+
+    /**
+     * 查询用户已申请职位详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public ApplyJobDetailVo detail(Long id) {
+        return applyJobMapper.detail(id);
     }
 }

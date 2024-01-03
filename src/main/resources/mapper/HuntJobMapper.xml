@@ -78,6 +78,7 @@
         <result column="cityName" property="cityName"/>
         <result column="address" property="address"/>
         <result column="isCollected" property="isCollected"/>
+        <result column="isRecommend" property="isRecommend"/>
         <collection property="workExperienceVoList" javaType="java.util.List"
                     ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
                     resultMap="WorkExperienceVoMap">
@@ -283,6 +284,13 @@
             AND hunt_id =
                #{id}
             AND is_delete = 0) AS isCollected,
+            (SELECT CASE WHEN COUNT (*) > 0 THEN 1 ELSE 0 END
+            FROM internal_recommend
+            WHERE referee =
+               #{userId}
+            AND hunt_id =
+               #{id}
+            AND is_delete = 0) AS isRecommend,
             we.id AS weId,
             we.enterprise_name AS enterpriseName,
             we.department_name AS departmentName,
@@ -307,6 +315,22 @@
             LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
             LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE hj.id = #{id}
+    </select>
+
+    <!--  查询hr列表  -->
+    <select id="queryHRList" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.huntjob.EnterpriseHRVo">
+        SELECT u.id,
+               u.last_name  AS lastName,
+               u.first_name AS firstName
+        FROM yy_user_enterprise AS ue
+                 LEFT JOIN yy_user AS u ON ue.uid = u.id AND u.is_delete = 0
+                 LEFT JOIN yy_user_role AS ur ON ue.uid = ur.uid AND ur.is_delete = 0
+                 LEFT JOIN yy_role AS r ON ur.rid = r.id AND r.is_delete = 0
+        WHERE ue.uid != #{userId}
+          AND ue.enterprise_id = #{enterpriseId}
+          AND r.role_name = 'hr'
+          AND ue.is_delete = 0
     </select>
 
     <!--  查询用户个人求职列表  -->

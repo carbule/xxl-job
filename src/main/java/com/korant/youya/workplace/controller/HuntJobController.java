@@ -3,10 +3,7 @@ package com.korant.youya.workplace.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.*;
 import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
@@ -14,6 +11,7 @@ import com.korant.youya.workplace.service.HuntJobService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,6 +55,31 @@ public class HuntJobController {
     public R<?> queryHomePageDetailById(@PathVariable("id") Long id) {
         HuntJobHomePageDetailVo homePageDetailVo = huntJobService.queryHomePageDetailById(id);
         return R.success(homePageDetailVo);
+    }
+
+    /**
+     * 查询hr列表
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryHRList")
+    public R<?> queryHRList() {
+        List<EnterpriseHRVo> list = huntJobService.queryHRList();
+        return R.success(list);
+    }
+
+    /**
+     * 内推
+     *
+     * @param recommendDto
+     * @return
+     */
+    @PostMapping("/recommend")
+    @PreAuthorize("hasAnyRole('admin','hr','employee')")
+    public R<?> recommend(@RequestBody @Valid HuntJobRecommendDto recommendDto) {
+        huntJobService.recommend(recommendDto);
+        return R.ok();
     }
 
     /**

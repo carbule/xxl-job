@@ -2,10 +2,7 @@ package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobCreateDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryHomePageListDto;
-import com.korant.youya.workplace.pojo.dto.huntjob.HuntJobQueryPersonalListDto;
+import com.korant.youya.workplace.pojo.dto.huntjob.*;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
@@ -40,6 +37,20 @@ public interface HuntJobService extends IService<HuntJob> {
      * @return
      */
     HuntJobHomePageDetailVo queryHomePageDetailById(Long id);
+
+    /**
+     * 查询hr列表
+     *
+     * @return
+     */
+    List<EnterpriseHRVo> queryHRList();
+
+    /**
+     * 内推
+     *
+     * @param recommendDto
+     */
+    void recommend(HuntJobRecommendDto recommendDto);
 
     /**
      * 收藏或取消收藏求职信息
