@@ -3,6 +3,8 @@ package com.korant.youya.workplace.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.mapper.CandidateMapper;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
+import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
+import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
 import com.korant.youya.workplace.service.CandidateService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -40,5 +42,27 @@ public class CandidateServiceImpl implements CandidateService {
         Page<CandidateVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
+    }
+
+    /**
+     * 查询候选人详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public CandidateDetailVo detail(Long id) {
+        return candidateMapper.detail(id);
+    }
+
+    /**
+     * 查询候选人招聘记录
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public CandidateRecruitmentRecordsVo queryRecruitmentRecords(Long id) {
+        return candidateMapper.queryRecruitmentRecords(id);
     }
 }

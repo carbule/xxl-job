@@ -2,6 +2,8 @@ package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
+import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
+import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
 
 /**
@@ -20,4 +22,20 @@ public interface CandidateService {
      * @return
      */
     Page<CandidateVo> queryList(CandidateQueryListDto listDto);
+
+    /**
+     * 查询候选人详情
+     *
+     * @param id
+     * @return
+     */
+    CandidateDetailVo detail(Long id);
+
+    /**
+     * 查询候选人招聘记录
+     *
+     * @param id
+     * @return
+     */
+    CandidateRecruitmentRecordsVo queryRecruitmentRecords(Long id);
 }
