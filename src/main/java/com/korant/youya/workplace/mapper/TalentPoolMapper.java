@@ -1,5 +1,15 @@
 package com.korant.youya.workplace.mapper;
 
+import com.korant.youya.workplace.pojo.dto.talentpool.QueryPublishedJobListDto;
+import com.korant.youya.workplace.pojo.dto.talentpool.TalentPoolQueryListDto;
+import com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo;
+import com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo;
+import com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo;
+import com.korant.youya.workplace.pojo.vo.talentpool.TalentRecruitmentRecordsVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
 /**
  * @ClassName TalentPoolMapper
  * @Description
@@ -8,4 +18,54 @@ package com.korant.youya.workplace.mapper;
  * @Version 1.0
  */
 public interface TalentPoolMapper {
+
+    /**
+     * 查询人才库数量
+     *
+     * @param userId
+     * @return
+     */
+    int queryListCount(@Param("userId") Long userId);
+
+    /**
+     * 查询人才库列表
+     *
+     * @param userId
+     * @param listDto
+     * @return
+     */
+    List<TalentPoolVo> queryList(@Param("userId") Long userId, @Param("listDto") TalentPoolQueryListDto listDto);
+
+    /**
+     * 查询人才详情
+     *
+     * @param id
+     * @return
+     */
+    TalentDetailVo detail(@Param("id") Long id);
+
+    /**
+     * 查询人才招聘记录
+     *
+     * @param id
+     * @return
+     */
+    TalentRecruitmentRecordsVo queryRecruitmentRecords(@Param("id") Long id);
+
+    /**
+     * 查询已发布职位数量
+     *
+     * @param userId
+     * @return
+     */
+    int queryPublishedJobListCount(@Param("userId") Long userId);
+
+    /**
+     * 查询已发布职位列表
+     *
+     * @param userId
+     * @param listDto
+     * @return
+     */
+    List<PublishedJobVo> queryPublishedJobList(@Param("userId") Long userId, @Param("listDto") QueryPublishedJobListDto listDto);
 }

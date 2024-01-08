@@ -2,4 +2,220 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.TalentPoolMapper">
 
+    <resultMap id="detailMap" type="com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo">
+        <id column="id" property="id"/>
+        <result column="uid" property="uid"/>
+        <result column="avatar" property="avatar"/>
+        <result column="lastName" property="lastName"/>
+        <result column="firstName" property="firstName"/>
+        <result column="gender" property="gender"/>
+        <result column="personalSignature" property="personalSignature"/>
+        <result column="age" property="age"/>
+        <result column="eduLevel" property="eduLevel"/>
+        <result column="workExperience" property="workExperience"/>
+        <result column="employStatus" property="employStatus"/>
+        <result column="minSalary" property="minSalary"/>
+        <result column="maxSalary" property="maxSalary"/>
+        <result column="description" property="description"/>
+        <result column="phone" property="phone"/>
+        <result column="wechatId" property="wechatId"/>
+        <result column="qq" property="qq"/>
+        <result column="email" property="email"/>
+        <result column="countryName" property="countryName"/>
+        <result column="provinceName" property="provinceName"/>
+        <result column="cityName" property="cityName"/>
+        <result column="address" property="address"/>
+        <collection property="workExperienceVoList" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo"
+                    resultMap="WorkExperienceVoMap">
+        </collection>
+    </resultMap>
+
+    <resultMap id="WorkExperienceVoMap"
+               type="com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo">
+        <id column="weId" property="weId"/>
+        <result column="enterpriseName" property="enterpriseName"/>
+        <result column="departmentName" property="departmentName"/>
+        <result column="positionName" property="positionName"/>
+        <result column="startTime" property="startTime"/>
+        <result column="endTime" property="endTime"/>
+        <result column="content" property="content"/>
+        <result column="performance" property="performance"/>
+        <collection property="projectExperienceVoList" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewVo"
+                    resultMap="ProjectExperienceVoMap">
+        </collection>
+    </resultMap>
+
+    <resultMap id="ProjectExperienceVoMap"
+               type="com.korant.youya.workplace.pojo.vo.projectexperience.ProjectExperiencePreviewVo">
+        <id column="peId" property="peId"/>
+        <result column="projectName" property="projectName"/>
+        <result column="projectRole" property="projectRole"/>
+        <result column="projectContent" property="projectContent"/>
+    </resultMap>
+
+    <!--  查询人才库数量  -->
+    <select id="queryListCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM internal_recommend
+        WHERE hr = #{userId}
+          AND is_delete = 0
+    </select>
+
+    <!--  查询人才库列表  -->
+    <select id="queryList" resultType="com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo">
+        SELECT ir.id,
+               u1.avatar             AS applicantAvatar,
+               u1.last_name          AS applicantLastName,
+               u1.first_name         AS applicantFirstName,
+               u1.personal_signature AS personalSignature,
+               u2.avatar             AS refereeAvatar,
+               u2.last_name          AS refereeLastName,
+               u2.first_name         AS refereeFirstName,
+               p.name                AS positionName,
+               ir.create_time        AS recommendedTime
+        FROM internal_recommend AS ir
+                 LEFT JOIN hunt_job AS hj ON ir.hunt_id = hj.id AND hj.is_delete = 0
+                 LEFT JOIN yy_user AS u1 ON hj.uid = u1.id AND u1.is_delete = 0
+                 LEFT JOIN yy_user AS u2 ON ir.referee = u2.id AND u2.is_delete = 0
+                 LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+        WHERE ir.hr = #{userId}
+          AND ir.is_delete = 0
+        ORDER BY ir.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+    </select>
+
+    <!--  查询人才详情  -->
+    <select id="detail" parameterType="java.lang.Long" resultMap="detailMap">
+        SELECT ir.id,
+               u.id                 AS uid,
+               u.avatar,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
+               u.gender,
+               u.personal_signature AS personalSignature,
+               (SELECT CASE
+                           WHEN u.birthday IS NOT NULL THEN DATE_PART('year', AGE(NOW(), u.birthday))
+                           ELSE NULL
+                           END)     AS age,
+               (SELECT edu_level
+                FROM education_experience
+                WHERE uid = u.id
+                  AND is_delete = 0
+                ORDER BY end_time DESC, start_time
+                    DESC               LIMIT 1)                    AS eduLevel,
+               (SELECT CASE
+                           WHEN u.start_working_time IS NOT NULL
+                               THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+                           ELSE NULL
+                           END)      AS workExperience,
+               es.status             AS employStatus,
+               ep.min_salary         AS minSalary,
+               ep.min_salary         AS maxSalary,
+               hj.description,
+               rv.phone,
+               rv.wechat_id          AS wechatId,
+               rv.qq,
+               rv.email,
+               dd1.name              AS countryName,
+               dd2.name              AS provinceName,
+               dd3.name              AS cityName,
+               rv.address,
+               we.id AS weId,
+               we.enterprise_name AS enterpriseName,
+               we.department_name AS departmentName,
+               we.position_name AS positionName,
+               we.start_time AS startTime,
+               we.end_time AS endTime,
+               we.content,
+               we.performance,
+               pe.id AS peId,
+               pe.project_name AS projectName,
+               pe.project_role AS projectRole,
+               pe.project_content AS projectContent
+        FROM internal_recommend AS ir
+            LEFT JOIN hunt_job AS hj
+        On ir.hunt_id = hj.id AND hj.is_delete = 0
+            LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
+            LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+            LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+            LEFT JOIN yy_user_name_visible_info AS nv
+            ON u.id = nv.uid AND nv.is_delete = 0
+            LEFT JOIN recruiter_visible_info AS rv ON u.id = rv.uid AND rv.is_delete = 0
+            LEFT JOIN district_data dd1 ON dd1.code = rv.country_code AND dd1.is_delete = 0
+            LEFT JOIN district_data dd2 ON dd2.code = rv.province_code AND dd2.is_delete = 0
+            LEFT JOIN district_data dd3 ON dd3.code = rv.city_code AND dd3.is_delete = 0
+            LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
+            LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
+        WHERE ir.id = #{id}
+    </select>
+
+    <!--  查询人才招聘记录  -->
+    <select id="queryRecruitmentRecords" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.talentpool.TalentRecruitmentRecordsVo">
+        SELECT ir.id,
+               ir.recruit_process_instance_id AS recruitProcessInstanceId,
+               u.avatar,
+               nv.last_name                   AS lastName,
+               nv.first_name                  AS firstName,
+               u.personal_signature           AS personalSignature,
+               p1.name                        AS positionName,
+               ep.min_salary                  AS minSalary,
+               ep.min_salary                  AS maxSalary,
+               d1.name                        AS cityName,
+               p2.name                        AS associationPositionName,
+               j.min_salary                   AS associationPositionMinSalary,
+               j.min_salary                   AS associationPositionMaxSalary,
+               rpi.process_step               AS processStep
+        FROM internal_recommend AS ir
+                 LEFT JOIN hunt_job AS hj
+                           On ir.hunt_id = hj.id AND hj.is_delete = 0
+                 LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
+                 LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                 LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+                 LEFT JOIN position AS p1 ON ep.position_code = p1.code AND p1.is_delete = 0
+                 LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
+                 LEFT JOIN district_data AS d1 ON ewa.city_code = d1.code AND d1.is_delete = 0
+                 LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+                 LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN position AS p2 ON j.position_code = p2.code AND p2.is_delete = 0
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON ir.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+        WHERE ir.id = #{id}
+    </select>
+
+    <!--  查询已发布职位数量  -->
+    <select id="queryPublishedJobListCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM job
+        WHERE uid = #{userId}
+          AND status = 1
+          AND audit_status = 2
+          AND is_delete = 0
+    </select>
+
+    <!--  查询已发布职位列表  -->
+    <select id="queryPublishedJobList" resultType="com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo">
+        SELECT j.id,
+               p.name                                                   AS positionName,
+               j.edu_requirements                                       AS eduRequirements,
+               j.work_experience                                        AS workExperience,
+               j.min_salary                                             AS minSalary,
+               j.max_salary                                             AS maxSalary,
+               dd1.name                                                 AS cityName,
+               j.audit_status                                           AS auditStatus,
+               (SELECT CASE WHEN j.award IS NOT NULL THEN 1 ELSE 0 END) AS isAwardExist
+        FROM job AS j
+                 LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
+                 LEFT JOIN district_data dd1 ON j.city_code = dd1.code AND dd1.is_delete = 0
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+        WHERE j.uid = #{userId}
+          AND j.status = 1
+          AND j.audit_status = 2
+          AND j.is_delete = 0
+        ORDER BY j.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+    </select>
 </mapper>
