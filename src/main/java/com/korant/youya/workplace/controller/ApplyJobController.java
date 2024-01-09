@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
 import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
@@ -32,6 +33,7 @@ public class ApplyJobController {
      * @return
      */
     @PostMapping("/queryList")
+    @ExplanationDict
     public R<?> queryList(@RequestBody @Valid ApplyJobQueryListDto listDto) {
         Page<ApplyJobVo> page = applyJobService.queryList(listDto);
         return R.success(page);
@@ -44,6 +46,7 @@ public class ApplyJobController {
      * @return
      */
     @GetMapping("/detail/{id}")
+    @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         ApplyJobDetailVo detailVo = applyJobService.detail(id);
         return R.success(detailVo);

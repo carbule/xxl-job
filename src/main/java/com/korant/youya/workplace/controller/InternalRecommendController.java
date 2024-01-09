@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendDetailVo;
@@ -32,6 +33,7 @@ public class InternalRecommendController {
      * @return
      */
     @PostMapping("/queryList")
+    @ExplanationDict
     public R<?> queryList(@RequestBody @Valid InternalRecommendQueryListDto listDto) {
         Page<InternalRecommendVo> page = internalRecommendService.queryList(listDto);
         return R.success(page);
@@ -43,7 +45,8 @@ public class InternalRecommendController {
      * @param id
      * @return
      */
-    @PostMapping("/detail/{id}")
+    @GetMapping("/detail/{id}")
+    @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         InternalRecommendDetailVo detailVo = internalRecommendService.detail(id);
         return R.success(detailVo);

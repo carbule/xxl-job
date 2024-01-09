@@ -38,6 +38,7 @@
                  LEFT JOIN yy_user AS u ON ir.referee = u.id AND u.is_delete = 0
         WHERE hj.uid = #{userId}
           AND ir.is_delete = 0
+          AND ir.job_id IS NOT NULL
         ORDER BY ir.create_time DESC LIMIT #{listDto.pageSize}
         OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
     </select>

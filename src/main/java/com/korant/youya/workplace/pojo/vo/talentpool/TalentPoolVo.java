@@ -35,6 +35,11 @@ public class TalentPoolVo {
     private String applicantFirstName;
 
     /**
+     * 申请人性别
+     */
+    private Integer applicantGender;
+
+    /**
      * 个性签名
      */
     private String personalSignature;

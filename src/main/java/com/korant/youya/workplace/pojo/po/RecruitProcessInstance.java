@@ -28,13 +28,13 @@ public class RecruitProcessInstance implements Serializable {
      * 主键
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
-    private Integer id;
+    private Long id;
 
     /**
      * 流程环节
      */
     @TableField("process_step")
-    private Long processStep;
+    private Integer processStep;
 
     /**
      * 创建时间

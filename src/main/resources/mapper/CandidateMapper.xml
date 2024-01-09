@@ -73,8 +73,9 @@
         SELECT aj.id,
         aj.applicant,
         u.avatar,
-        u.last_name AS lastName,
-        u.first_name AS firstName,
+        nv.last_name AS lastName,
+        nv.first_name AS firstName,
+        u.gender,
         u.personal_signature AS personalSignature,
         aj.recruit_process_instance_id AS recruitProcessInstanceId,
         p.name AS positionName,
@@ -85,6 +86,7 @@
         LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
         LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
         LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+        LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
         <where>
             j.uid = #{userId}
             <if test="listDto.positionCode != ''">

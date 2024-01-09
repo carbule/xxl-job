@@ -1,6 +1,9 @@
 package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmationDto;
+import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
+import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
@@ -38,4 +41,25 @@ public interface CandidateService {
      * @return
      */
     CandidateRecruitmentRecordsVo queryRecruitmentRecords(Long id);
+
+    /**
+     * 创建面试邀约
+     *
+     * @param createInterviewDto
+     */
+    void createInterview(CandidateCreateInterviewDto createInterviewDto);
+
+    /**
+     * 创建入职邀约
+     *
+     * @param createOnboardingDto
+     */
+    void createOnboarding(CandidateCreateOnboardingDto createOnboardingDto);
+
+    /**
+     * 创建转正邀约
+     *
+     * @param createConfirmationDto
+     */
+    void createConfirmation(CandidateCreateConfirmationDto createConfirmationDto);
 }

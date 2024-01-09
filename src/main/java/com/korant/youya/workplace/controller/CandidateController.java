@@ -1,7 +1,11 @@
 package com.korant.youya.workplace.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmationDto;
+import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
+import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
@@ -44,6 +48,7 @@ public class CandidateController {
      * @return
      */
     @GetMapping("/detail/{id}")
+    @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         CandidateDetailVo detailVo = candidateService.detail(id);
         return R.success(detailVo);
@@ -59,5 +64,41 @@ public class CandidateController {
     public R<?> queryRecruitmentRecords(@PathVariable("id") Long id) {
         CandidateRecruitmentRecordsVo recruitmentRecordsVo = candidateService.queryRecruitmentRecords(id);
         return R.success(recruitmentRecordsVo);
+    }
+
+    /**
+     * 创建面试邀约
+     *
+     * @param createInterviewDto
+     * @return
+     */
+    @GetMapping("/createInterview")
+    public R<?> createInterview(@RequestBody @Valid CandidateCreateInterviewDto createInterviewDto) {
+        candidateService.createInterview(createInterviewDto);
+        return R.ok();
+    }
+
+    /**
+     * 创建入职邀约
+     *
+     * @param createOnboardingDto
+     * @return
+     */
+    @GetMapping("/createOnboarding")
+    public R<?> createOnboarding(@RequestBody @Valid CandidateCreateOnboardingDto createOnboardingDto) {
+        candidateService.createOnboarding(createOnboardingDto);
+        return R.ok();
+    }
+
+    /**
+     * 创建转正邀约
+     *
+     * @param createConfirmationDto
+     * @return
+     */
+    @GetMapping("/createConfirmation")
+    public R<?> createConfirmation(@RequestBody @Valid CandidateCreateConfirmationDto createConfirmationDto) {
+        candidateService.createConfirmation(createConfirmationDto);
+        return R.ok();
     }
 }

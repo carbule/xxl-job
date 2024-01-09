@@ -1,7 +1,12 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
 import com.korant.youya.workplace.pojo.po.Confirmation;
+import com.korant.youya.workplace.pojo.vo.confirmation.ConfirmationVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,11 @@ import com.korant.youya.workplace.pojo.po.Confirmation;
  */
 public interface ConfirmationMapper extends BaseMapper<Confirmation> {
 
+    /**
+     * 查询转正邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<ConfirmationVo> queryList(@Param("listDto") ConfirmationQueryListDto listDto);
 }

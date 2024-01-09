@@ -67,8 +67,9 @@
     <select id="queryList" resultType="com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo">
         SELECT ir.id,
                u1.avatar             AS applicantAvatar,
-               u1.last_name          AS applicantLastName,
-               u1.first_name         AS applicantFirstName,
+               nv.last_name          AS applicantLastName,
+               nv.first_name         AS applicantFirstName,
+               u1.gender             AS applicantGender,
                u1.personal_signature AS personalSignature,
                u2.avatar             AS refereeAvatar,
                u2.last_name          AS refereeLastName,
@@ -78,6 +79,7 @@
         FROM internal_recommend AS ir
                  LEFT JOIN hunt_job AS hj ON ir.hunt_id = hj.id AND hj.is_delete = 0
                  LEFT JOIN yy_user AS u1 ON hj.uid = u1.id AND u1.is_delete = 0
+                 LEFT JOIN yy_user_name_visible_info AS nv ON u1.id = nv.uid AND nv.is_delete = 0
                  LEFT JOIN yy_user AS u2 ON ir.referee = u2.id AND u2.is_delete = 0
                  LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
                  LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
@@ -163,11 +165,11 @@
                u.personal_signature           AS personalSignature,
                p1.name                        AS positionName,
                ep.min_salary                  AS minSalary,
-               ep.min_salary                  AS maxSalary,
+               ep.max_salary                  AS maxSalary,
                d1.name                        AS cityName,
                p2.name                        AS associationPositionName,
                j.min_salary                   AS associationPositionMinSalary,
-               j.min_salary                   AS associationPositionMaxSalary,
+               j.max_salary                   AS associationPositionMaxSalary,
                rpi.process_step               AS processStep
         FROM internal_recommend AS ir
                  LEFT JOIN hunt_job AS hj

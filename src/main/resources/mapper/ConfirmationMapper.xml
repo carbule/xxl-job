@@ -2,4 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.ConfirmationMapper">
 
+    <!--  查询转正邀请列表  -->
+    <select id="queryList" resultType="com.korant.youya.workplace.pojo.vo.confirmation.ConfirmationVo">
+        SELECT id,
+               confirmation_time AS confirmationTime,
+               salary,
+               note,
+               acceptance_status AS acceptanceStatus,
+               completion_status AS completionStatus
+        FROM confirmation
+        WHERE recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
+          AND is_delete = 0
+    </select>
 </mapper>

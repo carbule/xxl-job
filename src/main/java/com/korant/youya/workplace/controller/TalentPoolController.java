@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.talentpool.AssociateDto;
 import com.korant.youya.workplace.pojo.dto.talentpool.QueryPublishedJobListDto;
@@ -47,6 +48,7 @@ public class TalentPoolController {
      * @return
      */
     @GetMapping("/detail/{id}")
+    @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         TalentDetailVo detailVo = talentPoolService.detail(id);
         return R.success(detailVo);
@@ -71,6 +73,7 @@ public class TalentPoolController {
      * @return
      */
     @PostMapping("/queryPublishedJobList")
+    @ExplanationDict
     public R<?> queryPublishedJobList(@RequestBody @Valid QueryPublishedJobListDto listDto) {
         Page<PublishedJobVo> page = talentPoolService.queryPublishedJobList(listDto);
         return R.success(page);
