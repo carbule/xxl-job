@@ -1,9 +1,7 @@
 package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.korant.youya.workplace.pojo.dto.talentpool.AssociateDto;
-import com.korant.youya.workplace.pojo.dto.talentpool.QueryPublishedJobListDto;
-import com.korant.youya.workplace.pojo.dto.talentpool.TalentPoolQueryListDto;
+import com.korant.youya.workplace.pojo.dto.talentpool.*;
 import com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo;
 import com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo;
 import com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo;
@@ -56,4 +54,88 @@ public interface TalentPoolService {
      * @param associateDto
      */
     void associate(AssociateDto associateDto);
+
+    /**
+     * 创建面试邀约
+     *
+     * @param createInterviewDto
+     */
+    void createInterview(TalentPoolCreateInterviewDto createInterviewDto);
+
+    /**
+     * 取消面试邀约
+     *
+     * @param id
+     */
+    void cancelInterview(Long id);
+
+    /**
+     * 确认完成面试邀约
+     *
+     * @param id
+     */
+    void confirmInterview(Long id);
+
+    /**
+     * 删除面试邀约
+     *
+     * @param id
+     */
+    void deleteInterview(Long id);
+
+    /**
+     * 创建入职邀约
+     *
+     * @param createOnboardingDto
+     */
+    void createOnboarding(TalentPoolCreateOnboardingDto createOnboardingDto);
+
+    /**
+     * 取消入职邀约
+     *
+     * @param id
+     */
+    void cancelOnboarding(Long id);
+
+    /**
+     * 确认完成入职邀约
+     *
+     * @param id
+     */
+    void confirmOnboarding(Long id);
+
+    /**
+     * 删除入职邀约
+     *
+     * @param id
+     */
+    void deleteOnboarding(Long id);
+
+    /**
+     * 创建转正邀约
+     *
+     * @param createConfirmationDto
+     */
+    void createConfirmation(TalentPoolCreateConfirmationDto createConfirmationDto);
+
+    /**
+     * 取消转正邀约
+     *
+     * @param id
+     */
+    void cancelConfirmation(Long id);
+
+    /**
+     * 确认完成转正邀约
+     *
+     * @param id
+     */
+    void confirmConfirmation(Long id);
+
+    /**
+     * 删除转正邀约
+     *
+     * @param id
+     */
+    void deleteConfirmation(Long id);
 }

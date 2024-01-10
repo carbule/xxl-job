@@ -32,4 +32,25 @@ public interface InternalRecommendService extends IService<InternalRecommend> {
      * @return
      */
     InternalRecommendDetailVo detail(Long id);
+
+    /**
+     * 接受面试邀约
+     *
+     * @param id
+     */
+    void acceptInterview(Long id);
+
+    /**
+     * 接受入职邀约
+     *
+     * @param id
+     */
+    void acceptOnboarding(Long id);
+
+    /**
+     * 接受转正邀约
+     *
+     * @param id
+     */
+    void acceptConfirmation(Long id);
 }

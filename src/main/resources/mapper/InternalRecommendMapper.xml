@@ -76,4 +76,21 @@
         WHERE ir.id = #{id}
           AND ir.is_delete = 0
     </select>
+
+    <!--  根据招聘流程实例id查找hr  -->
+    <select id="selectHRByInstanceId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT hr
+        FROM internal_recommend
+        WHERE recruit_process_instance_id = #{instanceId}
+          AND is_delete = 0
+    </select>
+
+    <!--  根据招聘流程实例id查找候选人  -->
+    <select id="selectApplicantByInstanceId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT hj.uid
+        FROM internal_recommend AS ir
+                 LEFT JOIN hunt_job AS hj ON ir.hunt_id = hj.id AND hj.is_delete = 0
+        WHERE ir.recruit_process_instance_id = #{instanceId}
+          AND ir.is_delete = 0
+    </select>
 </mapper>

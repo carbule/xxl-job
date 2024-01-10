@@ -3,9 +3,7 @@ package com.korant.youya.workplace.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.dto.talentpool.AssociateDto;
-import com.korant.youya.workplace.pojo.dto.talentpool.QueryPublishedJobListDto;
-import com.korant.youya.workplace.pojo.dto.talentpool.TalentPoolQueryListDto;
+import com.korant.youya.workplace.pojo.dto.talentpool.*;
 import com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo;
 import com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo;
 import com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo;
@@ -88,6 +86,150 @@ public class TalentPoolController {
     @PostMapping("/associate")
     public R<?> associate(@RequestBody @Valid AssociateDto associateDto) {
         talentPoolService.associate(associateDto);
+        return R.ok();
+    }
+
+    /**
+     * 创建面试邀约
+     *
+     * @param createInterviewDto
+     * @return
+     */
+    @PostMapping("/createInterview")
+    public R<?> createInterview(@RequestBody @Valid TalentPoolCreateInterviewDto createInterviewDto) {
+        talentPoolService.createInterview(createInterviewDto);
+        return R.ok();
+    }
+
+    /**
+     * 取消面试邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/cancelInterview/{id}")
+    public R<?> cancelInterview(@PathVariable("id") Long id) {
+        talentPoolService.cancelInterview(id);
+        return R.ok();
+    }
+
+    /**
+     * 确认完成面试邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/confirmInterview/{id}")
+    public R<?> confirmInterview(@PathVariable("id") Long id) {
+        talentPoolService.confirmInterview(id);
+        return R.ok();
+    }
+
+    /**
+     * 删除面试邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/deleteInterview/{id}")
+    public R<?> deleteInterview(@PathVariable("id") Long id) {
+        talentPoolService.deleteInterview(id);
+        return R.ok();
+    }
+
+    /**
+     * 创建入职邀约
+     *
+     * @param createOnboardingDto
+     * @return
+     */
+    @PostMapping("/createOnboarding")
+    public R<?> createOnboarding(@RequestBody @Valid TalentPoolCreateOnboardingDto createOnboardingDto) {
+        talentPoolService.createOnboarding(createOnboardingDto);
+        return R.ok();
+    }
+
+    /**
+     * 取消入职邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/cancelOnboarding/{id}")
+    public R<?> cancelOnboarding(@PathVariable("id") Long id) {
+        talentPoolService.cancelOnboarding(id);
+        return R.ok();
+    }
+
+    /**
+     * 确认完成入职邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/confirmOnboarding/{id}")
+    public R<?> confirmOnboarding(@PathVariable("id") Long id) {
+        talentPoolService.confirmOnboarding(id);
+        return R.ok();
+    }
+
+    /**
+     * 删除入职邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/deleteOnboarding/{id}")
+    public R<?> deleteOnboarding(@PathVariable("id") Long id) {
+        talentPoolService.deleteOnboarding(id);
+        return R.ok();
+    }
+
+    /**
+     * 创建转正邀约
+     *
+     * @param createConfirmationDto
+     * @return
+     */
+    @PostMapping("/createConfirmation")
+    public R<?> createConfirmation(@RequestBody @Valid TalentPoolCreateConfirmationDto createConfirmationDto) {
+        talentPoolService.createConfirmation(createConfirmationDto);
+        return R.ok();
+    }
+
+    /**
+     * 取消转正邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/cancelConfirmation/{id}")
+    public R<?> cancelConfirmation(@PathVariable("id") Long id) {
+        talentPoolService.cancelConfirmation(id);
+        return R.ok();
+    }
+
+    /**
+     * 确认完成转正邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/confirmConfirmation/{id}")
+    public R<?> confirmConfirmation(@PathVariable("id") Long id) {
+        talentPoolService.confirmConfirmation(id);
+        return R.ok();
+    }
+
+    /**
+     * 删除转正邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/deleteConfirmation/{id}")
+    public R<?> deleteConfirmation(@PathVariable("id") Long id) {
+        talentPoolService.deleteConfirmation(id);
         return R.ok();
     }
 }
