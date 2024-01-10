@@ -220,4 +220,42 @@
         ORDER BY j.create_time DESC LIMIT #{listDto.pageSize}
         OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
     </select>
+
+    <!--  查询面试邀约详情  -->
+    <select id="interviewDetail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolInterviewDetailVo">
+        SELECT i.id,
+               u.avatar,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
+               u.personal_signature AS personalSignature,
+               p1.name              AS positionName,
+               ep.min_salary        AS minSalary,
+               ep.max_salary        AS maxSalary,
+               d1.name              AS cityName,
+               p2.name              AS associationPositionName,
+               j.min_salary         AS associationPositionMinSalary,
+               j.max_salary         AS associationPositionMaxSalary,
+               i.approach,
+               i.inter_time         AS interTime,
+               i.note,
+               i.acceptance_status  AS acceptanceStatus,
+               i.completion_status  AS completionStatus
+        FROM interview AS i
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON i.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                 LEFT JOIN internal_recommend AS ir ON rpi.id = ir.recruit_process_instance_id AND ir.is_delete = 0
+                 LEFT JOIN hunt_job AS hj ON ir.hunt_id = hj.id AND hj.is_delete = 0
+                 LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
+                 LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                 LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+                 LEFT JOIN position AS p1 ON ep.position_code = p1.code AND p1.is_delete = 0
+                 LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
+                 LEFT JOIN district_data AS d1 ON ewa.city_code = d1.code AND d1.is_delete = 0
+                 LEFT JOIN yy_user_name_visible_info nv ON u.id = nv.uid AND nv.is_delete = 0
+                 LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN position AS p2 ON j.position_code = p2.code AND p2.is_delete = 0
+        WHERE i.id = #{id}
+          AND i.is_delete = 0
+    </select>
 </mapper>

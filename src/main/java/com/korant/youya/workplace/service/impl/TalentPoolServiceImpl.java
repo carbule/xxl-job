@@ -11,10 +11,7 @@ import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.talentpool.*;
 import com.korant.youya.workplace.pojo.po.*;
-import com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentRecruitmentRecordsVo;
+import com.korant.youya.workplace.pojo.vo.talentpool.*;
 import com.korant.youya.workplace.service.TalentPoolService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -182,6 +179,17 @@ public class TalentPoolServiceImpl implements TalentPoolService {
     }
 
     /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public TalentPoolInterviewDetailVo interviewDetail(Long id) {
+        return talentPoolMapper.interviewDetail(id);
+    }
+
+    /**
      * 取消面试邀约
      *
      * @param id
@@ -279,6 +287,17 @@ public class TalentPoolServiceImpl implements TalentPoolService {
     }
 
     /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public TalentPoolOnboardingDetailVo onboardingDetail(Long id) {
+        return null;
+    }
+
+    /**
      * 取消入职邀约
      *
      * @param id
@@ -371,6 +390,17 @@ public class TalentPoolServiceImpl implements TalentPoolService {
             recruitProcessInstance.setProcessStep(3);
             recruitProcessInstanceMapper.updateById(recruitProcessInstance);
         }
+    }
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public TalentPoolConfirmationDetailVo confirmationDetail(Long id) {
+        return null;
     }
 
     /**

@@ -2,10 +2,7 @@ package com.korant.youya.workplace.mapper;
 
 import com.korant.youya.workplace.pojo.dto.talentpool.QueryPublishedJobListDto;
 import com.korant.youya.workplace.pojo.dto.talentpool.TalentPoolQueryListDto;
-import com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentRecruitmentRecordsVo;
+import com.korant.youya.workplace.pojo.vo.talentpool.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -68,4 +65,12 @@ public interface TalentPoolMapper {
      * @return
      */
     List<PublishedJobVo> queryPublishedJobList(@Param("userId") Long userId, @Param("listDto") QueryPublishedJobListDto listDto);
+
+    /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    TalentPoolInterviewDetailVo interviewDetail(@Param("id") Long id);
 }

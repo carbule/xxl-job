@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.talentpool.*;
-import com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentRecruitmentRecordsVo;
+import com.korant.youya.workplace.pojo.vo.talentpool.*;
 import com.korant.youya.workplace.service.TalentPoolService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -102,6 +99,18 @@ public class TalentPoolController {
     }
 
     /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/interviewDetail/{id}")
+    public R<?> interviewDetail(@PathVariable("id") Long id) {
+        TalentPoolInterviewDetailVo detailVo = talentPoolService.interviewDetail(id);
+        return R.success(detailVo);
+    }
+
+    /**
      * 取消面试邀约
      *
      * @param id
@@ -147,6 +156,18 @@ public class TalentPoolController {
     public R<?> createOnboarding(@RequestBody @Valid TalentPoolCreateOnboardingDto createOnboardingDto) {
         talentPoolService.createOnboarding(createOnboardingDto);
         return R.ok();
+    }
+
+    /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/onboardingDetail/{id}")
+    public R<?> onboardingDetail(@PathVariable("id") Long id) {
+        TalentPoolOnboardingDetailVo detailVo = talentPoolService.onboardingDetail(id);
+        return R.success(detailVo);
     }
 
     /**
@@ -196,6 +217,19 @@ public class TalentPoolController {
         talentPoolService.createConfirmation(createConfirmationDto);
         return R.ok();
     }
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/confirmationDetail/{id}")
+    public R<?> confirmationDetail(@PathVariable("id") Long id) {
+        TalentPoolConfirmationDetailVo detailVo = talentPoolService.confirmationDetail(id);
+        return R.success(detailVo);
+    }
+
 
     /**
      * 取消转正邀约

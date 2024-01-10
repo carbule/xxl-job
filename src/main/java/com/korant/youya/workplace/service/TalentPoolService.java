@@ -2,10 +2,7 @@ package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.dto.talentpool.*;
-import com.korant.youya.workplace.pojo.vo.talentpool.PublishedJobVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentDetailVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentPoolVo;
-import com.korant.youya.workplace.pojo.vo.talentpool.TalentRecruitmentRecordsVo;
+import com.korant.youya.workplace.pojo.vo.talentpool.*;
 
 /**
  * @ClassName TalentPoolService
@@ -63,6 +60,14 @@ public interface TalentPoolService {
     void createInterview(TalentPoolCreateInterviewDto createInterviewDto);
 
     /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    TalentPoolInterviewDetailVo interviewDetail(Long id);
+
+    /**
      * 取消面试邀约
      *
      * @param id
@@ -91,6 +96,14 @@ public interface TalentPoolService {
     void createOnboarding(TalentPoolCreateOnboardingDto createOnboardingDto);
 
     /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    TalentPoolOnboardingDetailVo onboardingDetail(Long id);
+
+    /**
      * 取消入职邀约
      *
      * @param id
@@ -117,6 +130,14 @@ public interface TalentPoolService {
      * @param createConfirmationDto
      */
     void createConfirmation(TalentPoolCreateConfirmationDto createConfirmationDto);
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    TalentPoolConfirmationDetailVo confirmationDetail(Long id);
 
     /**
      * 取消转正邀约
