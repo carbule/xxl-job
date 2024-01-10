@@ -25,6 +25,21 @@ public class OnboardingVo {
     private LocalDateTime onboardingTime;
 
     /**
+     * 国家编码
+     */
+    private String countryName;
+
+    /**
+     * 省份编码
+     */
+    private String provinceName;
+
+    /**
+     * 市级编码
+     */
+    private String cityName;
+
+    /**
      * 入职地点
      */
     private String address;

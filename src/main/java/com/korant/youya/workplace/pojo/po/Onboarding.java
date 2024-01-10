@@ -43,6 +43,24 @@ public class Onboarding implements Serializable {
     private LocalDateTime onboardingTime;
 
     /**
+     * 国家编码
+     */
+    @TableField("country_code")
+    private String countryCode;
+
+    /**
+     * 省份编码
+     */
+    @TableField("province_code")
+    private String provinceCode;
+
+    /**
+     * 市级编码
+     */
+    @TableField("city_code")
+    private String cityCode;
+
+    /**
      * 入职地点
      */
     @TableField("address")

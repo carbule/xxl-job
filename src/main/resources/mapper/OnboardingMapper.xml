@@ -4,14 +4,20 @@
 
     <!--  查询入职邀请列表  -->
     <select id="queryList" resultType="com.korant.youya.workplace.pojo.vo.onboarding.OnboardingVo">
-        SELECT id,
-               onboarding_time   AS onboardingTime,
-               address,
-               note,
-               acceptance_status AS acceptanceStatus,
-               completion_status AS completionStatus
-        FROM onboarding
-        WHERE recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
-          AND is_delete = 0
+        SELECT o.id,
+               o.onboarding_time   AS onboardingTime,
+               d1.name             AS countryName,
+               d2.name             AS provinceName,
+               d3.name             AS cityName,
+               o.address,
+               o.note,
+               o.acceptance_status AS acceptanceStatus,
+               o.completion_status AS completionStatus
+        FROM onboarding AS o
+                 LEFT JOIN district_data d1 ON d1.code = o.country_code AND d1.is_delete = 0
+                 LEFT JOIN district_data d2 ON d2.code = o.province_code AND d2.is_delete = 0
+                 LEFT JOIN district_data d3 ON d3.code = o.city_code AND d3.is_delete = 0
+        WHERE o.recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
+          AND o.is_delete = 0
     </select>
 </mapper>
