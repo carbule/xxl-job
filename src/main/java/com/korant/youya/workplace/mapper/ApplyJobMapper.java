@@ -35,4 +35,20 @@ public interface ApplyJobMapper extends BaseMapper<ApplyJob> {
      * @return
      */
     ApplyJobDetailVo detail(@Param("id") Long id);
+
+    /**
+     * 根据招聘流程实例id查找hr
+     *
+     * @param recruitProcessInstanceId
+     * @return
+     */
+    Long selectHRByInstanceId(@Param("instanceId") Long recruitProcessInstanceId);
+
+    /**
+     * 根据招聘流程实例id查找候选人
+     *
+     * @param recruitProcessInstanceId
+     * @return
+     */
+    Long selectApplicantByInstanceId(@Param("instanceId") Long recruitProcessInstanceId);
 }

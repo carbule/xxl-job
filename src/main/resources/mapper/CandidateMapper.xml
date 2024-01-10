@@ -98,6 +98,19 @@
         </where>
     </select>
 
+    <!--  查询已发布职位分类  -->
+    <select id="queryPublishedJobCategoryList" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.candidate.PublishedJobCategoryVo">
+        SELECT j.position_code AS positionCode,
+               p.name          AS positionName
+        FROM job AS j
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+        WHERE j.uid = #{userId}
+          AND j.status = 1
+          AND j.audit_status = 2
+          AND j.is_delete = 0
+    </select>
+
     <!--  查询候选人详情  -->
     <select id="detail" parameterType="java.lang.Long" resultMap="detailMap">
         SELECT aj.id,
@@ -124,7 +137,7 @@
                            END)      AS workExperience,
                es.status             AS employStatus,
                ep.min_salary         AS minSalary,
-               ep.min_salary         AS maxSalary,
+               ep.max_salary         AS maxSalary,
                rv.phone,
                rv.wechat_id          AS wechatId,
                rv.qq,
@@ -178,11 +191,11 @@
                u.personal_signature           AS personalSignature,
                p1.name                        AS positionName,
                ep.min_salary                  AS minSalary,
-               ep.min_salary                  AS maxSalary,
+               ep.max_salary                  AS maxSalary,
                d1.name                        AS cityName,
                p2.name                        AS associationPositionName,
                j.min_salary                   AS associationPositionMinSalary,
-               j.min_salary                   AS associationPositionMaxSalary,
+               j.max_salary                   AS associationPositionMaxSalary,
                rpi.process_step               AS processStep
         FROM apply_job AS aj
                  LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0

@@ -51,4 +51,40 @@ public class ApplyJobController {
         ApplyJobDetailVo detailVo = applyJobService.detail(id);
         return R.success(detailVo);
     }
+
+    /**
+     * 接受面试邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/acceptInterview/{id}")
+    public R<?> acceptInterview(@PathVariable("id") Long id) {
+        applyJobService.acceptInterview(id);
+        return R.ok();
+    }
+
+    /**
+     * 接受入职邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/acceptOnboarding/{id}")
+    public R<?> acceptOnboarding(@PathVariable("id") Long id) {
+        applyJobService.acceptOnboarding(id);
+        return R.ok();
+    }
+
+    /**
+     * 接受转正邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/acceptConfirmation/{id}")
+    public R<?> acceptConfirmation(@PathVariable("id") Long id) {
+        applyJobService.acceptConfirmation(id);
+        return R.ok();
+    }
 }

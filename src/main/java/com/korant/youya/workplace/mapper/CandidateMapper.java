@@ -4,6 +4,7 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
+import com.korant.youya.workplace.pojo.vo.candidate.PublishedJobCategoryVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -34,6 +35,14 @@ public interface CandidateMapper {
      * @return
      */
     List<CandidateVo> queryList(@Param("userId") Long userId, @Param("listDto") CandidateQueryListDto listDto);
+
+    /**
+     * 查询已发布职位分类
+     *
+     * @param userId
+     * @return
+     */
+    List<PublishedJobCategoryVo> queryPublishedJobCategoryList(@Param("userId") Long userId);
 
     /**
      * 查询候选人详情

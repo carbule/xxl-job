@@ -54,4 +54,22 @@
         WHERE aj.id = #{id}
           AND aj.is_delete = 0
     </select>
+
+    <!--  根据招聘流程实例id查找hr  -->
+    <select id="selectHRByInstanceId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT u.id
+        FROM apply_job AS aj
+                 LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN yy_user AS u ON j.uid = u.id AND u.is_delete = 0
+        WHERE aj.recruit_process_instance_id = #{instanceId}
+          AND aj.is_delete = 0
+    </select>
+
+    <!--  根据招聘流程实例id查找候选人  -->
+    <select id="selectApplicantByInstanceId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT applicant
+        FROM apply_job
+        WHERE recruit_process_instance_id = #{instanceId}
+          AND is_delete = 0
+    </select>
 </mapper>

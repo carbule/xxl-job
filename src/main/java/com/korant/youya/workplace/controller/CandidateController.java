@@ -10,10 +10,13 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
 import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
+import com.korant.youya.workplace.pojo.vo.candidate.PublishedJobCategoryVo;
 import com.korant.youya.workplace.service.CandidateService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @ClassName CandidateController
@@ -39,6 +42,17 @@ public class CandidateController {
     public R<?> queryList(@RequestBody @Valid CandidateQueryListDto listDto) {
         Page<CandidateVo> page = candidateService.queryList(listDto);
         return R.success(page);
+    }
+
+    /**
+     * 查询已发布职位分类
+     *
+     * @return
+     */
+    @GetMapping("/queryPublishedJobCategoryList")
+    public R<?> queryPublishedJobCategoryList() {
+        List<PublishedJobCategoryVo> list = candidateService.queryPublishedJobCategoryList();
+        return R.success(list);
     }
 
     /**
@@ -72,9 +86,45 @@ public class CandidateController {
      * @param createInterviewDto
      * @return
      */
-    @GetMapping("/createInterview")
+    @PostMapping("/createInterview")
     public R<?> createInterview(@RequestBody @Valid CandidateCreateInterviewDto createInterviewDto) {
         candidateService.createInterview(createInterviewDto);
+        return R.ok();
+    }
+
+    /**
+     * 取消面试邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/cancelInterview/{id}")
+    public R<?> cancelInterview(@PathVariable("id") Long id) {
+        candidateService.cancelInterview(id);
+        return R.ok();
+    }
+
+    /**
+     * 确认完成面试邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/confirmInterview/{id}")
+    public R<?> confirmInterview(@PathVariable("id") Long id) {
+        candidateService.confirmInterview(id);
+        return R.ok();
+    }
+
+    /**
+     * 删除面试邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/deleteInterview/{id}")
+    public R<?> deleteInterview(@PathVariable("id") Long id) {
+        candidateService.deleteInterview(id);
         return R.ok();
     }
 
@@ -84,9 +134,45 @@ public class CandidateController {
      * @param createOnboardingDto
      * @return
      */
-    @GetMapping("/createOnboarding")
+    @PostMapping("/createOnboarding")
     public R<?> createOnboarding(@RequestBody @Valid CandidateCreateOnboardingDto createOnboardingDto) {
         candidateService.createOnboarding(createOnboardingDto);
+        return R.ok();
+    }
+
+    /**
+     * 取消入职邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/cancelOnboarding/{id}")
+    public R<?> cancelOnboarding(@PathVariable("id") Long id) {
+        candidateService.cancelOnboarding(id);
+        return R.ok();
+    }
+
+    /**
+     * 确认完成入职邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/confirmOnboarding/{id}")
+    public R<?> confirmOnboarding(@PathVariable("id") Long id) {
+        candidateService.confirmOnboarding(id);
+        return R.ok();
+    }
+
+    /**
+     * 删除入职邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/deleteOnboarding/{id}")
+    public R<?> deleteOnboarding(@PathVariable("id") Long id) {
+        candidateService.deleteOnboarding(id);
         return R.ok();
     }
 
@@ -96,9 +182,45 @@ public class CandidateController {
      * @param createConfirmationDto
      * @return
      */
-    @GetMapping("/createConfirmation")
+    @PostMapping("/createConfirmation")
     public R<?> createConfirmation(@RequestBody @Valid CandidateCreateConfirmationDto createConfirmationDto) {
         candidateService.createConfirmation(createConfirmationDto);
+        return R.ok();
+    }
+
+    /**
+     * 取消转正邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/cancelConfirmation/{id}")
+    public R<?> cancelConfirmation(@PathVariable("id") Long id) {
+        candidateService.cancelConfirmation(id);
+        return R.ok();
+    }
+
+    /**
+     * 确认完成转正邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/confirmConfirmation/{id}")
+    public R<?> confirmConfirmation(@PathVariable("id") Long id) {
+        candidateService.confirmConfirmation(id);
+        return R.ok();
+    }
+
+    /**
+     * 删除转正邀约
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/deleteConfirmation/{id}")
+    public R<?> deleteConfirmation(@PathVariable("id") Long id) {
+        candidateService.deleteConfirmation(id);
         return R.ok();
     }
 }

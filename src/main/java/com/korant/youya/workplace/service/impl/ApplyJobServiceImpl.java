@@ -3,14 +3,23 @@ package com.korant.youya.workplace.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.enums.AcceptanceStatusEnum;
+import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.ApplyJobMapper;
+import com.korant.youya.workplace.mapper.ConfirmationMapper;
+import com.korant.youya.workplace.mapper.InterviewMapper;
+import com.korant.youya.workplace.mapper.OnboardingMapper;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
 import com.korant.youya.workplace.pojo.po.ApplyJob;
+import com.korant.youya.workplace.pojo.po.Confirmation;
+import com.korant.youya.workplace.pojo.po.Interview;
+import com.korant.youya.workplace.pojo.po.Onboarding;
 import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
 import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobVo;
 import com.korant.youya.workplace.service.ApplyJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +37,15 @@ public class ApplyJobServiceImpl extends ServiceImpl<ApplyJobMapper, ApplyJob> i
 
     @Resource
     private ApplyJobMapper applyJobMapper;
+
+    @Resource
+    private InterviewMapper interviewMapper;
+
+    @Resource
+    private OnboardingMapper onboardingMapper;
+
+    @Resource
+    private ConfirmationMapper confirmationMapper;
 
     /**
      * 查询用户已申请职位列表
@@ -56,5 +74,59 @@ public class ApplyJobServiceImpl extends ServiceImpl<ApplyJobMapper, ApplyJob> i
     @Override
     public ApplyJobDetailVo detail(Long id) {
         return applyJobMapper.detail(id);
+    }
+
+    /**
+     * 接受面试邀约
+     *
+     * @param id
+     */
+    @Override
+    public void acceptInterview(Long id) {
+        Interview interview = interviewMapper.selectOne(new LambdaQueryWrapper<Interview>().eq(Interview::getId, id).eq(Interview::getIsDelete, 0));
+        if (null == interview) throw new YouyaException("面试邀约信息不存在");
+        Long recruitProcessInstanceId = interview.getRecruitProcessInstanceId();
+        Long applicant = applyJobMapper.selectApplicantByInstanceId(recruitProcessInstanceId);
+        if (ObjectUtils.notEqual(applicant, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
+        Integer acceptanceStatus = interview.getAcceptanceStatus();
+        if (AcceptanceStatusEnum.PENDING.getStatus() != acceptanceStatus) throw new YouyaException("只有待接受的面试邀约才可以操作");
+        interview.setAcceptanceStatus(AcceptanceStatusEnum.ACCEPTED.getStatus());
+        interviewMapper.updateById(interview);
+    }
+
+    /**
+     * 接受入职邀约
+     *
+     * @param id
+     */
+    @Override
+    public void acceptOnboarding(Long id) {
+        Onboarding onboarding = onboardingMapper.selectOne(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getId, id).eq(Onboarding::getIsDelete, 0));
+        if (null == onboarding) throw new YouyaException("入职邀约信息不存在");
+        Long recruitProcessInstanceId = onboarding.getRecruitProcessInstanceId();
+        Long applicant = applyJobMapper.selectApplicantByInstanceId(recruitProcessInstanceId);
+        if (ObjectUtils.notEqual(applicant, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
+        Integer acceptanceStatus = onboarding.getAcceptanceStatus();
+        if (AcceptanceStatusEnum.PENDING.getStatus() != acceptanceStatus) throw new YouyaException("只有待接受的入职邀约才可以操作");
+        onboarding.setAcceptanceStatus(AcceptanceStatusEnum.ACCEPTED.getStatus());
+        onboardingMapper.updateById(onboarding);
+    }
+
+    /**
+     * 接受转正邀约
+     *
+     * @param id
+     */
+    @Override
+    public void acceptConfirmation(Long id) {
+        Confirmation confirmation = confirmationMapper.selectOne(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getId, id).eq(Confirmation::getIsDelete, 0));
+        if (null == confirmation) throw new YouyaException("转正邀约信息不存在");
+        Long recruitProcessInstanceId = confirmation.getRecruitProcessInstanceId();
+        Long applicant = applyJobMapper.selectApplicantByInstanceId(recruitProcessInstanceId);
+        if (ObjectUtils.notEqual(applicant, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
+        Integer acceptanceStatus = confirmation.getAcceptanceStatus();
+        if (AcceptanceStatusEnum.PENDING.getStatus() != acceptanceStatus) throw new YouyaException("只有待接受的转正邀约才可以操作");
+        confirmation.setAcceptanceStatus(AcceptanceStatusEnum.ACCEPTED.getStatus());
+        confirmationMapper.updateById(confirmation);
     }
 }
