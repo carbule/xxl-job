@@ -10,12 +10,14 @@ import com.korant.youya.workplace.mapper.ConfirmationMapper;
 import com.korant.youya.workplace.mapper.InterviewMapper;
 import com.korant.youya.workplace.mapper.OnboardingMapper;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
+import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
+import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.ApplyJob;
 import com.korant.youya.workplace.pojo.po.Confirmation;
 import com.korant.youya.workplace.pojo.po.Interview;
 import com.korant.youya.workplace.pojo.po.Onboarding;
-import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobVo;
+import com.korant.youya.workplace.pojo.vo.applyjob.*;
 import com.korant.youya.workplace.service.ApplyJobService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -74,6 +76,60 @@ public class ApplyJobServiceImpl extends ServiceImpl<ApplyJobMapper, ApplyJob> i
     @Override
     public ApplyJobDetailVo detail(Long id) {
         return applyJobMapper.detail(id);
+    }
+
+    /**
+     * 查询面试邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<ApplyJobInterviewVo> queryInterviewList(InterviewQueryListDto listDto) {
+        Long recruitProcessInstanceId = listDto.getRecruitProcessInstanceId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = interviewMapper.selectCount(new LambdaQueryWrapper<Interview>().eq(Interview::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Interview::getIsDelete, 0));
+        List<ApplyJobInterviewVo> list = applyJobMapper.queryInterviewList(listDto);
+        Page<ApplyJobInterviewVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询入职邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<ApplyJobOnboardingVo> queryOnboardingList(OnboardingQueryListDto listDto) {
+        Long recruitProcessInstanceId = listDto.getRecruitProcessInstanceId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = onboardingMapper.selectCount(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getIsDelete, 0));
+        List<ApplyJobOnboardingVo> list = applyJobMapper.queryOnboardingList(listDto);
+        Page<ApplyJobOnboardingVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询转正邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<ApplyJobConfirmationVo> queryConfirmationList(ConfirmationQueryListDto listDto) {
+        Long recruitProcessInstanceId = listDto.getRecruitProcessInstanceId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = confirmationMapper.selectCount(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getIsDelete, 0));
+        List<ApplyJobConfirmationVo> list = applyJobMapper.queryConfirmationList(listDto);
+        Page<ApplyJobConfirmationVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
     }
 
     /**

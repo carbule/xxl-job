@@ -2,9 +2,11 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
+import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
+import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.ApplyJob;
-import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobVo;
+import com.korant.youya.workplace.pojo.vo.applyjob.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -35,6 +37,30 @@ public interface ApplyJobMapper extends BaseMapper<ApplyJob> {
      * @return
      */
     ApplyJobDetailVo detail(@Param("id") Long id);
+
+    /**
+     * 查询面试邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<ApplyJobInterviewVo> queryInterviewList(@Param("listDto") InterviewQueryListDto listDto);
+
+    /**
+     * 查询入职邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<ApplyJobOnboardingVo> queryOnboardingList(@Param("listDto") OnboardingQueryListDto listDto);
+
+    /**
+     * 查询转正邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<ApplyJobConfirmationVo> queryConfirmationList(@Param("listDto") ConfirmationQueryListDto listDto);
 
     /**
      * 根据招聘流程实例id查找hr

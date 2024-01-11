@@ -5,10 +5,7 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmation
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
-import com.korant.youya.workplace.pojo.vo.candidate.PublishedJobCategoryVo;
+import com.korant.youya.workplace.pojo.vo.candidate.*;
 
 import java.util.List;
 
@@ -60,6 +57,14 @@ public interface CandidateService {
     void createInterview(CandidateCreateInterviewDto createInterviewDto);
 
     /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    CandidateInterviewDetailVo interviewDetail(Long id);
+
+    /**
      * 取消面试邀约
      *
      * @param id
@@ -88,6 +93,14 @@ public interface CandidateService {
     void createOnboarding(CandidateCreateOnboardingDto createOnboardingDto);
 
     /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    CandidateOnboardingDetailVo onboardingDetail(Long id);
+
+    /**
      * 取消入职邀约
      *
      * @param id
@@ -114,6 +127,14 @@ public interface CandidateService {
      * @param createConfirmationDto
      */
     void createConfirmation(CandidateCreateConfirmationDto createConfirmationDto);
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    CandidateConfirmationDetailVo confirmationDetail(Long id);
 
     /**
      * 取消转正邀约

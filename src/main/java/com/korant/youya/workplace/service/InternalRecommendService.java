@@ -2,10 +2,12 @@ package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
+import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
+import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
-import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendDetailVo;
-import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendVo;
+import com.korant.youya.workplace.pojo.vo.internalrecommend.*;
 
 /**
  * <p>
@@ -32,6 +34,30 @@ public interface InternalRecommendService extends IService<InternalRecommend> {
      * @return
      */
     InternalRecommendDetailVo detail(Long id);
+
+    /**
+     * 查询面试邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<InternalRecommendInterviewVo> queryInterviewList(InterviewQueryListDto listDto);
+
+    /**
+     * 查询入职邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<InternalRecommendOnboardingVo> queryOnboardingList(OnboardingQueryListDto listDto);
+
+    /**
+     * 查询转正邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<InternalRecommendConfirmationVo> queryConfirmationList(ConfirmationQueryListDto listDto);
 
     /**
      * 接受面试邀约

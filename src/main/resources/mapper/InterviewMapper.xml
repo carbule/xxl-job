@@ -13,5 +13,7 @@
         FROM interview
         WHERE recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
           AND is_delete = 0
+        ORDER BY create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
     </select>
 </mapper>

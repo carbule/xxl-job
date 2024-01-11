@@ -19,5 +19,7 @@
                  LEFT JOIN district_data d3 ON d3.code = o.city_code AND d3.is_delete = 0
         WHERE o.recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
           AND o.is_delete = 0
+        ORDER BY o.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
     </select>
 </mapper>

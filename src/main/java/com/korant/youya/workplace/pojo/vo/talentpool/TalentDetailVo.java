@@ -129,6 +129,11 @@ public class TalentDetailVo {
     private String address;
 
     /**
+     * 是否关联职位
+     */
+    private Integer isAssociated;
+
+    /**
      * 工作履历
      */
     private List<WorkExperiencePreviewVo> workExperienceVoList;

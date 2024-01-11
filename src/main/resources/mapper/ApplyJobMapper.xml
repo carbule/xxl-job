@@ -31,6 +31,7 @@
     <select id="detail" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo">
         SELECT aj.id,
+               aj.job_id                                                AS jobId,
                aj.recruit_process_instance_id                           AS recruitProcessInstanceId,
                e.id                                                     AS enterpriseId,
                e.logo,
@@ -53,6 +54,84 @@
                            ON aj.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
         WHERE aj.id = #{id}
           AND aj.is_delete = 0
+    </select>
+
+    <!--  查询面试邀请列表  -->
+    <select id="queryInterviewList"
+            resultType="com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobInterviewVo">
+        SELECT i.id,
+               i.approach,
+               i.inter_time        AS interTime,
+               i.note,
+               i.acceptance_status AS acceptanceStatus,
+               i.completion_status AS completionStatus,
+               u.avatar,
+               u.last_name         AS lastName,
+               u.first_name        AS firstName
+        FROM interview AS i
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON i.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                 LEFT JOIN apply_job AS aj ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                 LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN yy_user AS u ON j.uid = u.id AND u.is_delete = 0
+        WHERE i.recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
+          AND i.is_delete = 0
+        ORDER BY i.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+    </select>
+
+    <!--  查询入职邀请列表  -->
+    <select id="queryOnboardingList"
+            resultType="com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobOnboardingVo">
+        SELECT o.id,
+               o.onboarding_time   AS onboardingTime,
+               d1.name             AS countryName,
+               d2.name             AS provinceName,
+               d3.name             AS cityName,
+               o.address,
+               o.note,
+               o.acceptance_status AS acceptanceStatus,
+               o.completion_status AS completionStatus,
+               u.avatar,
+               u.last_name         AS lastName,
+               u.first_name        AS firstName
+        FROM onboarding AS o
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON o.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                 LEFT JOIN apply_job AS aj ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                 LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN yy_user AS u ON j.uid = u.id AND u.is_delete = 0
+                 LEFT JOIN district_data d1 ON d1.code = o.country_code AND d1.is_delete = 0
+                 LEFT JOIN district_data d2 ON d2.code = o.province_code AND d2.is_delete = 0
+                 LEFT JOIN district_data d3 ON d3.code = o.city_code AND d3.is_delete = 0
+        WHERE o.recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
+          AND o.is_delete = 0
+        ORDER BY o.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+    </select>
+
+    <!--  查询转正邀请列表  -->
+    <select id="queryConfirmationList"
+            resultType="com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobConfirmationVo">
+        SELECT c.id,
+               c.confirmation_time AS confirmationTime,
+               c.salary,
+               c.note,
+               c.acceptance_status AS acceptanceStatus,
+               c.completion_status AS completionStatus,
+               u.avatar,
+               u.last_name         AS lastName,
+               u.first_name        AS firstName
+        FROM confirmation AS c
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON c.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                 LEFT JOIN apply_job AS aj ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                 LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN yy_user AS u ON j.uid = u.id AND u.is_delete = 0
+        WHERE c.recruit_process_instance_id = #{listDto.recruitProcessInstanceId}
+          AND c.is_delete = 0
+        ORDER BY c.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
     </select>
 
     <!--  根据招聘流程实例id查找hr  -->

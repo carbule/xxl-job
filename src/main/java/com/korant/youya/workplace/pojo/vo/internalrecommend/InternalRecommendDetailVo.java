@@ -21,6 +21,11 @@ public class InternalRecommendDetailVo {
     private Long id;
 
     /**
+     * 职位id
+     */
+    private Long jobId;
+
+    /**
      * 招聘流程实列id
      */
     private Long recruitProcessInstanceId;

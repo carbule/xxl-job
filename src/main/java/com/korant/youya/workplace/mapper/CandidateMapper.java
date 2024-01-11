@@ -1,10 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
-import com.korant.youya.workplace.pojo.vo.candidate.PublishedJobCategoryVo;
+import com.korant.youya.workplace.pojo.vo.candidate.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -59,4 +56,28 @@ public interface CandidateMapper {
      * @return
      */
     CandidateRecruitmentRecordsVo queryRecruitmentRecords(@Param("id") Long id);
+
+    /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    CandidateInterviewDetailVo interviewDetail(@Param("id") Long id);
+
+    /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    CandidateOnboardingDetailVo onboardingDetail(@Param("id") Long id);
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    CandidateConfirmationDetailVo confirmationDetail(@Param("id") Long id);
 }

@@ -1,18 +1,18 @@
-package com.korant.youya.workplace.pojo.vo.talentpool;
+package com.korant.youya.workplace.pojo.vo.candidate;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 /**
- * @ClassName TalentPoolInterviewDetailVo
+ * @ClassName CandidateInterviewDetailVo
  * @Description
  * @Author chenyiqiang
- * @Date 2024/1/10 19:27
+ * @Date 2024/1/11 11:25
  * @Version 1.0
  */
 @Data
-public class TalentPoolInterviewDetailVo {
+public class CandidateInterviewDetailVo {
 
     /**
      * 主键

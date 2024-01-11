@@ -3,9 +3,11 @@ package com.korant.youya.workplace.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.applyjob.ApplyJobQueryListDto;
+import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
+import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
+import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.ApplyJob;
-import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobDetailVo;
-import com.korant.youya.workplace.pojo.vo.applyjob.ApplyJobVo;
+import com.korant.youya.workplace.pojo.vo.applyjob.*;
 
 /**
  * <p>
@@ -32,6 +34,30 @@ public interface ApplyJobService extends IService<ApplyJob> {
      * @return
      */
     ApplyJobDetailVo detail(Long id);
+
+    /**
+     * 查询面试邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<ApplyJobInterviewVo> queryInterviewList(InterviewQueryListDto listDto);
+
+    /**
+     * 查询入职邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<ApplyJobOnboardingVo> queryOnboardingList(OnboardingQueryListDto listDto);
+
+    /**
+     * 查询转正邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    Page<ApplyJobConfirmationVo> queryConfirmationList(ConfirmationQueryListDto listDto);
 
     /**
      * 接受面试邀约

@@ -1,18 +1,18 @@
-package com.korant.youya.workplace.pojo.vo.talentpool;
+package com.korant.youya.workplace.pojo.vo.candidate;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 /**
- * @ClassName TalentPoolInterviewDetailVo
+ * @ClassName CandidateConfirmationDetailVo
  * @Description
  * @Author chenyiqiang
- * @Date 2024/1/10 19:27
+ * @Date 2024/1/11 11:26
  * @Version 1.0
  */
 @Data
-public class TalentPoolInterviewDetailVo {
+public class CandidateConfirmationDetailVo {
 
     /**
      * 主键
@@ -35,14 +35,14 @@ public class TalentPoolInterviewDetailVo {
     private String lastName;
 
     /**
-     * 用户性别
-     */
-    private Integer gender;
-
-    /**
      * 用户名
      */
     private String firstName;
+
+    /**
+     * 用户性别
+     */
+    private Integer gender;
 
     /**
      * 个性签名
@@ -85,14 +85,14 @@ public class TalentPoolInterviewDetailVo {
     private Integer associationPositionMaxSalary;
 
     /**
-     * 面试方式
+     * 转正时间
      */
-    private Integer approach;
+    private LocalDateTime confirmationTime;
 
     /**
-     * 面试时间
+     * 转正薪资
      */
-    private LocalDateTime interTime;
+    private Integer salary;
 
     /**
      * 备注

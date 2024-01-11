@@ -73,4 +73,20 @@ public interface TalentPoolMapper {
      * @return
      */
     TalentPoolInterviewDetailVo interviewDetail(@Param("id") Long id);
+
+    /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    TalentPoolOnboardingDetailVo onboardingDetail(@Param("id") Long id);
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    TalentPoolConfirmationDetailVo confirmationDetail(@Param("id") Long id);
 }

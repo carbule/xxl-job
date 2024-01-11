@@ -7,10 +7,7 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmation
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
-import com.korant.youya.workplace.pojo.vo.candidate.PublishedJobCategoryVo;
+import com.korant.youya.workplace.pojo.vo.candidate.*;
 import com.korant.youya.workplace.service.CandidateService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -93,6 +90,18 @@ public class CandidateController {
     }
 
     /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/interviewDetail/{id}")
+    public R<?> interviewDetail(@PathVariable("id") Long id) {
+        CandidateInterviewDetailVo detailVo = candidateService.interviewDetail(id);
+        return R.success(detailVo);
+    }
+
+    /**
      * 取消面试邀约
      *
      * @param id
@@ -141,6 +150,18 @@ public class CandidateController {
     }
 
     /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/onboardingDetail/{id}")
+    public R<?> onboardingDetail(@PathVariable("id") Long id) {
+        CandidateOnboardingDetailVo detailVo = candidateService.onboardingDetail(id);
+        return R.success(detailVo);
+    }
+
+    /**
      * 取消入职邀约
      *
      * @param id
@@ -186,6 +207,18 @@ public class CandidateController {
     public R<?> createConfirmation(@RequestBody @Valid CandidateCreateConfirmationDto createConfirmationDto) {
         candidateService.createConfirmation(createConfirmationDto);
         return R.ok();
+    }
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/confirmationDetail/{id}")
+    public R<?> confirmationDetail(@PathVariable("id") Long id) {
+        CandidateConfirmationDetailVo detailVo = candidateService.confirmationDetail(id);
+        return R.success(detailVo);
     }
 
     /**

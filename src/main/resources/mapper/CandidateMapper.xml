@@ -231,4 +231,208 @@
                            ON aj.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
         WHERE aj.id = #{id}
     </select>
+
+    <!--  查询面试邀约详情  -->
+    <select id="interviewDetail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.candidate.CandidateInterviewDetailVo">
+        SELECT i.id,
+               u.avatar,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
+               u.gender,
+               u.personal_signature AS personalSignature,
+               p1.name              AS positionName,
+               ep.min_salary        AS minSalary,
+               ep.max_salary        AS maxSalary,
+               d1.name              AS cityName,
+               p2.name              AS associationPositionName,
+               j.min_salary         AS associationPositionMinSalary,
+               j.max_salary         AS associationPositionMaxSalary,
+               i.approach,
+               i.inter_time         AS interTime,
+               i.note,
+               i.acceptance_status  AS acceptanceStatus,
+               i.completion_status  AS completionStatus
+        FROM interview AS i
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON i.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                 LEFT JOIN apply_job AS aj ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                 LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+                 LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                 LEFT JOIN (
+            SELECT *
+            FROM expected_position
+            WHERE status_id = (SELECT es.id
+                               FROM interview AS i
+                                        LEFT JOIN recruit_process_instance AS rpi
+                                                  ON i.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                                        LEFT JOIN apply_job AS aj
+                                                  ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                                        LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+                                        LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                               WHERE i.id = #{id})
+            ORDER BY create_time DESC LIMIT 1
+        ) AS ep
+                           ON es.id = ep.status_id
+                 LEFT JOIN position AS p1 ON ep.position_code = p1.code AND p1.is_delete = 0
+                 LEFT JOIN (
+            SELECT *
+            FROM expected_work_area
+            WHERE status_id = (SELECT es.id
+                               FROM interview AS i
+                                        LEFT JOIN recruit_process_instance AS rpi
+                                                  ON i.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                                        LEFT JOIN apply_job AS aj
+                                                  ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                                        LEFT JOIN yy_user AS u
+                                                  ON aj.applicant = u.id AND u.is_delete = 0
+                                        LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                               WHERE i.id = #{id})
+            ORDER BY create_time DESC LIMIT 1
+        ) AS ewa ON es.id = ewa.status_id
+                 LEFT JOIN district_data AS d1 ON ewa.city_code = d1.code AND d1.is_delete = 0
+                 LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+                 LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN position AS p2 ON j.position_code = p2.code AND p2.is_delete = 0
+        WHERE i.id = #{id}
+          AND i.is_delete = 0
+    </select>
+
+    <!--  查询入职邀约详情  -->
+    <select id="onboardingDetail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.candidate.CandidateOnboardingDetailVo">
+        SELECT o.id,
+               u.avatar,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
+               u.gender,
+               u.personal_signature AS personalSignature,
+               p1.name              AS positionName,
+               ep.min_salary        AS minSalary,
+               ep.max_salary        AS maxSalary,
+               d1.name              AS cityName,
+               p2.name              AS associationPositionName,
+               j.min_salary         AS associationPositionMinSalary,
+               j.max_salary         AS associationPositionMaxSalary,
+               o.onboarding_time    AS onboardingTime,
+               d2.name              AS countryName,
+               d3.name              AS provinceName,
+               d4.name              AS cityName,
+               o.address,
+               o.note,
+               o.acceptance_status  AS acceptanceStatus,
+               o.completion_status  AS completionStatus
+        FROM onboarding AS o
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON o.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                 LEFT JOIN apply_job AS aj ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                 LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+                 LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                 LEFT JOIN (
+            SELECT *
+            FROM expected_position
+            WHERE status_id = (SELECT es.id
+                               FROM onboarding AS o
+                                        LEFT JOIN recruit_process_instance AS rpi
+                                                  ON o.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                                        LEFT JOIN apply_job AS aj
+                                                  ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                                        LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+                                        LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                               WHERE o.id = #{id})
+            ORDER BY create_time DESC LIMIT 1
+        ) AS ep
+                           ON es.id = ep.status_id
+                 LEFT JOIN position AS p1 ON ep.position_code = p1.code AND p1.is_delete = 0
+                 LEFT JOIN (
+            SELECT *
+            FROM expected_work_area
+            WHERE status_id = (SELECT es.id
+                               FROM onboarding AS o
+                                        LEFT JOIN recruit_process_instance AS rpi
+                                                  ON o.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                                        LEFT JOIN apply_job AS aj
+                                                  ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                                        LEFT JOIN yy_user AS u
+                                                  ON aj.applicant = u.id AND u.is_delete = 0
+                                        LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                               WHERE o.id = #{id})
+            ORDER BY create_time DESC LIMIT 1
+        ) AS ewa ON es.id = ewa.status_id
+                 LEFT JOIN district_data AS d1 ON ewa.city_code = d1.code AND d1.is_delete = 0
+                 LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+                 LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN position AS p2 ON j.position_code = p2.code AND p2.is_delete = 0
+                 LEFT JOIN district_data AS d2 ON o.country_code = d2.code AND d2.is_delete = 0
+                 LEFT JOIN district_data AS d3 ON o.province_code = d3.code AND d3.is_delete = 0
+                 LEFT JOIN district_data AS d4 ON o.city_code = d4.code AND d4.is_delete = 0
+        WHERE o.id = #{id}
+          AND o.is_delete = 0
+    </select>
+
+    <!--  查询转正邀约详情  -->
+    <select id="confirmationDetail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.candidate.CandidateConfirmationDetailVo">
+        SELECT c.id,
+               u.avatar,
+               nv.last_name         AS lastName,
+               nv.first_name        AS firstName,
+               u.gender,
+               u.personal_signature AS personalSignature,
+               p1.name              AS positionName,
+               ep.min_salary        AS minSalary,
+               ep.max_salary        AS maxSalary,
+               d1.name              AS cityName,
+               p2.name              AS associationPositionName,
+               j.min_salary         AS associationPositionMinSalary,
+               j.max_salary         AS associationPositionMaxSalary,
+               c.confirmation_time  AS confirmationTime,
+               c.salary,
+               c.note,
+               c.acceptance_status  AS acceptanceStatus,
+               c.completion_status  AS completionStatus
+        FROM confirmation AS c
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON c.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                 LEFT JOIN apply_job AS aj ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                 LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+                 LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                 LEFT JOIN (
+            SELECT *
+            FROM expected_position
+            WHERE status_id = (SELECT es.id
+                               FROM confirmation AS c
+                                        LEFT JOIN recruit_process_instance AS rpi
+                                                  ON c.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                                        LEFT JOIN apply_job AS aj
+                                                  ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                                        LEFT JOIN yy_user AS u ON aj.applicant = u.id AND u.is_delete = 0
+                                        LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                               WHERE c.id = #{id})
+            ORDER BY create_time DESC LIMIT 1
+        ) AS ep
+                           ON es.id = ep.status_id
+                 LEFT JOIN position AS p1 ON ep.position_code = p1.code AND p1.is_delete = 0
+                 LEFT JOIN (
+            SELECT *
+            FROM expected_work_area
+            WHERE status_id = (SELECT es.id
+                               FROM confirmation AS c
+                                        LEFT JOIN recruit_process_instance AS rpi
+                                                  ON c.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+                                        LEFT JOIN apply_job AS aj
+                                                  ON rpi.id = aj.recruit_process_instance_id AND aj.is_delete = 0
+                                        LEFT JOIN yy_user AS u
+                                                  ON aj.applicant = u.id AND u.is_delete = 0
+                                        LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
+                               WHERE c.id = #{id})
+            ORDER BY create_time DESC LIMIT 1
+        ) AS ewa ON es.id = ewa.status_id
+                 LEFT JOIN district_data AS d1 ON ewa.city_code = d1.code AND d1.is_delete = 0
+                 LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+                 LEFT JOIN job AS j ON aj.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN position AS p2 ON j.position_code = p2.code AND p2.is_delete = 0
+        WHERE c.id = #{id}
+          AND c.is_delete = 0
+    </select>
 </mapper>

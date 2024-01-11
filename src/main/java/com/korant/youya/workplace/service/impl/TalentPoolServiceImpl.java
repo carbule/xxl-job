@@ -249,6 +249,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
      * @param createOnboardingDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void createOnboarding(TalentPoolCreateOnboardingDto createOnboardingDto) {
         Long id = createOnboardingDto.getId();
         InternalRecommend internalRecommend = internalRecommendMapper.selectOne(new LambdaQueryWrapper<InternalRecommend>().eq(InternalRecommend::getId, id).eq(InternalRecommend::getIsDelete, 0));
@@ -273,8 +274,8 @@ public class TalentPoolServiceImpl implements TalentPoolService {
             Integer processStep = recruitProcessInstance.getProcessStep();
             if (processStep > 2) throw new YouyaException("当前招聘环节实列已更新至最新节点，无法创建入职邀请");
         }
-        boolean e1 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstance).eq(Onboarding::getAcceptanceStatus, 0).eq(Onboarding::getCompletionStatus, 0));
-        boolean e2 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstance).eq(Onboarding::getAcceptanceStatus, 2).eq(Onboarding::getCompletionStatus, 2));
+        boolean e1 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getAcceptanceStatus, 0).eq(Onboarding::getCompletionStatus, 0));
+        boolean e2 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getAcceptanceStatus, 2).eq(Onboarding::getCompletionStatus, 2));
         if (e1 || e2) throw new YouyaException("当前已存在入职邀请或入职邀请已完成，无法重复创建");
         Onboarding onboarding = new Onboarding();
         onboarding.setRecruitProcessInstanceId(recruitProcessInstanceId).setOnboardingTime(createOnboardingDto.getOnboardingTime()).setCountryCode(createOnboardingDto.getCountryCode()).setProvinceCode(createOnboardingDto.getProvinceCode()).setCityCode(createOnboardingDto.getCityCode()).setAddress(createOnboardingDto.getAddress()).setNote(createOnboardingDto.getNote());
@@ -294,7 +295,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
      */
     @Override
     public TalentPoolOnboardingDetailVo onboardingDetail(Long id) {
-        return null;
+        return talentPoolMapper.onboardingDetail(id);
     }
 
     /**
@@ -357,6 +358,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
      * @param createConfirmationDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void createConfirmation(TalentPoolCreateConfirmationDto createConfirmationDto) {
         Long id = createConfirmationDto.getId();
         InternalRecommend internalRecommend = internalRecommendMapper.selectOne(new LambdaQueryWrapper<InternalRecommend>().eq(InternalRecommend::getId, id).eq(InternalRecommend::getIsDelete, 0));
@@ -379,8 +381,8 @@ public class TalentPoolServiceImpl implements TalentPoolService {
             recruitProcessInstance = recruitProcessInstanceMapper.selectOne(new LambdaQueryWrapper<RecruitProcessInstance>().eq(RecruitProcessInstance::getId, recruitProcessInstanceId).eq(RecruitProcessInstance::getIsDelete, 0));
             if (null == recruitProcessInstance) throw new YouyaException("招聘环节实列不存在");
         }
-        boolean e1 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstance).eq(Confirmation::getAcceptanceStatus, 0).eq(Confirmation::getCompletionStatus, 0));
-        boolean e2 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstance).eq(Confirmation::getAcceptanceStatus, 2).eq(Confirmation::getCompletionStatus, 2));
+        boolean e1 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getAcceptanceStatus, 0).eq(Confirmation::getCompletionStatus, 0));
+        boolean e2 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getAcceptanceStatus, 2).eq(Confirmation::getCompletionStatus, 2));
         if (e1 || e2) throw new YouyaException("当前已存在转正邀请或转正邀请已完成，无法重复创建");
         Confirmation confirmation = new Confirmation();
         confirmation.setRecruitProcessInstanceId(recruitProcessInstanceId).setConfirmationTime(createConfirmationDto.getConfirmationTime()).setSalary(createConfirmationDto.getSalary()).setNote(createConfirmationDto.getNote());
@@ -400,7 +402,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
      */
     @Override
     public TalentPoolConfirmationDetailVo confirmationDetail(Long id) {
-        return null;
+        return talentPoolMapper.confirmationDetail(id);
     }
 
     /**

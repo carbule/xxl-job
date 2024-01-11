@@ -1,10 +1,12 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
+import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
+import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
-import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendDetailVo;
-import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendVo;
+import com.korant.youya.workplace.pojo.vo.internalrecommend.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -43,6 +45,30 @@ public interface InternalRecommendMapper extends BaseMapper<InternalRecommend> {
      * @return
      */
     InternalRecommendDetailVo detail(@Param("id") Long id);
+
+    /**
+     * 查询面试邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<InternalRecommendInterviewVo> queryInterviewList(@Param("listDto") InterviewQueryListDto listDto);
+
+    /**
+     * 查询入职邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<InternalRecommendOnboardingVo> queryOnboardingList(@Param("listDto") OnboardingQueryListDto listDto);
+
+    /**
+     * 查询转正邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    List<InternalRecommendConfirmationVo> queryConfirmationList(@Param("listDto") ConfirmationQueryListDto listDto);
 
     /**
      * 根据招聘流程实例id查找hr

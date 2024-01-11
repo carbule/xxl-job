@@ -9,13 +9,15 @@ import com.korant.youya.workplace.mapper.ConfirmationMapper;
 import com.korant.youya.workplace.mapper.InternalRecommendMapper;
 import com.korant.youya.workplace.mapper.InterviewMapper;
 import com.korant.youya.workplace.mapper.OnboardingMapper;
+import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
+import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
+import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.Confirmation;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
 import com.korant.youya.workplace.pojo.po.Interview;
 import com.korant.youya.workplace.pojo.po.Onboarding;
-import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendDetailVo;
-import com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendVo;
+import com.korant.youya.workplace.pojo.vo.internalrecommend.*;
 import com.korant.youya.workplace.service.InternalRecommendService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -74,6 +76,60 @@ public class InternalRecommendServiceImpl extends ServiceImpl<InternalRecommendM
     @Override
     public InternalRecommendDetailVo detail(Long id) {
         return internalRecommendMapper.detail(id);
+    }
+
+    /**
+     * 查询面试邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<InternalRecommendInterviewVo> queryInterviewList(InterviewQueryListDto listDto) {
+        Long recruitProcessInstanceId = listDto.getRecruitProcessInstanceId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = interviewMapper.selectCount(new LambdaQueryWrapper<Interview>().eq(Interview::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Interview::getIsDelete, 0));
+        List<InternalRecommendInterviewVo> list = internalRecommendMapper.queryInterviewList(listDto);
+        Page<InternalRecommendInterviewVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询入职邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<InternalRecommendOnboardingVo> queryOnboardingList(OnboardingQueryListDto listDto) {
+        Long recruitProcessInstanceId = listDto.getRecruitProcessInstanceId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = onboardingMapper.selectCount(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getIsDelete, 0));
+        List<InternalRecommendOnboardingVo> list = internalRecommendMapper.queryOnboardingList(listDto);
+        Page<InternalRecommendOnboardingVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询转正邀请列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public Page<InternalRecommendConfirmationVo> queryConfirmationList(ConfirmationQueryListDto listDto) {
+        Long recruitProcessInstanceId = listDto.getRecruitProcessInstanceId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = confirmationMapper.selectCount(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getIsDelete, 0));
+        List<InternalRecommendConfirmationVo> list = internalRecommendMapper.queryConfirmationList(listDto);
+        Page<InternalRecommendConfirmationVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
     }
 
     /**

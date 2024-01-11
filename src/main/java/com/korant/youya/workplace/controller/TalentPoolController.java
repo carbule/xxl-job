@@ -104,7 +104,7 @@ public class TalentPoolController {
      * @param id
      * @return
      */
-    @PostMapping("/interviewDetail/{id}")
+    @GetMapping("/interviewDetail/{id}")
     public R<?> interviewDetail(@PathVariable("id") Long id) {
         TalentPoolInterviewDetailVo detailVo = talentPoolService.interviewDetail(id);
         return R.success(detailVo);
@@ -164,7 +164,7 @@ public class TalentPoolController {
      * @param id
      * @return
      */
-    @PostMapping("/onboardingDetail/{id}")
+    @GetMapping("/onboardingDetail/{id}")
     public R<?> onboardingDetail(@PathVariable("id") Long id) {
         TalentPoolOnboardingDetailVo detailVo = talentPoolService.onboardingDetail(id);
         return R.success(detailVo);
@@ -224,7 +224,7 @@ public class TalentPoolController {
      * @param id
      * @return
      */
-    @PostMapping("/confirmationDetail/{id}")
+    @GetMapping("/confirmationDetail/{id}")
     public R<?> confirmationDetail(@PathVariable("id") Long id) {
         TalentPoolConfirmationDetailVo detailVo = talentPoolService.confirmationDetail(id);
         return R.success(detailVo);

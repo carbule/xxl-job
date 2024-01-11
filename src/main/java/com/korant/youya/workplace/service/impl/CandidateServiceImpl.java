@@ -11,10 +11,7 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.po.*;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateDetailVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateRecruitmentRecordsVo;
-import com.korant.youya.workplace.pojo.vo.candidate.CandidateVo;
-import com.korant.youya.workplace.pojo.vo.candidate.PublishedJobCategoryVo;
+import com.korant.youya.workplace.pojo.vo.candidate.*;
 import com.korant.youya.workplace.service.CandidateService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -149,6 +146,17 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     /**
+     * 查询面试邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public CandidateInterviewDetailVo interviewDetail(Long id) {
+        return candidateMapper.interviewDetail(id);
+    }
+
+    /**
      * 取消面试邀约
      *
      * @param id
@@ -208,6 +216,7 @@ public class CandidateServiceImpl implements CandidateService {
      * @param createOnboardingDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void createOnboarding(CandidateCreateOnboardingDto createOnboardingDto) {
         Long id = createOnboardingDto.getId();
         ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getId, id).eq(ApplyJob::getIsDelete, 0));
@@ -233,8 +242,8 @@ public class CandidateServiceImpl implements CandidateService {
             Integer processStep = recruitProcessInstance.getProcessStep();
             if (processStep > 2) throw new YouyaException("当前招聘环节实列已更新至最新节点，无法创建入职邀请");
         }
-        boolean e1 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstance).eq(Onboarding::getAcceptanceStatus, 0).eq(Onboarding::getCompletionStatus, 0));
-        boolean e2 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstance).eq(Onboarding::getAcceptanceStatus, 2).eq(Onboarding::getCompletionStatus, 2));
+        boolean e1 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getAcceptanceStatus, 0).eq(Onboarding::getCompletionStatus, 0));
+        boolean e2 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getAcceptanceStatus, 2).eq(Onboarding::getCompletionStatus, 2));
         if (e1 || e2) throw new YouyaException("当前已存在入职邀请或入职邀请已完成，无法重复创建");
         Onboarding onboarding = new Onboarding();
         onboarding.setRecruitProcessInstanceId(recruitProcessInstanceId).setOnboardingTime(createOnboardingDto.getOnboardingTime()).setCountryCode(createOnboardingDto.getCountryCode()).setProvinceCode(createOnboardingDto.getProvinceCode()).setCityCode(createOnboardingDto.getCityCode()).setAddress(createOnboardingDto.getAddress()).setNote(createOnboardingDto.getNote());
@@ -244,6 +253,17 @@ public class CandidateServiceImpl implements CandidateService {
             recruitProcessInstance.setProcessStep(2);
             recruitProcessInstanceMapper.updateById(recruitProcessInstance);
         }
+    }
+
+    /**
+     * 查询入职邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public CandidateOnboardingDetailVo onboardingDetail(Long id) {
+        return candidateMapper.onboardingDetail(id);
     }
 
     /**
@@ -306,6 +326,7 @@ public class CandidateServiceImpl implements CandidateService {
      * @param createConfirmationDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void createConfirmation(CandidateCreateConfirmationDto createConfirmationDto) {
         Long id = createConfirmationDto.getId();
         ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getId, id).eq(ApplyJob::getIsDelete, 0));
@@ -329,8 +350,8 @@ public class CandidateServiceImpl implements CandidateService {
             recruitProcessInstance = recruitProcessInstanceMapper.selectOne(new LambdaQueryWrapper<RecruitProcessInstance>().eq(RecruitProcessInstance::getId, recruitProcessInstanceId).eq(RecruitProcessInstance::getIsDelete, 0));
             if (null == recruitProcessInstance) throw new YouyaException("招聘环节实列不存在");
         }
-        boolean e1 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstance).eq(Confirmation::getAcceptanceStatus, 0).eq(Confirmation::getCompletionStatus, 0));
-        boolean e2 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstance).eq(Confirmation::getAcceptanceStatus, 2).eq(Confirmation::getCompletionStatus, 2));
+        boolean e1 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getAcceptanceStatus, 0).eq(Confirmation::getCompletionStatus, 0));
+        boolean e2 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getAcceptanceStatus, 2).eq(Confirmation::getCompletionStatus, 2));
         if (e1 || e2) throw new YouyaException("当前已存在转正邀请或转正邀请已完成，无法重复创建");
         Confirmation confirmation = new Confirmation();
         confirmation.setRecruitProcessInstanceId(recruitProcessInstanceId).setConfirmationTime(createConfirmationDto.getConfirmationTime()).setSalary(createConfirmationDto.getSalary()).setNote(createConfirmationDto.getNote());
@@ -340,6 +361,17 @@ public class CandidateServiceImpl implements CandidateService {
             recruitProcessInstance.setProcessStep(3);
             recruitProcessInstanceMapper.updateById(recruitProcessInstance);
         }
+    }
+
+    /**
+     * 查询转正邀约详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public CandidateConfirmationDetailVo confirmationDetail(Long id) {
+        return candidateMapper.confirmationDetail(id);
     }
 
     /**
