@@ -143,9 +143,9 @@ public class HttpClientUtil {
                 .timeout(Duration.ofSeconds(TIMEOUT))
                 .POST(HttpRequest.BodyPublishers.ofString(paramObj.toJSONString()))
                 .build();
-        HttpResponse<String> httpResponse = null;
+        HttpResponse<byte[]> httpResponse = null;
         try {
-            httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             return null;
@@ -153,7 +153,7 @@ public class HttpClientUtil {
         if (null != httpResponse) {
             int statusCode = httpResponse.statusCode();
             if (HttpStatus.OK.value() == statusCode) {
-                return httpResponse.body().getBytes(StandardCharsets.UTF_8);
+                return httpResponse.body();
             }
             return null;
         }
