@@ -57,6 +57,14 @@ public interface JobService extends IService<Job> {
     void collect(Long id);
 
     /**
+     * 根据id查询分享信息
+     *
+     * @param id
+     * @return
+     */
+    JobShareInfo queryShareInfo(Long id);
+
+    /**
      * 查询用户个人职位列表
      *
      * @param personalListDto

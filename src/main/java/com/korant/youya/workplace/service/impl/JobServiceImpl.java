@@ -171,6 +171,22 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     }
 
     /**
+     * 根据id查询分享信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public JobShareInfo queryShareInfo(Long id) {
+        JobShareInfo shareInfo = jobMapper.queryShareInfo(id);
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        shareInfo.setRefereeAvatar(loginUser.getAvatar());
+        shareInfo.setRefereeLastName(loginUser.getLastName());
+        shareInfo.setRefereeFirstName(loginUser.getFirstName());
+        return shareInfo;
+    }
+
+    /**
      * 查询用户个人职位列表
      *
      * @param personalListDto

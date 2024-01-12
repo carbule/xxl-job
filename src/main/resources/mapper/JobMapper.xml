@@ -248,6 +248,23 @@
         WHERE e.id = #{id}
     </select>
 
+    <!--  根据id查询分享信息  -->
+    <select id="queryShareInfo" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.job.JobShareInfo">
+        SELECT j.id,
+               e.logo,
+               e.name       AS enterpriseName,
+               p.name       AS positionName,
+               j.min_salary AS minSalary,
+               j.max_salary AS maxSalary,
+               j.award
+        FROM job AS j
+                 LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+        WHERE j.id = #{id}
+          AND j.is_delete = 0
+    </select>
+
     <!--  查询用户个人职位列表  -->
     <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.job.JobPersonalVo">
         SELECT j.id,

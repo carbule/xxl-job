@@ -1,11 +1,11 @@
 package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.korant.youya.workplace.pojo.dto.huntjobqrcode.UnlimitedQRCodeDto;
+import com.korant.youya.workplace.pojo.dto.huntjobqrcode.HuntJobUnlimitedQRCodeDto;
 import com.korant.youya.workplace.pojo.po.HuntJobQrCode;
 import com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobQrcodeData;
-import com.korant.youya.workplace.pojo.vo.huntjobqrcode.ReferrerInfoVo;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -25,7 +25,15 @@ public interface HuntJobQrCodeService extends IService<HuntJobQrCode> {
      * @param unlimitedQRCodeDto
      * @param response
      */
-    void getUnlimitedQRCode(UnlimitedQRCodeDto unlimitedQRCodeDto, HttpServletResponse response) throws IOException;
+    void getUnlimitedQRCode(HuntJobUnlimitedQRCodeDto unlimitedQRCodeDto, HttpServletResponse response) throws IOException;
+
+    /**
+     * 上传分享图片
+     *
+     * @param file
+     * @return
+     */
+    String uploadShareImage(MultipartFile file);
 
     /**
      * 根据二维码id获取二维码数据
@@ -36,10 +44,9 @@ public interface HuntJobQrCodeService extends IService<HuntJobQrCode> {
     HuntJobQrcodeData getData(Long id);
 
     /**
-     * 获取推荐人信息
+     * 删除分享图片
      *
-     * @param id
-     * @return
+     * @param objectKey
      */
-    ReferrerInfoVo getReferrerInfo(Long id);
+    void deleteShareImage(String objectKey);
 }

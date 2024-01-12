@@ -333,6 +333,38 @@
           AND ue.is_delete = 0
     </select>
 
+    <!--  根据id查询分享信息  -->
+    <select id="queryShareInfo" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobShareInfo">
+        SELECT hj.id,
+               u.avatar          AS applicantAvatar,
+               nv.last_name      AS applicantLastName,
+               nv.first_name     AS applicantFirstName,
+               u.gender          AS applicantGender,
+               u.self_evaluation AS selfEvaluation,
+               (SELECT CASE
+                           WHEN u.birthday IS NOT NULL THEN DATE_PART('year', AGE(NOW(), u.birthday))
+                           ELSE NULL
+                           END)  AS age,
+               (SELECT edu_level
+                FROM education_experience
+                WHERE uid = u.id
+                  AND is_delete = 0
+                ORDER BY end_time DESC, start_time
+                    DESC            LIMIT 1)                    AS eduLevel,
+               (SELECT CASE
+                           WHEN u.start_working_time IS NOT NULL
+                               THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+                           ELSE NULL
+                           END)      AS workExperience,
+              hj.award
+        FROM hunt_job AS hj
+            LEFT JOIN yy_user AS u
+        ON hj.uid = u.id AND u.is_delete = 0
+            LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+        WHERE hj.id = #{id}
+    </select>
+
     <!--  查询用户个人求职列表  -->
     <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonalVo">
         SELECT hj.id,

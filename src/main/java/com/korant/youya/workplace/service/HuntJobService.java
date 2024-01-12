@@ -53,6 +53,14 @@ public interface HuntJobService extends IService<HuntJob> {
     void recommend(HuntJobRecommendDto recommendDto);
 
     /**
+     * 根据id查询分享信息
+     *
+     * @param id
+     * @return
+     */
+    HuntJobShareInfo queryShareInfo(Long id);
+
+    /**
      * 收藏或取消收藏求职信息
      *
      * @param id

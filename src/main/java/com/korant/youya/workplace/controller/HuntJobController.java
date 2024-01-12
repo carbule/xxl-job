@@ -83,6 +83,19 @@ public class HuntJobController {
     }
 
     /**
+     * 根据id查询分享信息
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/queryShareInfo/{id}")
+    @ExplanationDict
+    public R<?> queryShareInfo(@PathVariable("id") Long id) {
+        HuntJobShareInfo shareInfo = huntJobService.queryShareInfo(id);
+        return R.success(shareInfo);
+    }
+
+    /**
      * 收藏或取消收藏求职信息
      *
      * @param id

@@ -98,3 +98,21 @@ rabbitmq:
       routingKey: enterprise_shareImage
       #消费者类型
       consumerType: enterpriseShareImage
+    hunt_job_shareImage:
+      #交换机名称
+      exchangeName: hunt_job_shareImage_dev_exchange
+      #队列名称
+      queueName: hunt_job_shareImage_dev_queue
+      #路由键
+      routingKey: hunt_job_shareImage
+      #消费者类型
+      consumerType: huntJobShareImage
+    job_shareImage:
+      #交换机名称
+      exchangeName: job_shareImage_dev_exchange
+      #队列名称
+      queueName: job_shareImage_dev_queue
+      #路由键
+      routingKey: job_shareImage
+      #消费者类型
+      consumerType: jobShareImage

@@ -151,6 +151,22 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     }
 
     /**
+     * 根据id查询分享信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public HuntJobShareInfo queryShareInfo(Long id) {
+        HuntJobShareInfo shareInfo = huntJobMapper.queryShareInfo(id);
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        shareInfo.setRefereeAvatar(loginUser.getAvatar());
+        shareInfo.setRefereeLastName(loginUser.getLastName());
+        shareInfo.setRefereeFirstName(loginUser.getFirstName());
+        return shareInfo;
+    }
+
+    /**
      * 收藏或取消收藏求职信息
      *
      * @param id

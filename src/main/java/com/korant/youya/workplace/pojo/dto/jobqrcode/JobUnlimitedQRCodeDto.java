@@ -1,18 +1,18 @@
-package com.korant.youya.workplace.pojo.dto.huntjobqrcode;
+package com.korant.youya.workplace.pojo.dto.jobqrcode;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * @ClassName UnlimitedQRCodeDto
+ * @ClassName JobUnlimitedQRCodeDto
  * @Description
  * @Author chenyiqiang
- * @Date 2024/1/11 19:35
+ * @Date 2024/1/12 13:53
  * @Version 1.0
  */
 @Data
-public class UnlimitedQRCodeDto {
+public class JobUnlimitedQRCodeDto {
 
     /**
      * 页面
@@ -23,8 +23,8 @@ public class UnlimitedQRCodeDto {
     /**
      * 求职id
      */
-    @NotNull(message = "求职id不能为空")
-    private Long huntId;
+    @NotNull(message = "职位id不能为空")
+    private Long jobId;
 
     /**
      * 二维码id

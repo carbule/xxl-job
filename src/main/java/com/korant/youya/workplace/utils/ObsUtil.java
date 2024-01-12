@@ -14,8 +14,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.List;
@@ -274,6 +272,33 @@ public class ObsUtil {
     }
 
     /**
+     * 上传文件
+     *
+     * @param bucketName
+     * @param path
+     * @param inputStream
+     */
+    public static PutObjectResult putObject(String bucketName, String path, String contentType, InputStream inputStream) {
+        try {
+            PutObjectRequest request = new PutObjectRequest();
+            request.setBucketName(bucketName);
+            request.setObjectKey(path + IdWorker.getId() + "." + contentType);
+            request.setInput(inputStream);
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentType(contentType);
+            request.setMetadata(objectMetadata);
+            PutObjectResult putObjectResult = obsClient.putObject(request);
+            log.info("putObjectResult:{}", putObjectResult);
+            return putObjectResult;
+        } catch (YouyaException ye) {
+            throw ye;
+        } catch (Exception e) {
+            log.error("obs上传文件失败，异常信息：", e);
+        }
+        return null;
+    }
+
+    /**
      * 对象流式下载
      *
      * @param bucketName
@@ -342,10 +367,12 @@ public class ObsUtil {
 //        deleteBucket("youya-test");
 //        System.out.println(bucketExists("youya-test"));
 //        getBucketMetadata("youya-avatar");
-        String signedUrl = getSignedUrl("youya-enterprise", "hQXgHJ2adYeA1DGTx4IuoQ==.jpg");
-        String s = "hQXgHJ2adYeA1DGTx4IuoQ==.jpg";
-        String encode = URLEncoder.encode(s, StandardCharsets.UTF_8);
-        System.out.println(encode);
-        System.out.println(signedUrl);
+//        String signedUrl = getSignedUrl("youya-enterprise", "hQXgHJ2adYeA1DGTx4IuoQ==.jpg");
+//        String s = "hQXgHJ2adYeA1DGTx4IuoQ==.jpg";
+//        String encode = URLEncoder.encode(s, StandardCharsets.UTF_8);
+//        System.out.println(encode);
+//        System.out.println(signedUrl);
+        DeleteObjectResult deleteObjectResult = deleteObject("youya-activity", "hunt_job_qrcode/1745723092774801409.jpg");
+        System.out.println(deleteObjectResult.isDeleteMarker());
     }
 }

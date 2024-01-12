@@ -92,6 +92,18 @@ public class JobController {
     }
 
     /**
+     * 根据id查询分享信息
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/queryShareInfo/{id}")
+    public R<?> queryShareInfo(@PathVariable("id") Long id) {
+        JobShareInfo shareInfo = jobService.queryShareInfo(id);
+        return R.success(shareInfo);
+    }
+
+    /**
      * 查询用户个人职位列表
      *
      * @param personalListDto

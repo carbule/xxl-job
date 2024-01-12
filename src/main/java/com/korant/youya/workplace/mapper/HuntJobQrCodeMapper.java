@@ -2,6 +2,8 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.po.HuntJobQrCode;
+import com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobQrcodeData;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +15,11 @@ import com.korant.youya.workplace.pojo.po.HuntJobQrCode;
  */
 public interface HuntJobQrCodeMapper extends BaseMapper<HuntJobQrCode> {
 
+    /**
+     * 根据二维码id获取二维码数据
+     *
+     * @param id
+     * @return
+     */
+    HuntJobQrcodeData getData(@Param("id") Long id);
 }

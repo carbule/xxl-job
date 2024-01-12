@@ -1,14 +1,14 @@
 package com.korant.youya.workplace.controller;
 
 import com.korant.youya.workplace.pojo.R;
-import com.korant.youya.workplace.pojo.dto.huntjobqrcode.UnlimitedQRCodeDto;
+import com.korant.youya.workplace.pojo.dto.huntjobqrcode.HuntJobUnlimitedQRCodeDto;
 import com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobQrcodeData;
-import com.korant.youya.workplace.pojo.vo.huntjobqrcode.ReferrerInfoVo;
 import com.korant.youya.workplace.service.HuntJobQrCodeService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -35,8 +35,20 @@ public class HuntJobQrCodeController {
      * @return
      */
     @PostMapping("/getUnlimitedQRCode")
-    public void getUnlimitedQRCode(@RequestBody @Valid UnlimitedQRCodeDto unlimitedQRCodeDto, HttpServletResponse response) throws IOException {
+    public void getUnlimitedQRCode(@RequestBody @Valid HuntJobUnlimitedQRCodeDto unlimitedQRCodeDto, HttpServletResponse response) throws IOException {
         huntJobQrCodeService.getUnlimitedQRCode(unlimitedQRCodeDto, response);
+    }
+
+    /**
+     * 上传分享图片
+     *
+     * @param
+     * @returnb'gen
+     */
+    @PostMapping("/uploadShareImage")
+    public R<?> uploadShareImage(MultipartFile file) {
+        String imageUrl = huntJobQrCodeService.uploadShareImage(file);
+        return R.success(imageUrl);
     }
 
     /**
@@ -48,18 +60,6 @@ public class HuntJobQrCodeController {
     @GetMapping("/getData/{id}")
     public R<?> getData(@PathVariable("id") Long id) {
         HuntJobQrcodeData data = huntJobQrCodeService.getData(id);
-        return R.success(data);
-    }
-
-    /**
-     * 获取推荐人信息
-     *
-     * @param id
-     * @return
-     */
-    @GetMapping("/getReferrerInfo/{id}")
-    public R<?> getReferrerInfo(@PathVariable("id") Long id) {
-        ReferrerInfoVo data = huntJobQrCodeService.getReferrerInfo(id);
         return R.success(data);
     }
 }

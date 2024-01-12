@@ -96,8 +96,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
     private static final String ENTERPRISE_BUCKET = "enterprise";
 
-    //todo 暂时先用头像的 后面更换
-    private static final String ENTERPRISE_QRCODE_BUCKET = "avatar";
+    private static final String ENTERPRISE_QRCODE_BUCKET = "activity";
 
     private static final String DEFAULT_LOGO = "https://resources.youyai.cn/svg/door-open.svg";
 
@@ -713,7 +712,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 //            InputStream inputStream = QrCodeUtil.getQrCode(enterpriseQrcodeUrl + id, 180, 180);
             InputStream inputStream = QrCodeUtil.getQrCode(enterpriseQrcodeUrl + "123456789", 180, 180);
             String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);
-            PutObjectResult result = ObsUtil.putObject(bucketName, "jpg", inputStream);
+            String path = "enterprise_qrcode/";
+            PutObjectResult result = ObsUtil.putObject(bucketName, path, "jpg", inputStream);
             if (null == result) throw new YouyaException("上传文件失败");
             String etag = result.getEtag();
             String objectUrl = result.getObjectUrl();
@@ -757,7 +757,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             throw new YouyaException("文件流获取失败");
         }
         String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);
-        PutObjectResult result = ObsUtil.putObject(bucketName, "jpg", inputStream);
+        String path = "enterprise_qrcode/";
+        PutObjectResult result = ObsUtil.putObject(bucketName, path, "jpg", inputStream);
         if (null == result) throw new YouyaException("上传文件失败");
         String etag = result.getEtag();
         String objectUrl = result.getObjectUrl();
@@ -807,6 +808,11 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         }
     }
 
+    /**
+     * 删除分享图片
+     *
+     * @param objectKey
+     */
     @Override
     public void deleteShareImage(String objectKey) {
         String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);

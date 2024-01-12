@@ -2,4 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.JobQrCodeMapper">
 
+    <!--  根据二维码id获取二维码数据  -->
+    <select id="getData" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrcodeData">
+        SELECT id,
+               job_id   AS jobId,
+               referee,
+               is_share AS isShare
+        FROM job_qr_code
+        WHERE id = #{id}
+          AND is_delete = 0
+    </select>
 </mapper>

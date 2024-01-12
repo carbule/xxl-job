@@ -72,6 +72,14 @@ public interface JobMapper extends BaseMapper<Job> {
     EnterDetailVo queryEnterpriseDetailById(@Param("id") Long id);
 
     /**
+     * 根据id查询分享信息
+     *
+     * @param id
+     * @return
+     */
+    JobShareInfo queryShareInfo(@Param("id") Long id);
+
+    /**
      * 查询用户个人职位列表
      *
      * @param userId
