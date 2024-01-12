@@ -104,9 +104,19 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
                 jobQrCodeMapper.insert(qrCode);
                 scene = "qrCodeId" + "=" + qrCode.getId();
             } else {
-                boolean exists = jobQrCodeMapper.exists(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getId, qrId).eq(JobQrCode::getIsDelete, 0));
-                if (!exists) throw new YouyaException("分享信息不存在");
-                scene = "qrCodeId" + "=" + qrId;
+                JobQrCode jobQrCode = jobQrCodeMapper.selectOne(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getId, qrId).eq(JobQrCode::getIsDelete, 0));
+                if (null == jobQrCode) throw new YouyaException("分享信息不存在");
+                if (jobQrCode.getIsShare() == 1) {
+                    JobQrCode qrCode = new JobQrCode();
+                    qrCode.setPid(qrId);
+                    qrCode.setReferee(userId);
+                    qrCode.setIsShare(0);
+                    qrCode.setJobId(jobId);
+                    jobQrCodeMapper.insert(qrCode);
+                    scene = "qrCodeId" + "=" + qrCode.getId();
+                } else {
+                    scene = "qrCodeId" + "=" + qrId;
+                }
             }
         }
         try {

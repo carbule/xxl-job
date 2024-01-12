@@ -99,9 +99,19 @@ public class HuntJobQrCodeServiceImpl extends ServiceImpl<HuntJobQrCodeMapper, H
                 huntJobQrCodeMapper.insert(qrCode);
                 scene = "qrCodeId" + "=" + qrCode.getId();
             } else {
-                boolean exists = huntJobQrCodeMapper.exists(new LambdaQueryWrapper<HuntJobQrCode>().eq(HuntJobQrCode::getId, qrId).eq(HuntJobQrCode::getIsDelete, 0));
-                if (!exists) throw new YouyaException("分享信息不存在");
-                scene = "qrCodeId" + "=" + qrId;
+                HuntJobQrCode huntJobQrCode = huntJobQrCodeMapper.selectOne(new LambdaQueryWrapper<HuntJobQrCode>().eq(HuntJobQrCode::getId, qrId).eq(HuntJobQrCode::getIsDelete, 0));
+                if (null == huntJobQrCode) throw new YouyaException("分享信息不存在");
+                if (huntJobQrCode.getIsShare() == 1) {
+                    HuntJobQrCode qrCode = new HuntJobQrCode();
+                    qrCode.setPid(qrId);
+                    qrCode.setReferee(userId);
+                    qrCode.setIsShare(0);
+                    qrCode.setHuntId(huntId);
+                    huntJobQrCodeMapper.insert(qrCode);
+                    scene = "qrCodeId" + "=" + qrCode.getId();
+                } else {
+                    scene = "qrCodeId" + "=" + qrId;
+                }
             }
         }
         try {

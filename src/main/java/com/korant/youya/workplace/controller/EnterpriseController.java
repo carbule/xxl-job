@@ -63,7 +63,7 @@ public class EnterpriseController {
      * @return
      */
     @PostMapping("/queryTransferPersonnelList")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasAnyRole('admin','hr')")
     public R<?> queryTransferPersonnelList(@RequestBody @Valid QueryTransferPersonnelListDto queryHRListDto) {
         Page<TransferPersonnelVo> page = enterpriseService.queryTransferPersonnelList(queryHRListDto);
         return R.success(page);
