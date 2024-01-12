@@ -628,9 +628,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String role = loginUser.getRole();
         if (StringUtils.isBlank(role)) throw new YouyaException("您当前未关联企业");
         if (RoleEnum.ADMIN.getRole().equals(role)) {
-            throw new YouyaException(200, "抱歉，您是该公司管理员，请切换至公司端解除关联！");
+            throw new YouyaException("抱歉，您是该公司管理员，请切换至公司端解除关联！");
         } else if (RoleEnum.HR.getRole().equals(role)) {
-            throw new YouyaException(200, "抱歉，您是该公司HR，请切换至公司端解除关联！");
+            throw new YouyaException("抱歉，您是该公司HR，请切换至公司端解除关联！");
         } else {
             Long userId = loginUser.getId();
             Long enterpriseId = loginUser.getEnterpriseId();

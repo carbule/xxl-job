@@ -427,11 +427,11 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             throw new YouyaException("您已绑定过企业或企业创建正在审批中");
         String socialCreditCode = createDto.getSocialCreditCode();
         boolean exists = enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getSocialCreditCode, socialCreditCode).eq(Enterprise::getIsDelete, 0));
-        if (exists) throw new YouyaException(200, "该企业已被其他用户注册");
+        if (exists) throw new YouyaException("该企业已被其他用户注册");
         LocalDate establishDate = createDto.getEstablishDate();
         Date date = Date.from(establishDate.atStartOfDay(ZoneId.of("Asia/Shanghai")).toInstant());
         long between = DateUtil.between(date, new Date(), DateUnit.DAY);
-        if (between < 365) throw new YouyaException(200, "成立时间未届满一年的企业不可注册");
+        if (between < 365) throw new YouyaException("成立时间未届满一年的企业不可注册");
         Enterprise enterprise = new Enterprise();
         BeanUtils.copyProperties(createDto, enterprise);
         enterprise.setLogo(DEFAULT_LOGO);
@@ -667,7 +667,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         if (null == enterprise) throw new YouyaException("企业未创建");
         String socialCreditCode = enterprise.getSocialCreditCode();
         if (!socialCreditCode.equals(changeDto.getSocialCreditCode()))
-            throw new YouyaException(200, "统一社会信用码不一致，请重新上传");
+            throw new YouyaException("统一社会信用码不一致，请重新上传");
         //名称变更
         if (EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType() == changeType) {
             boolean exists = enterpriseChangeTodoMapper.exists(new LambdaQueryWrapper<EnterpriseChangeTodo>().eq(EnterpriseChangeTodo::getEnterpriseId, id).eq(EnterpriseChangeTodo::getType, EnterpriseChangeTodoTypeEnum.NAME_CHANGE.getType()).eq(EnterpriseChangeTodo::getOperate, EnterpriseChangeTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseChangeTodo::getIsDelete, 0));

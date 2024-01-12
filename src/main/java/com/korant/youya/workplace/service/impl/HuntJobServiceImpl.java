@@ -118,7 +118,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     public List<EnterpriseHRVo> queryHRList() {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long enterpriseId = loginUser.getEnterpriseId();
-        if (null == enterpriseId) throw new YouyaException(200, "您好！您尚未加入任何公司，请联系管理员，加入后即可帮助推荐！");
+        if (null == enterpriseId) throw new YouyaException("您好！您尚未加入任何公司，请联系管理员，加入后即可帮助推荐！");
         Long userId = loginUser.getId();
         return huntJobMapper.queryHRList(userId, enterpriseId);
     }
