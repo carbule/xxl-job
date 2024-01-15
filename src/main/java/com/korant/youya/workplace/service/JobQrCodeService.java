@@ -1,9 +1,13 @@
 package com.korant.youya.workplace.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.korant.youya.workplace.pojo.PageData;
+import com.korant.youya.workplace.pojo.dto.jobqrcode.JobQrCodeQueryListDto;
 import com.korant.youya.workplace.pojo.dto.jobqrcode.JobUnlimitedQRCodeDto;
 import com.korant.youya.workplace.pojo.po.JobQrCode;
+import com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrCodeDetailVo;
 import com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrcodeData;
+import com.korant.youya.workplace.pojo.vo.jobqrcode.JobSharingVo;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +22,22 @@ import java.io.IOException;
  * @since 2023-11-14
  */
 public interface JobQrCodeService extends IService<JobQrCode> {
+
+    /**
+     * 查询职位分享列表
+     *
+     * @param listDto
+     * @return
+     */
+    PageData<JobSharingVo> queryList(JobQrCodeQueryListDto listDto);
+
+    /**
+     * 查询分享职位详情
+     *
+     * @param id
+     * @return
+     */
+    JobQrCodeDetailVo queryJobDetail(Long id);
 
     /**
      * 获取小程序职位二维码

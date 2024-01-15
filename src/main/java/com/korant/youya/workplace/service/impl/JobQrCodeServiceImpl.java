@@ -8,10 +8,14 @@ import com.korant.youya.workplace.enums.job.JobStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.JobMapper;
 import com.korant.youya.workplace.mapper.JobQrCodeMapper;
+import com.korant.youya.workplace.pojo.PageData;
+import com.korant.youya.workplace.pojo.dto.jobqrcode.JobQrCodeQueryListDto;
 import com.korant.youya.workplace.pojo.dto.jobqrcode.JobUnlimitedQRCodeDto;
 import com.korant.youya.workplace.pojo.po.Job;
 import com.korant.youya.workplace.pojo.po.JobQrCode;
+import com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrCodeDetailVo;
 import com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrcodeData;
+import com.korant.youya.workplace.pojo.vo.jobqrcode.JobSharingVo;
 import com.korant.youya.workplace.properties.DelayProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.service.JobQrCodeService;
@@ -62,6 +66,35 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
     private String env_version;
 
     private static final String JOB_QRCODE_BUCKET = "activity";
+
+    /**
+     * 查询职位分享列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public PageData<JobSharingVo> queryList(JobQrCodeQueryListDto listDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = jobQrCodeMapper.selectCount(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getReferee, userId).eq(JobQrCode::getIsDelete, 0));
+        JobSharingVo jobSharingVo = jobQrCodeMapper.queryList(userId, listDto);
+        PageData<JobSharingVo> page = new PageData<>();
+        page.setData(jobSharingVo).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询分享职位详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public JobQrCodeDetailVo queryJobDetail(Long id) {
+        return jobQrCodeMapper.queryJobDetail(id);
+    }
 
     /**
      * 获取小程序职位二维码

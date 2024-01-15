@@ -6,10 +6,14 @@ import com.korant.youya.workplace.config.ObsBucketConfig;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.HuntJobMapper;
 import com.korant.youya.workplace.mapper.HuntJobQrCodeMapper;
+import com.korant.youya.workplace.pojo.PageData;
 import com.korant.youya.workplace.pojo.dto.huntjobqrcode.HuntJobUnlimitedQRCodeDto;
+import com.korant.youya.workplace.pojo.dto.huntjobqrcode.huntJobQrCodeQueryListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
 import com.korant.youya.workplace.pojo.po.HuntJobQrCode;
 import com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobQrcodeData;
+import com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobRecommendVo;
+import com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobRecruitmentProgressVo;
 import com.korant.youya.workplace.properties.DelayProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.service.HuntJobQrCodeService;
@@ -61,6 +65,35 @@ public class HuntJobQrCodeServiceImpl extends ServiceImpl<HuntJobQrCodeMapper, H
 
     private static final String HUNT_JOB_QRCODE_BUCKET = "activity";
 
+    /**
+     * 查询求职推荐列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public PageData<HuntJobRecommendVo> queryList(huntJobQrCodeQueryListDto listDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = huntJobQrCodeMapper.selectCount(new LambdaQueryWrapper<HuntJobQrCode>().eq(HuntJobQrCode::getReferee, userId).eq(HuntJobQrCode::getIsDelete, 0));
+        HuntJobRecommendVo huntJobRecommendVo = huntJobQrCodeMapper.queryList(userId, listDto);
+        PageData<HuntJobRecommendVo> page = new PageData<>();
+        page.setData(huntJobRecommendVo).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询求职招聘进度
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public HuntJobRecruitmentProgressVo queryRecruitmentProgress(Long id) {
+
+        return null;
+    }
 
     /**
      * 获取小程序求职二维码

@@ -2,6 +2,69 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.HuntJobQrCodeMapper">
 
+    <resultMap id="queryListMap" type="com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobRecommendVo">
+        <result column="recommendedQuantity" property="recommendedQuantity"/>
+        <collection property="qrCodeVoList" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobQrCodeVo">
+            <id column="id" property="id"/>
+            <result column="avatar" property="avatar"/>
+            <result column="lastName" property="lastName"/>
+            <result column="firstName" property="firstName"/>
+            <result column="gender" property="gender"/>
+            <result column="personalSignature" property="personalSignature"/>
+            <result column="positionName" property="positionName"/>
+            <result column="eduLevel" property="eduLevel"/>
+            <result column="workExperience" property="workExperience"/>
+            <result column="minExpectedSalary" property="minExpectedSalary"/>
+            <result column="maxExpectedSalary" property="maxExpectedSalary"/>
+            <result column="award" property="award"/>
+        </collection>
+    </resultMap>
+
+    <!--  查询求职推荐列表  -->
+    <select id="queryList" resultMap="queryListMap">
+        SELECT (SELECT COUNT(1)
+                FROM hunt_job_qr_code
+                WHERE referee = #{userId}
+                  AND is_delete = 0
+                  AND EXTRACT(MONTH FROM create_time) = EXTRACT(MONTH FROM CURRENT_TIMESTAMP)
+                  AND EXTRACT(YEAR FROM create_time) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP)) AS recommendedQuantity,
+               hjqc.id,
+               u.id,
+               u.avatar,
+               nv.last_name                                                                  AS lastName,
+               nv.first_name                                                                 AS firstName,
+               u.gender,
+               u.personal_signature                                                          AS personalSignature,
+               p.name                                                                        AS positionName,
+               (SELECT edu_level
+                FROM education_experience
+                WHERE uid = u.id
+                  AND is_delete = 0
+                ORDER BY end_time DESC, start_time
+                    DESC                                                                        LIMIT 1) AS eduLevel,
+            (
+            SELECT CASE
+            WHEN u.start_working_time IS NOT NULL
+            THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+            ELSE NULL
+            END) AS workExperience,
+            ep.min_salary AS minExpectedSalary,
+            ep.max_salary AS maxExpectedSalary,
+            hj.award
+        FROM hunt_job_qr_code AS hjqc
+            LEFT JOIN hunt_job AS hj
+        ON hjqc.hunt_id = hj.id AND hj.is_delete = 0
+            LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
+            LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+            LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+            LEFT JOIN position AS p ON ep.position_code = p.code AND p.is_delete = 0
+        WHERE hjqc.referee = #{userId}
+          AND hjqc.is_delete = 0
+        ORDER BY hjqc.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+    </select>
+
     <!--  根据二维码id获取二维码数据  -->
     <select id="getData" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobQrcodeData">

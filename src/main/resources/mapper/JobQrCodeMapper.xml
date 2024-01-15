@@ -2,6 +2,125 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.JobQrCodeMapper">
 
+    <resultMap id="queryListMap" type="com.korant.youya.workplace.pojo.vo.jobqrcode.JobSharingVo">
+        <result column="shareQuantity" property="shareQuantity"/>
+        <collection property="qrCodeVoList" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrCodeVo">
+            <id column="id" property="id"/>
+            <result column="positionName" property="positionName"/>
+            <result column="cityName" property="cityName"/>
+            <result column="eduRequirements" property="eduRequirements"/>
+            <result column="work_experience" property="workExperience"/>
+            <result column="minSalary" property="minSalary"/>
+            <result column="maxSalary" property="maxSalary"/>
+            <result column="isAwardExist" property="isAwardExist"/>
+            <result column="logo" property="logo"/>
+            <result column="enterpriseName" property="enterpriseName"/>
+            <result column="scale" property="scale"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="queryJobDetailMap" type="com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrCodeDetailVo">
+        <id column="id" property="id"/>
+        <result column="enterpriseId" property="enterpriseId"/>
+        <result column="logo" property="logo"/>
+        <result column="enterpriseName" property="enterpriseName"/>
+        <result column="entType" property="entType"/>
+        <result column="scale" property="scale"/>
+        <result column="financingStage" property="financingStage"/>
+        <result column="positionName" property="positionName"/>
+        <result column="eduRequirements" property="eduRequirements"/>
+        <result column="workExperience" property="workExperience"/>
+        <result column="minSalary" property="minSalary"/>
+        <result column="maxSalary" property="maxSalary"/>
+        <result column="jobDesc" property="jobDesc"/>
+        <result column="otherInfo" property="otherInfo"/>
+        <result column="countryName" property="countryName"/>
+        <result column="provinceName" property="provinceName"/>
+        <result column="cityName" property="cityName"/>
+        <result column="detailAddress" property="detailAddress"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="award" property="award"/>
+        <result column="lastShareTime" property="lastShareTime"/>
+        <result column="shareTotal" property="shareTotal"/>
+        <collection property="welfareLabelDataVoList" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.enterprisewelfarelabel.EnterpriseWelfareLabelDataVo">
+            <id column="welfareLabelId" property="id"/>
+            <result column="name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <!--  查询职位分享列表  -->
+    <select id="queryList" resultMap="queryListMap">
+        SELECT (SELECT COUNT(1)
+                FROM job_qr_code
+                WHERE referee = #{userId}
+                  AND is_delete = 0
+                  AND EXTRACT(MONTH FROM create_time) = EXTRACT(MONTH FROM CURRENT_TIMESTAMP)
+                  AND EXTRACT(YEAR FROM create_time) = EXTRACT(YEAR FROM CURRENT_TIMESTAMP)) AS shareQuantity,
+               jqc.id,
+               p.name                                                                        AS positionName,
+               d.name                                                                        AS cityName,
+               j.edu_requirements                                                            AS eduRequirements,
+               j.work_experience                                                             AS workExperience,
+               j.min_salary                                                                  AS minSalary,
+               j.max_salary                                                                  AS maxSalary,
+               (SELECT CASE WHEN j.award IS NOT NULL THEN 1 ELSE 0 END)                      AS isAwardExist,
+               e.logo,
+               e.name                                                                        AS enterpriseName,
+               e.scale
+        FROM job_qr_code AS jqc
+                 LEFT JOIN job AS j ON jqc.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+                 LEFT JOIN district_data AS d ON j.city_code = d.code AND d.is_delete = 0
+        WHERE jqc.referee = #{userId}
+          AND jqc.is_delete = 0
+        ORDER BY jqc.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+    </select>
+
+    <!--  查询分享职位详情  -->
+    <select id="queryJobDetail" parameterType="java.lang.Long" resultMap="queryJobDetailMap">
+        SELECT jqr.id,
+               e.id                                                                     AS enterpriseId,
+               e.logo,
+               e.name                                                                   AS enterpriseName,
+               e.ent_type                                                               AS entType,
+               e.scale,
+               e.financing_stage                                                        AS financingStage,
+               p.name                                                                   AS positionName,
+               j.edu_requirements                                                       AS eduRequirements,
+               j.work_experience                                                        AS workExperience,
+               j.min_salary                                                             AS minSalary,
+               j.max_salary                                                             AS maxSalary,
+               j.job_desc                                                               AS jobDesc,
+               j.other_info                                                             AS otherInfo,
+               dd1.name                                                                 AS countryName,
+               dd2.name                                                                 AS provinceName,
+               dd3.name                                                                 AS cityName,
+               j.detail_address                                                         AS detailAddress,
+               j.longitude,
+               j.latitude,
+               j.award,
+               jqr.create_time                                                          AS lastShareTime,
+               (SELECT COUNT(1) FROM job_qr_code WHERE job_id = j.id AND is_delete = 0) AS shareTotal,
+               ewl.id                                                                   AS welfareLabelId,
+               ewl.name
+        FROM job_qr_code AS jqr
+                 LEFT JOIN job AS j ON jqr.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
+                 LEFT JOIN district_data dd1 ON j.country_code = dd1.code AND dd1.is_delete = 0
+                 LEFT JOIN district_data dd2 ON j.province_code = dd2.code AND dd2.is_delete = 0
+                 LEFT JOIN district_data dd3 ON j.city_code = dd3.code AND dd3.is_delete = 0
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+                 LEFT JOIN job_welfare_label AS jwl ON j.id = jwl.job_id AND jwl.is_delete = 0
+                 LEFT JOIN enterprise_welfare_label AS ewl ON jwl.label_id = ewl.id AND ewl.is_delete = 0
+        WHERE jqr.id = #{id}
+          AND jqr.is_delete = 0
+    </select>
+
     <!--  根据二维码id获取二维码数据  -->
     <select id="getData" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrcodeData">
