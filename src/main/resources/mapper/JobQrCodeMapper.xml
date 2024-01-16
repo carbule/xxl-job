@@ -10,7 +10,7 @@
             <result column="positionName" property="positionName"/>
             <result column="cityName" property="cityName"/>
             <result column="eduRequirements" property="eduRequirements"/>
-            <result column="work_experience" property="workExperience"/>
+            <result column="workExperience" property="workExperience"/>
             <result column="minSalary" property="minSalary"/>
             <result column="maxSalary" property="maxSalary"/>
             <result column="isAwardExist" property="isAwardExist"/>
