@@ -15,6 +15,7 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.job.*;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.job.*;
+import com.korant.youya.workplace.pojo.vo.user.UserPublicInfoVo;
 import com.korant.youya.workplace.service.JobService;
 import com.korant.youya.workplace.utils.JwtUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -56,6 +57,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
 
     @Resource
     private ApplyJobMapper applyJobMapper;
+
+    @Resource
+    private UserMapper userMapper;
 
     @Resource
     private DistrictDataMapper districtDataMapper;
@@ -179,10 +183,12 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     @Override
     public JobShareInfo queryShareInfo(Long id) {
         JobShareInfo shareInfo = jobMapper.queryShareInfo(id);
-        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        shareInfo.setRefereeAvatar(loginUser.getAvatar());
-        shareInfo.setRefereeLastName(loginUser.getLastName());
-        shareInfo.setRefereeFirstName(loginUser.getFirstName());
+        Long userId = SpringSecurityUtil.getUserId();
+        UserPublicInfoVo userPublicInfoVo = userMapper.queryUserPublicInfo(userId);
+        shareInfo.setRefereeAvatar(userPublicInfoVo.getAvatar());
+        shareInfo.setRefereeLastName(userPublicInfoVo.getLastName());
+        shareInfo.setRefereeFirstName(userPublicInfoVo.getFirstName());
+        shareInfo.setRefereeGender(userPublicInfoVo.getGender());
         return shareInfo;
     }
 
@@ -268,6 +274,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    //todo 福利标签需要对比修改
     public void modify(JobModifyDto modifyDto) {
         Long userId = SpringSecurityUtil.getUserId();
         Long id = modifyDto.getId();

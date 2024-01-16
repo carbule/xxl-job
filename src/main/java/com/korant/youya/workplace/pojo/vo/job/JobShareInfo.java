@@ -61,4 +61,9 @@ public class JobShareInfo {
      * 推荐人名字
      */
     private String refereeFirstName;
+
+    /**
+     * 推荐人性别
+     */
+    private Integer refereeGender;
 }

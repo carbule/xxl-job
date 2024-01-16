@@ -3,15 +3,15 @@ server:
 
 spring:
   datasource:
+    # 数据库连接URL
+    url: jdbc:postgresql://139.9.144.123:5432/workplace?charset=utf-8&sslmode=disable
+    # 数据库用户名
+    username: postgres
+    # 数据库密码
+    password: YouyaI@12345
     type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.postgresql.Driver
     druid:
-      driver-class-name: org.postgresql.Driver
-      # 数据库连接URL
-      url: jdbc:postgresql://139.9.144.123:5432/workplace?charset=utf-8&sslmode=disable
-      # 数据库用户名
-      username: postgres
-      # 数据库密码
-      password: YouyaI@12345
       # 连接池初始化时创建的连接数
       initialSize: 5
       # 连接池中最大连接数

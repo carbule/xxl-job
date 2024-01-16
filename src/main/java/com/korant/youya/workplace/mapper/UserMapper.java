@@ -5,10 +5,7 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.ModifyUserContactInfoDto;
 import com.korant.youya.workplace.pojo.dto.user.ModifyUserPersonalBasicInfoDto;
 import com.korant.youya.workplace.pojo.po.User;
-import com.korant.youya.workplace.pojo.vo.user.ResumeDetailVo;
-import com.korant.youya.workplace.pojo.vo.user.ResumePreviewVo;
-import com.korant.youya.workplace.pojo.vo.user.UserContactInfoVo;
-import com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo;
+import com.korant.youya.workplace.pojo.vo.user.*;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -94,4 +91,12 @@ public interface UserMapper extends BaseMapper<User> {
      * @return
      */
     String queryUserRoleById(@Param("userId") Long userId);
+
+    /**
+     * 根据用户id查询用户公开信息
+     *
+     * @param userId
+     * @return
+     */
+    UserPublicInfoVo queryUserPublicInfo(@Param("userId") Long userId);
 }

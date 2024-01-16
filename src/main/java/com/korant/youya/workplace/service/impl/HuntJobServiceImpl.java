@@ -14,6 +14,7 @@ import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo;
 import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkAreaVo;
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
+import com.korant.youya.workplace.pojo.vo.user.UserPublicInfoVo;
 import com.korant.youya.workplace.service.HuntJobService;
 import com.korant.youya.workplace.utils.JwtUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -159,10 +160,12 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     @Override
     public HuntJobShareInfo queryShareInfo(Long id) {
         HuntJobShareInfo shareInfo = huntJobMapper.queryShareInfo(id);
-        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        shareInfo.setRefereeAvatar(loginUser.getAvatar());
-        shareInfo.setRefereeLastName(loginUser.getLastName());
-        shareInfo.setRefereeFirstName(loginUser.getFirstName());
+        Long userId = SpringSecurityUtil.getUserId();
+        UserPublicInfoVo userPublicInfoVo = userMapper.queryUserPublicInfo(userId);
+        shareInfo.setRefereeAvatar(userPublicInfoVo.getAvatar());
+        shareInfo.setRefereeLastName(userPublicInfoVo.getLastName());
+        shareInfo.setRefereeFirstName(userPublicInfoVo.getFirstName());
+        shareInfo.setRefereeGender(userPublicInfoVo.getGender());
         return shareInfo;
     }
 

@@ -486,4 +486,18 @@
         WHERE u.id = #{userId}
           AND u.is_delete = 0
     </select>
+
+    <!--  根据用户id查询用户公开信息  -->
+    <select id="queryUserPublicInfo" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.user.UserPublicInfoVo">
+        SELECT u.id,
+               u.avatar,
+               nv.last_name  AS lastName,
+               nv.first_name AS firstName,
+               u.gender
+        FROM yy_user AS u
+                 LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+        WHERE u.id = #{userId}
+          AND u.is_delete = 0
+    </select>
 </mapper>

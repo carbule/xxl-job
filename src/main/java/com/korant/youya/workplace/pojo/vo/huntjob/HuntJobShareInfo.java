@@ -75,6 +75,11 @@ public class HuntJobShareInfo {
     private String refereeLastName;
 
     /**
+     * 推荐人性别
+     */
+    private Integer refereeGender;
+
+    /**
      * 推荐人名字
      */
     private String refereeFirstName;
