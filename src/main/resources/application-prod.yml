@@ -46,16 +46,16 @@ spring:
   data:
     redis:
       database: 0
-      host: 127.0.0.1
+      host: 116.63.160.129
       port: 6379
-      password:
+      password: YouyaI@12345
       lettuce:
         pool:
           max-active: 20 # 连接池最大连接数（使用负值表示没有限制）
           max-idle: 10 # 连接池中的最大空闲连接
           min-idle: 5 # 连接池中的最小空闲连接
           max-wait: 5000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
-      connect-timeout: 5000 # 连接超时时间（毫秒）
+      connect-timeout: 300 # 连接超时时间（毫秒）
 
   rabbitmq:
     addresses: 116.63.160.129:5672
@@ -77,3 +77,42 @@ mybatis-plus:
 env_version: release
 
 enterprise_qrcode_url: https://weichat.youyai.cn/?qrcodeId=
+
+rabbitmq:
+  delayProperties:
+    enterprise_qrcode:
+      #交换机名称
+      exchangeName: enterprise_qrcode_exchange
+      #队列名称
+      queueName: enterprise_qrcode_queue
+      #路由键
+      routingKey: enterprise_qrcode
+      #消费者类型
+      consumerType: enterpriseQrcode
+    enterprise_shareImage:
+      #交换机名称
+      exchangeName: enterprise_shareImage_exchange
+      #队列名称
+      queueName: enterprise_shareImage_queue
+      #路由键
+      routingKey: enterprise_shareImage
+      #消费者类型
+      consumerType: enterpriseShareImage
+    hunt_job_shareImage:
+      #交换机名称
+      exchangeName: hunt_job_shareImage_exchange
+      #队列名称
+      queueName: hunt_job_shareImage_queue
+      #路由键
+      routingKey: hunt_job_shareImage
+      #消费者类型
+      consumerType: huntJobShareImage
+    job_shareImage:
+      #交换机名称
+      exchangeName: job_shareImage_exchange
+      #队列名称
+      queueName: job_shareImage_queue
+      #路由键
+      routingKey: job_shareImage
+      #消费者类型
+      consumerType: jobShareImage

@@ -95,6 +95,47 @@ public class DictAspect {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                    } else if (type.equals(Object.class)) {
+                        field.setAccessible(true);
+                        try {
+                            Object o = field.get(data);
+                            if (o != null) {
+                                for (Field fieldVar : getAllFields(o)) {
+                                    String fieldVarName = fieldVar.getName();
+                                    Class<?> fieldVarType = fieldVar.getType();
+                                    if (fieldVarType.equals(List.class)) {
+                                        try {
+                                            fieldVar.setAccessible(true);
+                                            Object obj = fieldVar.get(o);
+                                            if (obj != null) {
+                                                JSONObject jsonObjectVar = jsonObject.getJSONObject(fieldName);
+                                                JSONArray array = jsonObjectVar.getJSONArray(fieldVarName);
+                                                JSONArray jsonArray = new JSONArray((List) obj);
+                                                for (int i = 0; i < jsonArray.size(); i++) {
+                                                    Object var = jsonArray.get(i);
+                                                    if (var != null) {
+                                                        if (!(var instanceof String) && !(var instanceof Integer) && !(var instanceof Double) && !(var instanceof Float) && !(var instanceof Boolean) && !(var instanceof Character) && !(var instanceof Byte) && !(var instanceof Short) && !(var instanceof Long)) {
+                                                            JSONObject arrayJSONObject = array.getJSONObject(i);
+                                                            for (Field allField : getAllFields(var)) {
+                                                                String textValue = getTextValue(allField, var);
+                                                                if (StringUtils.isNotBlank(textValue)) {
+                                                                    String allFieldName = allField.getName();
+                                                                    arrayJSONObject.put(allFieldName + CommonConstant.DICT_TEXT_SUFFIX, textValue);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         String textValue = getTextValue(field, data);
                         if (StringUtils.isNotBlank(textValue)) {

@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({AccessDeniedException.class})
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(R.error("权限不足,禁止访问"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(R.error("权限不足,禁止访问"));
     }
 
     @ExceptionHandler({Exception.class})
