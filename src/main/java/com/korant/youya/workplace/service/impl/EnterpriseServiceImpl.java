@@ -390,23 +390,29 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     public JSONObject getBusinessLicenseInfo(MultipartFile file) {
+        log.info("进入获取营业执照信息接口。。。");
         if (null == file) throw new YouyaException("文件不能为空");
         String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_BUCKET);
         String fileName = ObsUtil.getFileBase64Name(file);
+        log.info("营业执照图片名称：{}", fileName);
         if (StringUtils.isBlank(fileName)) throw new YouyaException("上传营业执照失败");
         if (!ObsUtil.doesObjectExist(bucketName, fileName)) {
+            log.info("营业执照图片不存在 准备上传。。。。");
             PutObjectResult result = ObsUtil.putObject(bucketName, fileName, file);
             if (null == result) throw new YouyaException("上传营业执照失败");
             String etag = result.getEtag();
             String objectKey = result.getObjectKey();
             if (StringUtils.isBlank(etag) && StringUtils.isBlank(objectKey)) throw new YouyaException("上传营业执照失败");
+            log.info("营业执照图片上传成功。。。");
         }
+        log.info("准备获取营业执照信息。。。");
         String signedUrl = ObsUtil.getSignedUrl(bucketName, fileName);
         String encode = URLEncoder.encode(signedUrl, StandardCharsets.UTF_8);
         JSONObject resultObj = HuaWeiUtil.getLicenseContentByUrl(encode);
         if (null == resultObj) throw new YouyaException("获取营业执照信息失败");
         resultObj.put("objectKey", fileName);
         resultObj.put("signedUrl", signedUrl);
+        log.info("营业执照信息获取成功 准备返回响应内容。。。");
         return resultObj;
     }
 
@@ -708,9 +714,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus) throw new YouyaException("请等待企业审核通过后再使用");
         long id = IdWorker.getId();
         try {
-            //todo 上生产之后放开 先写死一个
-//            InputStream inputStream = QrCodeUtil.getQrCode(enterpriseQrcodeUrl + id, 180, 180);
-            InputStream inputStream = QrCodeUtil.getQrCode(enterpriseQrcodeUrl + "123456789", 180, 180);
+            InputStream inputStream = QrCodeUtil.getQrCode(enterpriseQrcodeUrl + id, 180, 180);
             String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);
             String path = "enterprise_qrcode/";
             PutObjectResult result = ObsUtil.putObject(bucketName, path, "jpg", inputStream);

@@ -28,7 +28,7 @@
     <!--  根据职位id批量修改  -->
     <update id="batchModify" parameterType="java.util.List">
         UPDATE job_welfare_label
-        SET is_delete = 0
+        SET is_delete = 1
         WHERE job_id = #{jobId}
         AND label_id IN
         <foreach item="param" collection="list" open="(" separator="," close=")">
