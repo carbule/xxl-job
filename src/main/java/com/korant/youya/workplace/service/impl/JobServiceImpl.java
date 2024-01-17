@@ -274,7 +274,6 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    //todo 福利标签需要对比修改
     public void modify(JobModifyDto modifyDto) {
         Long userId = SpringSecurityUtil.getUserId();
         Long id = modifyDto.getId();
