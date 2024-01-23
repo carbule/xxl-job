@@ -125,8 +125,9 @@
         ON ir.hunt_id = hj.id AND hj.is_delete = 0
             LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
             LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
-            LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
-            LEFT JOIN yy_user AS u ON ir.referee = u.id AND u.is_delete = 0
+            LEFT JOIN yy_user_enterprise AS ue ON ir.hr = ue.uid AND ue.is_delete = 0
+            LEFT JOIN enterprise AS e ON ue.enterprise_id = e.id AND e.is_delete = 0
+            LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
             LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
         WHERE ir.referee = #{userId}
           AND ir.is_delete = 0
