@@ -2,9 +2,11 @@ package com.korant.youya.workplace.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
+import com.korant.youya.workplace.pojo.PageData;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
+import com.korant.youya.workplace.pojo.dto.internalrecommend.MyRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
 import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.vo.internalrecommend.*;
@@ -42,6 +44,19 @@ public class InternalRecommendController {
     }
 
     /**
+     * 查询我推荐的求职列表
+     *
+     * @param listDto
+     * @return
+     */
+    @PostMapping("/queryMyRecommendList")
+    @ExplanationDict
+    public R<?> queryMyRecommendList(@RequestBody @Valid MyRecommendQueryListDto listDto) {
+        PageData<MyRecommendVo> page = internalRecommendService.queryMyRecommendList(listDto);
+        return R.success(page);
+    }
+
+    /**
      * 查询用户被推荐职位详情
      *
      * @param id
@@ -51,6 +66,19 @@ public class InternalRecommendController {
     @ExplanationDict
     public R<?> detail(@PathVariable("id") Long id) {
         InternalRecommendDetailVo detailVo = internalRecommendService.detail(id);
+        return R.success(detailVo);
+    }
+
+    /**
+     * 查询我推荐的求职详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/queryMyRecommendDetail/{id}")
+    @ExplanationDict
+    public R<?> queryMyRecommendDetail(@PathVariable("id") Long id) {
+        MyRecommendDetailVo detailVo = internalRecommendService.queryMyRecommendDetail(id);
         return R.success(detailVo);
     }
 

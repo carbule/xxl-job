@@ -3,6 +3,7 @@ package com.korant.youya.workplace.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
+import com.korant.youya.workplace.pojo.dto.internalrecommend.MyRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
 import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.InternalRecommend;
@@ -39,12 +40,29 @@ public interface InternalRecommendMapper extends BaseMapper<InternalRecommend> {
     List<InternalRecommendVo> queryList(@Param("userId") Long userId, @Param("listDto") InternalRecommendQueryListDto listDto);
 
     /**
+     * 查询我推荐的求职列表
+     *
+     * @param userId
+     * @param listDto
+     * @return
+     */
+    MyRecommendVo queryMyRecommendList(@Param("userId") Long userId, @Param("listDto") MyRecommendQueryListDto listDto);
+
+    /**
      * 查询用户被推荐职位详情
      *
      * @param id
      * @return
      */
     InternalRecommendDetailVo detail(@Param("id") Long id);
+
+    /**
+     * 查询我推荐的求职详情
+     *
+     * @param id
+     * @return
+     */
+    MyRecommendDetailVo queryMyRecommendDetail(@Param("id") Long id);
 
     /**
      * 查询面试邀请列表

@@ -9,8 +9,10 @@ import com.korant.youya.workplace.mapper.ConfirmationMapper;
 import com.korant.youya.workplace.mapper.InternalRecommendMapper;
 import com.korant.youya.workplace.mapper.InterviewMapper;
 import com.korant.youya.workplace.mapper.OnboardingMapper;
+import com.korant.youya.workplace.pojo.PageData;
 import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
+import com.korant.youya.workplace.pojo.dto.internalrecommend.MyRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
 import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
 import com.korant.youya.workplace.pojo.po.Confirmation;
@@ -68,6 +70,24 @@ public class InternalRecommendServiceImpl extends ServiceImpl<InternalRecommendM
     }
 
     /**
+     * 查询我推荐的求职列表
+     *
+     * @param listDto
+     * @return
+     */
+    @Override
+    public PageData<MyRecommendVo> queryMyRecommendList(MyRecommendQueryListDto listDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        int pageNumber = listDto.getPageNumber();
+        int pageSize = listDto.getPageSize();
+        Long count = internalRecommendMapper.selectCount(new LambdaQueryWrapper<InternalRecommend>().eq(InternalRecommend::getReferee, userId).eq(InternalRecommend::getIsDelete, 0));
+        MyRecommendVo myRecommendVo = internalRecommendMapper.queryMyRecommendList(userId, listDto);
+        PageData<MyRecommendVo> page = new PageData<>();
+        page.setData(myRecommendVo).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
      * 查询用户被推荐职位详情
      *
      * @param id
@@ -76,6 +96,17 @@ public class InternalRecommendServiceImpl extends ServiceImpl<InternalRecommendM
     @Override
     public InternalRecommendDetailVo detail(Long id) {
         return internalRecommendMapper.detail(id);
+    }
+
+    /**
+     * 查询我推荐的求职详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public MyRecommendDetailVo queryMyRecommendDetail(Long id) {
+        return internalRecommendMapper.queryMyRecommendDetail(id);
     }
 
     /**

@@ -2,6 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.InternalRecommendMapper">
 
+    <resultMap id="queryMyRecommendListMap" type="com.korant.youya.workplace.pojo.vo.internalrecommend.MyRecommendVo">
+        <result column="recommendedQuantity" property="recommendedQuantity"/>
+        <collection property="recommendVoList" javaType="java.util.List"
+                    ofType="com.korant.youya.workplace.pojo.vo.internalrecommend.RecommendVo">
+            <id column="id" property="id"/>
+            <result column="avatar" property="avatar"/>
+            <result column="lastName" property="lastName"/>
+            <result column="firstName" property="firstName"/>
+            <result column="personalSignature" property="personalSignature"/>
+            <result column="positionName" property="positionName"/>
+            <result column="eduLevel" property="eduLevel"/>
+            <result column="workExperience" property="workExperience"/>
+            <result column="minSalary" property="minSalary"/>
+            <result column="maxSalary" property="maxSalary"/>
+            <result column="award" property="award"/>
+            <result column="associationPositionName" property="associationPositionName"/>
+            <result column="logo" property="logo"/>
+            <result column="enterpriseName" property="enterpriseName"/>
+        </collection>
+    </resultMap>
+
     <!--  查询用户被推荐职位数量  -->
     <select id="queryListCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
         SELECT COUNT(1)
@@ -43,6 +64,76 @@
         OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
     </select>
 
+    <!--  查询我推荐的求职列表  -->
+    <select id="queryMyRecommendList" resultMap="queryMyRecommendListMap">
+        SELECT (SELECT COUNT(1)
+                FROM internal_recommend
+                WHERE referee = #{userId}
+                  AND is_delete = 0) AS      recommendedQuantity,
+               ir.id,
+               u.avatar,
+               nv.last_name          AS      lastName,
+               nv.first_name         AS      firstName,
+               u.personal_signature  AS      personalSignature,
+               (SELECT p.name
+                FROM expected_position AS ep
+                         LEFT JOIN position AS p ON ep.position_code = p.code AND p.is_delete = 0
+                WHERE ep.status_id = (SELECT id
+                                      FROM employ_status
+                                      WHERE uid = u.id
+                                        AND is_delete = 0)
+                ORDER BY ep.create_time DESC LIMIT 1) AS positionName,
+               (
+        SELECT CASE
+            WHEN u.birthday IS NOT NULL
+            THEN DATE_PART('year', AGE(NOW(), u.birthday))
+            ELSE NULL
+            END) AS age,
+            (
+        SELECT edu_level
+        FROM education_experience
+        WHERE uid = u.id
+          AND is_delete = 0
+        ORDER BY end_time DESC, start_time DESC LIMIT 1) AS eduLevel,
+            (
+        SELECT CASE
+            WHEN u.start_working_time IS NOT NULL
+            THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+            ELSE NULL
+            END) AS workExperience,
+            (
+        SELECT ep.min_salary
+        FROM expected_position AS ep
+        WHERE ep.status_id = (SELECT id
+            FROM employ_status
+            WHERE uid = u.id
+          AND is_delete = 0)
+        ORDER BY ep.create_time DESC LIMIT 1) AS minSalary,
+            (
+        SELECT ep.max_salary
+        FROM expected_position AS ep
+        WHERE ep.status_id = (SELECT id
+            FROM employ_status
+            WHERE uid = u.id
+          AND is_delete = 0)
+        ORDER BY ep.create_time DESC LIMIT 1) AS maxSalary,
+            hj.award,
+            p.name AS associationPositionName,
+            e.logo,
+            e.name AS enterpriseName
+        FROM internal_recommend AS ir LEFT JOIN hunt_job AS hj
+        ON ir.hunt_id = hj.id AND hj.is_delete = 0
+            LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
+            LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+            LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
+            LEFT JOIN yy_user AS u ON ir.referee = u.id AND u.is_delete = 0
+            LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
+        WHERE ir.referee = #{userId}
+          AND ir.is_delete = 0
+        ORDER BY ir.create_time DESC LIMIT #{listDto.pageSize}
+        OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
+    </select>
+
     <!--  查询用户被推荐职位详情  -->
     <select id="detail" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.internalrecommend.InternalRecommendDetailVo">
@@ -65,13 +156,41 @@
                u.first_name                                             AS firstName,
                ir.create_time                                           AS recommendedTime,
                rpi.process_step                                         AS processStep
-        FROM internal_recommend ir
+        FROM internal_recommend AS ir
                  LEFT JOIN hunt_job AS hj ON ir.hunt_id = hj.id AND hj.is_delete = 0
                  LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
                  LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
                  LEFT JOIN district_data dd1 ON j.city_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
                  LEFT JOIN yy_user AS u ON ir.referee = u.id AND u.is_delete = 0
+                 LEFT JOIN recruit_process_instance AS rpi
+                           ON ir.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
+        WHERE ir.id = #{id}
+          AND ir.is_delete = 0
+    </select>
+
+    <!--  查询我推荐的求职详情  -->
+    <select id="queryMyRecommendDetail" parameterType="java.lang.Long"
+            resultType="com.korant.youya.workplace.pojo.vo.internalrecommend.MyRecommendDetailVo">
+        SELECT ir.id,
+               ir.job_id                                                AS jobId,
+               ir.recruit_process_instance_id                           AS recruitProcessInstanceId,
+               e.logo,
+               e.name                                                   AS enterpriseName,
+               e.scale,
+               p.name                                                   AS positionName,
+               j.edu_requirements                                       AS eduRequirements,
+               j.work_experience                                        AS workExperience,
+               j.min_salary                                             AS minSalary,
+               j.max_salary                                             AS maxSalary,
+               d.name                                                   AS cityName,
+               (SELECT CASE WHEN j.award IS NOT NULL THEN 1 ELSE 0 END) AS isAwardExist,
+               rpi.process_step                                         AS processStep
+        FROM internal_recommend AS ir
+                 LEFT JOIN job AS j ON ir.job_id = j.id AND j.is_delete = 0
+                 LEFT JOIN position AS p ON j.position_code = p.code AND p.is_delete = 0
+                 LEFT JOIN district_data AS d ON j.city_code = d.code AND d.is_delete = 0
+                 LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0
                  LEFT JOIN recruit_process_instance AS rpi
                            ON ir.recruit_process_instance_id = rpi.id AND rpi.is_delete = 0
         WHERE ir.id = #{id}
