@@ -2,6 +2,7 @@ package com.korant.youya.workplace.pojo.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -49,8 +50,9 @@ public class ModifyUserPersonalBasicInfoDto {
     /**
      * 用户开始工作时间
      */
-    @NotNull(message = "开始工作时间不能为空")
-    private LocalDate startWorkingTime;
+    @NotBlank(message = "开始工作时间不能为空")
+    @Pattern(regexp = "^(\\d{4})-(\\d{2})$", message = "年月参数格式错误，应为 'yyyy-MM' 格式")
+    private String startWorkingTime;
 
     /**
      * 政治面貌

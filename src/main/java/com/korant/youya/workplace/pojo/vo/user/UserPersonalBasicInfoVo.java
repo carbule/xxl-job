@@ -43,7 +43,7 @@ public class UserPersonalBasicInfoVo {
     /**
      * 用户开始工作时间
      */
-    private LocalDate startWorkingTime;
+    private String startWorkingTime;
 
     /**
      * 政治面貌

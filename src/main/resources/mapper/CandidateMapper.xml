@@ -132,7 +132,7 @@
                     DESC               LIMIT 1)                    AS eduLevel,
                (SELECT CASE
                            WHEN u.start_working_time IS NOT NULL
-                               THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+                               THEN DATE_PART('year', AGE(NOW(), to_date(u.start_working_time, 'YYYY-MM')))
                            ELSE NULL
                            END)      AS workExperience,
                es.status             AS employStatus,

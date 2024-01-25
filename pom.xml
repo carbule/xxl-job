@@ -25,6 +25,7 @@
         <rabbitmq.version>2.7.0</rabbitmq.version>
         <obs.version>3.23.3</obs.version>
         <huawei-apigateway.version>3.2.0</huawei-apigateway.version>
+        <wechatpay.version>0.2.12</wechatpay.version>
         <commons-pool.version>2.11.1</commons-pool.version>
         <fastjson.version>2.0.36</fastjson.version>
         <jwt.version>4.2.0</jwt.version>
@@ -119,6 +120,12 @@
             <groupId>com.huawei.apigateway</groupId>
             <artifactId>java-sdk-core</artifactId>
             <version>${huawei-apigateway.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+            <version>${wechatpay.version}</version>
         </dependency>
 
         <dependency>

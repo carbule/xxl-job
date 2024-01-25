@@ -20,6 +20,7 @@
             position_name   = #{modifyDto.positionName},
             start_time      = #{modifyDto.startTime},
             end_time        = #{modifyDto.endTime},
+            is_current      = #{modifyDto.isCurrent},
             content         =#{modifyDto.content},
             performance     =#{modifyDto.performance},
             update_time     = CURRENT_TIMESTAMP
@@ -35,6 +36,7 @@
                position_name   AS positionName,
                start_time      AS startTime,
                end_time        AS endTime,
+               is_current      AS isCurrent,
                content,
                performance
         FROM work_experience

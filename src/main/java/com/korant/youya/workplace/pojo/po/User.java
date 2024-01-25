@@ -77,7 +77,7 @@ public class User implements Serializable {
      * 用户开始工作时间
      */
     @TableField("start_working_time")
-    private LocalDate startWorkingTime;
+    private String startWorkingTime;
 
     /**
      * 用户手机号

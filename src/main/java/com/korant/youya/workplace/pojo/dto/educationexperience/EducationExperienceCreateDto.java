@@ -2,9 +2,8 @@ package com.korant.youya.workplace.pojo.dto.educationexperience;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-
-import java.time.LocalDate;
 
 /**
  * @ClassName EducationExperienceCreateDto
@@ -31,14 +30,16 @@ public class EducationExperienceCreateDto {
     /**
      * 开始时间
      */
-    @NotNull(message = "开始时间不能为空")
-    private LocalDate startTime;
+    @NotBlank(message = "开始时间不能为空")
+    @Pattern(regexp = "^(\\d{4})-(\\d{2})$", message = "年月参数格式错误，应为 'yyyy-MM' 格式")
+    private String startTime;
 
     /**
      * 结束时间
      */
-    @NotNull(message = "结束时间不能为空")
-    private LocalDate endTime;
+    @NotBlank(message = "结束时间不能为空")
+    @Pattern(regexp = "^(\\d{4})-(\\d{2})$", message = "年月参数格式错误，应为 'yyyy-MM' 格式")
+    private String endTime;
 
     /**
      * 专业名称

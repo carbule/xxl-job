@@ -2,8 +2,6 @@ package com.korant.youya.workplace.pojo.vo.workexperience;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-
 /**
  * @ClassName WorkExperienceDetailVo
  * @Description
@@ -37,12 +35,17 @@ public class WorkExperienceDetailVo {
     /**
      * 开始时间
      */
-    private LocalDate startTime;
+    private String startTime;
 
     /**
      * 结束时间
      */
-    private LocalDate endTime;
+    private String endTime;
+
+    /**
+     * 工作履历是否仍在进行中 0-否 1-是
+     */
+    private Integer isCurrent;
 
     /**
      * 工作内容

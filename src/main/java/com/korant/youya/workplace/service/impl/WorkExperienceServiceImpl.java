@@ -49,6 +49,11 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
     @Override
     public void create(WorkExperienceCreateDto createDto) {
         Long userId = SpringSecurityUtil.getUserId();
+        String endTime = createDto.getEndTime();
+        String regex = "^(\\d{4})-(\\d{2})$";
+        if (null != endTime) {
+            if (!endTime.matches(regex)) throw new YouyaException("年月参数格式错误，应为 'yyyy-MM' 格式");
+        }
         WorkExperience workExperience = new WorkExperience();
         BeanUtils.copyProperties(createDto, workExperience);
         workExperience.setUid(userId);
@@ -62,6 +67,11 @@ public class WorkExperienceServiceImpl extends ServiceImpl<WorkExperienceMapper,
      */
     @Override
     public void modify(WorkExperienceModifyDto modifyDto) {
+        String endTime = modifyDto.getEndTime();
+        String regex = "^(\\d{4})-(\\d{2})$";
+        if (null != endTime) {
+            if (!endTime.matches(regex)) throw new YouyaException("年月参数格式错误，应为 'yyyy-MM' 格式");
+        }
         workExperienceMapper.modify(modifyDto);
     }
 

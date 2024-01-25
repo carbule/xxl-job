@@ -40,7 +40,7 @@ public class HttpClientUtil {
     }
 
     /**
-     * 发送GET请求
+     * 发送Get请求
      */
     public static String sentGet(String url) {
         HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -68,7 +68,7 @@ public class HttpClientUtil {
     }
 
     /**
-     * 发送GET请求
+     * 发送Get请求
      */
     public static String sentGet(String url, Map<String, Object> paramMap) {
 
