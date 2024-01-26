@@ -26,12 +26,12 @@ public interface ExpectedWorkAreaMapper extends BaseMapper<ExpectedWorkArea> {
     List<Long> selectListByStatusId(@Param("statusId") Long statusId);
 
     /**
-     * 批量修改意向区域
+     * 批量删除意向区域
      *
      * @param list
      * @return
      */
-    int batchModify(@Param("list") List<Long> list);
+    int batchDelete(@Param("list") List<Long> list);
 
     /**
      * 批量新增意向区域
@@ -40,6 +40,14 @@ public interface ExpectedWorkAreaMapper extends BaseMapper<ExpectedWorkArea> {
      * @return
      */
     int batchInsert(@Param("list") List<ExpectedWorkAreaModifyDto> list);
+
+    /**
+     * 批量修改意向区域
+     *
+     * @param modifyWorkAreaList
+     * @return
+     */
+    int batchModify(@Param("list") List<ExpectedWorkAreaModifyDto> modifyWorkAreaList);
 
     /**
      * 根据用户id查询意向区域数量

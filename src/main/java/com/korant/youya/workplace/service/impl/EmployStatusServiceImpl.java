@@ -66,44 +66,26 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
             employStatus.setUid(userId);
             employStatusMapper.insert(employStatus);
             Long statusId = employStatus.getId();
-            List<ExpectedPositionModifyDto> positionModifyDtoList = modifyDto.getPositionModifyDtoList();
-            List<ExpectedWorkAreaModifyDto> workAreaModifyDtoList = modifyDto.getWorkAreaModifyDtoList();
-            List<Long> oldPositionIdList = expectedPositionMapper.selectListByStatusId(statusId);
-            List<Long> oldWorkAreaIdList = expectedWorkAreaMapper.selectListByStatusId(statusId);
-            List<Long> newPositionIdList = positionModifyDtoList.stream().map(ExpectedPositionModifyDto::getPositionId).collect(Collectors.toList());
-            List<Long> newWorkAreaIdList = workAreaModifyDtoList.stream().map(ExpectedWorkAreaModifyDto::getAreaId).collect(Collectors.toList());
-            List<Long> removedPositionIdList = oldPositionIdList.stream()
-                    .filter(e -> !newPositionIdList.contains(e))
-                    .collect(Collectors.toList());
-            List<Long> removedWorkAreaIdList = oldWorkAreaIdList.stream()
-                    .filter(e -> !newWorkAreaIdList.contains(e))
-                    .collect(Collectors.toList());
-            List<ExpectedPositionModifyDto> addPositionList = positionModifyDtoList.stream().filter(s -> null == s.getPositionId()).collect(Collectors.toList());
-            List<ExpectedWorkAreaModifyDto> addWorkAreaList = workAreaModifyDtoList.stream().filter(s -> null == s.getAreaId()).collect(Collectors.toList());
-            if (oldPositionIdList.size() - removedPositionIdList.size() + addPositionList.size() > 5)
+            List<ExpectedPositionModifyDto> positionAddDtoList = modifyDto.getPositionModifyDtoList();
+            List<ExpectedWorkAreaModifyDto> workAreaAddDtoList = modifyDto.getWorkAreaModifyDtoList();
+            if (positionAddDtoList.size() > 5)
                 throw new YouyaException("意向职位最多5个");
-            if (oldWorkAreaIdList.size() - removedWorkAreaIdList.size() + addWorkAreaList.size() > 3)
+            if (workAreaAddDtoList.size() > 3)
                 throw new YouyaException("意向区域最多3个");
-            if (removedPositionIdList.size() > 0) {
-                expectedPositionMapper.batchModify(removedPositionIdList);
-            }
-            if (removedWorkAreaIdList.size() > 0) {
-                expectedWorkAreaMapper.batchModify(removedWorkAreaIdList);
-            }
-            if (addPositionList.size() > 0) {
-                addPositionList.forEach(s -> {
+            if (positionAddDtoList.size() > 0) {
+                positionAddDtoList.forEach(s -> {
                     s.setPositionId(IdWorker.getId());
                     s.setStatusId(statusId);
                 });
-                expectedPositionMapper.batchInsert(addPositionList);
+                expectedPositionMapper.batchInsert(positionAddDtoList);
             }
-            if (addWorkAreaList.size() > 0) {
-                addWorkAreaList.forEach(s -> {
+            if (workAreaAddDtoList.size() > 0) {
+                workAreaAddDtoList.forEach(s -> {
                     s.setAreaId(IdWorker.getId());
                     s.setStatusId(statusId);
                     s.setCountryCode(CHINA_CODE);
                 });
-                expectedWorkAreaMapper.batchInsert(addWorkAreaList);
+                expectedWorkAreaMapper.batchInsert(workAreaAddDtoList);
             }
         } else {
             Long statusId = employStatus.getId();
@@ -119,6 +101,14 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
             List<Long> removedWorkAreaIdList = oldWorkAreaIdList.stream()
                     .filter(e -> !newWorkAreaIdList.contains(e))
                     .collect(Collectors.toList());
+            List<Long> positionSameIdList = oldPositionIdList.stream()
+                    .filter(newPositionIdList::contains)
+                    .collect(Collectors.toList());
+            List<Long> workAreaSameIdList = oldWorkAreaIdList.stream()
+                    .filter(newWorkAreaIdList::contains)
+                    .collect(Collectors.toList());
+            List<ExpectedPositionModifyDto> modifyPositionList = positionModifyDtoList.stream().filter(s -> positionSameIdList.contains(s.getPositionId())).collect(Collectors.toList());
+            List<ExpectedWorkAreaModifyDto> modifyWorkAreaList = workAreaModifyDtoList.stream().filter(s -> workAreaSameIdList.contains(s.getAreaId())).collect(Collectors.toList());
             List<ExpectedPositionModifyDto> addPositionList = positionModifyDtoList.stream().filter(s -> null == s.getPositionId()).collect(Collectors.toList());
             List<ExpectedWorkAreaModifyDto> addWorkAreaList = workAreaModifyDtoList.stream().filter(s -> null == s.getAreaId()).collect(Collectors.toList());
             if (oldPositionIdList.size() - removedPositionIdList.size() + addPositionList.size() > 5)
@@ -126,10 +116,10 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
             if (oldWorkAreaIdList.size() - removedWorkAreaIdList.size() + addWorkAreaList.size() > 3)
                 throw new YouyaException("意向区域最多3个");
             if (removedPositionIdList.size() > 0) {
-                expectedPositionMapper.batchModify(removedPositionIdList);
+                expectedPositionMapper.batchDelete(removedPositionIdList);
             }
             if (removedWorkAreaIdList.size() > 0) {
-                expectedWorkAreaMapper.batchModify(removedWorkAreaIdList);
+                expectedWorkAreaMapper.batchDelete(removedWorkAreaIdList);
             }
             if (addPositionList.size() > 0) {
                 addPositionList.forEach(s -> {
@@ -145,6 +135,12 @@ public class EmployStatusServiceImpl extends ServiceImpl<EmployStatusMapper, Emp
                     s.setCountryCode(CHINA_CODE);
                 });
                 expectedWorkAreaMapper.batchInsert(addWorkAreaList);
+            }
+            if (modifyPositionList.size() > 0) {
+                expectedPositionMapper.batchModify(modifyPositionList);
+            }
+            if (modifyWorkAreaList.size() > 0) {
+                expectedWorkAreaMapper.batchModify(modifyWorkAreaList);
             }
             Integer status = modifyDto.getStatus();
             if (null != status) {

@@ -26,11 +26,11 @@ public interface ExpectedPositionMapper extends BaseMapper<ExpectedPosition> {
     List<Long> selectListByStatusId(@Param("statusId") Long statusId);
 
     /**
-     * 批量修改意向职位
+     * 批量删除意向职位
      *
      * @param list
      */
-    int batchModify(@Param("list") List<Long> list);
+    int batchDelete(@Param("list") List<Long> list);
 
     /**
      * 批量新增意向职位
@@ -38,6 +38,14 @@ public interface ExpectedPositionMapper extends BaseMapper<ExpectedPosition> {
      * @param list
      */
     int batchInsert(@Param("list") List<ExpectedPositionModifyDto> list);
+
+    /**
+     * 批量修改意向职位
+     *
+     * @param modifyPositionList
+     * @return
+     */
+    int batchModify(@Param("list") List<ExpectedPositionModifyDto> modifyPositionList);
 
     /**
      * 根据用户id查询意向职位数量

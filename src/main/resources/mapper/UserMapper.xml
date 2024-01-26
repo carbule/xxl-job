@@ -368,7 +368,7 @@
                                                   WHEN is_current = 1 THEN to_char(CURRENT_DATE, 'yyyy-MM')
                                                   ELSE end_time END),
                                              end_time
-                                         ) DESC, start_time DESC) AS we
+                                         ) DESC, start_time DESC, create_time DESC) AS we
                            ON u.id = we.uid
                  LEFT JOIN (SELECT pe1.id              AS peId,
                                    we1.enterprise_name AS projectEnterpriseName,
@@ -384,13 +384,13 @@
                             FROM education_experience
                             WHERE uid = #{userId}
                               AND is_delete = 0
-                            ORDER BY end_time DESC, start_time DESC) AS ee
+                            ORDER BY end_time DESC, start_time DESC, create_time DESC) AS ee
                            ON u.id = ee.uid
                  LEFT JOIN (SELECT *
                             FROM honor_certificate
                             WHERE uid = #{userId}
                               AND is_delete = 0
-                            ORDER BY obtain_time DESC) AS hc
+                            ORDER BY obtain_time DESC, create_time DESC) AS hc
                            ON u.id = hc.uid
                  LEFT JOIN (SELECT *
                             FROM attachment
@@ -495,7 +495,7 @@
             WHEN is_current = 1 THEN to_char(CURRENT_DATE, 'yyyy-MM')
             ELSE end_time END),
             end_time
-            ) DESC, start_time DESC) AS we ON u.id = we.uid
+            ) DESC, start_time DESC ,create_time DESC) AS we ON u.id = we.uid
             LEFT JOIN (SELECT pe1.id AS peId,
             we1.enterprise_name AS projectEnterpriseName,
             we1.uid,
@@ -509,12 +509,12 @@
             FROM education_experience
             WHERE uid = #{userId}
             AND is_delete = 0
-            ORDER BY end_time DESC, start_time DESC) AS ee ON u.id = ee.uid
+            ORDER BY end_time DESC, start_time DESC ,create_time DESC) AS ee ON u.id = ee.uid
             LEFT JOIN (SELECT *
             FROM honor_certificate
             WHERE uid = #{userId}
             AND is_delete = 0
-            ORDER BY obtain_time DESC) AS hc ON u.id = hc.uid
+            ORDER BY obtain_time DESC ,create_time DESC) AS hc ON u.id = hc.uid
             LEFT JOIN (SELECT *
             FROM attachment
             WHERE uid = #{userId}

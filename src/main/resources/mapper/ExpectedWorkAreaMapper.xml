@@ -10,8 +10,8 @@
           AND is_delete = 0
     </select>
 
-    <!--  批量修改意向区域  -->
-    <update id="batchModify" parameterType="java.util.List">
+    <!--  批量删除意向区域  -->
+    <update id="batchDelete" parameterType="java.util.List">
         UPDATE expected_work_area
         SET update_time = CURRENT_TIMESTAMP,
         is_delete = 1
@@ -38,6 +38,17 @@
             )
         </foreach>
     </insert>
+
+    <!--  批量修改意向区域  -->
+    <update id="batchModify" parameterType="java.util.List">
+        <foreach collection="list" item="area" separator=";">
+            UPDATE expected_work_area
+            SET province_code = #{area.provinceCode},
+            city_code = #{area.cityCode},
+            update_time = CURRENT_TIMESTAMP
+            WHERE id = #{area.areaId}
+        </foreach>
+    </update>
 
     <!--  根据用户id查询意向区域数量  -->
     <select id="selectCountByUserId" parameterType="java.lang.Long" resultType="java.lang.Integer">

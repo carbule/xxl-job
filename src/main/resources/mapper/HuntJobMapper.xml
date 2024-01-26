@@ -312,8 +312,17 @@
             LEFT JOIN district_data dd1 ON dd1.code = ev.country_code AND dd1.is_delete = 0
             LEFT JOIN district_data dd2 ON dd2.code = ev.province_code AND dd2.is_delete = 0
             LEFT JOIN district_data dd3 ON dd3.code = ev.city_code AND dd3.is_delete = 0
-            LEFT JOIN work_experience AS we ON u.id = we.uid AND we.is_delete = 0
-            LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
+            LEFT JOIN (SELECT *
+            FROM work_experience
+            WHERE uid = #{userId}
+            AND is_delete = 0
+            ORDER BY COALESCE (
+            (CASE
+            WHEN is_current = 1 THEN to_char(CURRENT_DATE, 'yyyy-MM')
+            ELSE end_time END),
+            end_time
+            ) DESC, start_time DESC, create_time DESC) AS we ON u.id = we.uid
+            LEFT JOIN (SELECT * FROM project_experience ORDER BY create_time DESC) AS pe ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE hj.id = #{id}
     </select>
 
@@ -354,7 +363,7 @@
                     DESC            LIMIT 1)                    AS eduLevel,
                (SELECT CASE
                            WHEN u.start_working_time IS NOT NULL
-                               THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+                               THEN DATE_PART('year', AGE(NOW(), to_date(u.start_working_time, 'YYYY-MM')))
                            ELSE NULL
                            END)      AS workExperience,
               hj.award
@@ -443,7 +452,7 @@
                ee.edu_level         AS eduLevel,
                (SELECT CASE
                            WHEN u.start_working_time IS NOT NULL
-                               THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+                               THEN DATE_PART('year', AGE(NOW(), to_date(u.start_working_time, 'YYYY-MM')))
                            ELSE NULL
                            END)     AS workExperience,
                es.status            AS employStatus,
@@ -479,10 +488,19 @@
                             FROM education_experience
                             WHERE uid = #{userId}
                               AND is_delete = 0
-                            ORDER BY end_time DESC, start_time DESC LIMIT 1) AS ee ON u.id = ee.uid
-                 LEFT JOIN work_experience AS we
-                           ON u.id = we.uid AND we.is_delete = 0
-                 LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
+                            ORDER BY end_time DESC, start_time DESC, create_time DESC LIMIT 1) AS ee ON u.id = ee.uid
+                 LEFT JOIN (SELECT *
+                            FROM work_experience
+                            WHERE uid = #{userId}
+                              AND is_delete = 0
+                            ORDER BY COALESCE(
+                                             (CASE
+                                                  WHEN is_current = 1 THEN to_char(CURRENT_DATE, 'yyyy-MM')
+                                                  ELSE end_time END),
+                                             end_time
+                                         ) DESC, start_time DESC, create_time DESC) AS we ON u.id = we.uid
+                 LEFT JOIN (SELECT * FROM project_experience ORDER BY create_time DESC) AS pe
+                           ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE u.id = #{userId}
           AND u.is_delete = 0
     </select>
@@ -553,7 +571,7 @@
                ee.edu_level         AS eduLevel,
                (SELECT CASE
                            WHEN u.start_working_time IS NOT NULL
-                               THEN DATE_PART('year', AGE(NOW(), u.start_working_time))
+                               THEN DATE_PART('year', AGE(NOW(), to_date(u.start_working_time, 'YYYY-MM')))
                            ELSE NULL
                            END)     AS workExperience,
                ep.min_salary        AS minExpectedSalary,
@@ -594,10 +612,19 @@
                             FROM education_experience
                             WHERE uid = #{userId}
                               AND is_delete = 0
-                            ORDER BY end_time DESC, start_time DESC LIMIT 1) AS ee ON u.id = ee.uid
-                 LEFT JOIN work_experience AS we
-                           ON u.id = we.uid AND we.is_delete = 0
-                 LEFT JOIN project_experience AS pe ON we.id = pe.we_id AND pe.is_delete = 0
+                            ORDER BY end_time DESC, start_time DESC, create_time DESC LIMIT 1) AS ee ON u.id = ee.uid
+                 LEFT JOIN (SELECT *
+                            FROM work_experience
+                            WHERE uid = #{userId}
+                              AND is_delete = 0
+                            ORDER BY COALESCE(
+                                             (CASE
+                                                  WHEN is_current = 1 THEN to_char(CURRENT_DATE, 'yyyy-MM')
+                                                  ELSE end_time END),
+                                             end_time
+                                         ) DESC, start_time DESC, create_time DESC) AS we ON u.id = we.uid
+                 LEFT JOIN (SELECT * FROM project_experience ORDER BY create_time DESC) AS pe
+                           ON we.id = pe.we_id AND pe.is_delete = 0
         WHERE hj.id = #{id}
           AND u.is_delete = 0
     </select>

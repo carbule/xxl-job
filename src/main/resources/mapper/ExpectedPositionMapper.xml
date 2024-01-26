@@ -10,8 +10,8 @@
           AND is_delete = 0
     </select>
 
-    <!--  批量修改意向职位  -->
-    <update id="batchModify" parameterType="java.util.List">
+    <!--  批量删除意向职位  -->
+    <update id="batchDelete" parameterType="java.util.List">
         UPDATE expected_position
         SET update_time = CURRENT_TIMESTAMP,
         is_delete = 1
@@ -40,6 +40,20 @@
             )
         </foreach>
     </insert>
+
+    <!--  批量修改意向职位  -->
+    <update id="batchModify" parameterType="java.util.List">
+        <foreach collection="list" item="position" separator=";">
+            UPDATE expected_position
+            SET industry_code = #{position.industryCode},
+            sector_code = #{position.sectorCode},
+            position_code = #{position.positionCode},
+            min_salary = #{position.minSalary},
+            max_salary = #{position.maxSalary},
+            update_time = CURRENT_TIMESTAMP
+            WHERE id = #{position.positionId}
+        </foreach>
+    </update>
 
     <!--  根据用户id查询意向职位数量  -->
     <select id="selectCountByUserId" parameterType="java.lang.Long" resultType="java.lang.Integer">
