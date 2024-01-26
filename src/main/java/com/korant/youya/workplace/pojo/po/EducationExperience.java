@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -53,14 +52,12 @@ public class EducationExperience implements Serializable {
      * 开始时间
      */
     @TableField("start_time")
-    @DateTimeFormat(pattern = "yyyy-MM")
     private String startTime;
 
     /**
      * 结束时间
      */
     @TableField("end_time")
-    @DateTimeFormat(pattern = "yyyy-MM")
     private String endTime;
 
     /**
