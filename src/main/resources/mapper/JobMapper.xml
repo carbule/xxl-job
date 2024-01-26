@@ -117,7 +117,7 @@
 
     <!--  查询首页职位数量  -->
     <select id="queryHomePageListCountByUserId" resultType="java.lang.Integer">
-        SELECT COUNT(t1.*) FROM (SELECT enterprise_id
+        SELECT COUNT(1)
         FROM job
         <where>
             status = 1
@@ -130,25 +130,11 @@
                 AND position_code = #{listDto.positionCode}
             </if>
         </where>
-        )AS t1 WHERE NOT EXISTS (SELECT 1 FROM yy_user_blocked_enterprise AS se WHERE se.uid = #{userId} AND
-        se.enterprise_id = t1.enterprise_id AND se.is_delete = 0)
     </select>
 
     <!--  查询首页职位列表  -->
     <select id="queryHomePageListByUserId" resultType="com.korant.youya.workplace.pojo.vo.job.JobHomePageListVo">
-        SELECT t1.id,
-        t1.logo,
-        t1.enterpriseName,
-        t1.scale,
-        t1.positionName,
-        t1.eduRequirements,
-        t1.workExperience,
-        t1.minSalary,
-        t1.maxSalary,
-        t1.cityName,
-        t1.isAwardExist
-        FROM (SELECT j.id,
-        e.id AS enterpriseId,
+        SELECT j.id,
         e.logo,
         e.name AS enterpriseName,
         e.scale,
@@ -176,8 +162,6 @@
             ORDER BY j.create_time DESC LIMIT #{listDto.pageSize}
             OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}
         </where>
-        ) AS t1 WHERE NOT EXISTS (SELECT 1 FROM yy_user_blocked_enterprise AS se WHERE se.uid = #{userId} AND
-        se.enterprise_id = t1.enterpriseId AND se.is_delete = 0)
     </select>
 
     <!--  根据求职id查询首页职位信息详情  -->
