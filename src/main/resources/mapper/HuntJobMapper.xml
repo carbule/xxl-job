@@ -69,6 +69,12 @@
         <result column="award" property="award"/>
         <result column="employStatus" property="employStatus"/>
         <result column="description" property="description"/>
+        <result column="expectedIndustry" property="expectedIndustry"/>
+        <result column="expectedSector" property="expectedSector"/>
+        <result column="expectedPosition" property="expectedPosition"/>
+        <result column="expectedCountry" property="expectedCountry"/>
+        <result column="expectedProvince" property="expectedProvince"/>
+        <result column="expectedCity" property="expectedCity"/>
         <result column="phone" property="phone"/>
         <result column="wechatId" property="wechatId"/>
         <result column="qq" property="qq"/>
@@ -269,6 +275,12 @@
                hj.award,
                es.status             AS employStatus,
                hj.description,
+               p1.name               AS expectedIndustry,
+               p2.name               AS expectedSector,
+               p3.name               AS expectedPosition,
+               d1.name               AS expectedCountry,
+               d2.name               AS expectedProvince,
+               d3.name               AS expectedCity,
                ev.phone,
                ev.wechat_id          AS wechatId,
                ev.qq,
@@ -306,6 +318,13 @@
         FROM hunt_job AS hj LEFT JOIN yy_user AS u
         ON hj.uid = u.id AND u.is_delete = 0
             LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
+            LEFT JOIN position AS p1 ON ep.industry_code = p1.code AND p1.is_delete =0
+            LEFT JOIN position AS p2 ON ep.sector_code = p2.code AND p2.is_delete =0
+            LEFT JOIN position AS p3 ON ep.position_code = p3.code AND p3.is_delete =0
+            LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete =0
+            LEFT JOIN district_data d1 ON d1.code = ewa.country_code AND d1.is_delete = 0
+            LEFT JOIN district_data d2 ON d2.code = ewa.province_code AND d2.is_delete = 0
+            LEFT JOIN district_data d3 ON d3.code = ewa.city_code AND d3.is_delete = 0
             LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
             LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
             LEFT JOIN everyone_visible_info AS ev ON u.id = ev.uid AND ev.is_delete = 0
@@ -314,8 +333,7 @@
             LEFT JOIN district_data dd3 ON dd3.code = ev.city_code AND dd3.is_delete = 0
             LEFT JOIN (SELECT *
             FROM work_experience
-            WHERE uid = #{userId}
-            AND is_delete = 0
+            WHERE is_delete = 0
             ORDER BY COALESCE (
             (CASE
             WHEN is_current = 1 THEN to_char(CURRENT_DATE, 'yyyy-MM')

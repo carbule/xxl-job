@@ -74,6 +74,36 @@ public class CandidateDetailVo {
     private Integer employStatus;
 
     /**
+     * 期望行业
+     */
+    private String expectedIndustry;
+
+    /**
+     * 期望领域
+     */
+    private String expectedSector;
+
+    /**
+     * 期望职位
+     */
+    private String expectedPosition;
+
+    /**
+     * 期望国家
+     */
+    private String expectedCountry;
+
+    /**
+     * 期望省市
+     */
+    private String expectedProvince;
+
+    /**
+     * 期望市级
+     */
+    private String expectedCity;
+
+    /**
      * 最低薪资
      */
     private Integer minSalary;
