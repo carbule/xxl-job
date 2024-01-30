@@ -19,12 +19,6 @@ import java.time.LocalDate;
 public class ModifyUserPersonalBasicInfoDto {
 
     /**
-     * 用户头像
-     */
-    @NotBlank(message = "头像不能为空")
-    private String avatar;
-
-    /**
      * 用户姓氏
      */
     @NotBlank(message = "姓氏不能为空")

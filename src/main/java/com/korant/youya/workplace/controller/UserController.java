@@ -107,6 +107,17 @@ public class UserController {
     }
 
     /**
+     * 修改用户头像
+     *
+     * @return
+     */
+    @PostMapping("/modifyUserAvatar")
+    public R<?> modifyUserAvatar(@RequestBody @Valid ModifyUserAvatarDto modifyUserAvatarDto) {
+        userService.modifyUserAvatar(modifyUserAvatarDto);
+        return R.ok();
+    }
+
+    /**
      * 查询个人基本信息
      *
      * @param

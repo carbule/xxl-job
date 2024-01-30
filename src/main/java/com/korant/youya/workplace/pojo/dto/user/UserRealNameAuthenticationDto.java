@@ -24,10 +24,4 @@ public class UserRealNameAuthenticationDto {
      */
     @NotBlank(message = "名字不能为空")
     private String firstName;
-
-    /**
-     * 身份证号
-     */
-    @NotBlank(message = "身份证不能为空")
-    private String idcard;
 }

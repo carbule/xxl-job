@@ -2,6 +2,7 @@ package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.korant.youya.workplace.pojo.LoginUser;
+import com.korant.youya.workplace.pojo.dto.user.ModifyUserAvatarDto;
 import com.korant.youya.workplace.pojo.dto.user.ModifyUserContactInfoDto;
 import com.korant.youya.workplace.pojo.dto.user.ModifyUserPersonalBasicInfoDto;
 import com.korant.youya.workplace.pojo.po.User;
@@ -33,6 +34,15 @@ public interface UserMapper extends BaseMapper<User> {
      * @return
      */
     LoginUser selectUserToLoginByPhoneNumber(@Param("phoneNumber") String phoneNumber);
+
+    /**
+     * 修改用户头像
+     *
+     * @param userId
+     * @param modifyUserAvatarDto
+     * @return
+     */
+    int modifyUserAvatar(@Param("userId") Long userId, @Param("modifyUserAvatarDto") ModifyUserAvatarDto modifyUserAvatarDto);
 
     /**
      * 查询个人基本信息

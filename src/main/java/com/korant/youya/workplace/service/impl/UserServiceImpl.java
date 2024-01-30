@@ -329,15 +329,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (0 == authenticationStatus) {
             String lastName = realNameAuthDto.getLastName();
             String firstName = realNameAuthDto.getFirstName();
-            String idcard = realNameAuthDto.getIdcard();
             String name = lastName + firstName;
             String phone = loginUser.getPhone();
-            if (!HuaWeiUtil.realNameAuth(idcard, phone, name)) throw new YouyaException("实名认证失败");
+            if (!HuaWeiUtil.realNameAuth2(phone, name)) throw new YouyaException("实名认证失败");
             Long id = loginUser.getId();
             User user = userMapper.selectById(id);
             user.setLastName(lastName);
             user.setFirstName(firstName);
-            user.setIdentityCard(idcard);
             user.setAuthenticationStatus(UserAuthenticationStatusEnum.CERTIFIED.getStatus());
             userMapper.updateById(user);
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
@@ -370,10 +368,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String idKey = String.format(RedisConstant.YY_USER_ID, phone);
         String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
         String tokenKey = String.format(RedisConstant.YY_USER_TOKEN, id);
-        if (!redisUtil.del(idKey) || !redisUtil.del(cacheKey) || !redisUtil.del(tokenKey))
-            throw new YouyaException("注销失败,请稍后再试");
+        redisUtil.del(idKey);
+        redisUtil.del(cacheKey);
+        redisUtil.del(tokenKey);
         user.setIsDelete(1);
         userMapper.updateById(user);
+    }
+
+    /**
+     * 修改用户头像
+     *
+     * @param modifyUserAvatarDto
+     */
+    @Override
+    public void modifyUserAvatar(ModifyUserAvatarDto modifyUserAvatarDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        userMapper.modifyUserAvatar(userId, modifyUserAvatarDto);
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        redisUtil.del(cacheKey);
     }
 
     /**

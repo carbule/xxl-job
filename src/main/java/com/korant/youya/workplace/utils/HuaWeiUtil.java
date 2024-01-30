@@ -174,6 +174,73 @@ public class HuaWeiUtil {
     }
 
     /**
+     * 实名认证
+     *
+     * @param mobile
+     * @param name
+     * @return
+     */
+    public static boolean realNameAuth2(String mobile, String name) {
+        String[] param = {mobile, name};
+        for (String s : param) {
+            if (StringUtils.isBlank(s)) throw new YouyaException("实名认证参数缺失");
+        }
+        Request request = new Request();
+        try {
+            request.setKey(AppKey);
+            request.setSecret(AppSecret);
+            request.setMethod(HttpMethod.GET.name());
+            request.setUrl("http://mobtwo.apistore.huaweicloud.com/lundear/mobTwo?mobile=" + mobile + "&name=" + name);
+            request.addHeader("Content-Type", "text/plain");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
+        CloseableHttpClient client = null;
+        try {
+            // Sign the request.
+            HttpRequestBase signedRequest = Client.sign(request, Constant.SIGNATURE_ALGORITHM_SDK_HMAC_SHA256);
+            // Do not verify ssl certificate
+            client = (CloseableHttpClient) SSLCipherSuiteUtil.createHttpClient(Constant.INTERNATIONAL_PROTOCOL);
+            HttpResponse response = client.execute(signedRequest);
+            // Print the body of the response.
+            HttpEntity resEntity = response.getEntity();
+            if (resEntity != null) {
+                // 获取响应状态
+                String responseStr = EntityUtils.toString(response.getEntity(), "UTF-8");
+                log.info("实名认证接口响应数据：{}", responseStr);
+                int status = response.getStatusLine().getStatusCode();
+                if (status == HttpStatus.SC_OK) {
+                    // 获取响应数据
+                    if (StringUtils.isNotBlank(responseStr)) {
+                        JSONObject jsonObject = JSONObject.parseObject(responseStr);
+                        int code = jsonObject.getIntValue("code");
+                        String desc = jsonObject.getString("desc");
+                        if (0 == code && "一致".equals(desc)) {
+                            log.info("手机号:{},实名认证成功!真实姓名:{}", mobile, name);
+                            return true;
+                        }
+                        log.error("手机号:{},实名认证失败!", mobile);
+                    }
+                } else {
+                    log.error("实名认证接口失败，状态码：" + status);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        } finally {
+            if (client != null) {
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * 根据文件url识别营业执照内容
      *
      * @param url

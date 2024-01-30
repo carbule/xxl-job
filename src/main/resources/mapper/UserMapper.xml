@@ -216,6 +216,14 @@
           AND u.is_delete = 0
     </select>
 
+    <!--  修改用户头像  -->
+    <update id="modifyUserAvatar">
+        UPDATE yy_user
+        SET avatar      = #{modifyUserAvatarDto.avatar},
+            update_time = CURRENT_TIMESTAMP
+        WHERE id = #{userId}
+    </update>
+
     <!--  查询个人基本信息  -->
     <select id="queryPersonalBasicInfo" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.user.UserPersonalBasicInfoVo">
@@ -241,8 +249,7 @@
     <update id="modifyUserPersonalBasicInfo"
             parameterType="com.korant.youya.workplace.pojo.dto.user.ModifyUserPersonalBasicInfoDto">
         UPDATE yy_user
-        SET avatar             = #{modifyDto.avatar},
-            last_name          = #{modifyDto.lastName},
+        SET last_name          = #{modifyDto.lastName},
             first_name         = #{modifyDto.firstName},
             gender             = #{modifyDto.gender},
             birthday           = #{modifyDto.birthday},

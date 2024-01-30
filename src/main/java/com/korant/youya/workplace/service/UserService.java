@@ -73,6 +73,13 @@ public interface UserService extends IService<User> {
     void cancel();
 
     /**
+     * 修改用户头像
+     *
+     * @param modifyUserAvatarDto
+     */
+    void modifyUserAvatar(ModifyUserAvatarDto modifyUserAvatarDto);
+
+    /**
      * 查询个人基本信息
      *
      * @return
