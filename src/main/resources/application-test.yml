@@ -78,6 +78,8 @@ env_version: trial
 
 enterprise_qrcode_url: https://tweichat.youyai.cn/?qrcodeId=
 
+notify_url: https://tweichat.youyai.cn/workplace/user/rechargeNotify
+
 rabbitmq:
   delayProperties:
     enterprise_qrcode:

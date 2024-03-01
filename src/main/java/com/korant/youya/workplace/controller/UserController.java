@@ -1,11 +1,13 @@
 package com.korant.youya.workplace.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +33,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/loginByWechatCode")
-    public R<?> loginByWechatCode(@RequestBody @Valid UserLoginByWechatCodeDto wechatCodeDto) {
+    public R<?> loginByWechatCode(@RequestBody @Valid WechatCodeDto wechatCodeDto) {
         UserLoginVo loginVo = userService.loginByWechatCode(wechatCodeDto);
         return R.success(loginVo);
     }
@@ -104,6 +106,74 @@ public class UserController {
     public R<?> cancel() {
         userService.cancel();
         return R.ok();
+    }
+
+    /**
+     * 查询用户钱包信息
+     *
+     * @return
+     */
+    @GetMapping("/queryUserWalletInfo")
+    public R<?> queryUserWalletInfo() {
+        UserWalletVo userWalletVo = userService.queryUserWalletInfo();
+        return R.success(userWalletVo);
+    }
+
+    /**
+     * 获取用户微信openid
+     *
+     * @param wechatCodeDto
+     * @return
+     */
+    @PostMapping("/getWechatOpenId")
+    public R<?> getWechatOpenId(@RequestBody @Valid WechatCodeDto wechatCodeDto) {
+        String openid = userService.getWechatOpenId(wechatCodeDto);
+        return R.success(openid);
+    }
+
+    /**
+     * 用户充值
+     *
+     * @param userRechargeDto
+     * @return
+     */
+    @PostMapping("/recharge")
+    public R<?> recharge(@RequestBody @Valid UserRechargeDto userRechargeDto) {
+        JSONObject result = userService.recharge(userRechargeDto);
+        return R.success(result);
+    }
+
+    /**
+     * 用户完成支付
+     *
+     * @return
+     */
+    @PostMapping("/completePayment")
+    public R<?> completePayment(@RequestBody @Valid CompletePaymentDto completePaymentDto) {
+        userService.completePayment(completePaymentDto);
+        return R.ok();
+    }
+
+    /**
+     * 用户充值通知
+     *
+     * @return
+     */
+    @PostMapping("/rechargeNotify")
+    public R<?> rechargeNotify(HttpServletRequest request) {
+        userService.rechargeNotify(request);
+        return R.ok();
+    }
+
+    /**
+     * 查询充值结果
+     *
+     * @return
+     */
+    @PostMapping("/queryRechargeResult")
+    public R<?> queryRechargeResult(@RequestBody @Valid QueryRechargeResultDto rechargeResultDto) {
+        Integer status = userService.queryRechargeResult(rechargeResultDto);
+        return R.success(status);
     }
 
     /**

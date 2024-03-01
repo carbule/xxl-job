@@ -59,7 +59,7 @@ public class CodeGenerationUtil {
         //策略配置
         StrategyConfig.Builder strategyConfigBuilder = new StrategyConfig.Builder();
         //配置生成的表名 不配置生成所有的表
-        strategyConfigBuilder.addInclude("apply_job", "internal_recommend", "recruit_process_instance", "interview", "onboarding", "confirmation");
+        strategyConfigBuilder.addInclude("apply_job_main_task","apply_job_sub_task","enterprise_recruitment_main_task","enterprise_recruitment_sub_task","enterprise_wallet_account","enterprise_wallet_freeze_record","payment_record","yy_sys_commission_record","yy_sys_order","yy_sys_product","yy_sys_product_commission","yy_sys_wallet_account","yy_user_wallet_account","yy_user_wallet_freeze_record","yy_wallet_transaction_flow","yy_wallet_withdrawal_record");
         //过滤表前缀
         strategyConfigBuilder.addTablePrefix("yy_");
 

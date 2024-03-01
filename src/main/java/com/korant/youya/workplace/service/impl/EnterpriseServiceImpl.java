@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -81,6 +82,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private EnterpriseWalletAccountMapper enterpriseWalletAccountMapper;
 
     @Resource
     private RedisUtil redisUtil;
@@ -447,6 +451,12 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         userEnterprise.setUid(userId);
         userEnterprise.setEnterpriseId(enterprise.getId());
         userEnterpriseMapper.insert(userEnterprise);
+        EnterpriseWalletAccount enterpriseWalletAccount = new EnterpriseWalletAccount();
+        enterpriseWalletAccount.setEnterpriseId(enterprise.getId());
+        enterpriseWalletAccount.setAccountBalance(new BigDecimal(0));
+        enterpriseWalletAccount.setFreezeAmount(new BigDecimal(0));
+        enterpriseWalletAccount.setStatus(0);
+        enterpriseWalletAccountMapper.insert(enterpriseWalletAccount);
     }
 
     /**

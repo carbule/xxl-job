@@ -78,6 +78,8 @@ env_version: release
 
 enterprise_qrcode_url: https://weichat.youyai.cn/?qrcodeId=
 
+notify_url: https://weichat.youyai.cn/workplace/user/rechargeNotify
+
 rabbitmq:
   delayProperties:
     enterprise_qrcode:

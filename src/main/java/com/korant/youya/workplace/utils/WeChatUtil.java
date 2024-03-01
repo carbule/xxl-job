@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.korant.youya.workplace.constants.WechatConstant;
 import com.korant.youya.workplace.exception.YouyaException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -17,23 +18,12 @@ import java.util.HashMap;
 @Slf4j
 public class WeChatUtil {
 
-    //小程序appId
-    private final static String APP_ID = "wxac76b91987ca9f96";
-    //小程序appSecret
-    private final static String APP_SECRET = "280f7c2a134eb1577dfa0f75aed8a1b9";
-    //知明贤公众号
-    private final static String OFFICIAL_ACCOUNT = "wx0583bd04a25d0695";
-    //知明贤公众号secret
-    private final static String OFFICIAL_ACCOUNT_SECRET = "b51329f481bf3a0a081eb61654ccd631";
-
-
     //小程序accessToken
     private static String MINI_PROGRAM_ACCESS_TOKEN;
     //公众号accessToken
     private static String OFFICIAL_ACCOUNT_ACCESS_TOKEN;
     //JsApiTicket
     private static String JSAPI_TICKET;
-
 
     public static String getMiniProgramAccessToken() {
         return MINI_PROGRAM_ACCESS_TOKEN;
@@ -57,8 +47,8 @@ public class WeChatUtil {
         String GRANT_TYPE = "client_credential";
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("grant_type", GRANT_TYPE);
-        paramMap.put("appid", APP_ID);
-        paramMap.put("secret", APP_SECRET);
+        paramMap.put("appid", WechatConstant.APP_ID);
+        paramMap.put("secret", WechatConstant.APP_SECRET);
         paramMap.put("force_refresh", false);
         String response = HttpClientUtil.sentPost("https://api.weixin.qq.com/cgi-bin/stable_token", paramMap);
         if (StringUtils.isNotBlank(response)) {
@@ -84,8 +74,8 @@ public class WeChatUtil {
         String GRANT_TYPE = "client_credential";
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("grant_type", GRANT_TYPE);
-        paramMap.put("appid", OFFICIAL_ACCOUNT);
-        paramMap.put("secret", OFFICIAL_ACCOUNT_SECRET);
+        paramMap.put("appid", WechatConstant.OFFICIAL_ACCOUNT);
+        paramMap.put("secret", WechatConstant.OFFICIAL_ACCOUNT_SECRET);
         paramMap.put("force_refresh", false);
         String response = HttpClientUtil.sentPost("https://api.weixin.qq.com/cgi-bin/stable_token", paramMap);
         if (StringUtils.isNotBlank(response)) {
@@ -152,6 +142,37 @@ public class WeChatUtil {
                 }
             } else if (40029 == errcode) {
                 throw new YouyaException("code无效");
+            } else {
+                throw new YouyaException("微信系统繁忙");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取微信openid
+     *
+     * @param code 每个code只能使用一次，code的有效期为5min
+     * @return
+     */
+    public static String code2Session(String code) {
+        String url = "https://api.weixin.qq.com/sns/jscode2session";
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("appid", WechatConstant.APP_ID);
+        paramMap.put("secret", WechatConstant.APP_SECRET);
+        paramMap.put("js_code", code);
+        paramMap.put("grant_type", "authorization_code");
+        String response = HttpClientUtil.sentGet(url, paramMap);
+        log.info("[code2Session] response:{}", response);
+        if (StringUtils.isNotBlank(response)) {
+            JSONObject jsonObject = JSONObject.parseObject(response);
+            int errcode = jsonObject.getIntValue("errcode");
+            if (0 == errcode) {
+                return jsonObject.getString("openid");
+            } else if (40029 == errcode) {
+                throw new YouyaException("code无效");
+            } else if (45011 == errcode) {
+                throw new YouyaException("API调用太频繁，请稍候再试");
             } else {
                 throw new YouyaException("微信系统繁忙");
             }

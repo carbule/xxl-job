@@ -78,6 +78,8 @@ env_version: develop
 
 enterprise_qrcode_url: https://tweichat.youyai.cn/?qrcodeId=
 
+notify_url:
+
 rabbitmq:
   delayProperties:
     enterprise_qrcode:

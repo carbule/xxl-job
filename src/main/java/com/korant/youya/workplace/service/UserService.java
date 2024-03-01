@@ -1,10 +1,12 @@
 package com.korant.youya.workplace.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.user.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -22,7 +24,7 @@ public interface UserService extends IService<User> {
      * @param wechatCodeDto
      * @return
      */
-    UserLoginVo loginByWechatCode(UserLoginByWechatCodeDto wechatCodeDto);
+    UserLoginVo loginByWechatCode(WechatCodeDto wechatCodeDto);
 
     /**
      * 短信验证码登陆
@@ -71,6 +73,51 @@ public interface UserService extends IService<User> {
      * 用户注销
      */
     void cancel();
+
+    /**
+     * 查询用户钱包信息
+     *
+     * @return
+     */
+    UserWalletVo queryUserWalletInfo();
+
+    /**
+     * 获取用户微信openid
+     *
+     * @param wechatCodeDto
+     * @return
+     */
+    String getWechatOpenId(WechatCodeDto wechatCodeDto);
+
+    /**
+     * 用户充值
+     *
+     * @param userRechargeDto
+     * @return
+     */
+    JSONObject recharge(UserRechargeDto userRechargeDto);
+
+    /**
+     * 用户完成支付
+     *
+     * @param completePaymentDto
+     */
+    void completePayment(CompletePaymentDto completePaymentDto);
+
+    /**
+     * 用户充值通知
+     *
+     * @param request
+     */
+    void rechargeNotify(HttpServletRequest request);
+
+    /**
+     * 查询充值结果
+     *
+     * @param rechargeResultDto
+     * @return
+     */
+    Integer queryRechargeResult(QueryRechargeResultDto rechargeResultDto);
 
     /**
      * 修改用户头像

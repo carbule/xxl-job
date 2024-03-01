@@ -11,7 +11,7 @@ import lombok.Data;
  * @Version 1.0
  */
 @Data
-public class UserLoginByWechatCodeDto {
+public class WechatCodeDto {
 
     /**
      * 前端传入的微信code
