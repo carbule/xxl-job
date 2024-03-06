@@ -3,6 +3,9 @@ package com.korant.youya.workplace.service.impl;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.diagnosis.DiagnosisUtils;
+import com.alipay.api.response.AlipayFundAccountQueryResponse;
+import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.constants.RedisConstant;
@@ -20,6 +23,7 @@ import com.korant.youya.workplace.enums.userprivacy.OtherInfoVisibleTypeEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
+import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.user.*;
@@ -105,6 +109,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private WalletTransactionFlowMapper walletTransactionFlowMapper;
 
     @Resource
+    private WalletWithdrawalRecordMapper walletWithdrawalRecordMapper;
+
+    @Resource
     private RedisUtil redisUtil;
 
     @Value("${notify_url}")
@@ -115,6 +122,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private static final String CHINA_CODE = "100000";
 
     private static final String RECHARGE_DESCRIPTION = "友涯用户充值";
+
+    private static final String WALLET_ACCOUNT_WITHDRAWAL = "友涯用户钱包账户提现";
 
     /**
      * 微信登陆
@@ -352,8 +361,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Object o = redisUtil.get(key);
         if (null == o) {
             String code = verificationCodeGenerator();
-            if (!HuaWeiUtil.sendVerificationCode(code, phone)) throw new YouyaException("短信验证码发送失败，请稍后再试");
-            if (!redisUtil.set(key, code, 600)) throw new YouyaException("获取验证码失败，请稍后再试");
+            if (!HuaWeiUtil.sendVerificationCode(HuaWeiUtil.TEMPLATE_A, code, phone))
+                throw new YouyaException("短信验证码发送失败，请稍后再试");
+            if (!redisUtil.set(key, code, 600)) throw new YouyaException("短信验证码发送失败，请稍后再试");
         } else throw new YouyaException("验证码10分钟内有效，请勿频繁获取短信验证码");
     }
 
@@ -495,8 +505,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
         Long accountId = userWalletAccount.getId();
         WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-        walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionDirectionTypeEnum.CREDIT.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(new BigDecimal(totalAmount)).setCurrency(CurrencyTypeEnum.CNY.getType())
-                .setDescription(RECHARGE_DESCRIPTION).setTransactionDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus());
+        walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(new BigDecimal(totalAmount)).setCurrency(CurrencyTypeEnum.CNY.getType())
+                .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
         walletTransactionFlowMapper.insert(walletTransactionFlow);
         JSONObject result = new JSONObject();
         result.put("timeStamp", response.getTimeStamp());
@@ -604,10 +614,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long sysOrderId = sysOrder.getId();
         WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, sysOrderId).eq(WalletTransactionFlow::getIsDelete, 0));
         if (null == walletTransactionFlow) throw new YouyaException("订单交易流水不存在");
-        sysOrder.setTransactionId(transactionId);
+        sysOrder.setOutTransactionId(transactionId);
         //支付成功
         Transaction.TradeStateEnum tradeState = transaction.getTradeState();
+        BigDecimal beforeBalance = userWalletAccount.getAccountBalance();
         if (Transaction.TradeStateEnum.SUCCESS.equals(tradeState)) {
+            //更新订单状态
             BigDecimal actualAmount = sysOrder.getActualAmount();
             TransactionAmount amount = transaction.getAmount();
             if (null == amount) throw new YouyaException("缺失订单金额信息");
@@ -616,39 +628,76 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (actualAmount.compareTo(payerTotalAmount) != 0) throw new YouyaException("支付金额与订单需要实付金额不一致");
             sysOrder.setStatus(OrderStatusEnum.PAID.getStatus());
             sysOrderMapper.updateById(sysOrder);
-            BigDecimal beforeBalance = userWalletAccount.getAccountBalance();
+            //更新账户金额
             BigDecimal afterBalance = beforeBalance.add(payerTotalAmount);
             userWalletAccount.setAccountBalance(afterBalance);
             userWalletAccountMapper.updateById(userWalletAccount);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc());
             walletTransactionFlow.setBalanceBefore(beforeBalance);
             walletTransactionFlow.setBalanceAfter(afterBalance);
-            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SETTLED.getStatus());
-            walletTransactionFlow.setTransactionDate(parseStringToLocalDateTime(successTime));
-            walletTransactionFlow.setDescription(tradeStateDesc);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
             log.info("友涯订单id:【{}】，支付成功，账户余额和订单状态以及账户流水更新成功", sysOrderId);
         } else if (Transaction.TradeStateEnum.PAYERROR.equals(tradeState)) {
             //支付失败
+            //更新订单状态
             sysOrder.setStatus(OrderStatusEnum.PAYMENT_FAILED.getStatus());
             sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
             walletTransactionFlow.setStatus(TransactionFlowStatusEnum.FAILED.getStatus());
-            walletTransactionFlow.setTransactionDate(parseStringToLocalDateTime(successTime));
-            walletTransactionFlow.setDescription(tradeStateDesc);
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.FAILED.getStatusDesc());
+            walletTransactionFlow.setTransactionFailReason(tradeStateDesc);
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
             log.info("友涯订单id:【{}】，支付失败，订单状态以及账户流水更新成功", sysOrderId);
         } else if (Transaction.TradeStateEnum.CLOSED.equals(tradeState)) {
             //已关闭
+            //更新订单状态
             sysOrder.setStatus(OrderStatusEnum.PAYMENT_CANCELED.getStatus());
             sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
             walletTransactionFlow.setStatus(TransactionFlowStatusEnum.CANCELLED.getStatus());
-            walletTransactionFlow.setTransactionDate(parseStringToLocalDateTime(successTime));
-            walletTransactionFlow.setDescription(tradeStateDesc);
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.CANCELLED.getStatusDesc());
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
-            log.info("友涯订单id:【{}】，已被关闭，订单状态以及账户流水更新成功", sysOrderId);
+            log.info("友涯订单id:【{}】，已关闭，订单状态以及账户流水更新成功", sysOrderId);
         } else if (Transaction.TradeStateEnum.NOTPAY.equals(tradeState)) {
             //未支付
+            //更新订单状态
+            sysOrder.setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.PENDING.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("友涯订单id:【{}】，未支付，订单状态以及账户流水更新成功", sysOrderId);
         } else if (Transaction.TradeStateEnum.REFUND.equals(tradeState)) {
             //转入退款
+            ////更新订单状态
+            sysOrder.setStatus(OrderStatusEnum.REFUNDED.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.REFUNDED.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.REFUNDED.getStatusDesc());
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("友涯订单id:【{}】，转入退款，订单状态以及账户流水更新成功", sysOrderId);
         }
     }
 
@@ -667,6 +716,303 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long buyerId = sysOrder.getBuyerId();
         if (!buyerId.equals(userId)) throw new YouyaException("非法操作");
         return sysOrder.getStatus();
+    }
+
+    /**
+     * 查询用户支付宝账号
+     *
+     * @return
+     */
+    @Override
+    public UserAlipayAccountVo queryUserAlipayAccount() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String alipayAccount = loginUser.getAlipayAccount();
+        if (StringUtils.isBlank(alipayAccount)) return null;
+        UserAlipayAccountVo userAlipayAccountVo = new UserAlipayAccountVo();
+        userAlipayAccountVo.setAlipayAccount(alipayAccount);
+        return userAlipayAccountVo;
+    }
+
+    /**
+     * 发送支付宝账号绑定验证码
+     *
+     * @param verificationCodeDto
+     */
+    @Override
+    public void sendAlipayAccountBindingVerificationCode(BindingVerificationCodeDto verificationCodeDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Integer accountStatus = loginUser.getAccountStatus();
+        if (UserAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("账号已被冻结,详情请咨询客服");
+        String alipayAccount = verificationCodeDto.getAlipayAccount();
+        String key = String.format(RedisConstant.YY_ALIPAY_COUNT_CODE, alipayAccount);
+        Object o = redisUtil.get(key);
+        if (null == o) {
+            String code = verificationCodeGenerator();
+            if (!HuaWeiUtil.sendVerificationCode(HuaWeiUtil.TEMPLATE_B, code, alipayAccount))
+                throw new YouyaException("短信验证码发送失败，请稍后再试");
+            if (!redisUtil.set(key, code, 600)) throw new YouyaException("短信验证码发送失败，请稍后再试");
+        } else throw new YouyaException("验证码10分钟内有效，请勿频繁获取短信验证码");
+    }
+
+    /**
+     * 校验支付宝账号绑定验证码
+     *
+     * @param checkVerificationCodeDto
+     */
+    @Override
+    public void checkVerificationCode(CheckVerificationCodeDto checkVerificationCodeDto) {
+        String alipayAccount = checkVerificationCodeDto.getAlipayAccount();
+        String code = checkVerificationCodeDto.getCode();
+        String codeKey = String.format(RedisConstant.YY_ALIPAY_COUNT_CODE, alipayAccount);
+        Object codeCache = redisUtil.get(codeKey);
+        if (null == codeCache) throw new YouyaException("验证码已过期");
+        String cacheCode = String.valueOf(codeCache);
+        if (!cacheCode.equals(code)) {
+            throw new YouyaException("验证码错误");
+        }
+    }
+
+    /**
+     * 绑定支付宝账号
+     *
+     * @param bindAlipayAccountDto
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void bindAlipayAccount(BindAlipayAccountDto bindAlipayAccountDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String alipay = loginUser.getAlipayAccount();
+        if (StringUtils.isBlank(alipay)) {
+            String lastName = bindAlipayAccountDto.getLastName();
+            String firstName = bindAlipayAccountDto.getFirstName();
+            String alipayAccount = bindAlipayAccountDto.getAlipayAccount();
+            String idcard = bindAlipayAccountDto.getIdcard();
+            String name = lastName + firstName;
+            if (!HuaWeiUtil.realNameAuth(idcard, alipayAccount, name)) throw new YouyaException("实名认证失败");
+            Long id = loginUser.getId();
+            User user = userMapper.selectById(id);
+            user.setAlipayAccount(alipayAccount);
+            user.setAlipayAccountName(name);
+            userMapper.updateById(user);
+            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
+            redisUtil.del(cacheKey);
+        } else {
+            throw new YouyaException("请勿重复认证");
+        }
+    }
+
+    /**
+     * 查询用户钱包账户可用余额
+     *
+     * @return
+     */
+    @Override
+    public BigDecimal queryAccountAvailableBalance() {
+        Long userId = SpringSecurityUtil.getUserId();
+        UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+        if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
+        Integer status = userWalletAccount.getStatus();
+        if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
+        //账户总额
+        BigDecimal accountBalance = userWalletAccount.getAccountBalance();
+        //冻结金额
+        BigDecimal freezeAmount = userWalletAccount.getFreezeAmount();
+        //可用余额
+        BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
+        MathContext mathContext = new MathContext(3, RoundingMode.UNNECESSARY);
+        return availableBalance.divide(new BigDecimal(100), mathContext);
+    }
+
+    /**
+     * 解绑支付宝账号
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void unbindAlipayAccount() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String alipayAccount = loginUser.getAlipayAccount();
+        if (StringUtils.isBlank(alipayAccount)) throw new YouyaException("当前账户未绑定支付宝账号");
+        Long id = loginUser.getId();
+        userMapper.unbindAlipayAccount(id);
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
+        redisUtil.del(cacheKey);
+    }
+
+    /**
+     * 用户钱包提现
+     *
+     * @param withdrawalDto
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    //todo 账户变动时缺少锁 后面加上
+    public R<?> withdrawal(WithdrawalDto withdrawalDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        String phone = loginUser.getPhone();
+        UserWalletAccount walletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+        if (null == walletAccount) throw new YouyaException("钱包账户不存在");
+        Integer accountStatus = walletAccount.getStatus();
+        if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("钱包账户已被冻结，请联系客服");
+        BigDecimal accountBalance = walletAccount.getAccountBalance();
+        BigDecimal freezeAmount = walletAccount.getFreezeAmount();
+        BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
+        if (availableBalance.intValue() <= 0) throw new YouyaException("当前账户可用余额为0，无法提现");
+        String amount = withdrawalDto.getAmount();
+        BigDecimal decimal = new BigDecimal(amount);
+        //先去除尾部多余的零
+        BigDecimal withdrawalAmount = decimal.stripTrailingZeros();
+        //设置小数位数为2，使用HALF_UP或其他合适的舍入模式
+        int scale = withdrawalAmount.scale();
+        //判断经过处理后的小数位是否为2
+        if (scale > 2) throw new YouyaException("提现最小金额单位为分");
+        if (withdrawalAmount.compareTo(accountBalance) > 0) throw new YouyaException("提现金额不能大于账户可用余额");
+        if (withdrawalAmount.compareTo(new BigDecimal("0.1")) < 0) throw new YouyaException("最小提现金额为0.1元");
+        //查询支付宝商户账号可用余额
+        AlipayFundAccountQueryResponse alipayFundAccountQueryResponse = AlipayUtil.fundAccountQuery();
+        if (null == alipayFundAccountQueryResponse) throw new YouyaException("网络异常，请稍后重试");
+        if (alipayFundAccountQueryResponse.isSuccess()) {
+            String availableAmount = alipayFundAccountQueryResponse.getAvailableAmount();
+            BigDecimal alipayAccountAvailableAmount = new BigDecimal(availableAmount);
+            if (withdrawalAmount.compareTo(alipayAccountAvailableAmount) > 0) {
+                log.error("用户:【{}】，提现：【{}】元，大于支付宝商户账户可用余额：【{}】，提现失败", phone, withdrawalAmount, alipayAccountAvailableAmount);
+                throw new YouyaException("网络异常，请稍后重试");
+            }
+            String alipayAccount = loginUser.getAlipayAccount();
+            String alipayAccountName = loginUser.getAlipayAccountName();
+            //创建内部转账订单
+            Long walletAccountId = walletAccount.getId();
+            WalletWithdrawalRecord walletWithdrawalRecord = new WalletWithdrawalRecord();
+            walletWithdrawalRecord.setAccountId(walletAccountId).setAmount(withdrawalAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setWithdrawalMethod(WithdrawalMethodEnum.ALIPAY_ACCOUNT.getMethod())
+                    .setPaymentAccount(alipayAccount).setPaymentName(alipayAccountName).setStatus(WalletWithdrawalStatusEnum.PROCESSING.getStatus()).setRequestTime(LocalDateTime.now()).setProcessingTime(LocalDateTime.now());
+            walletWithdrawalRecordMapper.insert(walletWithdrawalRecord);
+            Long withdrawalRecordId = walletWithdrawalRecord.getId();
+            //创建账户交易流水
+            WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
+            walletTransactionFlow.setAccountId(walletAccountId).setOrderId(withdrawalRecordId).setTransactionType(TransactionTypeEnum
+                    .WITHDRAWAL.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(withdrawalAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setDescription(WALLET_ACCOUNT_WITHDRAWAL)
+                    .setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
+            walletTransactionFlowMapper.insert(walletTransactionFlow);
+            //发起转账
+            AlipayFundTransUniTransferResponse transferResponse = AlipayUtil.transfer(WALLET_ACCOUNT_WITHDRAWAL, withdrawalRecordId, withdrawalAmount, alipayAccount, alipayAccountName);
+            if (null == transferResponse) throw new YouyaException("网络异常，请稍后重试");
+            log.info("友涯用户:【{}】，提现订单号：【{}】，友涯商户转账到支付宝账号响应明文：【{}】", phone, withdrawalRecordId, JSONObject.toJSONString(transferResponse));
+            if (transferResponse.isSuccess()) {
+                String code = transferResponse.getCode();
+                if (StringUtils.isBlank(code)) {
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态码", phone, withdrawalAmount, withdrawalRecordId);
+                    return R.error("网络异常，请稍后重试");
+                }
+                String status = transferResponse.getStatus();
+                if (StringUtils.isBlank(status)) {
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态值", phone, withdrawalAmount, withdrawalRecordId);
+                    return R.error("网络异常，请稍后重试");
+                }
+                String outBizNo = transferResponse.getOutBizNo();
+                if (StringUtils.isBlank(outBizNo)) {
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失商户订单号", phone, withdrawalAmount, withdrawalRecordId);
+                    return R.error("网络异常，请稍后重试");
+                }
+                String outOrderId = transferResponse.getOrderId();
+                if (StringUtils.isBlank(outOrderId)) {
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝订单号", phone, withdrawalAmount, withdrawalRecordId);
+                    return R.error("网络异常，请稍后重试");
+                }
+                String payFundOrderId = transferResponse.getPayFundOrderId();
+                if (StringUtils.isBlank(payFundOrderId)) {
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝支付资金流水号", phone, withdrawalAmount, withdrawalRecordId);
+                    return R.error("网络异常，请稍后重试");
+                }
+                String transDate = transferResponse.getTransDate();
+                LocalDateTime completionDate = null;
+                if (StringUtils.isNotBlank(transDate)) {
+                    completionDate = LocalDateTime.parse(transDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                }
+                //转账支付宝账号成功
+                if ("10000".equals(code) && "SUCCESS".equals(status)) {
+                    if (withdrawalRecordId.toString().equals(outBizNo)) {
+                        //更新转账订单状态
+                        walletWithdrawalRecord.setStatus(WalletWithdrawalStatusEnum.SUCCESSFUL.getStatus());
+                        walletWithdrawalRecord.setAlipayOrderId(outOrderId);
+                        walletWithdrawalRecord.setAlipayFundOrderId(payFundOrderId);
+                        walletWithdrawalRecord.setCompletionTime(completionDate);
+                        walletWithdrawalRecordMapper.updateById(walletWithdrawalRecord);
+                        //更新账户金额
+                        BigDecimal hundred = BigDecimal.valueOf(100);
+                        BigDecimal multiply = withdrawalAmount.multiply(hundred);
+                        BigDecimal subtract = accountBalance.subtract(multiply);
+                        walletAccount.setAccountBalance(subtract);
+                        userWalletAccountMapper.updateById(walletAccount);
+                        //更新账户交易流水状态
+                        walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());
+                        walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc());
+                        walletTransactionFlow.setBalanceBefore(accountBalance);
+                        walletTransactionFlow.setBalanceAfter(subtract);
+                        walletTransactionFlow.setCompletionDate(completionDate);
+                        walletTransactionFlow.setOutTransactionId(payFundOrderId);
+                        walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                        log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元成功", phone, withdrawalAmount, withdrawalRecordId);
+                        return R.ok();
+                    } else {
+                        log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中的商户订单号与平台提现订单号不一致", phone, withdrawalAmount, withdrawalRecordId);
+                        throw new YouyaException("网络异常，请稍后重试");
+                    }
+                } else {
+                    //转账支付宝账号失败
+                    String msg = transferResponse.getMsg();
+                    String subCode = transferResponse.getSubCode();
+                    String subMsg = transferResponse.getSubMsg();
+                    if (StringUtils.isBlank(msg) || StringUtils.isBlank(subCode) || StringUtils.isBlank(subMsg)) {
+                        log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalAmount, withdrawalRecordId);
+                        throw new YouyaException("网络异常，请稍后重试");
+                    }
+                    //修改转账订单状态
+                    walletWithdrawalRecord.setStatus(WalletWithdrawalStatusEnum.FAILED.getStatus());
+                    walletWithdrawalRecord.setFailReason(subMsg);
+                    walletWithdrawalRecord.setAlipayOrderId(outOrderId);
+                    walletWithdrawalRecord.setAlipayFundOrderId(payFundOrderId);
+                    walletWithdrawalRecord.setCompletionTime(completionDate);
+                    walletWithdrawalRecordMapper.updateById(walletWithdrawalRecord);
+                    //修改账户交易流水状态
+                    walletTransactionFlow.setStatus(TransactionFlowStatusEnum.FAILED.getStatus());
+                    walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.FAILED.getStatusDesc());
+                    walletTransactionFlow.setTransactionFailReason(subMsg);
+                    walletTransactionFlow.setBalanceBefore(accountBalance);
+                    walletTransactionFlow.setBalanceAfter(accountBalance);
+                    walletTransactionFlow.setCompletionDate(completionDate);
+                    walletTransactionFlow.setOutTransactionId(payFundOrderId);
+                    walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败,原因：【{}】", phone, withdrawalAmount, withdrawalRecordId, subMsg);
+                    return R.error(subMsg);
+                }
+            } else {
+                String msg = transferResponse.getMsg();
+                String subCode = transferResponse.getSubCode();
+                String subMsg = transferResponse.getSubMsg();
+                if (StringUtils.isBlank(msg) || StringUtils.isBlank(subCode) || StringUtils.isBlank(subMsg)) {
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalAmount, withdrawalRecordId);
+                    throw new YouyaException("网络异常，请稍后重试");
+                }
+                //更新转账订单状态
+                walletWithdrawalRecord.setStatus(WalletWithdrawalStatusEnum.FAILED.getStatus());
+                walletWithdrawalRecord.setFailReason(subMsg);
+                walletWithdrawalRecordMapper.updateById(walletWithdrawalRecord);
+                //更新账户交易流水状态
+                walletTransactionFlow.setStatus(TransactionFlowStatusEnum.FAILED.getStatus());
+                walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.FAILED.getStatusDesc());
+                walletTransactionFlow.setTransactionFailReason(subMsg);
+                walletTransactionFlow.setBalanceBefore(accountBalance);
+                walletTransactionFlow.setBalanceAfter(accountBalance);
+                walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                String diagnosisUrl = DiagnosisUtils.getDiagnosisUrl(transferResponse);
+                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，诊断url:【{}】", phone, withdrawalAmount, withdrawalRecordId, subMsg, diagnosisUrl);
+                return R.error(subMsg);
+            }
+        } else {
+            String diagnosisUrl = DiagnosisUtils.getDiagnosisUrl(alipayFundAccountQueryResponse);
+            log.error("查询支付宝商户可用余额失败，诊断url:【{}】", diagnosisUrl);
+            throw new YouyaException("网络异常，请稍后重试");
+        }
     }
 
     /**
@@ -994,14 +1340,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //        // 将OffsetDateTime转换为LocalDateTime，忽略时区信息
 //        LocalDateTime localDateTime = offsetDateTime.toLocalDateTime();
 //        System.out.println(localDateTime);
-        BigDecimal bd = new BigDecimal("103");
-        try {
-            // 尝试将BigDecimal设置为两位小数，但不允许舍入
-            MathContext mathContext = new MathContext(3, RoundingMode.UNNECESSARY);
-            BigDecimal divide = bd.divide(new BigDecimal("100"), mathContext);
-            System.out.println(divide);
-        } catch (ArithmeticException e) {
-            System.out.println("ArithmeticException: " + e.getMessage());
-        }
+//        BigDecimal bd = new BigDecimal("103");
+//        try {
+//            // 尝试将BigDecimal设置为两位小数，但不允许舍入
+//            MathContext mathContext = new MathContext(3, RoundingMode.UNNECESSARY);
+//            BigDecimal divide = bd.divide(new BigDecimal("100"), mathContext);
+//            System.out.println(divide);
+//        } catch (ArithmeticException e) {
+//            System.out.println("ArithmeticException: " + e.getMessage());
+//        }
+
+        BigDecimal value = new BigDecimal("123.451000");
+        BigDecimal decimal = value.stripTrailingZeros();
+        // 获取BigDecimal对象的小数位数（标度）
+        int scale = decimal.scale();
+        System.out.println(scale);
     }
 }

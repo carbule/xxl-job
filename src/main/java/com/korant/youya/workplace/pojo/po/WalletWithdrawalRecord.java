@@ -62,10 +62,28 @@ public class WalletWithdrawalRecord implements Serializable {
     private String paymentAccount;
 
     /**
+     * 收款账户姓名
+     */
+    @TableField("payment_name")
+    private String paymentName;
+
+    /**
      * 提现手续费
      */
     @TableField("fee_amount")
     private BigDecimal feeAmount;
+
+    /**
+     * 支付宝转账订单号
+     */
+    @TableField("alipay_order_id")
+    private String AlipayOrderId;
+
+    /**
+     * 支付宝支付资金流水号
+     */
+    @TableField("alipay_fund_order_id")
+    private String AlipayFundOrderId;
 
     /**
      * 提现状态
@@ -74,10 +92,10 @@ public class WalletWithdrawalRecord implements Serializable {
     private Integer status;
 
     /**
-     * 拒绝原因
+     * 失败原因
      */
-    @TableField("rejection_reason")
-    private String rejectionReason;
+    @TableField("fail_reason")
+    private String failReason;
 
     /**
      * 提现请求发起时间
@@ -86,7 +104,7 @@ public class WalletWithdrawalRecord implements Serializable {
     private LocalDateTime requestTime;
 
     /**
-     * 处理开始时间
+     * 提现开始时间
      */
     @TableField("processing_time")
     private LocalDateTime processingTime;
@@ -102,6 +120,24 @@ public class WalletWithdrawalRecord implements Serializable {
      */
     @TableField("remark")
     private String remark;
+
+    /**
+     * 预留字段1
+     */
+    @TableField("reserved_field_1")
+    private String reservedField1;
+
+    /**
+     * 预留字段2
+     */
+    @TableField("reserved_field_2")
+    private String reservedField2;
+
+    /**
+     * 预留字段3
+     */
+    @TableField("reserved_field_3")
+    private String reservedField3;
 
     /**
      * 创建时间

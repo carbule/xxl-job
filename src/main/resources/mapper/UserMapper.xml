@@ -175,15 +175,20 @@
             resultType="com.korant.youya.workplace.pojo.LoginUser">
         SELECT u.id,
                u.avatar,
-               u.last_name             AS lastName,
-               u.first_name            AS firstName,
+               u.last_name                    AS lastName,
+               u.first_name                   AS firstName,
                u.phone,
-               u.identity_card         AS identityCard,
-               u.personal_signature    AS personalSignature,
-               u.authentication_status AS authenticationStatus,
-               u.account_status        AS accountStatus,
-               r.role_name             AS role,
-               e.id                    AS enterpriseId
+               u.identity_card                AS identityCard,
+               u.personal_signature           AS personalSignature,
+               u.authentication_status        AS authenticationStatus,
+               u.account_status               AS accountStatus,
+               u.wechat_open_id               AS wechatOpenId,
+               u.alipay_open_id               AS alipayOpenId,
+               u.alipay_account               AS alipayAccount,
+               u.alipay_account_name          AS alipayAccountName,
+               u.alipay_account_identity_card AS alipayAccountIdentityCard,
+               r.role_name                    AS role,
+               e.id                           AS enterpriseId
         FROM yy_user AS u
                  LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
                  LEFT JOIN yy_role AS r ON ur.rid = r.id
@@ -198,15 +203,20 @@
             resultType="com.korant.youya.workplace.pojo.LoginUser">
         SELECT u.id,
                u.avatar,
-               u.last_name             AS lastName,
-               u.first_name            AS firstName,
+               u.last_name                    AS lastName,
+               u.first_name                   AS firstName,
                u.phone,
-               u.identity_card         AS identityCard,
-               u.personal_signature    AS personalSignature,
-               u.authentication_status AS authenticationStatus,
-               u.account_status        AS accountStatus,
-               r.role_name             AS role,
-               e.id                    AS enterpriseId
+               u.identity_card                AS identityCard,
+               u.personal_signature           AS personalSignature,
+               u.authentication_status        AS authenticationStatus,
+               u.account_status               AS accountStatus,
+               u.wechat_open_id               AS wechatOpenId,
+               u.alipay_open_id               AS alipayOpenId,
+               u.alipay_account               AS alipayAccount,
+               u.alipay_account_name          AS alipayAccountName,
+               u.alipay_account_identity_card AS alipayAccountIdentityCard,
+               r.role_name                    AS role,
+               e.id                           AS enterpriseId
         FROM yy_user AS u
                  LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
                  LEFT JOIN yy_role AS r ON ur.rid = r.id
@@ -215,6 +225,16 @@
         WHERE u.phone = #{phoneNumber}
           AND u.is_delete = 0
     </select>
+
+    <!--  解绑支付宝账号  -->
+    <update id="unbindAlipayAccount">
+        UPDATE yy_user
+        SET alipay_account               = null,
+            alipay_account_name          = null,
+            alipay_account_identity_card = null,
+            update_time                  = CURRENT_TIMESTAMP
+        WHERE id = #{userId}
+    </update>
 
     <!--  修改用户头像  -->
     <update id="modifyUserAvatar">

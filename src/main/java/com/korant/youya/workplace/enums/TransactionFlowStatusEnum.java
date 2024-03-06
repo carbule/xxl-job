@@ -10,30 +10,27 @@ package com.korant.youya.workplace.enums;
 public enum TransactionFlowStatusEnum {
 
     //待处理，交易已发起但尚未确认
-    PENDING(1),
+    PENDING(1, "交易待处理"),
     //处理中，系统正在验证和执行交易
-    PROCESSING(2),
-    //已支付，交易成功完成，款项已划转
-    PAID(3),
-    //支付失败，由于某些原因交易未能完成
-    FAILED(4),
-    //已退款，原始交易金额部分或全部退还给付款方
-    REFUNDED(5),
+    PROCESSING(2, "交易处理中"),
+    //交易成功，款项已划转
+    SUCCESSFUL(3, "交易成功"),
+    //交易失败，由于某些原因交易未能完成
+    FAILED(4, "交易失败"),
+    //已过期，交易在有效期内未完成,
+    EXPIRED(5, "交易已过期"),
     //已取消，交易在完成前被用户或系统取消
-    CANCELLED(6),
-    //结算完成，资金清算完毕，已入账
-    SETTLED(7),
-    //交易冲正，之前的支付状态被反向操作
-    REVERSED(8),
-    //已过期，交易在有效期内未完成
-    EXPIRED(9),
-    //部分支付，订单的一部分金额已经支付
-    PARTIALLY_PAID(10);
+    CANCELLED(6, "交易已取消"),
+    //已退款，原始交易金额部分或全部退还给付款方
+    REFUNDED(7, "交易已退款");
 
     private int status;
 
-    TransactionFlowStatusEnum(int status) {
+    private String statusDesc;
+
+    TransactionFlowStatusEnum(int status, String statusDesc) {
         this.status = status;
+        this.statusDesc = statusDesc;
     }
 
     public int getStatus() {
@@ -42,5 +39,13 @@ public enum TransactionFlowStatusEnum {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getStatusDesc() {
+        return statusDesc;
+    }
+
+    public void setStatusDesc(String statusDesc) {
+        this.statusDesc = statusDesc;
     }
 }

@@ -34,6 +34,10 @@ public class HuaWeiUtil {
     public static final String AppKey = "0f0dd9f71f0443268d7bf3135adf782c";
     public static final String AppSecret = "ef3786129f964c8a9c1f591075da1777";
 
+    public static final String TEMPLATE_A = "【友涯】验证码：%s，有效期10分钟。如非本人操作，请忽略。";
+    public static final String TEMPLATE_B = "【友涯】验证码：%s，有效期10分钟。您正在绑定支付宝账号操作。";
+    public static final String TEMPLATE_C = "【友涯】支付宝商户余额不足，请尽快充值。";
+
     /**
      * 发送短信验证码
      *
@@ -41,13 +45,15 @@ public class HuaWeiUtil {
      * @param mobile
      * @return
      */
-    public static boolean sendVerificationCode(String code, String mobile) {
-        String[] param = {code, mobile};
+    public static boolean sendVerificationCode(String template, String code, String mobile) {
+        String[] param = {template, mobile};
         for (String s : param) {
             if (StringUtils.isBlank(s)) throw new YouyaException("短信验证码参数缺失");
         }
-        String template = "【友涯】验证码：%s，有效期10分钟。如非本人操作，请忽略。";
-        String content = String.format(template, code);
+        String content = template;
+        if (StringUtils.isNotBlank(code)) {
+            content = String.format(template, code);
+        }
         Request request = new Request();
         try {
             request.setKey(AppKey);
@@ -371,6 +377,6 @@ public class HuaWeiUtil {
     public static void main(String[] args) throws IOException {
 //        boolean auth = realNameAuth("320621199710065918", "18052042163", "陈毅强");
 //        System.out.println(auth);
-        sendVerificationCode("123456", "18052042163");
+        sendVerificationCode(TEMPLATE_A, "123456", "18052042163");
     }
 }

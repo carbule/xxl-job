@@ -3,10 +3,13 @@ package com.korant.youya.workplace.service;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.LoginUser;
+import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -118,6 +121,53 @@ public interface UserService extends IService<User> {
      * @return
      */
     Integer queryRechargeResult(QueryRechargeResultDto rechargeResultDto);
+
+    /**
+     * 查询用户支付宝账号
+     *
+     * @return
+     */
+    UserAlipayAccountVo queryUserAlipayAccount();
+
+    /**
+     * 发送支付宝账号绑定验证码
+     *
+     * @param verificationCodeDto
+     */
+    void sendAlipayAccountBindingVerificationCode(BindingVerificationCodeDto verificationCodeDto);
+
+    /**
+     * 校验支付宝账号绑定验证码
+     *
+     * @param checkVerificationCodeDto
+     */
+    void checkVerificationCode(CheckVerificationCodeDto checkVerificationCodeDto);
+
+    /**
+     * 绑定支付宝账号
+     *
+     * @param bindAlipayAccountDto
+     */
+    void bindAlipayAccount(BindAlipayAccountDto bindAlipayAccountDto);
+
+    /**
+     * 查询用户钱包账户可用余额
+     *
+     * @return
+     */
+    BigDecimal queryAccountAvailableBalance();
+
+    /**
+     * 解绑支付宝账号
+     */
+    void unbindAlipayAccount();
+
+    /**
+     * 用户钱包提现
+     *
+     * @param withdrawalDto
+     */
+    R<?> withdrawal(WithdrawalDto withdrawalDto);
 
     /**
      * 修改用户头像

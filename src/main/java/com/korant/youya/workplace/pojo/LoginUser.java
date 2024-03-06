@@ -58,6 +58,31 @@ public class LoginUser {
     private Integer accountStatus;
 
     /**
+     * 微信友涯商户下用户openid
+     */
+    private String wechatOpenId;
+
+    /**
+     * 支付宝友涯商户下用户openid
+     */
+    private String alipayOpenId;
+
+    /**
+     * 用户支付宝账号
+     */
+    private String alipayAccount;
+
+    /**
+     * 用户支付宝账号姓名
+     */
+    private String alipayAccountName;
+
+    /**
+     * 用户支付宝账号身份证号
+     */
+    private String alipayAccountIdentityCard;
+
+    /**
      * 企业id
      */
     private Long enterpriseId;

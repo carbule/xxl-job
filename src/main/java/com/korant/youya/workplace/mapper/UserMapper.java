@@ -36,6 +36,14 @@ public interface UserMapper extends BaseMapper<User> {
     LoginUser selectUserToLoginByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
     /**
+     * 解绑支付宝账号
+     *
+     * @param userId
+     * @return
+     */
+    int unbindAlipayAccount(@Param("userId") Long userId);
+
+    /**
      * 修改用户头像
      *
      * @param userId

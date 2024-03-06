@@ -98,16 +98,40 @@ public class WalletTransactionFlow implements Serializable {
     private String description;
 
     /**
-     * 交易日期
+     * 交易发起日期
      */
-    @TableField("transaction_date")
-    private LocalDateTime transactionDate;
+    @TableField("initiation_date")
+    private LocalDateTime initiationDate;
+
+    /**
+     * 交易完成日期
+     */
+    @TableField("completion_date")
+    private LocalDateTime completionDate;
 
     /**
      * 交易状态
      */
     @TableField("status")
     private Integer status;
+
+    /**
+     * 交易状态描述
+     */
+    @TableField("trade_status_desc")
+    private String tradeStatusDesc;
+
+    /**
+     * 支付平台唯一交易流水号
+     */
+    @TableField("out_transaction_id")
+    private String outTransactionId;
+
+    /**
+     * 交易失败原因
+     */
+    @TableField("transaction_fail_reason")
+    private String transactionFailReason;
 
     /**
      * 交易凭证号
@@ -126,6 +150,24 @@ public class WalletTransactionFlow implements Serializable {
      */
     @TableField("balance_after")
     private BigDecimal balanceAfter;
+
+    /**
+     * 预留字段1
+     */
+    @TableField("reserved_field_1")
+    private String reservedField1;
+
+    /**
+     * 预留字段2
+     */
+    @TableField("reserved_field_2")
+    private String reservedField2;
+
+    /**
+     * 预留字段3
+     */
+    @TableField("reserved_field_3")
+    private String reservedField3;
 
     /**
      * 创建时间

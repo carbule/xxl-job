@@ -45,7 +45,7 @@ spring:
 
   data:
     redis:
-      database: 2
+      database: 0
       host: 139.9.240.37
       port: 6379
       password: korant@123

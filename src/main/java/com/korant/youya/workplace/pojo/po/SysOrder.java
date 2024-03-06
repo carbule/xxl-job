@@ -116,10 +116,10 @@ public class SysOrder implements Serializable {
     private String currency;
 
     /**
-     * 支付平台交易号或流水号
+     * 支付平台唯一交易流水号
      */
-    @TableField("transaction_id")
-    private String transactionId;
+    @TableField("out_transaction_id")
+    private String outTransactionId;
 
     /**
      * 订单状态

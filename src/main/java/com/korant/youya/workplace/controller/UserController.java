@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 /**
  * <p>
  * 友涯用户表 前端控制器
@@ -174,6 +176,84 @@ public class UserController {
     public R<?> queryRechargeResult(@RequestBody @Valid QueryRechargeResultDto rechargeResultDto) {
         Integer status = userService.queryRechargeResult(rechargeResultDto);
         return R.success(status);
+    }
+
+    /**
+     * 查询用户支付宝账号
+     *
+     * @return
+     */
+    @GetMapping("queryUserAlipayAccount")
+    public R<?> queryUserAlipayAccount() {
+        UserAlipayAccountVo userAlipayAccountVo = userService.queryUserAlipayAccount();
+        return R.success(userAlipayAccountVo);
+    }
+
+    /**
+     * 发送支付宝账号绑定验证码
+     *
+     * @return
+     */
+    @PostMapping("sendAlipayAccountBindingVerificationCode")
+    public R<?> sendAlipayAccountBindingVerificationCode(@RequestBody @Valid BindingVerificationCodeDto verificationCodeDto) {
+        userService.sendAlipayAccountBindingVerificationCode(verificationCodeDto);
+        return R.ok();
+    }
+
+    /**
+     * 校验支付宝账号绑定验证码
+     *
+     * @return
+     */
+    @PostMapping("checkVerificationCode")
+    public R<?> checkVerificationCode(@RequestBody @Valid CheckVerificationCodeDto checkVerificationCodeDto) {
+        userService.checkVerificationCode(checkVerificationCodeDto);
+        return R.ok();
+    }
+
+    /**
+     * 绑定支付宝账号
+     *
+     * @param realNameAuthDto
+     * @return
+     */
+    @PostMapping("/bindAlipayAccount")
+    public R<?> bindAlipayAccount(@RequestBody @Valid BindAlipayAccountDto realNameAuthDto) {
+        userService.bindAlipayAccount(realNameAuthDto);
+        return R.ok();
+    }
+
+    /**
+     * 查询用户钱包账户可用余额
+     *
+     * @return
+     */
+    @GetMapping("/queryAccountAvailableBalance")
+    public R<?> queryAccountAvailableBalance() {
+        BigDecimal availableBalance = userService.queryAccountAvailableBalance();
+        return R.success(availableBalance);
+    }
+
+    /**
+     * 解绑支付宝账号
+     *
+     * @return
+     */
+    @GetMapping("unbindAlipayAccount")
+    public R<?> unbindAlipayAccount() {
+        userService.unbindAlipayAccount();
+        return R.ok();
+    }
+
+    /**
+     * 用户钱包提现
+     *
+     * @param withdrawalDto
+     * @return
+     */
+    @PostMapping("/withdrawal")
+    public R<?> withdrawal(@RequestBody @Valid WithdrawalDto withdrawalDto) {
+        return userService.withdrawal(withdrawalDto);
     }
 
     /**

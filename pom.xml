@@ -26,6 +26,9 @@
         <obs.version>3.23.3</obs.version>
         <huawei-apigateway.version>3.2.0</huawei-apigateway.version>
         <wechatpay.version>0.2.12</wechatpay.version>
+        <alipay.version>4.38.221.ALL</alipay.version>
+        <commons-logging.version>1.1.1</commons-logging.version>
+        <bcprov-jdk15on.version>1.62</bcprov-jdk15on.version>
         <commons-pool.version>2.11.1</commons-pool.version>
         <fastjson.version>2.0.36</fastjson.version>
         <jwt.version>4.2.0</jwt.version>
@@ -126,6 +129,24 @@
             <groupId>com.github.wechatpay-apiv3</groupId>
             <artifactId>wechatpay-java</artifactId>
             <version>${wechatpay.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>${alipay.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>${commons-logging.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bcprov-jdk15on.version}</version>
         </dependency>
 
         <dependency>

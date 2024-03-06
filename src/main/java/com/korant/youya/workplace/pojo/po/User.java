@@ -158,6 +158,54 @@ public class User implements Serializable {
     private Integer accountStatus;
 
     /**
+     * 微信友涯商户下用户openid
+     */
+    @TableField("wechat_open_id")
+    private String wechatOpenId;
+
+    /**
+     * 支付宝友涯商户下用户openid
+     */
+    @TableField("alipay_open_id")
+    private String alipayOpenId;
+
+    /**
+     * 用户支付宝账号
+     */
+    @TableField("alipay_account")
+    private String alipayAccount;
+
+    /**
+     * 用户支付宝账号姓名
+     */
+    @TableField("alipay_account_name")
+    private String alipayAccountName;
+
+    /**
+     * 用户支付宝账号身份证号
+     */
+    @TableField("alipay_account_identity_card")
+    private String alipayAccountIdentityCard;
+
+    /**
+     * 预留字段1
+     */
+    @TableField("reserved_field_1")
+    private String reservedField1;
+
+    /**
+     * 预留字段2
+     */
+    @TableField("reserved_field_2")
+    private String reservedField2;
+
+    /**
+     * 预留字段3
+     */
+    @TableField("reserved_field_3")
+    private String reservedField3;
+
+    /**
      * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
