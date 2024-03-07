@@ -15,4 +15,6 @@ public interface RedisConstant {
     String YY_USER_CACHE = "yy:user_cache:%s";
 
     String YY_USER_LOCATION = "yy:user_location";
+
+    String YY_ALIPAY_INSUFFICIENT_BALANCE_NOTICE = "yy:alipay_insufficient_balance_notice:%s";
 }

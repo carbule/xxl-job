@@ -127,6 +127,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String WALLET_ACCOUNT_WITHDRAWAL = "友涯用户钱包账户提现";
 
+    //友涯支付宝账号余额不足短信通知人员手机号码
+    private static final String ACCOUNTANT_PHONE = "15150586985";
+
     /**
      * 微信登陆
      *
@@ -1002,6 +1005,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             BigDecimal alipayAccountAvailableAmount = new BigDecimal(availableAmount);
             if (withdrawalAmount.compareTo(alipayAccountAvailableAmount) > 0) {
                 log.error("用户:【{}】，提现：【{}】元，大于支付宝商户账户可用余额：【{}】，提现失败", phone, withdrawalAmount, alipayAccountAvailableAmount);
+                //发送短信通知支付宝账号充值负责人告知余额不足
+                String key = String.format(RedisConstant.YY_ALIPAY_INSUFFICIENT_BALANCE_NOTICE, ACCOUNTANT_PHONE);
+                Object o = redisUtil.get(key);
+                if (null == o) {
+                    String code = verificationCodeGenerator();
+                    if (HuaWeiUtil.sendVerificationCode(HuaWeiUtil.TEMPLATE_C, code, ACCOUNTANT_PHONE)) {
+                        redisUtil.set(key, code, 600);
+                        log.info("支付宝商户余额不足告知短信发送成功");
+                    } else {
+                        log.error("支付宝商户余额不足告知短信发送失败");
+                    }
+                } else {
+                    log.info("支付宝商户余额不足告知短信10分钟内已发送，不再重复发送");
+                }
                 throw new YouyaException("网络异常，请稍后重试");
             }
             String alipayAccount = loginUser.getAlipayAccount();
