@@ -1008,15 +1008,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String alipayAccountName = loginUser.getAlipayAccountName();
             //创建内部转账订单
             Long walletAccountId = walletAccount.getId();
+            BigDecimal multiplyAmount = withdrawalAmount.multiply(BigDecimal.valueOf(100));
             WalletWithdrawalRecord walletWithdrawalRecord = new WalletWithdrawalRecord();
-            walletWithdrawalRecord.setAccountId(walletAccountId).setAmount(withdrawalAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setWithdrawalMethod(WithdrawalMethodEnum.ALIPAY_ACCOUNT.getMethod())
+            walletWithdrawalRecord.setAccountId(walletAccountId).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setWithdrawalMethod(WithdrawalMethodEnum.ALIPAY_ACCOUNT.getMethod())
                     .setPaymentAccount(alipayAccount).setPaymentName(alipayAccountName).setStatus(WalletWithdrawalStatusEnum.PROCESSING.getStatus()).setRequestTime(LocalDateTime.now()).setProcessingTime(LocalDateTime.now());
             walletWithdrawalRecordMapper.insert(walletWithdrawalRecord);
             Long withdrawalRecordId = walletWithdrawalRecord.getId();
             //创建账户交易流水
             WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
             walletTransactionFlow.setAccountId(walletAccountId).setOrderId(withdrawalRecordId).setTransactionType(TransactionTypeEnum
-                    .WITHDRAWAL.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(withdrawalAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setDescription(WALLET_ACCOUNT_WITHDRAWAL)
+                    .WITHDRAWAL.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setDescription(WALLET_ACCOUNT_WITHDRAWAL)
                     .setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
             walletTransactionFlowMapper.insert(walletTransactionFlow);
             //发起转账
@@ -1026,27 +1027,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (transferResponse.isSuccess()) {
                 String code = transferResponse.getCode();
                 if (StringUtils.isBlank(code)) {
-                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态码", phone, withdrawalAmount, withdrawalRecordId);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态码", phone, withdrawalRecordId, withdrawalAmount);
                     return R.error("网络异常，请稍后重试");
                 }
                 String status = transferResponse.getStatus();
                 if (StringUtils.isBlank(status)) {
-                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态值", phone, withdrawalAmount, withdrawalRecordId);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态值", phone, withdrawalRecordId, withdrawalAmount);
                     return R.error("网络异常，请稍后重试");
                 }
                 String outBizNo = transferResponse.getOutBizNo();
                 if (StringUtils.isBlank(outBizNo)) {
-                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失商户订单号", phone, withdrawalAmount, withdrawalRecordId);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失商户订单号", phone, withdrawalRecordId, withdrawalAmount);
                     return R.error("网络异常，请稍后重试");
                 }
                 String outOrderId = transferResponse.getOrderId();
                 if (StringUtils.isBlank(outOrderId)) {
-                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝订单号", phone, withdrawalAmount, withdrawalRecordId);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝订单号", phone, withdrawalRecordId, withdrawalAmount);
                     return R.error("网络异常，请稍后重试");
                 }
                 String payFundOrderId = transferResponse.getPayFundOrderId();
                 if (StringUtils.isBlank(payFundOrderId)) {
-                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝支付资金流水号", phone, withdrawalAmount, withdrawalRecordId);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝支付资金流水号", phone, withdrawalRecordId, withdrawalAmount);
                     return R.error("网络异常，请稍后重试");
                 }
                 String transDate = transferResponse.getTransDate();
@@ -1077,10 +1078,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         walletTransactionFlow.setCompletionDate(completionDate);
                         walletTransactionFlow.setOutTransactionId(payFundOrderId);
                         walletTransactionFlowMapper.updateById(walletTransactionFlow);
-                        log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元成功", phone, withdrawalAmount, withdrawalRecordId);
+                        log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元成功", phone, withdrawalRecordId, withdrawalAmount);
                         return R.ok();
                     } else {
-                        log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中的商户订单号与平台提现订单号不一致", phone, withdrawalAmount, withdrawalRecordId);
+                        log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中的商户订单号与平台提现订单号不一致", phone, withdrawalRecordId, withdrawalAmount);
                         throw new YouyaException("网络异常，请稍后重试");
                     }
                 } else {
@@ -1089,7 +1090,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     String subCode = transferResponse.getSubCode();
                     String subMsg = transferResponse.getSubMsg();
                     if (StringUtils.isBlank(msg) || StringUtils.isBlank(subCode) || StringUtils.isBlank(subMsg)) {
-                        log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalAmount, withdrawalRecordId);
+                        log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalRecordId, withdrawalAmount);
                         throw new YouyaException("网络异常，请稍后重试");
                     }
                     //修改转账订单状态
@@ -1108,7 +1109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     walletTransactionFlow.setCompletionDate(completionDate);
                     walletTransactionFlow.setOutTransactionId(payFundOrderId);
                     walletTransactionFlowMapper.updateById(walletTransactionFlow);
-                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败,原因：【{}】", phone, withdrawalAmount, withdrawalRecordId, subMsg);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败,原因：【{}】", phone, withdrawalRecordId, withdrawalAmount, subMsg);
                     return R.error(subMsg);
                 }
             } else {
@@ -1116,7 +1117,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 String subCode = transferResponse.getSubCode();
                 String subMsg = transferResponse.getSubMsg();
                 if (StringUtils.isBlank(msg) || StringUtils.isBlank(subCode) || StringUtils.isBlank(subMsg)) {
-                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalAmount, withdrawalRecordId);
+                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalRecordId, withdrawalAmount);
                     throw new YouyaException("网络异常，请稍后重试");
                 }
                 //更新转账订单状态
@@ -1131,7 +1132,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 walletTransactionFlow.setBalanceAfter(accountBalance);
                 walletTransactionFlowMapper.updateById(walletTransactionFlow);
                 String diagnosisUrl = DiagnosisUtils.getDiagnosisUrl(transferResponse);
-                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，诊断url:【{}】", phone, withdrawalAmount, withdrawalRecordId, subMsg, diagnosisUrl);
+                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，诊断url:【{}】", phone, withdrawalRecordId, withdrawalAmount, subMsg, diagnosisUrl);
                 return R.error(subMsg);
             }
         } else {
