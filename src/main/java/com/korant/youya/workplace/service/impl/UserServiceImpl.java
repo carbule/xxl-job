@@ -123,6 +123,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String CHINA_CODE = "100000";
 
+    private static final String USER_RECHARGE_PRODUCT_CODE = "user_recharge";
+
     private static final String RECHARGE_DESCRIPTION = "友涯用户充值";
 
     private static final String WALLET_ACCOUNT_WITHDRAWAL = "友涯用户钱包账户提现";
@@ -483,10 +485,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         log.info("收到用户充值请求");
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         String code = userRechargeDto.getCode();
-        Long productId = userRechargeDto.getProductId();
         Integer quantity = userRechargeDto.getQuantity();
-        SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getId, productId).eq(SysVirtualProduct::getIsDelete, 0));
+        SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getCode, USER_RECHARGE_PRODUCT_CODE).eq(SysVirtualProduct::getIsDelete, 0));
         if (null == virtualProduct) throw new YouyaException("充值商品不存在");
+        Long productId = virtualProduct.getId();
         BigDecimal price = virtualProduct.getPrice();
         BigDecimal multiply = price.multiply(new BigDecimal(quantity));
         int totalAmount = multiply.intValue();
@@ -632,10 +634,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .timestamp(timestamp)
                 .body(requestBody)
                 .build();
-        Transaction transaction = WechatPayUtil.parse(requestParam);
-        if (null == transaction) {
-            log.error("微信支付通知回调报文验签解密失败");
+        Transaction transaction = null;
+        try {
+            transaction = WechatPayUtil.parse(requestParam);
+        } catch (Exception e) {
+            log.error("微信支付通知回调报文验签解密失败,原因：", e);
             writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知回调报文验签解密失败");
+            return;
+        }
+        if (null == transaction) {
+            log.error("微信支付通知回调报文为空");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知回调报文为空");
             return;
         }
         log.info("友涯微信用户支付通知回调请求验签解密成功，回调明文：【{}】", transaction);

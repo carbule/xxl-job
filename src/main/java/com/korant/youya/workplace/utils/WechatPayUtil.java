@@ -2,9 +2,7 @@ package com.korant.youya.workplace.utils;
 
 import com.korant.youya.workplace.constants.WechatConstant;
 import com.korant.youya.workplace.constants.WechatPayConstant;
-import com.korant.youya.workplace.exception.YouyaException;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
-import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.core.notification.RequestParam;
 import com.wechat.pay.java.service.payments.jsapi.JsapiService;
@@ -130,14 +128,8 @@ public class WechatPayUtil {
     public static Transaction parse(RequestParam requestParam) {
         //初始化 NotificationParser
         NotificationParser parser = new NotificationParser(rsaAutoCertificateConfig);
-
-        try {
-            //以支付通知回调为例，验签、解密并转换成 Transaction
-            return parser.parse(requestParam, Transaction.class);
-        } catch (ValidationException e) {
-            //签名验证失败，返回 401 UNAUTHORIZED 状态码
-            throw new YouyaException(401, "UNAUTHORIZED");
-        }
+        //以支付通知回调为例，验签、解密并转换成 Transaction
+        return parser.parse(requestParam, Transaction.class);
     }
 
     /**

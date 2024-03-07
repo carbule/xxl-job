@@ -21,12 +21,6 @@ public class UserRechargeDto {
     private String code;
 
     /**
-     * 商品id
-     */
-    @NotNull(message = "商品id不能为空")
-    private Long productId;
-
-    /**
      * 商品购买数量
      */
     @NotNull(message = "购买数量不能为空")
