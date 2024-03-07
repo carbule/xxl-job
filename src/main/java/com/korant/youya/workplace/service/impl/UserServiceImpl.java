@@ -102,7 +102,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserWalletAccountMapper userWalletAccountMapper;
 
     @Resource
-    private SysProductMapper sysProductMapper;
+    private SysVirtualProductMapper sysVirtualProductMapper;
 
     @Resource
     private SysOrderMapper sysOrderMapper;
@@ -485,12 +485,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String code = userRechargeDto.getCode();
         Long productId = userRechargeDto.getProductId();
         Integer quantity = userRechargeDto.getQuantity();
-        SysProduct sysProduct = sysProductMapper.selectOne(new LambdaQueryWrapper<SysProduct>().eq(SysProduct::getId, productId).eq(SysProduct::getIsDelete, 0));
-        if (null == sysProduct) throw new YouyaException("充值商品不存在");
-        BigDecimal price = sysProduct.getPrice();
+        SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getId, productId).eq(SysVirtualProduct::getIsDelete, 0));
+        if (null == virtualProduct) throw new YouyaException("充值商品不存在");
+        BigDecimal price = virtualProduct.getPrice();
         BigDecimal multiply = price.multiply(new BigDecimal(quantity));
         int totalAmount = multiply.intValue();
-        log.info("用户：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", loginUser.getPhone(), sysProduct.getId(), price, quantity, totalAmount);
+        log.info("用户：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", loginUser.getPhone(), virtualProduct.getId(), price, quantity, totalAmount);
         //todo 放开最低充值限制
         //if (totalAmount < 100) throw new YouyaException("最低充值金额为1元");
         SysOrder sysOrder = new SysOrder();
@@ -503,7 +503,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long orderId = sysOrder.getId();
         PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), notifyUrl, totalAmount, openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
-        log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功", loginUser.getPhone(), sysProduct.getId());
+        log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功", loginUser.getPhone(), virtualProduct.getId());
         UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, loginUser.getId()).eq(UserWalletAccount::getIsDelete, 0));
         if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
         Integer status = userWalletAccount.getStatus();
@@ -520,7 +520,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         result.put("signType", response.getSignType());
         result.put("paySign", response.getPaySign());
         result.put("orderId", orderId);
-        log.info("用户：【{}】，购买商品id：【{}】，下单成功", loginUser.getPhone(), sysProduct.getId());
+        log.info("用户：【{}】，购买商品id：【{}】，下单成功", loginUser.getPhone(), virtualProduct.getId());
         return result;
     }
 

@@ -5,14 +5,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 商品抽成表 前端控制器
+ * 系统虚拟商品表 前端控制器
  * </p>
  *
  * @author chenyiqiang
- * @since 2024-02-22
+ * @since 2024-03-07
  */
 @RestController
-@RequestMapping("/sysProductCommission")
-public class SysProductCommissionController {
+@RequestMapping("/sysVirtualProduct")
+public class SysVirtualProductController {
 
 }

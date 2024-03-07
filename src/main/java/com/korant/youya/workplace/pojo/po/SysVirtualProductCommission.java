@@ -11,17 +11,17 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 商品抽成表
+ * 虚拟商品抽成表
  * </p>
  *
  * @author chenyiqiang
- * @since 2024-02-22
+ * @since 2024-03-07
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("yy_sys_product_commission")
-public class SysProductCommission implements Serializable {
+@TableName("yy_sys_virtual_product_commission")
+public class SysVirtualProductCommission implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
