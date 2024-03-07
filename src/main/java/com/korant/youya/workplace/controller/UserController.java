@@ -8,6 +8,7 @@ import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -159,12 +160,13 @@ public class UserController {
     /**
      * 用户充值通知
      *
+     * @param request
+     * @param response
      * @return
      */
     @PostMapping("/rechargeNotify")
-    public R<?> rechargeNotify(HttpServletRequest request) {
-        userService.rechargeNotify(request);
-        return R.ok();
+    public void rechargeNotify(HttpServletRequest request, HttpServletResponse response) {
+        userService.rechargeNotify(request, response);
     }
 
     /**

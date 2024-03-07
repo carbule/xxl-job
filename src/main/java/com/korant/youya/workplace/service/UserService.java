@@ -8,6 +8,7 @@ import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.math.BigDecimal;
 
@@ -111,8 +112,9 @@ public interface UserService extends IService<User> {
      * 用户充值通知
      *
      * @param request
+     * @param response
      */
-    void rechargeNotify(HttpServletRequest request);
+    void rechargeNotify(HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 查询充值结果

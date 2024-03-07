@@ -1,7 +1,5 @@
 package com.korant.youya.workplace.service.impl;
 
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.diagnosis.DiagnosisUtils;
 import com.alipay.api.response.AlipayFundAccountQueryResponse;
@@ -35,6 +33,7 @@ import com.wechat.pay.java.service.payments.model.Transaction;
 import com.wechat.pay.java.service.payments.model.TransactionAmount;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -43,15 +42,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Random;
 
 /**
@@ -551,23 +553,59 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 用户充值通知
      *
      * @param request
+     * @param response
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     //todo 账户变动时缺少锁 后面加上
-    public void rechargeNotify(HttpServletRequest request) {
+    public void rechargeNotify(HttpServletRequest request, HttpServletResponse response) {
         log.info("收到友涯微信用户支付通知回调请求");
         String serial = request.getHeader("Wechatpay-Serial");
-        if (StringUtils.isBlank(serial)) throw new YouyaException("缺失证书序列号");
-        if (serial.equals(WechatPayConstant.MERCHANT_SERIAL_NUMBER)) throw new YouyaException("证书序列号不一致");
+        if (StringUtils.isBlank(serial)) {
+            log.error("微信支付通知缺失证书序列号");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失证书序列号");
+            return;
+        }
+        if (serial.equals(WechatPayConstant.MERCHANT_SERIAL_NUMBER)) {
+            log.error("微信支付通知证书序列号错误");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知证书序列号错误");
+            return;
+        }
         String timestamp = request.getHeader("Wechatpay-Timestamp");
-        if (StringUtils.isBlank(timestamp)) throw new YouyaException("缺失时间戳");
-        long between = DateUtil.between(new Date(Long.parseLong(timestamp)), new Date(), DateUnit.MINUTE);
-//        if (between > 5) throw new YouyaException("通知时间超时");
+        if (StringUtils.isBlank(timestamp)) {
+            log.error("微信支付通知缺失时间戳");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失时间戳");
+            return;
+        }
+        log.info("微信支付通知请求头中参数Wechatpay-Timestamp原值为：【{}】", timestamp);
+        long currentTimestamp = Instant.now().getEpochSecond();
+        log.info("友涯系统当前时间Timestamp原值为：【{}】", currentTimestamp);
+        long notifyTimestamp = Long.parseLong(timestamp);
+        //将时间戳转换为Instant对象
+        Instant instant1 = Instant.ofEpochSecond(currentTimestamp);
+        Instant instant2 = Instant.ofEpochSecond(notifyTimestamp);
+        //计算两个时间戳之间的Duration
+        Duration duration = Duration.between(instant1, instant2);
+        //获取相差的分钟数
+        long minutesApart = duration.toMinutes();
+        log.info("微信支付通知回调时间对比当前系统时间相差：【{}】分钟", minutesApart);
+        if (minutesApart > 5) {
+            log.error("微信支付通知时间对比友涯当前系统时间相差超过5分钟，不予处理");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知时间对比友涯当前系统时间相差超过5分钟，不予处理");
+            return;
+        }
         String nonce = request.getHeader("Wechatpay-Nonce");
-        if (StringUtils.isBlank(nonce)) throw new YouyaException("缺失应答随机串");
+        if (StringUtils.isBlank(nonce)) {
+            log.error("微信支付通知缺失应答随机串");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失应答随机串");
+            return;
+        }
         String signature = request.getHeader("Wechatpay-Signature");
-        if (StringUtils.isBlank(signature)) throw new YouyaException("缺少应答签名");
+        if (StringUtils.isBlank(signature)) {
+            log.error("微信支付通知缺少应答签名");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺少应答签名");
+            return;
+        }
         String requestBody;
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8));
@@ -581,7 +619,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("获取友涯微信用户支付通知回调请求报文成功");
         } catch (Exception e) {
             log.error("获取友涯微信用户支付通知回调请求报文失败");
-            throw new YouyaException("获取通知报文失败");
+            writeToWechatPayNotifyResponseErrorMessage(response, "获取友涯微信用户支付通知回调请求报文失败");
+            return;
         }
         RequestParam requestParam = new RequestParam.Builder()
                 .serialNumber(serial)
@@ -591,29 +630,68 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .body(requestBody)
                 .build();
         Transaction transaction = WechatPayUtil.parse(requestParam);
-        if (null == transaction) throw new YouyaException("支付通知回调报文获取失败");
+        if (null == transaction) {
+            log.error("微信支付通知回调报文验签解密失败");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知回调报文验签解密失败");
+            return;
+        }
         log.info("友涯微信用户支付通知回调请求验签解密成功，回调明文：【{}】", transaction);
         String appid = transaction.getAppid();
         String mchid = transaction.getMchid();
-        if (StringUtils.isBlank(appid) || StringUtils.isBlank(mchid)) throw new YouyaException("appid或商户号缺失");
-        if (!appid.equals(WechatConstant.APP_ID) || !mchid.equals(WechatPayConstant.MERCHANT_ID))
-            throw new YouyaException("appid或商户号不匹配");
+        if (StringUtils.isBlank(appid) || StringUtils.isBlank(mchid)) {
+            log.error("微信支付通知appid或商户号缺失");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知appid或商户号缺失");
+            return;
+        }
+        if (!appid.equals(WechatConstant.APP_ID) || !mchid.equals(WechatPayConstant.MERCHANT_ID)) {
+            log.error("微信支付通知appid或商户号不匹配");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知appid或商户号不匹配");
+            return;
+        }
         String outTradeNo = transaction.getOutTradeNo();
-        if (StringUtils.isBlank(outTradeNo)) throw new YouyaException("缺失内部订单号");
+        if (StringUtils.isBlank(outTradeNo)) {
+            log.error("微信支付通知缺失商户订单号");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失商户订单号");
+            return;
+        }
         String tradeStateDesc = transaction.getTradeStateDesc();
-        if (StringUtils.isBlank(tradeStateDesc)) throw new YouyaException("缺失交易状态描述");
+        if (StringUtils.isBlank(tradeStateDesc)) {
+            log.error("微信支付通知缺失交易状态描述");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失交易状态描述");
+            return;
+        }
         String transactionId = transaction.getTransactionId();
-        if (StringUtils.isBlank(transactionId)) throw new YouyaException("微信支付订单号缺失");
+        if (StringUtils.isBlank(transactionId)) {
+            log.error("微信支付通知缺失微信支付系统订单号");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失微信支付系统订单号");
+            return;
+        }
         String successTime = transaction.getSuccessTime();
-        if (StringUtils.isBlank(successTime)) throw new YouyaException("支付完成时间缺失");
+        if (StringUtils.isBlank(successTime)) {
+            log.error("微信支付通知缺失支付完成时间");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失支付完成时间");
+            return;
+        }
         SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, Long.valueOf(outTradeNo)).eq(SysOrder::getIsDelete, 0));
-        if (null == sysOrder) throw new YouyaException("订单不存在");
+        if (null == sysOrder) {
+            log.error("友涯系统不存在此笔订单");
+            writeToWechatPayNotifyResponseErrorMessage(response, "友涯系统不存在此笔订单");
+            return;
+        }
         Long buyerId = sysOrder.getBuyerId();
         UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, buyerId).eq(UserWalletAccount::getIsDelete, 0));
-        if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
+        if (null == userWalletAccount) {
+            log.error("友涯用户钱包账户不存在");
+            writeToWechatPayNotifyResponseErrorMessage(response, "友涯用户钱包账户不存在");
+            return;
+        }
         Long sysOrderId = sysOrder.getId();
         WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, sysOrderId).eq(WalletTransactionFlow::getIsDelete, 0));
-        if (null == walletTransactionFlow) throw new YouyaException("订单交易流水不存在");
+        if (null == walletTransactionFlow) {
+            log.error("友涯系统不存在此笔订单交易流水");
+            writeToWechatPayNotifyResponseErrorMessage(response, "友涯系统不存在此笔订单交易流水");
+            return;
+        }
         sysOrder.setOutTransactionId(transactionId);
         //支付成功
         Transaction.TradeStateEnum tradeState = transaction.getTradeState();
@@ -622,10 +700,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             //更新订单状态
             BigDecimal actualAmount = sysOrder.getActualAmount();
             TransactionAmount amount = transaction.getAmount();
-            if (null == amount) throw new YouyaException("缺失订单金额信息");
+            if (null == amount) {
+                log.error("微信支付通知缺失订单金额信息");
+                writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失订单金额信息");
+                return;
+            }
             Integer payerTotal = amount.getPayerTotal();
             BigDecimal payerTotalAmount = new BigDecimal(payerTotal);
-            if (actualAmount.compareTo(payerTotalAmount) != 0) throw new YouyaException("支付金额与订单需要实付金额不一致");
+            if (actualAmount.compareTo(payerTotalAmount) != 0) {
+                log.error("微信支付通知中支付金额与订单需要实付金额不一致");
+                writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失订单金额信息");
+                return;
+            }
             sysOrder.setStatus(OrderStatusEnum.PAID.getStatus());
             sysOrderMapper.updateById(sysOrder);
             //更新账户金额
@@ -641,6 +727,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
             log.info("友涯订单id:【{}】，支付成功，账户余额和订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } else if (Transaction.TradeStateEnum.PAYERROR.equals(tradeState)) {
             //支付失败
             //更新订单状态
@@ -656,6 +744,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
             log.info("友涯订单id:【{}】，支付失败，订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } else if (Transaction.TradeStateEnum.CLOSED.equals(tradeState)) {
             //已关闭
             //更新订单状态
@@ -684,6 +774,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
             log.info("友涯订单id:【{}】，未支付，订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } else if (Transaction.TradeStateEnum.REFUND.equals(tradeState)) {
             //转入退款
             ////更新订单状态
@@ -698,6 +790,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
             log.info("友涯订单id:【{}】，转入退款，订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        }
+    }
+
+    /**
+     * 写入微信支付通知响应错误消息
+     *
+     * @param response
+     * @param message
+     */
+    private void writeToWechatPayNotifyResponseErrorMessage(HttpServletResponse response, String message) {
+        //创建一个包含应答内容的JSON对象
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", "FAIL");
+        jsonObject.put("message", message);
+        // 设置响应状态码为500
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        //设置响应内容类型为JSON
+        response.setContentType("application/json;charset=UTF-8");
+        //获取PrintWriter对象以便写入响应体
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //将JSON对象转换为字符串并写入响应
+            assert out != null;
+            out.print(jsonObject.toString());
+            //刷新输出流
+            out.flush();
+            //关闭输出流
+            out.close();
         }
     }
 
@@ -1331,7 +1457,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return offsetDateTime.toLocalDateTime();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 //        String input = "2024-03-01T16:37:42+08:00";
 //        // 创建一个可以解析ISO-8601格式时间字符串的formatter
 //        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -1350,10 +1476,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //            System.out.println("ArithmeticException: " + e.getMessage());
 //        }
 
-        BigDecimal value = new BigDecimal("123.451000");
-        BigDecimal decimal = value.stripTrailingZeros();
-        // 获取BigDecimal对象的小数位数（标度）
-        int scale = decimal.scale();
-        System.out.println(scale);
+//        BigDecimal value = new BigDecimal("123.451000");
+//        BigDecimal decimal = value.stripTrailingZeros();
+//        // 获取BigDecimal对象的小数位数（标度）
+//        int scale = decimal.scale();
+//        System.out.println(scale);
+
+        //假设我们有两个时间戳（以毫秒为单位）
+        long timestamp1 = Instant.now().toEpochMilli(); // 获取当前时间戳
+        long timestamp2 = System.currentTimeMillis(); // 这里替换为另一个时间戳值
+        //将时间戳转换为Instant对象
+        Instant instant1 = Instant.ofEpochMilli(timestamp1);
+        Instant instant2 = Instant.ofEpochMilli(timestamp2);
+        //计算两个时间戳之间的 Duration
+        Duration duration = Duration.between(instant1, instant2);
+        //获取相差的分钟数
+        long minutesApart = duration.toMinutes();
+        System.out.println("两个时间戳相隔 " + minutesApart + " 分钟");
     }
 }
