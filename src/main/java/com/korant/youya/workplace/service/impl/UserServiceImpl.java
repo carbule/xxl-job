@@ -934,6 +934,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             User user = userMapper.selectById(id);
             user.setAlipayAccount(alipayAccount);
             user.setAlipayAccountName(name);
+            user.setAlipayAccountIdentityCard(idcard);
             userMapper.updateById(user);
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, id);
             redisUtil.del(cacheKey);
