@@ -4,14 +4,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * @ClassName QueryRechargeResultDto
+ * @ClassName UserQueryRechargeResultDto
  * @Description
  * @Author chenyiqiang
  * @Date 2024/3/1 14:34
  * @Version 1.0
  */
 @Data
-public class QueryRechargeResultDto {
+public class UserQueryRechargeResultDto {
 
     /**
      * 订单id

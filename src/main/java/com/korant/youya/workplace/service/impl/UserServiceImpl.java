@@ -116,8 +116,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private RedisUtil redisUtil;
 
-    @Value("${notify_url}")
-    private String notifyUrl;
+    @Value("${user_recharge_notify_url}")
+    private String userRechargeNotifyUrl;
 
     private static final String DEFAULT_AVATAR = "https://resources.youyai.cn/icon/male.svg";
 
@@ -484,6 +484,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public JSONObject recharge(UserRechargeDto userRechargeDto) {
         log.info("收到用户充值请求");
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        String phone = loginUser.getPhone();
+        UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+        if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
+        Integer status = userWalletAccount.getStatus();
+        if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
         String code = userRechargeDto.getCode();
         Integer quantity = userRechargeDto.getQuantity();
         SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getCode, USER_RECHARGE_PRODUCT_CODE).eq(SysVirtualProduct::getIsDelete, 0));
@@ -492,24 +498,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BigDecimal price = virtualProduct.getPrice();
         BigDecimal multiply = price.multiply(new BigDecimal(quantity));
         int totalAmount = multiply.intValue();
-        log.info("用户：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", loginUser.getPhone(), virtualProduct.getId(), price, quantity, totalAmount);
+        log.info("用户：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", phone, productId, price, quantity, totalAmount);
         //todo 放开最低充值限制
         //if (totalAmount < 100) throw new YouyaException("最低充值金额为1元");
         SysOrder sysOrder = new SysOrder();
-        sysOrder.setSysProductId(productId).setBuyerId(loginUser.getId()).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
+        sysOrder.setSysProductId(productId).setBuyerId(userId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
                 .setQuantity(quantity).setTotalAmount(multiply).setActualAmount(multiply).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
         sysOrderMapper.insert(sysOrder);
         String openid = WeChatUtil.code2Session(code);
         if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
-        if (StringUtils.isBlank(notifyUrl)) throw new YouyaException("支付通知地址获取失败");
+        if (StringUtils.isBlank(userRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
         Long orderId = sysOrder.getId();
-        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), notifyUrl, totalAmount, openid);
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), userRechargeNotifyUrl, totalAmount, openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
-        log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功", loginUser.getPhone(), virtualProduct.getId());
-        UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, loginUser.getId()).eq(UserWalletAccount::getIsDelete, 0));
-        if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
-        Integer status = userWalletAccount.getStatus();
-        if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
+        log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功", phone, productId);
         Long accountId = userWalletAccount.getId();
         WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
         walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(new BigDecimal(totalAmount)).setCurrency(CurrencyTypeEnum.CNY.getType())
@@ -522,7 +524,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         result.put("signType", response.getSignType());
         result.put("paySign", response.getPaySign());
         result.put("orderId", orderId);
-        log.info("用户：【{}】，购买商品id：【{}】，下单成功", loginUser.getPhone(), virtualProduct.getId());
+        log.info("用户：【{}】，购买商品id：【{}】，下单成功", phone, productId);
         return result;
     }
 
@@ -533,9 +535,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void completePayment(CompletePaymentDto completePaymentDto) {
+    public void completePayment(UserCompletePaymentDto completePaymentDto) {
         log.info("收到用户完成支付请求");
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String phone = loginUser.getPhone();
         Long orderId = completePaymentDto.getOrderId();
         SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
@@ -550,7 +553,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (null == walletTransactionFlow) throw new YouyaException("订单交易流水不存在");
             walletTransactionFlow.setStatus(TransactionFlowStatusEnum.PROCESSING.getStatus());
             walletTransactionFlowMapper.updateById(walletTransactionFlow);
-            log.info("用户：【{}】，订单id：【{}】，完成支付操作", loginUser.getPhone(), orderId);
+            log.info("用户：【{}】，订单id：【{}】，完成支付操作", phone, orderId);
         }
     }
 
@@ -705,9 +708,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return;
         }
         sysOrder.setOutTransactionId(transactionId);
-        //支付成功
         Transaction.TradeStateEnum tradeState = transaction.getTradeState();
         BigDecimal beforeBalance = userWalletAccount.getAccountBalance();
+        //支付成功
         if (Transaction.TradeStateEnum.SUCCESS.equals(tradeState)) {
             //更新订单状态
             BigDecimal actualAmount = sysOrder.getActualAmount();
@@ -846,7 +849,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public Integer queryRechargeResult(QueryRechargeResultDto rechargeResultDto) {
+    public Integer queryRechargeResult(UserQueryRechargeResultDto rechargeResultDto) {
         Long userId = SpringSecurityUtil.getUserId();
         Long orderId = rechargeResultDto.getOrderId();
         SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));

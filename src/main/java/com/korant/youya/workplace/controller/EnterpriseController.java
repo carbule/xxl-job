@@ -8,6 +8,8 @@ import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.service.EnterpriseService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -364,5 +366,66 @@ public class EnterpriseController {
     public R<?> queryEnterpriseInfoByQrcodeId(@RequestBody @Valid QueryEnterpriseInfoByQrcodeIdDto qrcodeIdDto) {
         EnterpriseInfoByQrcodeIdVo enterpriseInfoByQrcodeIdVo = enterpriseService.queryEnterpriseInfoByQrcodeId(qrcodeIdDto);
         return R.success(enterpriseInfoByQrcodeIdVo);
+    }
+
+    /**
+     * 查询企业钱包信息
+     *
+     * @return
+     */
+    @GetMapping("/queryEnterpriseWalletInfo")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> queryEnterpriseWalletInfo() {
+        EnterpriseWalletVo userWalletVo = enterpriseService.queryEnterpriseWalletInfo();
+        return R.success(userWalletVo);
+    }
+
+    /**
+     * 企业微信充值
+     *
+     * @param enterpriseRechargeDto
+     * @return
+     */
+    @PostMapping("/recharge")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> recharge(@RequestBody @Valid EnterpriseRechargeDto enterpriseRechargeDto) {
+        JSONObject result = enterpriseService.recharge(enterpriseRechargeDto);
+        return R.success(result);
+    }
+
+    /**
+     * 企业完成支付
+     *
+     * @return
+     */
+    @PostMapping("/completePayment")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> completePayment(@RequestBody @Valid EnterpriseCompletePaymentDto completePaymentDto) {
+        enterpriseService.completePayment(completePaymentDto);
+        return R.ok();
+    }
+
+    /**
+     * 企业充值通知
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    @PostMapping("/rechargeNotify")
+    public void rechargeNotify(HttpServletRequest request, HttpServletResponse response) {
+        enterpriseService.rechargeNotify(request, response);
+    }
+
+    /**
+     * 查询企业充值结果
+     *
+     * @return
+     */
+    @PostMapping("/queryRechargeResult")
+    @PreAuthorize("hasRole('admin')")
+    public R<?> queryRechargeResult(@RequestBody @Valid QueryEnterpriseRechargeResultDto rechargeResultDto) {
+        Integer status = enterpriseService.queryRechargeResult(rechargeResultDto);
+        return R.success(status);
     }
 }

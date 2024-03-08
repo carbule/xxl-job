@@ -106,7 +106,7 @@ public interface UserService extends IService<User> {
      *
      * @param completePaymentDto
      */
-    void completePayment(CompletePaymentDto completePaymentDto);
+    void completePayment(UserCompletePaymentDto completePaymentDto);
 
     /**
      * 用户充值通知
@@ -122,7 +122,7 @@ public interface UserService extends IService<User> {
      * @param rechargeResultDto
      * @return
      */
-    Integer queryRechargeResult(QueryRechargeResultDto rechargeResultDto);
+    Integer queryRechargeResult(UserQueryRechargeResultDto rechargeResultDto);
 
     /**
      * 查询用户支付宝账号

@@ -135,7 +135,7 @@ public class UserController {
     }
 
     /**
-     * 用户充值
+     * 用户微信充值
      *
      * @param userRechargeDto
      * @return
@@ -152,7 +152,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/completePayment")
-    public R<?> completePayment(@RequestBody @Valid CompletePaymentDto completePaymentDto) {
+    public R<?> completePayment(@RequestBody @Valid UserCompletePaymentDto completePaymentDto) {
         userService.completePayment(completePaymentDto);
         return R.ok();
     }
@@ -170,12 +170,12 @@ public class UserController {
     }
 
     /**
-     * 查询充值结果
+     * 查询用户充值结果
      *
      * @return
      */
     @PostMapping("/queryRechargeResult")
-    public R<?> queryRechargeResult(@RequestBody @Valid QueryRechargeResultDto rechargeResultDto) {
+    public R<?> queryRechargeResult(@RequestBody @Valid UserQueryRechargeResultDto rechargeResultDto) {
         Integer status = userService.queryRechargeResult(rechargeResultDto);
         return R.success(status);
     }

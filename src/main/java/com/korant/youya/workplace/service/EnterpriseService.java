@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -226,4 +228,42 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @param objectKey
      */
     void deleteShareImage(String objectKey);
+
+    /**
+     * 查询企业钱包信息
+     *
+     * @return
+     */
+    EnterpriseWalletVo queryEnterpriseWalletInfo();
+
+    /**
+     * 企业微信充值
+     *
+     * @param enterpriseRechargeDto
+     * @return
+     */
+    JSONObject recharge(EnterpriseRechargeDto enterpriseRechargeDto);
+
+    /**
+     * 企业完成支付
+     *
+     * @param completePaymentDto
+     */
+    void completePayment(EnterpriseCompletePaymentDto completePaymentDto);
+
+    /**
+     * 企业充值通知
+     *
+     * @param request
+     * @param response
+     */
+    void rechargeNotify(HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 查询企业充值结果
+     *
+     * @param rechargeResultDto
+     * @return
+     */
+    Integer queryRechargeResult(QueryEnterpriseRechargeResultDto rechargeResultDto);
 }

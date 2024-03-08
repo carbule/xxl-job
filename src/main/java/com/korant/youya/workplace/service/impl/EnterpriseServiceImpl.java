@@ -9,6 +9,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
 import com.korant.youya.workplace.constants.RedisConstant;
+import com.korant.youya.workplace.constants.WechatConstant;
+import com.korant.youya.workplace.constants.WechatPayConstant;
+import com.korant.youya.workplace.enums.*;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.enterprisechangetodo.EnterpriseChangeTodoOperateEnum;
 import com.korant.youya.workplace.enums.enterprisechangetodo.EnterpriseChangeTodoTypeEnum;
@@ -27,7 +30,13 @@ import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.service.EnterpriseService;
 import com.korant.youya.workplace.utils.*;
 import com.obs.services.model.PutObjectResult;
+import com.wechat.pay.java.core.notification.RequestParam;
+import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
+import com.wechat.pay.java.service.payments.model.Transaction;
+import com.wechat.pay.java.service.payments.model.TransactionAmount;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -36,13 +45,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +97,15 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     private EnterpriseWalletAccountMapper enterpriseWalletAccountMapper;
 
     @Resource
+    private SysVirtualProductMapper sysVirtualProductMapper;
+
+    @Resource
+    private SysOrderMapper sysOrderMapper;
+
+    @Resource
+    private WalletTransactionFlowMapper walletTransactionFlowMapper;
+
+    @Resource
     private RedisUtil redisUtil;
 
     @Resource
@@ -94,6 +113,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
     @Value("${enterprise_qrcode_url}")
     private String enterpriseQrcodeUrl;
+
+    @Value("${enterprise_recharge_notify_url}")
+    private String enterpriseRechargeNotifyUrl;
 
     @Resource
     RabbitMqConfigurationProperties mqConfigurationProperties;
@@ -103,6 +125,10 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     private static final String ENTERPRISE_QRCODE_BUCKET = "activity";
 
     private static final String DEFAULT_LOGO = "https://resources.youyai.cn/svg/door-open.svg";
+
+    private static final String ENTERPRISE_RECHARGE_PRODUCT_CODE = "enterprise_recharge";
+
+    private static final String RECHARGE_DESCRIPTION = "友涯企业充值";
 
     /**
      * 查询企业hr列表
@@ -831,5 +857,445 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
     public void deleteShareImage(String objectKey) {
         String bucketName = ObsBucketConfig.getBucketName(ENTERPRISE_QRCODE_BUCKET);
         ObsUtil.deleteObject(bucketName, objectKey);
+    }
+
+    /**
+     * 查询企业钱包信息
+     *
+     * @return
+     */
+    @Override
+    public EnterpriseWalletVo queryEnterpriseWalletInfo() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) return null;
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        Integer authStatus = enterprise.getAuthStatus();
+        if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus) throw new YouyaException("请等待企业审核通过后再使用");
+        EnterpriseWalletAccount enterpriseWalletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
+        if (null == enterpriseWalletAccount) throw new YouyaException("钱包账户不存在");
+        Integer status = enterpriseWalletAccount.getStatus();
+        if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
+        //账户总额
+        BigDecimal accountBalance = enterpriseWalletAccount.getAccountBalance();
+        //冻结金额
+        BigDecimal freezeAmount = enterpriseWalletAccount.getFreezeAmount();
+        MathContext mathContext = new MathContext(3, RoundingMode.UNNECESSARY);
+        //可用余额
+        BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
+        EnterpriseWalletVo enterpriseWalletVo = new EnterpriseWalletVo();
+        enterpriseWalletVo.setAccountBalance(accountBalance.divide(new BigDecimal(100), mathContext));
+        enterpriseWalletVo.setFreezeAmount(freezeAmount.divide(new BigDecimal(100), mathContext));
+        enterpriseWalletVo.setAvailableBalance(availableBalance.divide(new BigDecimal(100), mathContext));
+        return enterpriseWalletVo;
+    }
+
+    /**
+     * 企业微信充值
+     *
+     * @param enterpriseRechargeDto
+     * @return
+     */
+    @Override
+    public JSONObject recharge(EnterpriseRechargeDto enterpriseRechargeDto) {
+        log.info("收到企业充值请求");
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        Integer authStatus = enterprise.getAuthStatus();
+        if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus) throw new YouyaException("请等待企业审核通过后再使用");
+        EnterpriseWalletAccount enterpriseWalletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
+        if (null == enterpriseWalletAccount) throw new YouyaException("钱包账户不存在");
+        Integer status = enterpriseWalletAccount.getStatus();
+        if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
+        String enterpriseName = enterprise.getName();
+        String code = enterpriseRechargeDto.getCode();
+        Integer quantity = enterpriseRechargeDto.getQuantity();
+        SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getCode, ENTERPRISE_RECHARGE_PRODUCT_CODE).eq(SysVirtualProduct::getIsDelete, 0));
+        if (null == virtualProduct) throw new YouyaException("充值商品不存在");
+        Long productId = virtualProduct.getId();
+        BigDecimal price = virtualProduct.getPrice();
+        BigDecimal multiply = price.multiply(new BigDecimal(quantity));
+        int totalAmount = multiply.intValue();
+        log.info("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", enterpriseName, enterpriseId, productId, price, quantity, totalAmount);
+        //todo 放开最低充值限制
+        //if (totalAmount < 100) throw new YouyaException("最低充值金额为1元");
+        SysOrder sysOrder = new SysOrder();
+        sysOrder.setSysProductId(productId).setBuyerId(enterpriseId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
+                .setQuantity(quantity).setTotalAmount(multiply).setActualAmount(multiply).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
+        sysOrderMapper.insert(sysOrder);
+        String openid = WeChatUtil.code2Session(code);
+        if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
+        if (StringUtils.isBlank(enterpriseRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
+        Long orderId = sysOrder.getId();
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), enterpriseRechargeNotifyUrl, totalAmount, openid);
+        if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
+        log.info("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功", enterpriseName, enterpriseId, productId);
+        Long accountId = enterpriseWalletAccount.getId();
+        WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
+        walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(new BigDecimal(totalAmount)).setCurrency(CurrencyTypeEnum.CNY.getType())
+                .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
+        walletTransactionFlowMapper.insert(walletTransactionFlow);
+        JSONObject result = new JSONObject();
+        result.put("timeStamp", response.getTimeStamp());
+        result.put("nonceStr", response.getNonceStr());
+        result.put("package", response.getPackageVal());
+        result.put("signType", response.getSignType());
+        result.put("paySign", response.getPaySign());
+        result.put("orderId", orderId);
+        log.info("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，下单成功", enterpriseName, enterpriseId, productId);
+        return result;
+    }
+
+    /**
+     * 企业完成支付
+     *
+     * @param completePaymentDto
+     */
+    @Override
+    public void completePayment(EnterpriseCompletePaymentDto completePaymentDto) {
+        log.info("收到企业完成支付请求");
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        String enterpriseName = enterprise.getName();
+        Long orderId = completePaymentDto.getOrderId();
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+        if (null == sysOrder) throw new YouyaException("订单不存在");
+        Long buyerId = sysOrder.getBuyerId();
+        if (!buyerId.equals(enterpriseId)) throw new YouyaException("非法操作");
+        Integer status = sysOrder.getStatus();
+        if (OrderStatusEnum.PENDING_PAYMENT.getStatus() == status) {
+            sysOrder.setStatus(OrderStatusEnum.PROCESSING_PAYMENT.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, orderId).eq(WalletTransactionFlow::getIsDelete, 0));
+            if (null == walletTransactionFlow) throw new YouyaException("订单交易流水不存在");
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.PROCESSING.getStatus());
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("企业名称：【{}】，企业id：【{}】，订单id：【{}】，完成支付操作", enterpriseName, enterpriseId, orderId);
+        }
+    }
+
+    /**
+     * 企业充值通知
+     *
+     * @param request
+     * @param response
+     */
+    @Override
+    //todo 完成企业充值通知方法
+    public void rechargeNotify(HttpServletRequest request, HttpServletResponse response) {
+        log.info("收到友涯微信企业支付通知回调请求");
+        String serial = request.getHeader("Wechatpay-Serial");
+        if (StringUtils.isBlank(serial)) {
+            log.error("微信支付通知缺失证书序列号");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失证书序列号");
+            return;
+        }
+        if (serial.equals(WechatPayConstant.MERCHANT_SERIAL_NUMBER)) {
+            log.error("微信支付通知证书序列号错误");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知证书序列号错误");
+            return;
+        }
+        String timestamp = request.getHeader("Wechatpay-Timestamp");
+        if (StringUtils.isBlank(timestamp)) {
+            log.error("微信支付通知缺失时间戳");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失时间戳");
+            return;
+        }
+        log.info("微信支付通知请求头中参数Wechatpay-Timestamp原值为：【{}】", timestamp);
+        long currentTimestamp = Instant.now().getEpochSecond();
+        log.info("友涯系统当前时间Timestamp原值为：【{}】", currentTimestamp);
+        long notifyTimestamp = Long.parseLong(timestamp);
+        //将时间戳转换为Instant对象
+        Instant instant1 = Instant.ofEpochSecond(currentTimestamp);
+        Instant instant2 = Instant.ofEpochSecond(notifyTimestamp);
+        //计算两个时间戳之间的Duration
+        Duration duration = Duration.between(instant1, instant2);
+        //获取相差的分钟数
+        long minutesApart = duration.toMinutes();
+        log.info("微信支付通知回调时间对比当前系统时间相差：【{}】分钟", minutesApart);
+        if (minutesApart > 5) {
+            log.error("微信支付通知时间对比友涯当前系统时间相差超过5分钟，不予处理");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知时间对比友涯当前系统时间相差超过5分钟，不予处理");
+            return;
+        }
+        String nonce = request.getHeader("Wechatpay-Nonce");
+        if (StringUtils.isBlank(nonce)) {
+            log.error("微信支付通知缺失应答随机串");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失应答随机串");
+            return;
+        }
+        String signature = request.getHeader("Wechatpay-Signature");
+        if (StringUtils.isBlank(signature)) {
+            log.error("微信支付通知缺少应答签名");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺少应答签名");
+            return;
+        }
+        String requestBody;
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder requestBodyBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                requestBodyBuilder.append(line);
+            }
+            reader.close();
+            requestBody = requestBodyBuilder.toString();
+            log.info("获取友涯微信用户支付通知回调请求报文成功");
+        } catch (Exception e) {
+            log.error("获取友涯微信用户支付通知回调请求报文失败");
+            writeToWechatPayNotifyResponseErrorMessage(response, "获取友涯微信用户支付通知回调请求报文失败");
+            return;
+        }
+        RequestParam requestParam = new RequestParam.Builder()
+                .serialNumber(serial)
+                .nonce(nonce)
+                .signature(signature)
+                .timestamp(timestamp)
+                .body(requestBody)
+                .build();
+        Transaction transaction = null;
+        try {
+            transaction = WechatPayUtil.parse(requestParam);
+        } catch (Exception e) {
+            log.error("微信支付通知回调报文验签解密失败,原因：", e);
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知回调报文验签解密失败");
+            return;
+        }
+        if (null == transaction) {
+            log.error("微信支付通知回调报文为空");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知回调报文为空");
+            return;
+        }
+        log.info("友涯微信企业支付通知回调请求验签解密成功，回调明文：【{}】", transaction);
+        String appid = transaction.getAppid();
+        String mchid = transaction.getMchid();
+        if (StringUtils.isBlank(appid) || StringUtils.isBlank(mchid)) {
+            log.error("微信支付通知appid或商户号缺失");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知appid或商户号缺失");
+            return;
+        }
+        if (!appid.equals(WechatConstant.APP_ID) || !mchid.equals(WechatPayConstant.MERCHANT_ID)) {
+            log.error("微信支付通知appid或商户号不匹配");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知appid或商户号不匹配");
+            return;
+        }
+        String outTradeNo = transaction.getOutTradeNo();
+        if (StringUtils.isBlank(outTradeNo)) {
+            log.error("微信支付通知缺失商户订单号");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失商户订单号");
+            return;
+        }
+        String tradeStateDesc = transaction.getTradeStateDesc();
+        if (StringUtils.isBlank(tradeStateDesc)) {
+            log.error("微信支付通知缺失交易状态描述");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失交易状态描述");
+            return;
+        }
+        String transactionId = transaction.getTransactionId();
+        if (StringUtils.isBlank(transactionId)) {
+            log.error("微信支付通知缺失微信支付系统订单号");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失微信支付系统订单号");
+            return;
+        }
+        String successTime = transaction.getSuccessTime();
+        if (StringUtils.isBlank(successTime)) {
+            log.error("微信支付通知缺失支付完成时间");
+            writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失支付完成时间");
+            return;
+        }
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, Long.valueOf(outTradeNo)).eq(SysOrder::getIsDelete, 0));
+        if (null == sysOrder) {
+            log.error("友涯系统不存在此笔订单");
+            writeToWechatPayNotifyResponseErrorMessage(response, "友涯系统不存在此笔订单");
+            return;
+        }
+        Long buyerId = sysOrder.getBuyerId();
+        EnterpriseWalletAccount enterpriseWalletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, buyerId).eq(EnterpriseWalletAccount::getIsDelete, 0));
+        if (null == enterpriseWalletAccount) {
+            log.error("友涯企业钱包账户不存在");
+            writeToWechatPayNotifyResponseErrorMessage(response, "友涯企业钱包账户不存在");
+            return;
+        }
+        Long sysOrderId = sysOrder.getId();
+        WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, sysOrderId).eq(WalletTransactionFlow::getIsDelete, 0));
+        if (null == walletTransactionFlow) {
+            log.error("友涯系统不存在此笔订单交易流水");
+            writeToWechatPayNotifyResponseErrorMessage(response, "友涯系统不存在此笔订单交易流水");
+            return;
+        }
+        sysOrder.setOutTransactionId(transactionId);
+        Transaction.TradeStateEnum tradeState = transaction.getTradeState();
+        BigDecimal beforeBalance = enterpriseWalletAccount.getAccountBalance();
+        //支付成功
+        if (Transaction.TradeStateEnum.SUCCESS.equals(tradeState)) {
+            //更新订单状态
+            BigDecimal actualAmount = sysOrder.getActualAmount();
+            TransactionAmount amount = transaction.getAmount();
+            if (null == amount) {
+                log.error("微信支付通知缺失订单金额信息");
+                writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失订单金额信息");
+                return;
+            }
+            Integer payerTotal = amount.getPayerTotal();
+            BigDecimal payerTotalAmount = new BigDecimal(payerTotal);
+            if (actualAmount.compareTo(payerTotalAmount) != 0) {
+                log.error("微信支付通知中支付金额与订单需要实付金额不一致");
+                writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知缺失订单金额信息");
+                return;
+            }
+            sysOrder.setStatus(OrderStatusEnum.PAID.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            //更新账户金额
+            BigDecimal afterBalance = beforeBalance.add(payerTotalAmount);
+            enterpriseWalletAccount.setAccountBalance(afterBalance);
+            enterpriseWalletAccountMapper.updateById(enterpriseWalletAccount);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc());
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(afterBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("友涯订单id:【{}】，支付成功，账户余额和订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } else if (Transaction.TradeStateEnum.PAYERROR.equals(tradeState)) {
+            //支付失败
+            //更新订单状态
+            sysOrder.setStatus(OrderStatusEnum.PAYMENT_FAILED.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.FAILED.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.FAILED.getStatusDesc());
+            walletTransactionFlow.setTransactionFailReason(tradeStateDesc);
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("友涯订单id:【{}】，支付失败，订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } else if (Transaction.TradeStateEnum.CLOSED.equals(tradeState)) {
+            //已关闭
+            //更新订单状态
+            sysOrder.setStatus(OrderStatusEnum.PAYMENT_CANCELED.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.CANCELLED.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.CANCELLED.getStatusDesc());
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("友涯订单id:【{}】，已关闭，订单状态以及账户流水更新成功", sysOrderId);
+        } else if (Transaction.TradeStateEnum.NOTPAY.equals(tradeState)) {
+            //未支付
+            //更新订单状态
+            sysOrder.setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.PENDING.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("友涯订单id:【{}】，未支付，订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } else if (Transaction.TradeStateEnum.REFUND.equals(tradeState)) {
+            //转入退款
+            ////更新订单状态
+            sysOrder.setStatus(OrderStatusEnum.REFUNDED.getStatus());
+            sysOrderMapper.updateById(sysOrder);
+            //更新账户交易流水状态
+            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.REFUNDED.getStatus());
+            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.REFUNDED.getStatusDesc());
+            walletTransactionFlow.setBalanceBefore(beforeBalance);
+            walletTransactionFlow.setBalanceAfter(beforeBalance);
+            walletTransactionFlow.setOutTransactionId(transactionId);
+            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+            log.info("友涯订单id:【{}】，转入退款，订单状态以及账户流水更新成功", sysOrderId);
+            //设置HTTP响应状态码为204（No Content）
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        }
+    }
+
+    /**
+     * 写入微信支付通知响应错误消息
+     *
+     * @param response
+     * @param message
+     */
+    private void writeToWechatPayNotifyResponseErrorMessage(HttpServletResponse response, String message) {
+        //创建一个包含应答内容的JSON对象
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", "FAIL");
+        jsonObject.put("message", message);
+        // 设置响应状态码为500
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        //设置响应内容类型为JSON
+        response.setContentType("application/json;charset=UTF-8");
+        //获取PrintWriter对象以便写入响应体
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //将JSON对象转换为字符串并写入响应
+            assert out != null;
+            out.print(jsonObject.toString());
+            //刷新输出流
+            out.flush();
+            //关闭输出流
+            out.close();
+        }
+    }
+
+    /**
+     * 查询企业充值结果
+     *
+     * @param rechargeResultDto
+     * @return
+     */
+    @Override
+    public Integer queryRechargeResult(QueryEnterpriseRechargeResultDto rechargeResultDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
+        Long orderId = rechargeResultDto.getOrderId();
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+        if (null == sysOrder) throw new YouyaException("订单不存在");
+        Long buyerId = sysOrder.getBuyerId();
+        if (!buyerId.equals(enterpriseId)) throw new YouyaException("非法操作");
+        return sysOrder.getStatus();
+    }
+
+    /**
+     * 将字符串转换为时间
+     *
+     * @param var
+     * @return
+     */
+    private static LocalDateTime parseStringToLocalDateTime(String var) {
+        // 创建一个可以解析ISO-8601格式时间字符串的formatter
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        // 解析为OffsetDateTime
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(var, formatter);
+        // 将OffsetDateTime转换为LocalDateTime，忽略时区信息
+        return offsetDateTime.toLocalDateTime();
     }
 }
