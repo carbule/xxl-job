@@ -112,6 +112,126 @@ public class UserController {
     }
 
     /**
+     * 修改用户头像
+     *
+     * @return
+     */
+    @PostMapping("/modifyUserAvatar")
+    public R<?> modifyUserAvatar(@RequestBody @Valid ModifyUserAvatarDto modifyUserAvatarDto) {
+        userService.modifyUserAvatar(modifyUserAvatarDto);
+        return R.ok();
+    }
+
+    /**
+     * 查询个人基本信息
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryPersonalBasicInfo")
+    @ExplanationDict
+    public R<?> queryPersonalBasicInfo() {
+        UserPersonalBasicInfoVo personalBasicInfoVo = userService.queryPersonalBasicInfo();
+        return R.success(personalBasicInfoVo);
+    }
+
+    /**
+     * 修改个人基本信息
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/modifyPersonalBasicInfo")
+    public R<?> modifyPersonalInfo(@RequestBody @Valid ModifyUserPersonalBasicInfoDto modifyDto) {
+        userService.modifyUserPersonalBasicInfo(modifyDto);
+        return R.ok();
+    }
+
+    /**
+     * 查询用户联系方式
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryUserContactInfo")
+    public R<?> queryUserContactInfo() {
+        UserContactInfoVo contactInfoVo = userService.queryUserContactInfo();
+        return R.success(contactInfoVo);
+    }
+
+    /**
+     * 修改联系方式
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/modifyContactInfo")
+    public R<?> modifyContactInfo(@RequestBody @Valid ModifyUserContactInfoDto modifyDto) {
+        userService.modifyUserContactInfo(modifyDto);
+        return R.ok();
+    }
+
+    /**
+     * 查询登录用户信息
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/queryLoginUserInfo")
+    public R<?> queryCurrentUserInfo() {
+        LoginUserVo loginUserVo = userService.queryLoginUserInfo();
+        return R.success(loginUserVo);
+    }
+
+    /**
+     * 简历详情
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/resumeDetail")
+    @ExplanationDict
+    public R<?> resumeDetail() {
+        ResumeDetailVo resumeDetailVo = userService.resumeDetail();
+        return R.success(resumeDetailVo);
+    }
+
+    /**
+     * 简历预览
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/resumePreview")
+    @ExplanationDict
+    public R<?> resumePreview() {
+        ResumePreviewVo resumePreviewVo = userService.resumePreview();
+        return R.success(resumePreviewVo);
+    }
+
+    /**
+     * 申请关联企业
+     *
+     * @return
+     */
+    @PostMapping("/applyAffiliatedEnterprise")
+    public R<?> applyAffiliatedEnterprise(@RequestBody @Valid ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto) {
+        userService.affiliatedEnterprise(applyAffiliatedEnterpriseDto);
+        return R.ok();
+    }
+
+    /**
+     * 解除关联企业
+     *
+     * @return
+     */
+    @GetMapping("/relieveAffiliated")
+    public R<?> relieveAffiliated() {
+        userService.relieveAffiliated();
+        return R.ok();
+    }
+
+    /**
      * 查询用户钱包信息
      *
      * @return
@@ -256,125 +376,5 @@ public class UserController {
     @PostMapping("/withdrawal")
     public R<?> withdrawal(@RequestBody @Valid WithdrawalDto withdrawalDto) {
         return userService.withdrawal(withdrawalDto);
-    }
-
-    /**
-     * 修改用户头像
-     *
-     * @return
-     */
-    @PostMapping("/modifyUserAvatar")
-    public R<?> modifyUserAvatar(@RequestBody @Valid ModifyUserAvatarDto modifyUserAvatarDto) {
-        userService.modifyUserAvatar(modifyUserAvatarDto);
-        return R.ok();
-    }
-
-    /**
-     * 查询个人基本信息
-     *
-     * @param
-     * @return
-     */
-    @GetMapping("/queryPersonalBasicInfo")
-    @ExplanationDict
-    public R<?> queryPersonalBasicInfo() {
-        UserPersonalBasicInfoVo personalBasicInfoVo = userService.queryPersonalBasicInfo();
-        return R.success(personalBasicInfoVo);
-    }
-
-    /**
-     * 修改个人基本信息
-     *
-     * @param
-     * @return
-     */
-    @PostMapping("/modifyPersonalBasicInfo")
-    public R<?> modifyPersonalInfo(@RequestBody @Valid ModifyUserPersonalBasicInfoDto modifyDto) {
-        userService.modifyUserPersonalBasicInfo(modifyDto);
-        return R.ok();
-    }
-
-    /**
-     * 查询用户联系方式
-     *
-     * @param
-     * @return
-     */
-    @GetMapping("/queryUserContactInfo")
-    public R<?> queryUserContactInfo() {
-        UserContactInfoVo contactInfoVo = userService.queryUserContactInfo();
-        return R.success(contactInfoVo);
-    }
-
-    /**
-     * 修改联系方式
-     *
-     * @param
-     * @return
-     */
-    @PostMapping("/modifyContactInfo")
-    public R<?> modifyContactInfo(@RequestBody @Valid ModifyUserContactInfoDto modifyDto) {
-        userService.modifyUserContactInfo(modifyDto);
-        return R.ok();
-    }
-
-    /**
-     * 查询登录用户信息
-     *
-     * @param
-     * @return
-     */
-    @GetMapping("/queryLoginUserInfo")
-    public R<?> queryCurrentUserInfo() {
-        LoginUserVo loginUserVo = userService.queryLoginUserInfo();
-        return R.success(loginUserVo);
-    }
-
-    /**
-     * 简历详情
-     *
-     * @param
-     * @return
-     */
-    @GetMapping("/resumeDetail")
-    @ExplanationDict
-    public R<?> resumeDetail() {
-        ResumeDetailVo resumeDetailVo = userService.resumeDetail();
-        return R.success(resumeDetailVo);
-    }
-
-    /**
-     * 简历预览
-     *
-     * @param
-     * @return
-     */
-    @GetMapping("/resumePreview")
-    @ExplanationDict
-    public R<?> resumePreview() {
-        ResumePreviewVo resumePreviewVo = userService.resumePreview();
-        return R.success(resumePreviewVo);
-    }
-
-    /**
-     * 申请关联企业
-     *
-     * @return
-     */
-    @PostMapping("/applyAffiliatedEnterprise")
-    public R<?> applyAffiliatedEnterprise(@RequestBody @Valid ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto) {
-        userService.affiliatedEnterprise(applyAffiliatedEnterpriseDto);
-        return R.ok();
-    }
-
-    /**
-     * 解除关联企业
-     *
-     * @return
-     */
-    @GetMapping("/relieveAffiliated")
-    public R<?> relieveAffiliated() {
-        userService.relieveAffiliated();
-        return R.ok();
     }
 }

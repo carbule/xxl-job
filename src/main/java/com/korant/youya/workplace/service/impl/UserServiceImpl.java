@@ -434,6 +434,292 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
+     * 修改用户头像
+     *
+     * @param modifyUserAvatarDto
+     */
+    @Override
+    public void modifyUserAvatar(ModifyUserAvatarDto modifyUserAvatarDto) {
+        Long userId = SpringSecurityUtil.getUserId();
+        userMapper.modifyUserAvatar(userId, modifyUserAvatarDto);
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        redisUtil.del(cacheKey);
+    }
+
+    /**
+     * 查询个人基本信息
+     *
+     * @return
+     */
+    @Override
+    public UserPersonalBasicInfoVo queryPersonalBasicInfo() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.queryPersonalBasicInfo(userId);
+    }
+
+    /**
+     * 修改个人基本信息
+     *
+     * @param modifyDto
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void modifyUserPersonalBasicInfo(ModifyUserPersonalBasicInfoDto modifyDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        if (UserAuthenticationStatusEnum.CERTIFIED.getStatus() == loginUser.getAuthenticationStatus()) {
+            String lastName = loginUser.getLastName();
+            String firstName = loginUser.getFirstName();
+            if (!lastName.equals(modifyDto.getLastName()) || !firstName.equals(modifyDto.getFirstName()))
+                throw new YouyaException("已完成实名认证,姓名不可更改");
+        }
+        UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
+        if (null == userPrivacy) {
+            userPrivacy = new UserPrivacy();
+            userPrivacy.setUid(userId)
+                    .setNamePublicStatus(NameVisibleTypeEnum.FULL_NAME.getValue())
+                    .setPhonePublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setWechatPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setQqPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setEmailPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
+                    .setAddressPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue());
+            userPrivacyMapper.insert(userPrivacy);
+        } else {
+            UserNameVisibleInfo userNameVisibleInfo = userNameVisibleInfoMapper.selectOne(new LambdaQueryWrapper<UserNameVisibleInfo>().eq(UserNameVisibleInfo::getUid, userId).eq(UserNameVisibleInfo::getIsDelete, 0));
+            if (null == userNameVisibleInfo) {
+                userNameVisibleInfo = new UserNameVisibleInfo();
+                userNameVisibleInfo.setUid(userId);
+                userNameVisibleInfoMapper.insert(userNameVisibleInfo);
+            } else {
+                Integer namePublicStatus = userPrivacy.getNamePublicStatus();
+                switch (namePublicStatus) {
+                    case 1:
+                        userNameVisibleInfo.setLastName(modifyDto.getLastName());
+                        userNameVisibleInfo.setFirstName(modifyDto.getFirstName());
+                        break;
+                    case 2:
+                        userNameVisibleInfo.setFirstName(null);
+                        userNameVisibleInfo.setLastName(modifyDto.getLastName());
+                        break;
+                    case 3:
+                        userNameVisibleInfo.setLastName(null);
+                        userNameVisibleInfo.setFirstName(modifyDto.getFirstName());
+                        break;
+                    default:
+                        break;
+                }
+                userNameVisibleInfoMapper.updateById(userNameVisibleInfo);
+            }
+        }
+        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+        if (!redisUtil.del(cacheKey)) throw new YouyaException("修改个人基本信息失败");
+        userMapper.modifyUserPersonalBasicInfo(userId, modifyDto);
+    }
+
+    /**
+     * 查询用户联系方式
+     *
+     * @return
+     */
+    @Override
+    public UserContactInfoVo queryUserContactInfo() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.queryUserContactInfo(userId);
+    }
+
+    /**
+     * 修改用户联系方式
+     *
+     * @param modifyDto
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void modifyUserContactInfo(ModifyUserContactInfoDto modifyDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
+        if (null == userPrivacy) {
+            userPrivacy = new UserPrivacy();
+            userPrivacy.setUid(userId)
+                    .setNamePublicStatus(1)
+                    .setPhonePublicStatus(3)
+                    .setWechatPublicStatus(3)
+                    .setQqPublicStatus(3)
+                    .setEmailPublicStatus(3)
+                    .setAddressPublicStatus(3);
+            userPrivacyMapper.insert(userPrivacy);
+        } else {
+            EveryoneVisibleInfo everyoneVisibleInfo = everyoneVisibleInfoMapper.selectOne(new LambdaQueryWrapper<EveryoneVisibleInfo>().eq(EveryoneVisibleInfo::getUid, userId).eq(EveryoneVisibleInfo::getIsDelete, 0));
+            if (null == everyoneVisibleInfo) {
+                everyoneVisibleInfo = new EveryoneVisibleInfo();
+                everyoneVisibleInfo.setUid(userId);
+                everyoneVisibleInfoMapper.insert(everyoneVisibleInfo);
+            }
+            RecruiterVisibleInfo recruiterVisibleInfo = recruiterVisibleInfoMapper.selectOne(new LambdaQueryWrapper<RecruiterVisibleInfo>().eq(RecruiterVisibleInfo::getUid, userId).eq(RecruiterVisibleInfo::getIsDelete, 0));
+            if (null == recruiterVisibleInfo) {
+                recruiterVisibleInfo = new RecruiterVisibleInfo();
+                recruiterVisibleInfo.setUid(userId);
+                recruiterVisibleInfoMapper.insert(recruiterVisibleInfo);
+            }
+            Integer phonePublicStatus = userPrivacy.getPhonePublicStatus();
+            Integer wechatPublicStatus = userPrivacy.getWechatPublicStatus();
+            Integer qqPublicStatus = userPrivacy.getQqPublicStatus();
+            Integer emailPublicStatus = userPrivacy.getEmailPublicStatus();
+            Integer addressPublicStatus = userPrivacy.getAddressPublicStatus();
+            switch (phonePublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setPhone(loginUser.getPhone());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setPhone(loginUser.getPhone());
+                    break;
+                default:
+                    break;
+            }
+            switch (wechatPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setWechatId(modifyDto.getWechatId());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setWechatId(modifyDto.getWechatId());
+                    break;
+                default:
+                    break;
+            }
+            switch (qqPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setQq(modifyDto.getQq());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setQq(modifyDto.getQq());
+                    break;
+                default:
+                    break;
+            }
+            switch (emailPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setEmail(modifyDto.getEmail());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setEmail(modifyDto.getEmail());
+                    break;
+                default:
+                    break;
+            }
+            switch (addressPublicStatus) {
+                case 1:
+                    everyoneVisibleInfo.setCountryCode(CHINA_CODE);
+                    everyoneVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
+                    everyoneVisibleInfo.setCityCode(modifyDto.getCityCode());
+                    everyoneVisibleInfo.setAddress(modifyDto.getAddress());
+                    break;
+                case 2:
+                    recruiterVisibleInfo.setCountryCode(CHINA_CODE);
+                    recruiterVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
+                    recruiterVisibleInfo.setCityCode(modifyDto.getCityCode());
+                    recruiterVisibleInfo.setAddress(modifyDto.getAddress());
+                    break;
+                default:
+                    break;
+            }
+            everyoneVisibleInfoMapper.updateById(everyoneVisibleInfo);
+            recruiterVisibleInfoMapper.updateById(recruiterVisibleInfo);
+        }
+        modifyDto.setCountryCode(CHINA_CODE);
+        userMapper.modifyUserContactInfo(userId, modifyDto);
+    }
+
+    /**
+     * 查询登录用户信息
+     *
+     * @return
+     */
+    @Override
+    public LoginUserVo queryLoginUserInfo() {
+        LoginUser userInfo = SpringSecurityUtil.getUserInfo();
+        LoginUserVo loginUserVo = new LoginUserVo();
+        BeanUtils.copyProperties(userInfo, loginUserVo);
+        return loginUserVo;
+    }
+
+    /**
+     * 简历详情
+     *
+     * @return
+     */
+    @Override
+    public ResumeDetailVo resumeDetail() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.resumeDetail(userId);
+    }
+
+    /**
+     * 简历预览
+     *
+     * @return
+     */
+    @Override
+    public ResumePreviewVo resumePreview() {
+        Long userId = SpringSecurityUtil.getUserId();
+        return userMapper.resumePreview(userId);
+    }
+
+    /**
+     * 申请关联企业
+     *
+     * @param applyAffiliatedEnterpriseDto
+     */
+    @Override
+    public void affiliatedEnterprise(ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Integer authenticationStatus = loginUser.getAuthenticationStatus();
+        if (!authenticationStatus.equals(UserAuthenticationStatusEnum.CERTIFIED.getStatus()))
+            throw new YouyaException("请先完成实名认证");
+        Long userId = loginUser.getId();
+        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getId, userId).eq(UserEnterprise::getIsDelete, 0));
+        if (null != userEnterprise) throw new YouyaException("您已关联企业，无法申请");
+        Long enterpriseId = applyAffiliatedEnterpriseDto.getEnterpriseId();
+        if (enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0)))
+            throw new YouyaException("企业未创建");
+        if (enterpriseTodoMapper.exists(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getEnterpriseId, enterpriseId).eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getOperate, EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseTodo::getIsDelete, 0)))
+            throw new YouyaException("您当前已有关联申请等待审核中");
+        EnterpriseTodo enterpriseTodo = new EnterpriseTodo();
+        enterpriseTodo.setEnterpriseId(enterpriseId).setUid(userId).setEventType(EnterpriseTodoEventTypeEnum.EMPLOYEE.getType()).setOperate(EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate());
+        enterpriseTodoMapper.insert(enterpriseTodo);
+    }
+
+    /**
+     * 解除关联企业
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void relieveAffiliated() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String role = loginUser.getRole();
+        if (StringUtils.isBlank(role)) throw new YouyaException("您当前未关联企业");
+        if (RoleEnum.ADMIN.getRole().equals(role)) {
+            throw new YouyaException("抱歉，您是该公司管理员，请切换至公司端解除关联！");
+        } else if (RoleEnum.HR.getRole().equals(role)) {
+            throw new YouyaException("抱歉，您是该公司HR，请切换至公司端解除关联！");
+        } else {
+            Long userId = loginUser.getId();
+            Long enterpriseId = loginUser.getEnterpriseId();
+            UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0));
+            if (null != userEnterprise) {
+                userEnterprise.setIsDelete(1);
+                userEnterpriseMapper.updateById(userEnterprise);
+            }
+            UserRole userRole = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
+            if (null != userRole) {
+                userRole.setIsDelete(1);
+                userRoleMapper.updateById(userRole);
+            }
+            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+            if (!redisUtil.del(cacheKey)) throw new YouyaException("解除关联企业失败，请稍后再试");
+        }
+    }
+
+    /**
      * 查询用户钱包信息
      *
      * @return
@@ -1169,292 +1455,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String diagnosisUrl = DiagnosisUtils.getDiagnosisUrl(alipayFundAccountQueryResponse);
             log.error("查询支付宝商户可用余额失败，诊断url:【{}】", diagnosisUrl);
             throw new YouyaException("网络异常，请稍后重试");
-        }
-    }
-
-    /**
-     * 修改用户头像
-     *
-     * @param modifyUserAvatarDto
-     */
-    @Override
-    public void modifyUserAvatar(ModifyUserAvatarDto modifyUserAvatarDto) {
-        Long userId = SpringSecurityUtil.getUserId();
-        userMapper.modifyUserAvatar(userId, modifyUserAvatarDto);
-        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
-        redisUtil.del(cacheKey);
-    }
-
-    /**
-     * 查询个人基本信息
-     *
-     * @return
-     */
-    @Override
-    public UserPersonalBasicInfoVo queryPersonalBasicInfo() {
-        Long userId = SpringSecurityUtil.getUserId();
-        return userMapper.queryPersonalBasicInfo(userId);
-    }
-
-    /**
-     * 修改个人基本信息
-     *
-     * @param modifyDto
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void modifyUserPersonalBasicInfo(ModifyUserPersonalBasicInfoDto modifyDto) {
-        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        Long userId = loginUser.getId();
-        if (UserAuthenticationStatusEnum.CERTIFIED.getStatus() == loginUser.getAuthenticationStatus()) {
-            String lastName = loginUser.getLastName();
-            String firstName = loginUser.getFirstName();
-            if (!lastName.equals(modifyDto.getLastName()) || !firstName.equals(modifyDto.getFirstName()))
-                throw new YouyaException("已完成实名认证,姓名不可更改");
-        }
-        UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
-        if (null == userPrivacy) {
-            userPrivacy = new UserPrivacy();
-            userPrivacy.setUid(userId)
-                    .setNamePublicStatus(NameVisibleTypeEnum.FULL_NAME.getValue())
-                    .setPhonePublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
-                    .setWechatPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
-                    .setQqPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
-                    .setEmailPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue())
-                    .setAddressPublicStatus(OtherInfoVisibleTypeEnum.VISIBLE_TO_ONESELF.getValue());
-            userPrivacyMapper.insert(userPrivacy);
-        } else {
-            UserNameVisibleInfo userNameVisibleInfo = userNameVisibleInfoMapper.selectOne(new LambdaQueryWrapper<UserNameVisibleInfo>().eq(UserNameVisibleInfo::getUid, userId).eq(UserNameVisibleInfo::getIsDelete, 0));
-            if (null == userNameVisibleInfo) {
-                userNameVisibleInfo = new UserNameVisibleInfo();
-                userNameVisibleInfo.setUid(userId);
-                userNameVisibleInfoMapper.insert(userNameVisibleInfo);
-            } else {
-                Integer namePublicStatus = userPrivacy.getNamePublicStatus();
-                switch (namePublicStatus) {
-                    case 1:
-                        userNameVisibleInfo.setLastName(modifyDto.getLastName());
-                        userNameVisibleInfo.setFirstName(modifyDto.getFirstName());
-                        break;
-                    case 2:
-                        userNameVisibleInfo.setFirstName(null);
-                        userNameVisibleInfo.setLastName(modifyDto.getLastName());
-                        break;
-                    case 3:
-                        userNameVisibleInfo.setLastName(null);
-                        userNameVisibleInfo.setFirstName(modifyDto.getFirstName());
-                        break;
-                    default:
-                        break;
-                }
-                userNameVisibleInfoMapper.updateById(userNameVisibleInfo);
-            }
-        }
-        String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
-        if (!redisUtil.del(cacheKey)) throw new YouyaException("修改个人基本信息失败");
-        userMapper.modifyUserPersonalBasicInfo(userId, modifyDto);
-    }
-
-    /**
-     * 查询用户联系方式
-     *
-     * @return
-     */
-    @Override
-    public UserContactInfoVo queryUserContactInfo() {
-        Long userId = SpringSecurityUtil.getUserId();
-        return userMapper.queryUserContactInfo(userId);
-    }
-
-    /**
-     * 修改用户联系方式
-     *
-     * @param modifyDto
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void modifyUserContactInfo(ModifyUserContactInfoDto modifyDto) {
-        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        Long userId = loginUser.getId();
-        UserPrivacy userPrivacy = userPrivacyMapper.selectOne(new LambdaQueryWrapper<UserPrivacy>().eq(UserPrivacy::getUid, userId).eq(UserPrivacy::getIsDelete, 0));
-        if (null == userPrivacy) {
-            userPrivacy = new UserPrivacy();
-            userPrivacy.setUid(userId)
-                    .setNamePublicStatus(1)
-                    .setPhonePublicStatus(3)
-                    .setWechatPublicStatus(3)
-                    .setQqPublicStatus(3)
-                    .setEmailPublicStatus(3)
-                    .setAddressPublicStatus(3);
-            userPrivacyMapper.insert(userPrivacy);
-        } else {
-            EveryoneVisibleInfo everyoneVisibleInfo = everyoneVisibleInfoMapper.selectOne(new LambdaQueryWrapper<EveryoneVisibleInfo>().eq(EveryoneVisibleInfo::getUid, userId).eq(EveryoneVisibleInfo::getIsDelete, 0));
-            if (null == everyoneVisibleInfo) {
-                everyoneVisibleInfo = new EveryoneVisibleInfo();
-                everyoneVisibleInfo.setUid(userId);
-                everyoneVisibleInfoMapper.insert(everyoneVisibleInfo);
-            }
-            RecruiterVisibleInfo recruiterVisibleInfo = recruiterVisibleInfoMapper.selectOne(new LambdaQueryWrapper<RecruiterVisibleInfo>().eq(RecruiterVisibleInfo::getUid, userId).eq(RecruiterVisibleInfo::getIsDelete, 0));
-            if (null == recruiterVisibleInfo) {
-                recruiterVisibleInfo = new RecruiterVisibleInfo();
-                recruiterVisibleInfo.setUid(userId);
-                recruiterVisibleInfoMapper.insert(recruiterVisibleInfo);
-            }
-            Integer phonePublicStatus = userPrivacy.getPhonePublicStatus();
-            Integer wechatPublicStatus = userPrivacy.getWechatPublicStatus();
-            Integer qqPublicStatus = userPrivacy.getQqPublicStatus();
-            Integer emailPublicStatus = userPrivacy.getEmailPublicStatus();
-            Integer addressPublicStatus = userPrivacy.getAddressPublicStatus();
-            switch (phonePublicStatus) {
-                case 1:
-                    everyoneVisibleInfo.setPhone(loginUser.getPhone());
-                    break;
-                case 2:
-                    recruiterVisibleInfo.setPhone(loginUser.getPhone());
-                    break;
-                default:
-                    break;
-            }
-            switch (wechatPublicStatus) {
-                case 1:
-                    everyoneVisibleInfo.setWechatId(modifyDto.getWechatId());
-                    break;
-                case 2:
-                    recruiterVisibleInfo.setWechatId(modifyDto.getWechatId());
-                    break;
-                default:
-                    break;
-            }
-            switch (qqPublicStatus) {
-                case 1:
-                    everyoneVisibleInfo.setQq(modifyDto.getQq());
-                    break;
-                case 2:
-                    recruiterVisibleInfo.setQq(modifyDto.getQq());
-                    break;
-                default:
-                    break;
-            }
-            switch (emailPublicStatus) {
-                case 1:
-                    everyoneVisibleInfo.setEmail(modifyDto.getEmail());
-                    break;
-                case 2:
-                    recruiterVisibleInfo.setEmail(modifyDto.getEmail());
-                    break;
-                default:
-                    break;
-            }
-            switch (addressPublicStatus) {
-                case 1:
-                    everyoneVisibleInfo.setCountryCode(CHINA_CODE);
-                    everyoneVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
-                    everyoneVisibleInfo.setCityCode(modifyDto.getCityCode());
-                    everyoneVisibleInfo.setAddress(modifyDto.getAddress());
-                    break;
-                case 2:
-                    recruiterVisibleInfo.setCountryCode(CHINA_CODE);
-                    recruiterVisibleInfo.setProvinceCode(modifyDto.getProvinceCode());
-                    recruiterVisibleInfo.setCityCode(modifyDto.getCityCode());
-                    recruiterVisibleInfo.setAddress(modifyDto.getAddress());
-                    break;
-                default:
-                    break;
-            }
-            everyoneVisibleInfoMapper.updateById(everyoneVisibleInfo);
-            recruiterVisibleInfoMapper.updateById(recruiterVisibleInfo);
-        }
-        modifyDto.setCountryCode(CHINA_CODE);
-        userMapper.modifyUserContactInfo(userId, modifyDto);
-    }
-
-    /**
-     * 查询登录用户信息
-     *
-     * @return
-     */
-    @Override
-    public LoginUserVo queryLoginUserInfo() {
-        LoginUser userInfo = SpringSecurityUtil.getUserInfo();
-        LoginUserVo loginUserVo = new LoginUserVo();
-        BeanUtils.copyProperties(userInfo, loginUserVo);
-        return loginUserVo;
-    }
-
-    /**
-     * 简历详情
-     *
-     * @return
-     */
-    @Override
-    public ResumeDetailVo resumeDetail() {
-        Long userId = SpringSecurityUtil.getUserId();
-        return userMapper.resumeDetail(userId);
-    }
-
-    /**
-     * 简历预览
-     *
-     * @return
-     */
-    @Override
-    public ResumePreviewVo resumePreview() {
-        Long userId = SpringSecurityUtil.getUserId();
-        return userMapper.resumePreview(userId);
-    }
-
-    /**
-     * 申请关联企业
-     *
-     * @param applyAffiliatedEnterpriseDto
-     */
-    @Override
-    public void affiliatedEnterprise(ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto) {
-        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        Integer authenticationStatus = loginUser.getAuthenticationStatus();
-        if (!authenticationStatus.equals(UserAuthenticationStatusEnum.CERTIFIED.getStatus()))
-            throw new YouyaException("请先完成实名认证");
-        Long userId = loginUser.getId();
-        UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getId, userId).eq(UserEnterprise::getIsDelete, 0));
-        if (null != userEnterprise) throw new YouyaException("您已关联企业，无法申请");
-        Long enterpriseId = applyAffiliatedEnterpriseDto.getEnterpriseId();
-        if (enterpriseMapper.exists(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getAuthStatus, EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus()).eq(Enterprise::getIsDelete, 0)))
-            throw new YouyaException("企业未创建");
-        if (enterpriseTodoMapper.exists(new LambdaQueryWrapper<EnterpriseTodo>().eq(EnterpriseTodo::getEnterpriseId, enterpriseId).eq(EnterpriseTodo::getUid, userId).eq(EnterpriseTodo::getOperate, EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate()).eq(EnterpriseTodo::getIsDelete, 0)))
-            throw new YouyaException("您当前已有关联申请等待审核中");
-        EnterpriseTodo enterpriseTodo = new EnterpriseTodo();
-        enterpriseTodo.setEnterpriseId(enterpriseId).setUid(userId).setEventType(EnterpriseTodoEventTypeEnum.EMPLOYEE.getType()).setOperate(EnterpriseTodoOperateEnum.PENDING_REVIEW.getOperate());
-        enterpriseTodoMapper.insert(enterpriseTodo);
-    }
-
-    /**
-     * 解除关联企业
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void relieveAffiliated() {
-        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        String role = loginUser.getRole();
-        if (StringUtils.isBlank(role)) throw new YouyaException("您当前未关联企业");
-        if (RoleEnum.ADMIN.getRole().equals(role)) {
-            throw new YouyaException("抱歉，您是该公司管理员，请切换至公司端解除关联！");
-        } else if (RoleEnum.HR.getRole().equals(role)) {
-            throw new YouyaException("抱歉，您是该公司HR，请切换至公司端解除关联！");
-        } else {
-            Long userId = loginUser.getId();
-            Long enterpriseId = loginUser.getEnterpriseId();
-            UserEnterprise userEnterprise = userEnterpriseMapper.selectOne(new LambdaQueryWrapper<UserEnterprise>().eq(UserEnterprise::getEnterpriseId, enterpriseId).eq(UserEnterprise::getUid, userId).eq(UserEnterprise::getIsDelete, 0));
-            if (null != userEnterprise) {
-                userEnterprise.setIsDelete(1);
-                userEnterpriseMapper.updateById(userEnterprise);
-            }
-            UserRole userRole = userRoleMapper.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUid, userId).eq(UserRole::getIsDelete, 0));
-            if (null != userRole) {
-                userRole.setIsDelete(1);
-                userRoleMapper.updateById(userRole);
-            }
-            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
-            if (!redisUtil.del(cacheKey)) throw new YouyaException("解除关联企业失败，请稍后再试");
         }
     }
 

@@ -79,6 +79,74 @@ public interface UserService extends IService<User> {
     void cancel();
 
     /**
+     * 修改用户头像
+     *
+     * @param modifyUserAvatarDto
+     */
+    void modifyUserAvatar(ModifyUserAvatarDto modifyUserAvatarDto);
+
+    /**
+     * 查询个人基本信息
+     *
+     * @return
+     */
+    UserPersonalBasicInfoVo queryPersonalBasicInfo();
+
+    /**
+     * 修改个人基本信息
+     *
+     * @param modifyDto
+     */
+    void modifyUserPersonalBasicInfo(ModifyUserPersonalBasicInfoDto modifyDto);
+
+    /**
+     * 查询用户联系方式
+     *
+     * @return
+     */
+    UserContactInfoVo queryUserContactInfo();
+
+    /**
+     * 修改联系方式
+     *
+     * @param modifyDto
+     */
+    void modifyUserContactInfo(ModifyUserContactInfoDto modifyDto);
+
+    /**
+     * 查询登录用户信息
+     *
+     * @return
+     */
+    LoginUserVo queryLoginUserInfo();
+
+    /**
+     * 简历详情
+     *
+     * @return
+     */
+    ResumeDetailVo resumeDetail();
+
+    /**
+     * 简历预览
+     *
+     * @return
+     */
+    ResumePreviewVo resumePreview();
+
+    /**
+     * 申请关联企业
+     *
+     * @param applyAffiliatedEnterpriseDto
+     */
+    void affiliatedEnterprise(ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto);
+
+    /**
+     * 解除关联企业
+     */
+    void relieveAffiliated();
+
+    /**
      * 查询用户钱包信息
      *
      * @return
@@ -170,72 +238,4 @@ public interface UserService extends IService<User> {
      * @param withdrawalDto
      */
     R<?> withdrawal(WithdrawalDto withdrawalDto);
-
-    /**
-     * 修改用户头像
-     *
-     * @param modifyUserAvatarDto
-     */
-    void modifyUserAvatar(ModifyUserAvatarDto modifyUserAvatarDto);
-
-    /**
-     * 查询个人基本信息
-     *
-     * @return
-     */
-    UserPersonalBasicInfoVo queryPersonalBasicInfo();
-
-    /**
-     * 修改个人基本信息
-     *
-     * @param modifyDto
-     */
-    void modifyUserPersonalBasicInfo(ModifyUserPersonalBasicInfoDto modifyDto);
-
-    /**
-     * 查询用户联系方式
-     *
-     * @return
-     */
-    UserContactInfoVo queryUserContactInfo();
-
-    /**
-     * 修改联系方式
-     *
-     * @param modifyDto
-     */
-    void modifyUserContactInfo(ModifyUserContactInfoDto modifyDto);
-
-    /**
-     * 查询登录用户信息
-     *
-     * @return
-     */
-    LoginUserVo queryLoginUserInfo();
-
-    /**
-     * 简历详情
-     *
-     * @return
-     */
-    ResumeDetailVo resumeDetail();
-
-    /**
-     * 简历预览
-     *
-     * @return
-     */
-    ResumePreviewVo resumePreview();
-
-    /**
-     * 申请关联企业
-     *
-     * @param applyAffiliatedEnterpriseDto
-     */
-    void affiliatedEnterprise(ApplyAffiliatedEnterpriseDto applyAffiliatedEnterpriseDto);
-
-    /**
-     * 解除关联企业
-     */
-    void relieveAffiliated();
 }
