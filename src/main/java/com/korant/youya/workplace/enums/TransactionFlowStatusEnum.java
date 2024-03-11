@@ -22,7 +22,9 @@ public enum TransactionFlowStatusEnum {
     //已取消，交易在完成前被用户或系统取消
     CANCELLED(6, "交易已取消"),
     //已退款，原始交易金额部分或全部退还给付款方
-    REFUNDED(7, "交易已退款");
+    REFUNDED(7, "交易已退款"),
+    //已关闭，交易在已过期状态下，系统自动关闭交易
+    CLOSED(8, "交易已关闭");
 
     private int status;
 

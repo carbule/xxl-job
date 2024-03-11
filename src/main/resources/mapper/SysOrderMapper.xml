@@ -2,4 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.SysOrderMapper">
 
+    <!--  查询订单列表  -->
+    <select id="queryOrderList" resultType="com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo">
+        SELECT o.id,
+        p.name AS productName,
+        p.description AS productDescription,
+        o.order_date AS orderDate,
+        o.total_amount AS totalAmount,
+        o.discount_amount AS discountAmount,
+        o.actual_amount AS actualAmount,
+        o.status
+        FROM yy_sys_order AS o
+        LEFT JOIN yy_sys_virtual_product AS p ON o.sys_product_id = p.id AND p.is_delete = 0
+        <where>
+            o.buyer_id = #{walletAccountId}
+            AND o.is_delete = 0
+            <if test="queryOrderListDto.status != null ">
+                AND o.status = #{queryOrderListDto.status}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC LIMIT #{queryOrderListDto.pageSize}
+        OFFSET (#{queryOrderListDto.pageNumber} -1) * #{queryOrderListDto.pageSize}
+    </select>
 </mapper>

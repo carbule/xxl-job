@@ -5,7 +5,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
+import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
+import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.service.EnterpriseService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -427,5 +430,29 @@ public class EnterpriseController {
     public R<?> queryRechargeResult(@RequestBody @Valid QueryEnterpriseRechargeResultDto rechargeResultDto) {
         Integer status = enterpriseService.queryRechargeResult(rechargeResultDto);
         return R.success(status);
+    }
+
+    /**
+     * 查询企业订单列表
+     *
+     * @param queryOrderListDto
+     * @return
+     */
+    @PostMapping("/queryOrderList")
+    public R<?> queryOrderList(@RequestBody @Valid QueryOrderListDto queryOrderListDto) {
+        Page<SysOrderVo> page = enterpriseService.queryOrderList(queryOrderListDto);
+        return R.success(page);
+    }
+
+    /**
+     * 生成订单支付参数
+     *
+     * @param generatePaymentParametersDto
+     * @return
+     */
+    @PostMapping("/generatePaymentParameters")
+    public R<?> generatePaymentParameters(@RequestBody @Valid GeneratePaymentParametersDto generatePaymentParametersDto) {
+        JSONObject result = enterpriseService.generatePaymentParameters(generatePaymentParametersDto);
+        return R.success(result);
     }
 }

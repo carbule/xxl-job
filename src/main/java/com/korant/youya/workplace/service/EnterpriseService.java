@@ -4,8 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
+import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
+import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -266,4 +269,20 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @return
      */
     Integer queryRechargeResult(QueryEnterpriseRechargeResultDto rechargeResultDto);
+
+    /**
+     * 查询企业订单列表
+     *
+     * @param queryOrderListDto
+     * @return
+     */
+    Page<SysOrderVo> queryOrderList(QueryOrderListDto queryOrderListDto);
+
+    /**
+     * 生成订单支付参数
+     *
+     * @param generatePaymentParametersDto
+     * @return
+     */
+    JSONObject generatePaymentParameters(GeneratePaymentParametersDto generatePaymentParametersDto);
 }

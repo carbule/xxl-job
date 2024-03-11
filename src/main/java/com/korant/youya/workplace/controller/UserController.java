@@ -1,9 +1,13 @@
 package com.korant.youya.workplace.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
+import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
@@ -376,5 +380,29 @@ public class UserController {
     @PostMapping("/withdrawal")
     public R<?> withdrawal(@RequestBody @Valid WithdrawalDto withdrawalDto) {
         return userService.withdrawal(withdrawalDto);
+    }
+
+    /**
+     * 查询用户订单列表
+     *
+     * @param queryOrderListDto
+     * @return
+     */
+    @PostMapping("/queryOrderList")
+    public R<?> queryOrderList(@RequestBody @Valid QueryOrderListDto queryOrderListDto) {
+        Page<SysOrderVo> page = userService.queryOrderList(queryOrderListDto);
+        return R.success(page);
+    }
+
+    /**
+     * 生成订单支付参数
+     *
+     * @param generatePaymentParametersDto
+     * @return
+     */
+    @PostMapping("/generatePaymentParameters")
+    public R<?> generatePaymentParameters(@RequestBody @Valid GeneratePaymentParametersDto generatePaymentParametersDto) {
+        JSONObject result = userService.generatePaymentParameters(generatePaymentParametersDto);
+        return R.success(result);
     }
 }

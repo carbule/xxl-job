@@ -24,7 +24,9 @@ public enum OrderStatusEnum {
     //退款中
     REFUNDING(7),
     //已退款
-    REFUNDED(8);
+    REFUNDED(8),
+    //已关闭
+    CLOSED(9);
 
     private int status;
 

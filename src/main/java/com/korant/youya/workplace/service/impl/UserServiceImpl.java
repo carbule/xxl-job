@@ -1,10 +1,12 @@
 package com.korant.youya.workplace.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.diagnosis.DiagnosisUtils;
 import com.alipay.api.response.AlipayFundAccountQueryResponse;
 import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.constants.WechatConstant;
@@ -22,8 +24,11 @@ import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.*;
+import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.utils.*;
@@ -54,6 +59,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -320,6 +326,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .setAuthenticationStatus(UserAuthenticationStatusEnum.NOT_CERTIFIED.getStatus())
                 .setAccountStatus(UserAccountStatusEnum.UNFROZEN.getStatus())
                 .setAvatar(DEFAULT_AVATAR);
+
         userMapper.insert(user);
         Long id = user.getId();
         UserPrivacy userPrivacy = new UserPrivacy();
@@ -787,8 +794,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         log.info("用户：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", phone, productId, price, quantity, totalAmount);
         //todo 放开最低充值限制
         //if (totalAmount < 100) throw new YouyaException("最低充值金额为1元");
+        Long accountId = userWalletAccount.getId();
         SysOrder sysOrder = new SysOrder();
-        sysOrder.setSysProductId(productId).setBuyerId(userId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
+        sysOrder.setSysProductId(productId).setBuyerId(accountId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
                 .setQuantity(quantity).setTotalAmount(multiply).setActualAmount(multiply).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
         sysOrderMapper.insert(sysOrder);
         String openid = WeChatUtil.code2Session(code);
@@ -797,8 +805,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long orderId = sysOrder.getId();
         PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), userRechargeNotifyUrl, totalAmount, openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
-        log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功", phone, productId);
-        Long accountId = userWalletAccount.getId();
+        log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功，微信响应报文：【{}】", phone, productId, JSONObject.toJSONString(response));
         WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
         walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(new BigDecimal(totalAmount)).setCurrency(CurrencyTypeEnum.CNY.getType())
                 .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
@@ -824,13 +831,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void completePayment(UserCompletePaymentDto completePaymentDto) {
         log.info("收到用户完成支付请求");
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         String phone = loginUser.getPhone();
+        UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+        if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
         Long orderId = completePaymentDto.getOrderId();
         SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
         Long buyerId = sysOrder.getBuyerId();
-        Long userId = loginUser.getId();
-        if (!buyerId.equals(userId)) throw new YouyaException("非法操作");
+        Long walletAccountId = userWalletAccount.getId();
+        if (!buyerId.equals(walletAccountId)) throw new YouyaException("非法操作");
         Integer status = sysOrder.getStatus();
         if (OrderStatusEnum.PENDING_PAYMENT.getStatus() == status) {
             sysOrder.setStatus(OrderStatusEnum.PROCESSING_PAYMENT.getStatus());
@@ -936,7 +946,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             writeToWechatPayNotifyResponseErrorMessage(response, "微信支付通知回调报文为空");
             return;
         }
-        log.info("友涯微信用户支付通知回调请求验签解密成功，回调明文：【{}】", transaction);
+        log.info("友涯微信用户支付通知回调请求验签解密成功，回调明文：【{}】", JSONObject.toJSONString(transaction));
         String appid = transaction.getAppid();
         String mchid = transaction.getMchid();
         if (StringUtils.isBlank(appid) || StringUtils.isBlank(mchid)) {
@@ -980,7 +990,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return;
         }
         Long buyerId = sysOrder.getBuyerId();
-        UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, buyerId).eq(UserWalletAccount::getIsDelete, 0));
+        UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getId, buyerId).eq(UserWalletAccount::getIsDelete, 0));
         if (null == userWalletAccount) {
             log.error("友涯用户钱包账户不存在");
             writeToWechatPayNotifyResponseErrorMessage(response, "友涯用户钱包账户不存在");
@@ -1136,12 +1146,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Integer queryRechargeResult(UserQueryRechargeResultDto rechargeResultDto) {
-        Long userId = SpringSecurityUtil.getUserId();
         Long orderId = rechargeResultDto.getOrderId();
         SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
-        Long buyerId = sysOrder.getBuyerId();
-        if (!buyerId.equals(userId)) throw new YouyaException("非法操作");
         return sysOrder.getStatus();
     }
 
@@ -1456,6 +1463,70 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.error("查询支付宝商户可用余额失败，诊断url:【{}】", diagnosisUrl);
             throw new YouyaException("网络异常，请稍后重试");
         }
+    }
+
+    /**
+     * 查询用户订单列表
+     *
+     * @param queryOrderListDto
+     * @return
+     */
+    @Override
+    public Page<SysOrderVo> queryOrderList(QueryOrderListDto queryOrderListDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        UserWalletAccount walletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+        if (null == walletAccount) throw new YouyaException("钱包账户不存在");
+        Long walletAccountId = walletAccount.getId();
+        Integer status = queryOrderListDto.getStatus();
+        int pageNumber = queryOrderListDto.getPageNumber();
+        int pageSize = queryOrderListDto.getPageSize();
+        Long count = sysOrderMapper.selectCount(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getBuyerId, walletAccountId).eq((ObjectUtil.isNotNull(status)), SysOrder::getStatus, status).eq(SysOrder::getIsDelete, 0));
+        List<SysOrderVo> list = sysOrderMapper.queryOrderList(walletAccountId, queryOrderListDto);
+        Page<SysOrderVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 生成订单支付参数
+     *
+     * @param generatePaymentParametersDto
+     * @return
+     */
+    @Override
+    public JSONObject generatePaymentParameters(GeneratePaymentParametersDto generatePaymentParametersDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        String phone = loginUser.getPhone();
+        UserWalletAccount walletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+        if (null == walletAccount) throw new YouyaException("钱包账户不存在");
+        Integer accountStatus = walletAccount.getStatus();
+        if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("钱包账户已被冻结，请联系客服");
+        Long orderId = generatePaymentParametersDto.getOrderId();
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+        if (null == sysOrder) throw new YouyaException("订单不存在");
+        Integer status = sysOrder.getStatus();
+        if (OrderStatusEnum.PENDING_PAYMENT.getStatus() != status) throw new YouyaException("只有待支付订单可以获取支付参数");
+        Long buyerId = sysOrder.getBuyerId();
+        Long walletAccountId = walletAccount.getId();
+        if (!buyerId.equals(walletAccountId)) throw new YouyaException("非法操作");
+        String code = generatePaymentParametersDto.getCode();
+        String openid = WeChatUtil.code2Session(code);
+        if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
+        if (StringUtils.isBlank(userRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
+        Integer actualAmount = sysOrder.getActualAmount().intValue();
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), userRechargeNotifyUrl, actualAmount, openid);
+        if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
+        log.info("用户：【{}】，订单id：【{}】，生成调起支付参数成功，微信响应报文：【{}】", phone, orderId, JSONObject.toJSONString(response));
+        JSONObject result = new JSONObject();
+        result.put("timeStamp", response.getTimeStamp());
+        result.put("nonceStr", response.getNonceStr());
+        result.put("package", response.getPackageVal());
+        result.put("signType", response.getSignType());
+        result.put("paySign", response.getPaySign());
+        result.put("orderId", orderId);
+        return result;
     }
 
     /**

@@ -1,11 +1,15 @@
 package com.korant.youya.workplace.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -238,4 +242,20 @@ public interface UserService extends IService<User> {
      * @param withdrawalDto
      */
     R<?> withdrawal(WithdrawalDto withdrawalDto);
+
+    /**
+     * 查询用户订单列表
+     *
+     * @param queryOrderListDto
+     * @return
+     */
+    Page<SysOrderVo> queryOrderList(QueryOrderListDto queryOrderListDto);
+
+    /**
+     * 生成订单支付参数
+     *
+     * @param generatePaymentParametersDto
+     * @return
+     */
+    JSONObject generatePaymentParameters(GeneratePaymentParametersDto generatePaymentParametersDto);
 }
