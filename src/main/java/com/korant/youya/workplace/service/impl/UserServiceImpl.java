@@ -752,13 +752,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BigDecimal accountBalance = userWalletAccount.getAccountBalance();
         //冻结金额
         BigDecimal freezeAmount = userWalletAccount.getFreezeAmount();
-        MathContext mathContext = new MathContext(3, RoundingMode.UNNECESSARY);
         //可用余额
         BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
         UserWalletVo userWalletVo = new UserWalletVo();
-        userWalletVo.setAccountBalance(accountBalance.divide(new BigDecimal(100), mathContext));
-        userWalletVo.setFreezeAmount(freezeAmount.divide(new BigDecimal(100), mathContext));
-        userWalletVo.setAvailableBalance(availableBalance.divide(new BigDecimal(100), mathContext));
+        userWalletVo.setAccountBalance(accountBalance.multiply(new BigDecimal("0.01")));
+        userWalletVo.setFreezeAmount(freezeAmount.multiply(new BigDecimal("0.01")));
+        userWalletVo.setAvailableBalance(availableBalance.multiply(new BigDecimal("0.01")));
         return userWalletVo;
     }
 
@@ -1331,8 +1330,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BigDecimal freezeAmount = userWalletAccount.getFreezeAmount();
         //可用余额
         BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
-        MathContext mathContext = new MathContext(3, RoundingMode.UNNECESSARY);
-        return availableBalance.divide(new BigDecimal(100), mathContext);
+        return availableBalance.multiply(new BigDecimal("0.01"));
     }
 
     /**

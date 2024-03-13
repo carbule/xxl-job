@@ -886,13 +886,12 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         BigDecimal accountBalance = enterpriseWalletAccount.getAccountBalance();
         //冻结金额
         BigDecimal freezeAmount = enterpriseWalletAccount.getFreezeAmount();
-        MathContext mathContext = new MathContext(3, RoundingMode.UNNECESSARY);
         //可用余额
         BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
         EnterpriseWalletVo enterpriseWalletVo = new EnterpriseWalletVo();
-        enterpriseWalletVo.setAccountBalance(accountBalance.divide(new BigDecimal(100), mathContext));
-        enterpriseWalletVo.setFreezeAmount(freezeAmount.divide(new BigDecimal(100), mathContext));
-        enterpriseWalletVo.setAvailableBalance(availableBalance.divide(new BigDecimal(100), mathContext));
+        enterpriseWalletVo.setAccountBalance(accountBalance.multiply(new BigDecimal("0.01")));
+        enterpriseWalletVo.setFreezeAmount(freezeAmount.multiply(new BigDecimal("0.01")));
+        enterpriseWalletVo.setAvailableBalance(availableBalance.multiply(new BigDecimal("0.01")));
         return enterpriseWalletVo;
     }
 
