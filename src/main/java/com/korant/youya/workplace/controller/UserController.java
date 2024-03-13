@@ -248,15 +248,26 @@ public class UserController {
     }
 
     /**
-     * 获取用户微信openid
+     * 检查用户是否有有效的微信Openid
+     *
+     * @return
+     */
+    @GetMapping("/checkIfUserHasValidWechatOpenid")
+    public R<?> checkIfUserHasValidWechatOpenid() {
+        boolean result = userService.checkIfUserHasValidWechatOpenid();
+        return R.success(result);
+    }
+
+    /**
+     * 更新用户微信openid
      *
      * @param wechatCodeDto
      * @return
      */
-    @PostMapping("/getWechatOpenId")
-    public R<?> getWechatOpenId(@RequestBody @Valid WechatCodeDto wechatCodeDto) {
-        String openid = userService.getWechatOpenId(wechatCodeDto);
-        return R.success(openid);
+    @PostMapping("/updateUserWechatOpenId")
+    public R<?> updateUserWechatOpenId(@RequestBody @Valid WechatCodeDto wechatCodeDto) {
+        userService.updateUserWechatOpenId(wechatCodeDto);
+        return R.ok();
     }
 
     /**

@@ -54,8 +54,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -762,17 +760,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 获取用户微信openid
+     * 检查用户是否有有效的微信Openid
+     *
+     * @return
+     */
+    @Override
+    public boolean checkIfUserHasValidWechatOpenid() {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String wechatOpenId = loginUser.getWechatOpenId();
+        return StringUtils.isNotBlank(wechatOpenId);
+    }
+
+    /**
+     * 更新用户微信openid
      *
      * @param wechatCodeDto
      * @return
      */
     @Override
-    public String getWechatOpenId(WechatCodeDto wechatCodeDto) {
-        String code = wechatCodeDto.getCode();
-        String openid = WeChatUtil.code2Session(code);
-        if (StringUtils.isBlank(openid)) throw new YouyaException("openid获取失败，请稍后重试");
-        return openid;
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserWechatOpenId(WechatCodeDto wechatCodeDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        String wechatOpenId = loginUser.getWechatOpenId();
+        if (StringUtils.isBlank(wechatOpenId)) {
+            String code = wechatCodeDto.getCode();
+            String openid = WeChatUtil.code2Session(code);
+            if (StringUtils.isBlank(openid)) throw new YouyaException("openid获取失败，请稍后重试");
+            Long userId = loginUser.getId();
+            User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, userId).eq(User::getIsDelete, 0));
+            if (null == user) throw new YouyaException("用户未注册或已注销");
+            user.setWechatId(openid);
+            userMapper.updateById(user);
+            String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
+            redisUtil.del(cacheKey);
+        }
     }
 
     /**

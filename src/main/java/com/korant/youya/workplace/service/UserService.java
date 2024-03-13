@@ -159,12 +159,19 @@ public interface UserService extends IService<User> {
     UserWalletVo queryUserWalletInfo();
 
     /**
-     * 获取用户微信openid
+     * 检查用户是否有有效的微信Openid
+     *
+     * @return
+     */
+    boolean checkIfUserHasValidWechatOpenid();
+
+    /**
+     * 更新用户微信openid
      *
      * @param wechatCodeDto
      * @return
      */
-    String getWechatOpenId(WechatCodeDto wechatCodeDto);
+    void updateUserWechatOpenId(WechatCodeDto wechatCodeDto);
 
     /**
      * 用户充值
