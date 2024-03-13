@@ -120,3 +120,39 @@ rabbitmq:
       routingKey: job_shareImage
       #消费者类型
       consumerType: jobShareImage
+    user_order_timeout:
+      #交换机名称
+      exchangeName: user_order_timeout_exchange
+      #队列名称
+      queueName: user_order_timeout_queue
+      #路由键
+      routingKey: user_order_timeout
+      #消费者类型
+      consumerType: userOrderTimeout
+    enterprise_order_timeout:
+      #交换机名称
+      exchangeName: enterprise_order_timeout_exchange
+      #队列名称
+      queueName: enterprise_order_timeout_queue
+      #路由键
+      routingKey: enterprise_order_timeout
+      #消费者类型
+      consumerType: enterpriseOrderTimeout
+    close_user_order:
+      #交换机名称
+      exchangeName: close_user_order_exchange
+      #队列名称
+      queueName: close_user_order_queue
+      #路由键
+      routingKey: close_user_order
+      #消费者类型
+      consumerType: closeUserOrder
+    close_enterprise_order:
+      #交换机名称
+      exchangeName: close_enterprise_order_exchange
+      #队列名称
+      queueName: close_enterprise_order_queue
+      #路由键
+      routingKey: close_enterprise_order
+      #消费者类型
+      consumerType: closeEnterpriseOrder

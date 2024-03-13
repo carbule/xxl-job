@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
@@ -174,6 +175,13 @@ public interface UserService extends IService<User> {
     JSONObject recharge(UserRechargeDto userRechargeDto);
 
     /**
+     * 订单超时处理
+     *
+     * @param orderId
+     */
+    void orderTimeoutProcessing(Long orderId);
+
+    /**
      * 用户完成支付
      *
      * @param completePaymentDto
@@ -258,4 +266,18 @@ public interface UserService extends IService<User> {
      * @return
      */
     JSONObject generatePaymentParameters(GeneratePaymentParametersDto generatePaymentParametersDto);
+
+    /**
+     * 取消订单
+     *
+     * @param cancelOrderDto
+     */
+    void cancelOrder(CancelOrderDto cancelOrderDto);
+
+    /**
+     * 关闭订单
+     *
+     * @param orderId
+     */
+    void closeUserOrder(Long orderId);
 }

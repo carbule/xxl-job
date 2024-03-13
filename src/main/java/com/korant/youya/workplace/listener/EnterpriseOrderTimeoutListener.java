@@ -18,22 +18,22 @@ import java.io.IOException;
  * @Version 1.0
  */
 @Slf4j
-public class EnterpriseQrcodeListener extends DefaultConsumer {
+public class EnterpriseOrderTimeoutListener extends DefaultConsumer {
 
-    public EnterpriseQrcodeListener(Channel channel) {
+    public EnterpriseOrderTimeoutListener(Channel channel) {
         super(channel);
     }
 
     @Override
     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
         try {
-            log.info("[EnterpriseQrcodeListener]接收到消息");
+            log.info("[EnterpriseOrderTimeoutListener]接收到消息");
             String msg = new String(body);
             log.info("消息内容:{}", msg);
             EnterpriseService enterpriseService = SpringContextUtils.getBean(EnterpriseService.class);
-            enterpriseService.deleteInvitationQrcode(Long.valueOf(msg));
+            enterpriseService.orderTimeoutProcessing(Long.valueOf(msg));
         } catch (Exception e) {
-            log.error("[PlanetActivityListener]接收消息异常:", e);
+            log.error("[EnterpriseOrderTimeoutListener]接收消息异常:", e);
         } finally {
             try {
                 getChannel().basicAck(envelope.getDeliveryTag(), false);

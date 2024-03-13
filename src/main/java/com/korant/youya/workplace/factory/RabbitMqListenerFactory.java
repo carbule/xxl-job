@@ -1,9 +1,6 @@
 package com.korant.youya.workplace.factory;
 
-import com.korant.youya.workplace.listener.EnterpriseQrcodeListener;
-import com.korant.youya.workplace.listener.EnterpriseShareImageListener;
-import com.korant.youya.workplace.listener.HuntJobShareImageListener;
-import com.korant.youya.workplace.listener.JobShareImageListener;
+import com.korant.youya.workplace.listener.*;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import lombok.Data;
@@ -42,6 +39,14 @@ public class RabbitMqListenerFactory implements ListenerFactory {
                 return new HuntJobShareImageListener(channel);
             case "jobShareImage":
                 return new JobShareImageListener(channel);
+            case "userOrderTimeout":
+                return new UserOrderTimeoutListener(channel);
+            case "enterpriseOrderTimeout":
+                return new EnterpriseOrderTimeoutListener(channel);
+            case "closeUserOrder":
+                return new CloseUserOrderListener(channel);
+            case "closeEnterpriseOrder":
+                return new CloseEnterpriseOrderListener(channel);
             default:
                 return null;
         }

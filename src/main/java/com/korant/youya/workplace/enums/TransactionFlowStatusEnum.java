@@ -17,14 +17,16 @@ public enum TransactionFlowStatusEnum {
     SUCCESSFUL(3, "交易成功"),
     //交易失败，由于某些原因交易未能完成
     FAILED(4, "交易失败"),
-    //已过期，交易在有效期内未完成,
+    //已过期，交易在有效期内未完成
     EXPIRED(5, "交易已过期"),
     //已取消，交易在完成前被用户或系统取消
     CANCELLED(6, "交易已取消"),
+    //退款中，原始交易金额部分或全部正在进行退款操作
+    REFUNDING(7, "交易退款中"),
     //已退款，原始交易金额部分或全部退还给付款方
-    REFUNDED(7, "交易已退款"),
+    REFUNDED(8, "交易已退款"),
     //已关闭，交易在已过期状态下，系统自动关闭交易
-    CLOSED(8, "交易已关闭");
+    CLOSED(9, "交易已关闭");
 
     private int status;
 

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
+import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
@@ -454,5 +455,17 @@ public class EnterpriseController {
     public R<?> generatePaymentParameters(@RequestBody @Valid GeneratePaymentParametersDto generatePaymentParametersDto) {
         JSONObject result = enterpriseService.generatePaymentParameters(generatePaymentParametersDto);
         return R.success(result);
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param cancelOrderDto
+     * @return
+     */
+    @PostMapping("/cancelOrder")
+    public R<?> cancelOrder(@RequestBody @Valid CancelOrderDto cancelOrderDto) {
+        enterpriseService.cancelOrder(cancelOrderDto);
+        return R.ok();
     }
 }

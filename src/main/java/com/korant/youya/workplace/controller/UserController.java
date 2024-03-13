@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
@@ -404,5 +405,17 @@ public class UserController {
     public R<?> generatePaymentParameters(@RequestBody @Valid GeneratePaymentParametersDto generatePaymentParametersDto) {
         JSONObject result = userService.generatePaymentParameters(generatePaymentParametersDto);
         return R.success(result);
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param cancelOrderDto
+     * @return
+     */
+    @PostMapping("/cancelOrder")
+    public R<?> cancelOrder(@RequestBody @Valid CancelOrderDto cancelOrderDto) {
+        userService.cancelOrder(cancelOrderDto);
+        return R.ok();
     }
 }

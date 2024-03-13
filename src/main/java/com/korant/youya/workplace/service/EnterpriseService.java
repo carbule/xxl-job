@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
+import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
@@ -248,6 +249,13 @@ public interface EnterpriseService extends IService<Enterprise> {
     JSONObject recharge(EnterpriseRechargeDto enterpriseRechargeDto);
 
     /**
+     * 订单超时处理
+     *
+     * @param orderId
+     */
+    void orderTimeoutProcessing(Long orderId);
+
+    /**
      * 企业完成支付
      *
      * @param completePaymentDto
@@ -285,4 +293,18 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @return
      */
     JSONObject generatePaymentParameters(GeneratePaymentParametersDto generatePaymentParametersDto);
+
+    /**
+     * 取消订单
+     *
+     * @param cancelOrderDto
+     */
+    void cancelOrder(CancelOrderDto cancelOrderDto);
+
+    /**
+     * 关闭订单
+     *
+     * @param orderId
+     */
+    void closeEnterpriseOrder(Long orderId);
 }
