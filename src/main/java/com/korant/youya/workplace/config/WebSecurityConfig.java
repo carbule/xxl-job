@@ -49,7 +49,7 @@ public class WebSecurityConfig {
                         // 允许所有OPTIONS请求
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 允许直接访问授权登录接口
-                        .requestMatchers("/user/loginByWechatCode", "/user/loginBySMSVerificationCode", "/user/loginByPassword", "/user/getVerificationCode", "/job/queryHomePageList", "/huntJob/queryHomePageList", "/wechat/js/sign", "/user/rechargeNotify","/enterprise/rechargeNotify").permitAll()
+                        .requestMatchers("/user/loginByWechatCode", "/user/loginBySMSVerificationCode", "/user/loginByPassword", "/user/getVerificationCode", "/job/queryHomePageList", "/huntJob/queryHomePageList", "/wechat/js/sign", "/user/rechargeNotify", "/enterprise/rechargeNotify", "/redisson/stressTest").permitAll()
                         // 允许 SpringMVC 的默认错误地址匿名访问
                         .requestMatchers("/error").permitAll()
                         // 其他所有接口必须有Authority信息，Authority在登录成功后的UserDetailsImpl对象中默认设置“ROLE_USER”

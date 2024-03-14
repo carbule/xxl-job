@@ -59,6 +59,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         PERMIT_URL.add("/wechat/js/sign");
         PERMIT_URL.add("/user/rechargeNotify");
         PERMIT_URL.add("/enterprise/rechargeNotify");
+        PERMIT_URL.add("/redisson/stressTest");
     }
 
     @Override
