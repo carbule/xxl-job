@@ -789,7 +789,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             Long userId = loginUser.getId();
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getId, userId).eq(User::getIsDelete, 0));
             if (null == user) throw new YouyaException("用户未注册或已注销");
-            user.setWechatId(openid);
+            user.setWechatOpenId(openid);
             userMapper.updateById(user);
             String cacheKey = String.format(RedisConstant.YY_USER_CACHE, userId);
             redisUtil.del(cacheKey);
