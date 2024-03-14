@@ -26,6 +26,7 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.*;
@@ -60,6 +61,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -1702,6 +1704,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 log.info("用户订单id:【{}】不是待支付状态，停止处理", orderId);
             }
         }
+    }
+
+    /**
+     * 查询用户已关闭订单列表
+     *
+     * @param queryClosedOrderListDto
+     * @return
+     */
+    @Override
+    public Page<SysOrderVo> queryClosedOrderList(QueryClosedOrderListDto queryClosedOrderListDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        UserWalletAccount walletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+        if (null == walletAccount) throw new YouyaException("钱包账户不存在");
+        Long walletAccountId = walletAccount.getId();
+        int pageNumber = queryClosedOrderListDto.getPageNumber();
+        int pageSize = queryClosedOrderListDto.getPageSize();
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(OrderStatusEnum.PAYMENT_FAILED.getStatus());
+        statusList.add(OrderStatusEnum.PAYMENT_TIMEOUT.getStatus());
+        statusList.add(OrderStatusEnum.PAYMENT_CANCELED.getStatus());
+        statusList.add(OrderStatusEnum.REFUNDING.getStatus());
+        statusList.add(OrderStatusEnum.REFUNDED.getStatus());
+        statusList.add(OrderStatusEnum.CLOSED.getStatus());
+        Long count = sysOrderMapper.selectCount(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getBuyerId, walletAccountId).in(SysOrder::getStatus, statusList).eq(SysOrder::getIsDelete, 0));
+        List<SysOrderVo> list = sysOrderMapper.queryClosedOrderList(walletAccountId, queryClosedOrderListDto);
+        Page<SysOrderVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
     }
 
     /**

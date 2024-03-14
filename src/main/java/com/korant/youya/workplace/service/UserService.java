@@ -7,6 +7,7 @@ import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
@@ -287,4 +288,12 @@ public interface UserService extends IService<User> {
      * @param orderId
      */
     void closeUserOrder(Long orderId);
+
+    /**
+     * 查询用户已关闭订单列表
+     *
+     * @param queryClosedOrderListDto
+     * @return
+     */
+    Page<SysOrderVo> queryClosedOrderList(QueryClosedOrderListDto queryClosedOrderListDto);
 }

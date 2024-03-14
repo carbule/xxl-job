@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.po.SysOrder;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
@@ -26,4 +27,13 @@ public interface SysOrderMapper extends BaseMapper<SysOrder> {
      * @return
      */
     List<SysOrderVo> queryOrderList(@Param("walletAccountId") Long walletAccountId, @Param("queryOrderListDto") QueryOrderListDto queryOrderListDto);
+
+    /**
+     * 查询已关闭订单列表
+     *
+     * @param walletAccountId
+     * @param queryClosedOrderListDto
+     * @return
+     */
+    List<SysOrderVo> queryClosedOrderList(@Param("walletAccountId") Long walletAccountId, @Param("queryClosedOrderListDto") QueryClosedOrderListDto queryClosedOrderListDto);
 }

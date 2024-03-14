@@ -6,6 +6,7 @@ import com.korant.youya.workplace.annotations.ExplanationDict;
 import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
@@ -428,5 +429,17 @@ public class UserController {
     public R<?> cancelOrder(@RequestBody @Valid CancelOrderDto cancelOrderDto) {
         userService.cancelOrder(cancelOrderDto);
         return R.ok();
+    }
+
+    /**
+     * 查询用户已关闭订单列表
+     *
+     * @param queryClosedOrderListDto
+     * @return
+     */
+    @PostMapping("/queryClosedOrderList")
+    public R<?> queryClosedOrderList(@RequestBody @Valid QueryClosedOrderListDto queryClosedOrderListDto) {
+        Page<SysOrderVo> page = userService.queryClosedOrderList(queryClosedOrderListDto);
+        return R.success(page);
     }
 }

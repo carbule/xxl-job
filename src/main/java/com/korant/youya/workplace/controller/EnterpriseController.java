@@ -7,6 +7,7 @@ import com.korant.youya.workplace.pojo.R;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
@@ -467,5 +468,17 @@ public class EnterpriseController {
     public R<?> cancelOrder(@RequestBody @Valid CancelOrderDto cancelOrderDto) {
         enterpriseService.cancelOrder(cancelOrderDto);
         return R.ok();
+    }
+
+    /**
+     * 查询企业已关闭订单列表
+     *
+     * @param queryClosedOrderListDto
+     * @return
+     */
+    @PostMapping("/queryClosedOrderList")
+    public R<?> queryClosedOrderList(@RequestBody @Valid QueryClosedOrderListDto queryClosedOrderListDto) {
+        Page<SysOrderVo> page = enterpriseService.queryClosedOrderList(queryClosedOrderListDto);
+        return R.success(page);
     }
 }

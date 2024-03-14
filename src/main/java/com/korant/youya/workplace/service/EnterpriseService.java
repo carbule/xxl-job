@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.korant.youya.workplace.pojo.dto.enterprise.*;
 import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
+import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
@@ -307,4 +308,12 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @param orderId
      */
     void closeEnterpriseOrder(Long orderId);
+
+    /**
+     * 查询企业已关闭订单列表
+     *
+     * @param queryClosedOrderListDto
+     * @return
+     */
+    Page<SysOrderVo> queryClosedOrderList(QueryClosedOrderListDto queryClosedOrderListDto);
 }

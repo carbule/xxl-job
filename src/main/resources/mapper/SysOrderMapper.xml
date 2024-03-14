@@ -24,4 +24,23 @@
         ORDER BY o.create_time DESC LIMIT #{queryOrderListDto.pageSize}
         OFFSET (#{queryOrderListDto.pageNumber} -1) * #{queryOrderListDto.pageSize}
     </select>
+
+    <!--  查询已关闭订单列表  -->
+    <select id="queryClosedOrderList" resultType="com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo">
+        SELECT o.id,
+               p.name            AS productName,
+               p.description     AS productDescription,
+               o.order_date      AS orderDate,
+               o.total_amount    AS totalAmount,
+               o.discount_amount AS discountAmount,
+               o.actual_amount   AS actualAmount,
+               o.status
+        FROM yy_sys_order AS o
+                 LEFT JOIN yy_sys_virtual_product AS p ON o.sys_product_id = p.id AND p.is_delete = 0
+        WHERE o.buyer_id = #{walletAccountId}
+          AND o.status IN (4, 5, 6, 7, 8, 9)
+          AND o.is_delete = 0
+        ORDER BY o.create_time DESC LIMIT #{queryClosedOrderListDto.pageSize}
+        OFFSET (#{queryClosedOrderListDto.pageNumber} -1) * #{queryClosedOrderListDto.pageSize}
+    </select>
 </mapper>
