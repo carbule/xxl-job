@@ -17,4 +17,8 @@ public interface RedisConstant {
     String YY_USER_LOCATION = "yy:user_location";
 
     String YY_ALIPAY_INSUFFICIENT_BALANCE_NOTICE = "yy:alipay_insufficient_balance_notice:%s";
+
+    String YY_SYS_ORDER_LOCK = "yy:sys_order_lock:%s";
+
+    String YY_WALLET_ACCOUNT_LOCK = "yy:wallet_account_lock:%s";
 }

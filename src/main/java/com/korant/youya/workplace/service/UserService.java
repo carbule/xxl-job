@@ -11,6 +11,9 @@ import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
 import com.korant.youya.workplace.pojo.po.User;
+import com.korant.youya.workplace.pojo.po.UserWalletAccount;
+import com.korant.youya.workplace.pojo.po.WalletTransactionFlow;
+import com.korant.youya.workplace.pojo.po.WalletWithdrawalRecord;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -258,6 +261,15 @@ public interface UserService extends IService<User> {
      * @param withdrawalDto
      */
     R<?> withdrawal(WithdrawalDto withdrawalDto);
+
+    /**
+     * 更新账户提现相关信息
+     *
+     * @param walletWithdrawalRecord
+     * @param userWalletAccount
+     * @param walletTransactionFlow
+     */
+    void updateAccountWithdrawalRelatedInfo(WalletWithdrawalRecord walletWithdrawalRecord, UserWalletAccount userWalletAccount, WalletTransactionFlow walletTransactionFlow);
 
     /**
      * 查询用户订单列表

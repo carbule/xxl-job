@@ -25,21 +25,12 @@ public class EnterpriseOrderTimeoutListener extends DefaultConsumer {
     }
 
     @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-        try {
-            log.info("[EnterpriseOrderTimeoutListener]接收到消息");
-            String msg = new String(body);
-            log.info("消息内容:{}", msg);
-            EnterpriseService enterpriseService = SpringContextUtils.getBean(EnterpriseService.class);
-            enterpriseService.orderTimeoutProcessing(Long.valueOf(msg));
-        } catch (Exception e) {
-            log.error("[EnterpriseOrderTimeoutListener]接收消息异常:", e);
-        } finally {
-            try {
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        log.info("[EnterpriseOrderTimeoutListener]接收到消息");
+        String msg = new String(body);
+        log.info("消息内容:{}", msg);
+        EnterpriseService enterpriseService = SpringContextUtils.getBean(EnterpriseService.class);
+        enterpriseService.orderTimeoutProcessing(Long.valueOf(msg));
+        getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 }

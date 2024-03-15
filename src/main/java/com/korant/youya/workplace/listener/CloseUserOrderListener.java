@@ -25,21 +25,12 @@ public class CloseUserOrderListener extends DefaultConsumer {
     }
 
     @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-        try {
-            log.info("[CloseUserOrderListener]接收到消息");
-            String msg = new String(body);
-            log.info("消息内容:{}", msg);
-            UserService userService = SpringContextUtils.getBean(UserService.class);
-            userService.closeUserOrder(Long.valueOf(msg));
-        } catch (Exception e) {
-            log.error("[CloseUserOrderListener]接收消息异常:", e);
-        } finally {
-            try {
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        log.info("[CloseUserOrderListener]接收到消息");
+        String msg = new String(body);
+        log.info("消息内容:{}", msg);
+        UserService userService = SpringContextUtils.getBean(UserService.class);
+        userService.closeUserOrder(Long.valueOf(msg));
+        getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 }

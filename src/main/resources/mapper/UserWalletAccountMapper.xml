@@ -2,4 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.UserWalletAccountMapper">
 
+    <!--  根据用户id查询钱包账户id  -->
+    <select id="queryWalletIdByUserId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT id
+        FROM yy_user_wallet_account
+        WHERE uid = #{userId}
+    </select>
 </mapper>
