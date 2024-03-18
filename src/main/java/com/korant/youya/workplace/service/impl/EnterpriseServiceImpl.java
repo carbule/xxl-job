@@ -490,7 +490,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         userEnterpriseMapper.insert(userEnterprise);
         EnterpriseWalletAccount enterpriseWalletAccount = new EnterpriseWalletAccount();
         enterpriseWalletAccount.setEnterpriseId(enterprise.getId());
-        enterpriseWalletAccount.setAccountBalance(new BigDecimal(0));
+        enterpriseWalletAccount.setAvailableBalance(new BigDecimal(0));
         enterpriseWalletAccount.setFreezeAmount(new BigDecimal(0));
         enterpriseWalletAccount.setStatus(0);
         enterpriseWalletAccountMapper.insert(enterpriseWalletAccount);
@@ -889,15 +889,15 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         Integer status = enterpriseWalletAccount.getStatus();
         if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
         //账户总额
-        BigDecimal accountBalance = enterpriseWalletAccount.getAccountBalance();
+        BigDecimal availableBalance = enterpriseWalletAccount.getAvailableBalance();
         //冻结金额
         BigDecimal freezeAmount = enterpriseWalletAccount.getFreezeAmount();
         //可用余额
-        BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
+        BigDecimal accountBalance = availableBalance.add(freezeAmount);
         EnterpriseWalletVo enterpriseWalletVo = new EnterpriseWalletVo();
-        enterpriseWalletVo.setAccountBalance(accountBalance.multiply(new BigDecimal("0.01")));
-        enterpriseWalletVo.setFreezeAmount(freezeAmount.multiply(new BigDecimal("0.01")));
         enterpriseWalletVo.setAvailableBalance(availableBalance.multiply(new BigDecimal("0.01")));
+        enterpriseWalletVo.setFreezeAmount(freezeAmount.multiply(new BigDecimal("0.01")));
+        enterpriseWalletVo.setAccountBalance(accountBalance.multiply(new BigDecimal("0.01")));
         return enterpriseWalletVo;
     }
 
@@ -994,9 +994,9 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                             if (null != walletTransactionFlow) {
                                 sysOrder.setStatus(OrderStatusEnum.PAYMENT_TIMEOUT.getStatus());
                                 sysOrderMapper.updateById(sysOrder);
-                                BigDecimal accountBalance = enterpriseWalletAccount.getAccountBalance();
-                                walletTransactionFlow.setBalanceBefore(accountBalance);
-                                walletTransactionFlow.setBalanceAfter(accountBalance);
+                                BigDecimal availableBalance = enterpriseWalletAccount.getAvailableBalance();
+                                walletTransactionFlow.setBalanceBefore(availableBalance);
+                                walletTransactionFlow.setBalanceAfter(availableBalance);
                                 walletTransactionFlow.setStatus(TransactionFlowStatusEnum.EXPIRED.getStatus());
                                 walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.EXPIRED.getStatusDesc());
                                 walletTransactionFlowMapper.updateById(walletTransactionFlow);
@@ -1251,7 +1251,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                             writeToWechatPayNotifyResponseErrorMessage(response, "友涯企业钱包账户不存在");
                             return;
                         }
-                        BigDecimal beforeBalance = enterpriseWalletAccount.getAccountBalance();
+                        BigDecimal beforeBalance = enterpriseWalletAccount.getAvailableBalance();
                         Transaction.TradeStateEnum tradeState = transaction.getTradeState();
                         //支付成功
                         if (Transaction.TradeStateEnum.SUCCESS.equals(tradeState)) {
@@ -1274,7 +1274,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                             sysOrderMapper.updateById(sysOrder);
                             //更新账户金额
                             BigDecimal afterBalance = beforeBalance.add(payerTotalAmount);
-                            enterpriseWalletAccount.setAccountBalance(afterBalance);
+                            enterpriseWalletAccount.setAvailableBalance(afterBalance);
                             enterpriseWalletAccountMapper.updateById(enterpriseWalletAccount);
                             //更新账户交易流水状态
                             walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());
@@ -1544,13 +1544,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                         if (null == enterpriseWalletAccount) throw new YouyaException("钱包账户不存在");
                         Long walletAccountId = enterpriseWalletAccount.getId();
                         if (!buyerId.equals(walletAccountId)) throw new YouyaException("非法操作");
-                        BigDecimal accountBalance = enterpriseWalletAccount.getAccountBalance();
+                        BigDecimal availableBalance = enterpriseWalletAccount.getAvailableBalance();
                         WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, orderId).eq(WalletTransactionFlow::getIsDelete, 0));
                         if (null == walletTransactionFlow) throw new YouyaException("系统不存在此笔订单交易流水");
                         sysOrder.setStatus(OrderStatusEnum.PAYMENT_CANCELED.getStatus());
                         sysOrderMapper.updateById(sysOrder);
-                        walletTransactionFlow.setBalanceBefore(accountBalance);
-                        walletTransactionFlow.setBalanceAfter(accountBalance);
+                        walletTransactionFlow.setBalanceBefore(availableBalance);
+                        walletTransactionFlow.setBalanceAfter(availableBalance);
                         walletTransactionFlow.setStatus(TransactionFlowStatusEnum.CANCELLED.getStatus());
                         walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.CANCELLED.getStatusDesc());
                         walletTransactionFlowMapper.updateById(walletTransactionFlow);

@@ -369,7 +369,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BeanUtils.copyProperties(user, loginUser);
         UserWalletAccount userWalletAccount = new UserWalletAccount();
         userWalletAccount.setUid(id);
-        userWalletAccount.setAccountBalance(new BigDecimal(0));
+        userWalletAccount.setAvailableBalance(new BigDecimal(0));
         userWalletAccount.setFreezeAmount(new BigDecimal(0));
         userWalletAccount.setStatus(0);
         userWalletAccountMapper.insert(userWalletAccount);
@@ -756,16 +756,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
         Integer status = userWalletAccount.getStatus();
         if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
-        //账户总额
-        BigDecimal accountBalance = userWalletAccount.getAccountBalance();
+        //可用余额
+        BigDecimal availableBalance = userWalletAccount.getAvailableBalance();
         //冻结金额
         BigDecimal freezeAmount = userWalletAccount.getFreezeAmount();
-        //可用余额
-        BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
+        //账户总额
+        BigDecimal accountBalance = availableBalance.add(freezeAmount);
         UserWalletVo userWalletVo = new UserWalletVo();
-        userWalletVo.setAccountBalance(accountBalance.multiply(new BigDecimal("0.01")));
-        userWalletVo.setFreezeAmount(freezeAmount.multiply(new BigDecimal("0.01")));
         userWalletVo.setAvailableBalance(availableBalance.multiply(new BigDecimal("0.01")));
+        userWalletVo.setFreezeAmount(freezeAmount.multiply(new BigDecimal("0.01")));
+        userWalletVo.setAccountBalance(accountBalance.multiply(new BigDecimal("0.01")));
         return userWalletVo;
     }
 
@@ -895,9 +895,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             if (null != walletTransactionFlow) {
                                 sysOrder.setStatus(OrderStatusEnum.PAYMENT_TIMEOUT.getStatus());
                                 sysOrderMapper.updateById(sysOrder);
-                                BigDecimal accountBalance = userWalletAccount.getAccountBalance();
-                                walletTransactionFlow.setBalanceBefore(accountBalance);
-                                walletTransactionFlow.setBalanceAfter(accountBalance);
+                                BigDecimal availableBalance = userWalletAccount.getAvailableBalance();
+                                walletTransactionFlow.setBalanceBefore(availableBalance);
+                                walletTransactionFlow.setBalanceAfter(availableBalance);
                                 walletTransactionFlow.setStatus(TransactionFlowStatusEnum.EXPIRED.getStatus());
                                 walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.EXPIRED.getStatusDesc());
                                 walletTransactionFlowMapper.updateById(walletTransactionFlow);
@@ -1150,7 +1150,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             writeToWechatPayNotifyResponseErrorMessage(response, "友涯用户钱包账户不存在");
                             return;
                         }
-                        BigDecimal beforeBalance = userWalletAccount.getAccountBalance();
+                        BigDecimal beforeBalance = userWalletAccount.getAvailableBalance();
                         Transaction.TradeStateEnum tradeState = transaction.getTradeState();
                         //支付成功
                         if (Transaction.TradeStateEnum.SUCCESS.equals(tradeState)) {
@@ -1173,7 +1173,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             sysOrderMapper.updateById(sysOrder);
                             //更新账户金额
                             BigDecimal afterBalance = beforeBalance.add(payerTotalAmount);
-                            userWalletAccount.setAccountBalance(afterBalance);
+                            userWalletAccount.setAvailableBalance(afterBalance);
                             userWalletAccountMapper.updateById(userWalletAccount);
                             //更新账户交易流水状态
                             walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());
@@ -1433,12 +1433,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
         Integer status = userWalletAccount.getStatus();
         if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
-        //账户总额
-        BigDecimal accountBalance = userWalletAccount.getAccountBalance();
-        //冻结金额
-        BigDecimal freezeAmount = userWalletAccount.getFreezeAmount();
         //可用余额
-        BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
+        BigDecimal availableBalance = userWalletAccount.getAvailableBalance();
         return availableBalance.multiply(new BigDecimal("0.01"));
     }
 
@@ -1480,9 +1476,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 Integer accountStatus = walletAccount.getStatus();
                 if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
                     throw new YouyaException("钱包账户已被冻结，请联系客服");
-                BigDecimal accountBalance = walletAccount.getAccountBalance();
-                BigDecimal freezeAmount = walletAccount.getFreezeAmount();
-                BigDecimal availableBalance = accountBalance.subtract(freezeAmount);
+                BigDecimal availableBalance = walletAccount.getAvailableBalance();
                 if (availableBalance.intValue() <= 0) throw new YouyaException("当前账户可用余额为0，无法提现");
                 String amount = withdrawalDto.getAmount();
                 BigDecimal decimal = new BigDecimal(amount);
@@ -1492,7 +1486,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 int scale = withdrawalAmount.scale();
                 //判断经过处理后的小数位是否为2
                 if (scale > 2) throw new YouyaException("提现最小金额单位为分");
-                if (withdrawalAmount.compareTo(accountBalance) > 0) throw new YouyaException("提现金额不能大于账户可用余额");
+                if (withdrawalAmount.compareTo(availableBalance) > 0) throw new YouyaException("提现金额不能大于账户可用余额");
                 if (withdrawalAmount.compareTo(new BigDecimal("0.1")) < 0) throw new YouyaException("最小提现金额为0.1元");
                 //查询支付宝商户账号可用余额
                 AlipayFundAccountQueryResponse alipayFundAccountQueryResponse = AlipayUtil.fundAccountQuery();
@@ -1586,12 +1580,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                                 //更新账户金额
                                 BigDecimal hundred = BigDecimal.valueOf(100);
                                 BigDecimal multiply = withdrawalAmount.multiply(hundred);
-                                BigDecimal subtract = accountBalance.subtract(multiply);
-                                walletAccount.setAccountBalance(subtract);
+                                BigDecimal subtract = availableBalance.subtract(multiply);
+                                walletAccount.setAvailableBalance(subtract);
                                 //更新账户交易流水状态
                                 walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());
                                 walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc());
-                                walletTransactionFlow.setBalanceBefore(accountBalance);
+                                walletTransactionFlow.setBalanceBefore(availableBalance);
                                 walletTransactionFlow.setBalanceAfter(subtract);
                                 walletTransactionFlow.setCompletionDate(completionDate);
                                 walletTransactionFlow.setOutTransactionId(payFundOrderId);
@@ -1626,8 +1620,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             walletTransactionFlow.setStatus(TransactionFlowStatusEnum.FAILED.getStatus());
                             walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.FAILED.getStatusDesc());
                             walletTransactionFlow.setTransactionFailReason(subMsg);
-                            walletTransactionFlow.setBalanceBefore(accountBalance);
-                            walletTransactionFlow.setBalanceAfter(accountBalance);
+                            walletTransactionFlow.setBalanceBefore(availableBalance);
+                            walletTransactionFlow.setBalanceAfter(availableBalance);
                             walletTransactionFlow.setCompletionDate(completionDate);
                             walletTransactionFlow.setOutTransactionId(payFundOrderId);
                             try {
@@ -1653,8 +1647,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         walletTransactionFlow.setStatus(TransactionFlowStatusEnum.FAILED.getStatus());
                         walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.FAILED.getStatusDesc());
                         walletTransactionFlow.setTransactionFailReason(subMsg);
-                        walletTransactionFlow.setBalanceBefore(accountBalance);
-                        walletTransactionFlow.setBalanceAfter(accountBalance);
+                        walletTransactionFlow.setBalanceBefore(availableBalance);
+                        walletTransactionFlow.setBalanceAfter(availableBalance);
                         try {
                             userService.updateAccountWithdrawalRelatedInfo(walletWithdrawalRecord, null, walletTransactionFlow);
                             log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新成功", phone, withdrawalRecordId, withdrawalAmount, subMsg);
@@ -1825,13 +1819,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         if (null == walletAccount) throw new YouyaException("钱包账户不存在");
                         Long walletAccountId = walletAccount.getId();
                         if (!buyerId.equals(walletAccountId)) throw new YouyaException("非法操作");
-                        BigDecimal accountBalance = walletAccount.getAccountBalance();
+                        BigDecimal availableBalance = walletAccount.getAvailableBalance();
                         WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, orderId).eq(WalletTransactionFlow::getIsDelete, 0));
                         if (null == walletTransactionFlow) throw new YouyaException("系统不存在此笔订单交易流水");
                         sysOrder.setStatus(OrderStatusEnum.PAYMENT_CANCELED.getStatus());
                         sysOrderMapper.updateById(sysOrder);
-                        walletTransactionFlow.setBalanceBefore(accountBalance);
-                        walletTransactionFlow.setBalanceAfter(accountBalance);
+                        walletTransactionFlow.setBalanceBefore(availableBalance);
+                        walletTransactionFlow.setBalanceAfter(availableBalance);
                         walletTransactionFlow.setStatus(TransactionFlowStatusEnum.CANCELLED.getStatus());
                         walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.CANCELLED.getStatusDesc());
                         walletTransactionFlowMapper.updateById(walletTransactionFlow);

@@ -38,10 +38,10 @@ public class EnterpriseWalletAccount implements Serializable {
     private Long enterpriseId;
 
     /**
-     * 账户余额
+     * 可用余额
      */
-    @TableField("account_balance")
-    private BigDecimal accountBalance;
+    @TableField("available_balance")
+    private BigDecimal availableBalance;
 
     /**
      * 冻结金额
