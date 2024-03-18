@@ -263,6 +263,14 @@ public interface UserService extends IService<User> {
     R<?> withdrawal(WithdrawalDto withdrawalDto);
 
     /**
+     * 创建账户提现相关信息
+     *
+     * @param walletWithdrawalRecord
+     * @param walletTransactionFlow
+     */
+    void createAccountWithdrawalRelatedInfo(WalletWithdrawalRecord walletWithdrawalRecord, WalletTransactionFlow walletTransactionFlow);
+
+    /**
      * 更新账户提现相关信息
      *
      * @param walletWithdrawalRecord

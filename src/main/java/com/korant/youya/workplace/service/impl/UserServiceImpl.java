@@ -6,6 +6,7 @@ import com.alipay.api.diagnosis.DiagnosisUtils;
 import com.alipay.api.response.AlipayFundAccountQueryResponse;
 import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.constants.RedisConstant;
@@ -1462,8 +1463,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param withdrawalDto
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public R<?> withdrawal(WithdrawalDto withdrawalDto) {
+        log.info("收到用户钱包提现请求");
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
         String phone = loginUser.getPhone();
@@ -1521,19 +1522,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     if (StringUtils.isBlank(alipayAccount)) throw new YouyaException("支付宝账号未绑定，提现失败");
                     String alipayAccountName = loginUser.getAlipayAccountName();
                     if (StringUtils.isBlank(alipayAccountName)) throw new YouyaException("支付宝账号未实名认证，提现失败");
-                    //创建内部转账订单
                     BigDecimal multiplyAmount = withdrawalAmount.multiply(BigDecimal.valueOf(100));
+                    //创建内部转账订单
+                    Long withdrawalRecordId = IdWorker.getId();
                     WalletWithdrawalRecord walletWithdrawalRecord = new WalletWithdrawalRecord();
-                    walletWithdrawalRecord.setAccountId(walletAccountId).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setWithdrawalMethod(WithdrawalMethodEnum.ALIPAY_ACCOUNT.getMethod())
+                    walletWithdrawalRecord.setId(withdrawalRecordId).setAccountId(walletAccountId).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setWithdrawalMethod(WithdrawalMethodEnum.ALIPAY_ACCOUNT.getMethod())
                             .setPaymentAccount(alipayAccount).setPaymentName(alipayAccountName).setStatus(WalletWithdrawalStatusEnum.PROCESSING.getStatus()).setRequestTime(LocalDateTime.now()).setProcessingTime(LocalDateTime.now());
-                    walletWithdrawalRecordMapper.insert(walletWithdrawalRecord);
-                    Long withdrawalRecordId = walletWithdrawalRecord.getId();
                     //创建账户交易流水
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
                     walletTransactionFlow.setAccountId(walletAccountId).setOrderId(withdrawalRecordId).setTransactionType(TransactionTypeEnum
                             .WITHDRAWAL.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setDescription(WALLET_ACCOUNT_WITHDRAWAL)
                             .setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
-                    walletTransactionFlowMapper.insert(walletTransactionFlow);
+                    try {
+                        userService.createAccountWithdrawalRelatedInfo(walletWithdrawalRecord, walletTransactionFlow);
+                        log.info("用户:【{}】，提现:【{}】元，创建转账订单和交易流水成功", phone, withdrawalAmount);
+                    } catch (Exception e) {
+                        log.error("用户:【{}】，提现:【{}】元，创建转账订单和交易流水失败，原因:【】", phone, withdrawalAmount, e);
+                        throw new YouyaException("网络异常，请稍后重试");
+                    }
                     //发起转账
                     AlipayFundTransUniTransferResponse transferResponse = AlipayUtil.transfer(WALLET_ACCOUNT_WITHDRAWAL, withdrawalRecordId, withdrawalAmount, alipayAccount, alipayAccountName);
                     if (null == transferResponse) throw new YouyaException("网络异常，请稍后重试");
@@ -1679,6 +1685,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (walletLock != null && walletLock.isHeldByCurrentThread()) {
                 walletLock.unlock();
             }
+        }
+    }
+
+    /**
+     * 创建账户提现相关信息
+     *
+     * @param walletWithdrawalRecord
+     * @param walletTransactionFlow
+     * @return
+     */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    public void createAccountWithdrawalRelatedInfo(WalletWithdrawalRecord walletWithdrawalRecord, WalletTransactionFlow walletTransactionFlow) {
+        if (null != walletWithdrawalRecord) {
+            walletWithdrawalRecordMapper.insert(walletWithdrawalRecord);
+        }
+        if (null != walletTransactionFlow) {
+            walletTransactionFlowMapper.insert(walletTransactionFlow);
         }
     }
 
