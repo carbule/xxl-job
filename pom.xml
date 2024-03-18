@@ -59,16 +59,16 @@
 
 	<scm>
 		<tag>master</tag>
-		<url>https://github.com/xuxueli/xxl-job.git</url>
-		<connection>scm:git:https://github.com/xuxueli/xxl-job.git</connection>
-		<developerConnection>scm:git:git@github.com:xuxueli/xxl-job.git</developerConnection>
+		<url>https://github.com/carbule/xxl-job.git</url>
+		<connection>scm:git:https://github.com/carbule/xxl-job.git</connection>
+		<developerConnection>scm:git:git@github.com:carbule/xxl-job.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
 			<id>XXL</id>
-			<name>xuxueli</name>
-			<email>931591021@qq.com</email>
-			<url>https://github.com/xuxueli</url>
+			<name>Zhifeng Zhou</name>
+			<email>carbule.bar@gmail.com</email>
+			<url>https://github.com/carbule</url>
 		</developer>
 	</developers>
 
