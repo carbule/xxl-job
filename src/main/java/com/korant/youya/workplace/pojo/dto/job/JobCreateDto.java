@@ -24,6 +24,12 @@ public class JobCreateDto {
     private String industryCode;
 
     /**
+     * 职业类型不能为空
+     */
+    @NotBlank(message = "职业类型不能为空")
+    private String typeCode;
+
+    /**
      * 领域编码
      */
     @NotBlank(message = "领域不能为空")
@@ -34,6 +40,12 @@ public class JobCreateDto {
      */
     @NotBlank(message = "职位不能为空")
     private String positionCode;
+
+    /**
+     * 职位名称
+     */
+    @NotBlank(message = "职位名称不能为空")
+    private String positionName;
 
     /**
      * 学历要求

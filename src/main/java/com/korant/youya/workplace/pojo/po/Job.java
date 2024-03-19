@@ -185,4 +185,14 @@ public class Job implements Serializable {
      */
     @TableField(value = "is_delete", fill = FieldFill.INSERT)
     private Integer isDelete;
+
+    /**
+     * 职业类型编码
+     */
+    private String typeCode;
+
+    /**
+     * 职业名称
+     */
+    private String positionName;
 }

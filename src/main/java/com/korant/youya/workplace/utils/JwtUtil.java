@@ -86,5 +86,6 @@ public class JwtUtil {
     }
 
     public static void main(String[] args) {
+        System.out.println(createToken(1764941765427163138L));
     }
 }

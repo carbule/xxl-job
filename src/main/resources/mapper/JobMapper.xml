@@ -36,6 +36,7 @@
     <resultMap id="detailMap" type="com.korant.youya.workplace.pojo.vo.job.JobDetailVo">
         <id column="id" property="id"/>
         <result column="industryName" property="industryName"/>
+        <result column="typeName" property="typeName"/>
         <result column="sectorName" property="sectorName"/>
         <result column="positionName" property="positionName"/>
         <result column="industryCode" property="industryCode"/>
@@ -138,7 +139,7 @@
         e.logo,
         e.name AS enterpriseName,
         e.scale,
-        p.name AS positionName,
+        j.position_name AS positionName,
         j.edu_requirements AS eduRequirements,
         j.work_experience AS workExperience,
         j.min_salary AS minSalary,
@@ -277,7 +278,9 @@
         UPDATE job
         SET industry_code           = #{modifyDto.industryCode},
             sector_code             = #{modifyDto.sectorCode},
+            type_code               = #{modifyDto.typeCode},
             position_code           = #{modifyDto.positionCode},
+            position_name           = #{modifyDto.positionName},
             edu_requirements        = #{modifyDto.eduRequirements},
             work_experience         = #{modifyDto.workExperience},
             min_salary              = #{modifyDto.minSalary},
@@ -300,7 +303,8 @@
         SELECT j.id,
                p1.name                   AS industryName,
                p2.name                   AS sectorName,
-               p3.name                   AS positionName,
+               j.position_name           AS positionName,
+               p4.name                   AS typeName,
                j.industry_code           AS industryCode,
                j.sector_code             AS sectorCode,
                j.position_code           AS positionCode,
@@ -327,6 +331,7 @@
                  LEFT JOIN position AS p1 ON j.industry_code = p1.code AND p1.is_delete = 0
                  LEFT JOIN position AS p2 ON j.sector_code = p2.code AND p2.is_delete = 0
                  LEFT JOIN position AS p3 ON j.position_code = p3.code AND p3.is_delete = 0
+                 LEFT JOIN position AS p4 ON j.type_code = p4.code AND p4.is_delete = 0
                  LEFT JOIN district_data dd1 ON j.country_code = dd1.code AND dd1.is_delete = 0
                  LEFT JOIN district_data dd2 ON j.province_code = dd2.code AND dd2.is_delete = 0
                  LEFT JOIN district_data dd3 ON j.city_code = dd3.code AND dd3.is_delete = 0

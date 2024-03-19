@@ -49,7 +49,7 @@ public class Position implements Serializable {
     private String code;
 
     /**
-     * 职位等级
+     * 职位层级
      */
     @TableField("level")
     private Integer level;
@@ -70,5 +70,21 @@ public class Position implements Serializable {
      * 是否删除 0-未删除 1-已删除
      */
     @TableField(value = "is_delete", fill = FieldFill.INSERT)
+    @TableLogic
     private Integer isDelete;
+
+    /**
+     * 职位描述
+     */
+    private String description;
+
+    /**
+     * 职业群名称
+     */
+    private String organizationLevel;
+
+    /**
+     * 职业等级名称
+     */
+    private String classLevel;
 }

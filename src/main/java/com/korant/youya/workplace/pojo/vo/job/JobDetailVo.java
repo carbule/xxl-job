@@ -27,6 +27,11 @@ public class JobDetailVo {
     private String industryName;
 
     /**
+     * 职业类型
+     */
+    private String typeName;
+
+    /**
      * 领域名称
      */
     private String sectorName;

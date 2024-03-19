@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.pojo.vo.position;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @ClassName PositionDataTreeVo
@@ -10,6 +11,7 @@ import lombok.Data;
  * @Version 1.0
  */
 @Data
+@Accessors(chain = true)
 public class PositionDataVo {
 
     /**
@@ -31,4 +33,9 @@ public class PositionDataVo {
      * 职位编码
      */
     private String code;
+
+    /**
+     * 职位层级
+     */
+    private Integer level;
 }

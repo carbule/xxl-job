@@ -1,14 +1,12 @@
 package com.korant.youya.workplace.controller;
 
 import com.korant.youya.workplace.pojo.R;
+import com.korant.youya.workplace.pojo.vo.position.PositionClassLevelVO;
 import com.korant.youya.workplace.pojo.vo.position.PositionDataTreeVo;
 import com.korant.youya.workplace.pojo.vo.position.PositionDataVo;
 import com.korant.youya.workplace.service.PositionService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -58,5 +56,26 @@ public class PositionController {
     public R<?> queryPositionsByIndustryCode(@PathVariable("industryCode") String industryCode) {
         List<PositionDataTreeVo> positionDataTreeVoList = positionService.queryPositionsByIndustryCode(industryCode);
         return R.success(positionDataTreeVoList);
+    }
+
+    /**
+     * 根据父级编码查询子集
+     */
+    @GetMapping("/listPositionsByParent/{parentCode}")
+    public R<List<PositionDataVo>> listPositionsByParent(@PathVariable String parentCode,
+                                                         @RequestParam(required = false) Integer level) {
+        return R.success(
+                positionService.listPositionsByParent(parentCode, level)
+        );
+    }
+
+    /**
+     * 查询专业领域下的职业等级
+     */
+    @GetMapping("/listClassLevels/{sectorCode}")
+    public R<List<PositionClassLevelVO>> listClassLevels(@PathVariable String sectorCode) {
+        return R.success(
+                positionService.listClassLevels(sectorCode)
+        );
     }
 }
