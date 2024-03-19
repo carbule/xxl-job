@@ -59,6 +59,8 @@
         <result column="interviewRewardRate" property="interviewRewardRate"/>
         <result column="onboardRewardRate" property="onboardRewardRate"/>
         <result column="fullMemberRewardRate" property="fullMemberRewardRate"/>
+        <result column="organization_level" property="organizationLevel"/>
+        <result column="class_level" property="classLevel"/>
         <collection property="welfareLabelDataVoList" javaType="java.util.List"
                     ofType="com.korant.youya.workplace.pojo.vo.enterprisewelfarelabel.EnterpriseWelfareLabelDataVo">
             <id column="welfareLabelId" property="id"/>
@@ -326,7 +328,9 @@
                j.onboard_reward_rate     AS onboardRewardRate,
                j.full_member_reward_rate AS fullMemberRewardRate,
                ewl.id                    AS welfareLabelId,
-               ewl.name
+               ewl.name,
+               p3.organization_level     AS organization_level,
+               p3.class_level            AS classLevel
         FROM job AS j
                  LEFT JOIN position AS p1 ON j.industry_code = p1.code AND p1.is_delete = 0
                  LEFT JOIN position AS p2 ON j.sector_code = p2.code AND p2.is_delete = 0

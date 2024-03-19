@@ -147,4 +147,14 @@ public class JobDetailVo {
      * 企业福利标签集
      */
     private List<EnterpriseWelfareLabelDataVo> welfareLabelDataVoList;
+
+    /**
+     * 职业群名称
+     */
+    private String organizationLevel;
+
+    /**
+     * 职业等级名称
+     */
+    private String classLevel;
 }
