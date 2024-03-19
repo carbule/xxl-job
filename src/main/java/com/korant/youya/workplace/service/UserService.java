@@ -216,6 +216,13 @@ public interface UserService extends IService<User> {
     Integer queryRechargeResult(UserQueryRechargeResultDto rechargeResultDto);
 
     /**
+     * 用户订单付款查询
+     *
+     * @param orderId
+     */
+    void userOrderPaymentInquiry(Long orderId);
+
+    /**
      * 查询用户支付宝账号
      *
      * @return

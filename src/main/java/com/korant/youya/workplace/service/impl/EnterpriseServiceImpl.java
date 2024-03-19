@@ -1041,7 +1041,6 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    //todo 如果当前状态为待支付完成支付操作更改状态成功后将其推入到队列 每隔5分钟查询一次订单状态
     public void completePayment(EnterpriseCompletePaymentDto completePaymentDto) {
         log.info("收到企业完成支付请求");
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
@@ -1072,6 +1071,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                             walletTransactionFlow.setStatus(TransactionFlowStatusEnum.PROCESSING.getStatus());
                             walletTransactionFlowMapper.updateById(walletTransactionFlow);
                             log.info("企业名称：【{}】，企业id：【{}】，订单id：【{}】，完成支付操作", enterpriseName, enterpriseId, orderId);
+                            try {
+                                HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+                                DelayProperties properties = delayProperties.get("enterprise_order_payment_inquiry");
+                                rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), orderId, 300);
+                            } catch (Exception e) {
+                                log.error("企业名称：【{}】，企业id：【{}】，订单id：【{}】，推送至订单付款查询队列失败，原因：", enterpriseName, enterpriseId, orderId, e);
+                            }
                         } else {
                             log.info("企业名称：【{}】，企业id：【{}】，订单id：【{}】，当前不是待支付状态，不再进行更新操作", enterpriseName, enterpriseId, orderId);
                         }
@@ -1306,7 +1312,6 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                                 log.info("友涯订单id:【{}】，调用微信关闭订单接口成功", sysOrderId);
                             } catch (Exception e) {
                                 log.error("友涯订单id:【{}】，调用微信关闭订单接口失败，原因：", sysOrderId, e);
-                                log.error("友涯订单id:【{}】，支付失败，订单状态以及账户流水更新失败", sysOrderId);
                                 writeToWechatPayNotifyResponseErrorMessage(response, "调用微信关闭订单接口失败");
                                 return;
                             }
@@ -1436,6 +1441,212 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
         return sysOrder.getStatus();
+    }
+
+    /**
+     * 企业订单付款查询
+     *
+     * @param orderId
+     */
+    @Override
+    public void enterpriseOrderPaymentInquiry(Long orderId) {
+        log.info("企业订单id:【{}】开始进行付款查询", orderId);
+        String orderLockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
+        RLock orderLock = redissonClient.getLock(orderLockKey);
+        try {
+            boolean tryOrderLock = orderLock.tryLock(3, TimeUnit.SECONDS);
+            if (tryOrderLock) {
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                if (null != sysOrder) {
+                    Integer status = sysOrder.getStatus();
+                    if (OrderStatusEnum.PROCESSING_PAYMENT.getStatus() == status) {
+                        Transaction transaction = null;
+                        try {
+                            transaction = WechatPayUtil.queryOrderByOutTradeNo(orderId.toString());
+                        } catch (Exception e) {
+                            log.error("企业订单付款查询失败，企业订单id：【{}】，根据商户订单号查询订单状态失败,原因：", orderId, e);
+                            throw new YouyaException("根据商户订单号查询订单状态失败");
+                        }
+                        if (null == transaction) {
+                            log.error("企业订单付款查询失败，企业订单id：【{}】，根据商户订单号查询订单状态响应报文为空", orderId);
+                            throw new YouyaException("根据商户订单号查询订单状态响应报文为空");
+                        }
+                        log.info("根据商户订单号查询微信订单状态请求成功，响应报文：【{}】", JSONObject.toJSONString(transaction));
+                        String appid = transaction.getAppid();
+                        String mchid = transaction.getMchid();
+                        if (StringUtils.isBlank(appid) || StringUtils.isBlank(mchid)) {
+                            log.error("企业订单付款查询失败，微信支付响应报文appid或商户号缺失");
+                            throw new YouyaException("微信支付响应报文appid或商户号缺失");
+                        }
+                        if (!appid.equals(WechatConstant.APP_ID) || !mchid.equals(WechatPayConstant.MERCHANT_ID)) {
+                            log.error("企业订单付款查询失败，微信支付响应报文appid或商户号不匹配");
+                            throw new YouyaException("微信支付响应报文appid或商户号不匹配");
+                        }
+                        String outTradeNo = transaction.getOutTradeNo();
+                        if (StringUtils.isBlank(outTradeNo)) {
+                            log.error("企业订单付款查询失败，微信支付响应报文缺失商户订单号");
+                            throw new YouyaException("微信支付响应报文缺失商户订单号");
+                        }
+                        String tradeStateDesc = transaction.getTradeStateDesc();
+                        if (StringUtils.isBlank(tradeStateDesc)) {
+                            log.error("企业订单付款查询失败，微信支付响应报文缺失交易状态描述");
+                            throw new YouyaException("微信支付响应报文缺失交易状态描述");
+                        }
+                        String transactionId = transaction.getTransactionId();
+                        if (StringUtils.isBlank(transactionId)) {
+                            log.error("企业订单付款查询失败，微信支付响应报文缺失微信支付系统订单号");
+                            throw new YouyaException("微信支付响应报文缺失微信支付系统订单号");
+                        }
+                        String successTime = transaction.getSuccessTime();
+                        if (StringUtils.isBlank(successTime)) {
+                            log.error("企业订单付款查询失败，微信支付响应报文缺失支付完成时间");
+                            throw new YouyaException("微信支付响应报文缺失支付完成时间");
+                        }
+                        WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, orderId).eq(WalletTransactionFlow::getIsDelete, 0));
+                        if (null != walletTransactionFlow) {
+                            sysOrder.setOutTransactionId(transactionId);
+                            Long buyerId = sysOrder.getBuyerId();
+                            String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, buyerId);
+                            RLock walletLock = redissonClient.getLock(walletLockKey);
+                            try {
+                                boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
+                                if (tryWalletLock) {
+                                    EnterpriseWalletAccount enterpriseWalletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getId, buyerId).eq(EnterpriseWalletAccount::getIsDelete, 0));
+                                    if (null != enterpriseWalletAccount) {
+                                        BigDecimal beforeBalance = enterpriseWalletAccount.getAvailableBalance();
+                                        Transaction.TradeStateEnum tradeState = transaction.getTradeState();
+                                        //支付成功
+                                        if (Transaction.TradeStateEnum.SUCCESS.equals(tradeState)) {
+                                            //更新订单状态
+                                            BigDecimal actualAmount = sysOrder.getActualAmount();
+                                            TransactionAmount amount = transaction.getAmount();
+                                            if (null == amount) {
+                                                log.error("企业订单付款查询失败，微信支付响应报文缺失订单金额信息");
+                                                throw new YouyaException("微信支付响应报文缺失订单金额信息");
+                                            }
+                                            Integer payerTotal = amount.getPayerTotal();
+                                            BigDecimal payerTotalAmount = new BigDecimal(payerTotal);
+                                            if (actualAmount.compareTo(payerTotalAmount) != 0) {
+                                                log.error("企业订单付款查询失败，微信支付响应报文中支付金额与订单需要实付金额不一致");
+                                                throw new YouyaException("微信支付通知缺失订单金额信息");
+                                            }
+                                            sysOrder.setStatus(OrderStatusEnum.PAID.getStatus());
+                                            sysOrderMapper.updateById(sysOrder);
+                                            //更新账户金额
+                                            BigDecimal afterBalance = beforeBalance.add(payerTotalAmount);
+                                            enterpriseWalletAccount.setAvailableBalance(afterBalance);
+                                            enterpriseWalletAccountMapper.updateById(enterpriseWalletAccount);
+                                            //更新账户交易流水状态
+                                            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());
+                                            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc());
+                                            walletTransactionFlow.setBalanceBefore(beforeBalance);
+                                            walletTransactionFlow.setBalanceAfter(afterBalance);
+                                            walletTransactionFlow.setOutTransactionId(transactionId);
+                                            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+                                            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                                            log.info("企业订单付款查询成功，友涯订单id:【{}】，支付成功，账户余额和订单状态以及账户流水更新成功", orderId);
+                                        } else if (Transaction.TradeStateEnum.PAYERROR.equals(tradeState)) {
+                                            //支付失败
+                                            //更新订单状态
+                                            sysOrder.setStatus(OrderStatusEnum.PAYMENT_FAILED.getStatus());
+                                            sysOrderMapper.updateById(sysOrder);
+                                            //更新账户交易流水状态
+                                            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.FAILED.getStatus());
+                                            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.FAILED.getStatusDesc());
+                                            walletTransactionFlow.setTransactionFailReason(tradeStateDesc);
+                                            walletTransactionFlow.setBalanceBefore(beforeBalance);
+                                            walletTransactionFlow.setBalanceAfter(beforeBalance);
+                                            walletTransactionFlow.setOutTransactionId(transactionId);
+                                            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+                                            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                                            try {
+                                                WechatPayUtil.closeOrder(outTradeNo);
+                                                log.info("友涯订单id:【{}】，调用微信关闭订单接口成功", orderId);
+                                            } catch (Exception e) {
+                                                log.error("友涯订单id:【{}】，调用微信关闭订单接口失败，原因：", orderId, e);
+                                            }
+                                            log.info("企业订单付款查询成功，友涯订单id:【{}】，支付失败，订单状态以及账户流水更新成功", orderId);
+                                        } else if (Transaction.TradeStateEnum.CLOSED.equals(tradeState)) {
+                                            //已关闭
+                                            //更新订单状态
+                                            sysOrder.setStatus(OrderStatusEnum.CLOSED.getStatus());
+                                            sysOrderMapper.updateById(sysOrder);
+                                            //更新账户交易流水状态
+                                            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.CLOSED.getStatus());
+                                            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.CLOSED.getStatusDesc());
+                                            walletTransactionFlow.setBalanceBefore(beforeBalance);
+                                            walletTransactionFlow.setBalanceAfter(beforeBalance);
+                                            walletTransactionFlow.setOutTransactionId(transactionId);
+                                            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+                                            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                                            log.info("企业订单付款查询成功，友涯订单id:【{}】，已关闭，订单状态以及账户流水更新成功", orderId);
+                                        } else if (Transaction.TradeStateEnum.NOTPAY.equals(tradeState)) {
+                                            //未支付
+                                            //更新订单状态
+                                            sysOrder.setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
+                                            sysOrderMapper.updateById(sysOrder);
+                                            //更新账户交易流水状态
+                                            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.PENDING.getStatus());
+                                            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
+                                            walletTransactionFlow.setBalanceBefore(beforeBalance);
+                                            walletTransactionFlow.setBalanceAfter(beforeBalance);
+                                            walletTransactionFlow.setOutTransactionId(transactionId);
+                                            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+                                            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                                            log.info("企业订单付款查询成功，友涯订单id:【{}】，未支付，订单状态以及账户流水更新成功", orderId);
+                                        } else if (Transaction.TradeStateEnum.REFUND.equals(tradeState)) {
+                                            //转入退款
+                                            ////更新订单状态
+                                            sysOrder.setStatus(OrderStatusEnum.REFUNDED.getStatus());
+                                            sysOrderMapper.updateById(sysOrder);
+                                            //更新账户交易流水状态
+                                            walletTransactionFlow.setStatus(TransactionFlowStatusEnum.REFUNDED.getStatus());
+                                            walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.REFUNDED.getStatusDesc());
+                                            walletTransactionFlow.setBalanceBefore(beforeBalance);
+                                            walletTransactionFlow.setBalanceAfter(beforeBalance);
+                                            walletTransactionFlow.setOutTransactionId(transactionId);
+                                            walletTransactionFlow.setCompletionDate(parseStringToLocalDateTime(successTime));
+                                            walletTransactionFlowMapper.updateById(walletTransactionFlow);
+                                            log.info("企业订单付款查询成功，友涯订单id:【{}】，转入退款，订单状态以及账户流水更新成功", orderId);
+                                        }
+                                    } else {
+                                        log.error("企业订单付款查询失败，企业订单id：【{}】，企业钱包账户不存在", orderId);
+                                    }
+                                } else {
+                                    //获取钱包账户锁超时
+                                    log.error("企业订单付款查询失败，友涯订单id:【{}】，获取钱包账户锁超时", orderId);
+                                    throw new YouyaException("获取钱包账户锁超时");
+                                }
+                            } catch (InterruptedException e) {
+                                //获取钱包账户锁失败
+                                log.error("企业订单付款查询失败，友涯订单id:【{}】，获取钱包账户锁失败，原因：", orderId, e);
+                                throw new YouyaException("获取钱包账户锁失败");
+                            } finally {
+                                if (walletLock != null && walletLock.isHeldByCurrentThread()) {
+                                    walletLock.unlock();
+                                }
+                            }
+                        } else {
+                            log.error("企业订单付款查询失败，系统不存在此笔订单id：【{}】交易流水，", orderId);
+                        }
+                    } else {
+                        log.info("企业订单id：【{}】，当前状态不是待支付，停止付款查询", orderId);
+                    }
+                } else {
+                    log.error("企业订单付款查询失败，企业订单id：【{}】，不存在", orderId);
+                }
+            } else {
+                log.error("企业订单付款查询失败，企业订单id：【{}】,获取订单锁超时", orderId);
+                throw new YouyaException("获取订单锁超时，付款查询处理失败");
+            }
+        } catch (InterruptedException e) {
+            log.error("企业订单付款查询失败，企业订单id：【{}】,获取订单锁失败，原因：", orderId, e);
+            throw new YouyaException("获取订单锁失败，付款查询处理失败");
+        } finally {
+            if (orderLock != null && orderLock.isHeldByCurrentThread()) {
+                orderLock.unlock();
+            }
+        }
     }
 
     /**

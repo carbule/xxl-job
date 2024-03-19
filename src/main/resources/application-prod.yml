@@ -120,6 +120,24 @@ rabbitmq:
       routingKey: job_shareImage
       #消费者类型
       consumerType: jobShareImage
+    user_order_payment_inquiry:
+      #交换机名称
+      exchangeName: user_order_payment_inquiry_exchange
+      #队列名称
+      queueName: user_order_payment_inquiry_queue
+      #路由键
+      routingKey: user_order_payment_inquiry
+      #消费者类型
+      consumerType: userOrderPaymentInquiry
+    enterprise_order_payment_inquiry:
+      #交换机名称
+      exchangeName: enterprise_order_payment_inquiry_exchange
+      #队列名称
+      queueName: enterprise_order_payment_inquiry_queue
+      #路由键
+      routingKey: enterprise_order_payment_inquiry
+      #消费者类型
+      consumerType: enterpriseOrderPaymentInquiry
     user_order_timeout:
       #交换机名称
       exchangeName: user_order_timeout_exchange

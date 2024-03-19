@@ -280,6 +280,13 @@ public interface EnterpriseService extends IService<Enterprise> {
     Integer queryRechargeResult(QueryEnterpriseRechargeResultDto rechargeResultDto);
 
     /**
+     * 企业订单付款查询
+     *
+     * @param orderId
+     */
+    void enterpriseOrderPaymentInquiry(Long orderId);
+
+    /**
      * 查询企业订单列表
      *
      * @param queryOrderListDto

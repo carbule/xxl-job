@@ -30,25 +30,18 @@ public class RabbitMqListenerFactory implements ListenerFactory {
         if (StringUtils.isBlank(type)) {
             return null;
         }
-        switch (type) {
-            case "enterpriseQrcode":
-                return new EnterpriseQrcodeListener(channel);
-            case "enterpriseShareImage":
-                return new EnterpriseShareImageListener(channel);
-            case "huntJobShareImage":
-                return new HuntJobShareImageListener(channel);
-            case "jobShareImage":
-                return new JobShareImageListener(channel);
-            case "userOrderTimeout":
-                return new UserOrderTimeoutListener(channel);
-            case "enterpriseOrderTimeout":
-                return new EnterpriseOrderTimeoutListener(channel);
-            case "closeUserOrder":
-                return new CloseUserOrderListener(channel);
-            case "closeEnterpriseOrder":
-                return new CloseEnterpriseOrderListener(channel);
-            default:
-                return null;
-        }
+        return switch (type) {
+            case "enterpriseQrcode" -> new EnterpriseQrcodeListener(channel);
+            case "enterpriseShareImage" -> new EnterpriseShareImageListener(channel);
+            case "huntJobShareImage" -> new HuntJobShareImageListener(channel);
+            case "jobShareImage" -> new JobShareImageListener(channel);
+            case "userOrderPaymentInquiry" -> new UserOrderPaymentInquiryListener(channel);
+            case "enterpriseOrderPaymentInquiry" -> new EnterpriseOrderPaymentInquiryListener(channel);
+            case "userOrderTimeout" -> new UserOrderTimeoutListener(channel);
+            case "enterpriseOrderTimeout" -> new EnterpriseOrderTimeoutListener(channel);
+            case "closeUserOrder" -> new CloseUserOrderListener(channel);
+            case "closeEnterpriseOrder" -> new CloseEnterpriseOrderListener(channel);
+            default -> null;
+        };
     }
 }
