@@ -23,6 +23,11 @@ public class PersonalExpectedPositionVo {
     private String industryName;
 
     /**
+     * 职业类型名称
+     */
+    private String typeName;
+
+    /**
      * 领域名称
      */
     private String sectorName;
@@ -36,6 +41,11 @@ public class PersonalExpectedPositionVo {
      * 行业编码
      */
     private String industryCode;
+
+    /**
+     * 职业类型编码
+     */
+    private String typeCode;
 
     /**
      * 领域编码

@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import javax.print.event.PrintJobAttributeEvent;
+
 /**
  * @ClassName ExpectedPositionModifyDto
  * @Description
@@ -29,6 +31,12 @@ public class ExpectedPositionModifyDto {
      */
     @NotBlank(message = "行业编码不能为空")
     private String industryCode;
+
+    /**
+     * 职业类型编码
+     */
+    @NotBlank(message = "职业类型编码")
+    private String typeCode;
 
     /**
      * 领域编码

@@ -10,9 +10,11 @@
                     ofType="com.korant.youya.workplace.pojo.vo.expectedposition.PersonalExpectedPositionVo">
             <id column="positionId" property="positionId"/>
             <result column="industryName" property="industryName"/>
+            <result column="typeName" property="typeName"/>
             <result column="sectorName" property="sectorName"/>
             <result column="positionName" property="positionName"/>
             <result column="industryCode" property="industryCode"/>
+            <result column="typeCode" property="typeCode"/>
             <result column="sectorCode" property="sectorCode"/>
             <result column="positionCode" property="positionCode"/>
             <result column="minSalary" property="minSalary"/>
@@ -39,7 +41,9 @@
                p1.name           AS industryName,
                p2.name           AS sectorName,
                p3.name           AS positionName,
+               p4.name           AS typeName,
                ep.industry_code  AS industryCode,
+               ep.type_code  AS typeCode,
                ep.sector_code    AS sectorCode,
                ep.position_code  AS positionCode,
                ep.min_salary     AS minSalary,
@@ -56,6 +60,7 @@
                  LEFT JOIN position AS p1 ON ep.industry_code = p1.code AND p1.is_delete = 0
                  LEFT JOIN position AS p2 ON ep.sector_code = p2.code AND p2.is_delete = 0
                  LEFT JOIN position AS p3 ON ep.position_code = p3.code AND p3.is_delete = 0
+                 LEFT JOIN position AS p4 ON ep.type_code = p4.code AND p4.is_delete = 0
                  LEFT JOIN expected_work_area AS ewa ON es.id = ewa.status_id AND ewa.is_delete = 0
                  LEFT JOIN district_data d1 ON d1.code = ewa.country_code AND d1.is_delete = 0
                  LEFT JOIN district_data d2 ON d2.code = ewa.province_code AND d2.is_delete = 0
