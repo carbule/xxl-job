@@ -4,8 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.print.event.PrintJobAttributeEvent;
-
 /**
  * @ClassName ExpectedPositionModifyDto
  * @Description
