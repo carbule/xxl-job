@@ -92,7 +92,7 @@
         e.logo,
         e.name AS enterpriseName,
         e.scale,
-        p.name AS positionName,
+        j.position_name AS positionName,
         j.edu_requirements AS eduRequirements,
         j.work_experience AS workExperience,
         j.min_salary AS minSalary,
