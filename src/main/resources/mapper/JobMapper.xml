@@ -40,6 +40,7 @@
         <result column="sectorName" property="sectorName"/>
         <result column="positionName" property="positionName"/>
         <result column="industryCode" property="industryCode"/>
+        <result column="typeCode" property="typeCode"/>
         <result column="sectorCode" property="sectorCode"/>
         <result column="positionCode" property="positionCode"/>
         <result column="eduRequirements" property="eduRequirements"/>
@@ -59,8 +60,8 @@
         <result column="interviewRewardRate" property="interviewRewardRate"/>
         <result column="onboardRewardRate" property="onboardRewardRate"/>
         <result column="fullMemberRewardRate" property="fullMemberRewardRate"/>
-        <result column="organization_level" property="organizationLevel"/>
-        <result column="class_level" property="classLevel"/>
+        <result column="classLevel" property="classLevel"/>
+        <result column="organizationLevel" property="organizationLevel"/>
         <collection property="welfareLabelDataVoList" javaType="java.util.List"
                     ofType="com.korant.youya.workplace.pojo.vo.enterprisewelfarelabel.EnterpriseWelfareLabelDataVo">
             <id column="welfareLabelId" property="id"/>
@@ -255,7 +256,7 @@
     <!--  查询用户个人职位列表  -->
     <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.job.JobPersonalVo">
         SELECT j.id,
-               p.name                                                   AS positionName,
+               j.position_name                                          AS positionName,
                j.edu_requirements                                       AS eduRequirements,
                j.work_experience                                        AS workExperience,
                j.min_salary                                             AS minSalary,
@@ -308,6 +309,7 @@
                j.position_name           AS positionName,
                p4.name                   AS typeName,
                j.industry_code           AS industryCode,
+               j.type_code               AS typeCode,
                j.sector_code             AS sectorCode,
                j.position_code           AS positionCode,
                j.edu_requirements        AS eduRequirements,
@@ -329,7 +331,7 @@
                j.full_member_reward_rate AS fullMemberRewardRate,
                ewl.id                    AS welfareLabelId,
                ewl.name,
-               p3.organization_level     AS organization_level,
+               p3.organization_level     AS organizationLevel,
                p3.class_level            AS classLevel
         FROM job AS j
                  LEFT JOIN position AS p1 ON j.industry_code = p1.code AND p1.is_delete = 0

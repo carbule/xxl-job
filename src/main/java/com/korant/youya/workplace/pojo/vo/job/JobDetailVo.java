@@ -47,6 +47,11 @@ public class JobDetailVo {
     private String industryCode;
 
     /**
+     * 职业类型编码
+     */
+    private String typeCode;
+
+    /**
      * 领域编码
      */
     private String sectorCode;
