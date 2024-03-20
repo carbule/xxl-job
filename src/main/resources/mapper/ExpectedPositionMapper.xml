@@ -24,7 +24,7 @@
     <!--  批量新增意向职位  -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO expected_position(id, status_id, industry_code, sector_code, position_code, min_salary, max_salary,
-        create_time,is_delete)
+        create_time,is_delete, type_code)
         VALUES
         <foreach collection="list" item="param" index="index" separator=",">
             (
@@ -36,7 +36,8 @@
             #{param.minSalary},
             #{param.maxSalary},
             CURRENT_TIMESTAMP,
-            0
+            0,
+            #{param.typeCode}
             )
         </foreach>
     </insert>
@@ -46,6 +47,7 @@
         <foreach collection="list" item="position" separator=";">
             UPDATE expected_position
             SET industry_code = #{position.industryCode},
+            type_code = #{position.typeCode},
             sector_code = #{position.sectorCode},
             position_code = #{position.positionCode},
             min_salary = #{position.minSalary},
