@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -40,7 +41,7 @@ public class SysVirtualProductCommission implements Serializable {
      * 抽成比例
      */
     @TableField("commission_rate")
-    private Short commissionRate;
+    private BigDecimal commissionRate;
 
     /**
      * 创建时间

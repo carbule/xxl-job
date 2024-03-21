@@ -7,5 +7,6 @@
         SELECT id
         FROM yy_user_wallet_account
         WHERE uid = #{userId}
+          AND is_delete = 0
     </select>
 </mapper>

@@ -1878,7 +1878,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 throw new YouyaException("网络异常，请稍后重试");
             }
         } catch (InterruptedException e) {
-            log.error("用户：【{}】，钱包账户提现，获取订单锁失败，原因：", phone, e);
+            log.error("用户：【{}】，钱包账户提现，获取钱包账户锁失败，原因：", phone, e);
             throw new YouyaException("网络异常，请稍后重试");
         } catch (YouyaException e) {
             log.error("用户：【{}】，钱包账户提现失败", phone);

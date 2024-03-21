@@ -38,6 +38,12 @@ public class EnterpriseWalletFreezeRecord implements Serializable {
     private Long enterpriseWalletId;
 
     /**
+     * 企业职位id
+     */
+    @TableField("job_id")
+    private Long jobId;
+
+    /**
      * 金额
      */
     @TableField("amount")

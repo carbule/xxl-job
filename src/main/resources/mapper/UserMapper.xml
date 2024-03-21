@@ -187,9 +187,11 @@
                u.alipay_account               AS alipayAccount,
                u.alipay_account_name          AS alipayAccountName,
                u.alipay_account_identity_card AS alipayAccountIdentityCard,
+               w.id                           AS walletAccountId,
                r.role_name                    AS role,
                e.id                           AS enterpriseId
         FROM yy_user AS u
+                 LEFT JOIN yy_user_wallet_account AS w ON u.id = w.uid AND w.is_delete = 0
                  LEFT JOIN yy_user_role AS ur ON u.id = ur.uid AND ur.is_delete = 0
                  LEFT JOIN yy_role AS r ON ur.rid = r.id
                  LEFT JOIN yy_user_enterprise AS ue ON u.id = ue.uid AND ue.is_delete = 0

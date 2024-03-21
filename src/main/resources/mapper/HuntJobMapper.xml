@@ -563,14 +563,11 @@
     <!--  修改求职信息  -->
     <update id="modify" parameterType="com.korant.youya.workplace.pojo.dto.huntjob.HuntJobModifyDto">
         UPDATE hunt_job
-        SET position_id             = #{modifyDto.positionId},
-            area_id                 = #{modifyDto.areaId},
-            award                   = #{modifyDto.award},
-            interview_reward_rate   = #{modifyDto.interviewRewardRate},
-            onboard_reward_rate     = #{modifyDto.onboardRewardRate},
-            full_member_reward_rate = #{modifyDto.fullMemberRewardRate},
-            description             = #{modifyDto.description},
-            update_time             = CURRENT_TIMESTAMP
+        SET position_id      = #{modifyDto.positionId},
+            area_id          = #{modifyDto.areaId},
+            onboarding_award = #{modifyDto.onboardingAward},
+            description      = #{modifyDto.description},
+            update_time      = CURRENT_TIMESTAMP
         WHERE id = #{modifyDto.id}
     </update>
 

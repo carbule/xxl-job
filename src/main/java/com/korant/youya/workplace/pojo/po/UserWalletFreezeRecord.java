@@ -38,6 +38,12 @@ public class UserWalletFreezeRecord implements Serializable {
     private Long userWalletId;
 
     /**
+     * 求职id
+     */
+    @TableField("hunt_id")
+    private Long huntId;
+
+    /**
      * 金额
      */
     @TableField("amount")

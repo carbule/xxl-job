@@ -1,8 +1,11 @@
 package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.korant.youya.workplace.constants.RedisConstant;
+import com.korant.youya.workplace.enums.*;
 import com.korant.youya.workplace.enums.huntjob.HuntJobStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAccountStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
@@ -16,17 +19,23 @@ import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkA
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.pojo.vo.user.UserPublicInfoVo;
 import com.korant.youya.workplace.service.HuntJobService;
+import com.korant.youya.workplace.utils.CalculationUtil;
 import com.korant.youya.workplace.utils.JwtUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -37,6 +46,7 @@ import java.util.List;
  * @since 2023-11-14
  */
 @Service
+@Slf4j
 public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> implements HuntJobService {
 
     @Resource
@@ -60,7 +70,36 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     @Resource
     private ExpectedWorkAreaMapper expectedWorkAreaMapper;
 
+    @Resource
+    private SysVirtualProductMapper sysVirtualProductMapper;
+
+    @Resource
+    private SysVirtualProductCommissionMapper sysVirtualProductCommissionMapper;
+
+    @Resource
+    private BonusDistributionRuleMapper bonusDistributionRuleMapper;
+
+    @Resource
+    private UserWalletAccountMapper userWalletAccountMapper;
+
+    @Resource
+    private UserWalletFreezeRecordMapper userWalletFreezeRecordMapper;
+
+    @Resource
+    private WalletTransactionFlowMapper walletTransactionFlowMapper;
+
+    @Resource
+    private RedissonClient redissonClient;
+
     private static final String NANJING_CITY_CODE = "320100";
+
+    private static final String HUNT_JOB_ONBOARD_PRODUCT = "hunt_job_onboard";
+
+    private static final String HUNT_JOB_ONBOARD_BONUS_DISTRIBUTION_RULE = "hunt_job_onboard";
+
+    private static final String HUNT_JOB_ONBOARD_FREEZE_DES = "求职入职奖金冻结";
+
+    private static final String HUNT_JOB_ONBOARD_UNFREEZE_DES = "求职入职奖金解冻";
 
     /**
      * 查询首页求职信息列表
@@ -274,25 +313,113 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @param createDto
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void create(HuntJobCreateDto createDto) {
-        LoginUser userInfo = SpringSecurityUtil.getUserInfo();
-        Integer authenticationStatus = userInfo.getAuthenticationStatus();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        String phone = loginUser.getPhone();
+        Integer authenticationStatus = loginUser.getAuthenticationStatus();
         if (UserAuthenticationStatusEnum.CERTIFIED.getStatus() != authenticationStatus)
             throw new YouyaException("请先完成实名认证再发布求职信息");
-        Integer award = createDto.getAward();
-        if (null != award) {
-            Integer interviewRewardRate = createDto.getInterviewRewardRate();
-            if (null == interviewRewardRate) throw new YouyaException("面试奖励分配比例不能为空");
-            Integer onboardRewardRate = createDto.getOnboardRewardRate();
-            if (null == onboardRewardRate) throw new YouyaException("入职奖励分配比例不能为空");
-            Integer fullMemberRewardRate = createDto.getFullMemberRewardRate();
-            if (null == fullMemberRewardRate) throw new YouyaException("转正奖励分配比例不能为空");
-            int totalAllocationRatio = interviewRewardRate + onboardRewardRate + fullMemberRewardRate;
-            if (100 != totalAllocationRatio) throw new YouyaException("面试奖励比例加入职奖励比例必须满足100%");
-        }
+        BigDecimal onboardingAward = createDto.getOnboardingAward();
+        Long id = IdWorker.getId();
         HuntJob huntJob = new HuntJob();
-        BeanUtils.copyProperties(createDto, huntJob);
-        huntJob.setUid(userInfo.getId());
+        huntJob.setId(id);
+        if (null != onboardingAward) {
+            BigDecimal divisor = new BigDecimal("1");
+            boolean isPositiveInteger = onboardingAward.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
+            if (!isPositiveInteger) throw new YouyaException("奖励金额必须是正整数");
+            SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getCode, HUNT_JOB_ONBOARD_PRODUCT).eq(SysVirtualProduct::getIsDelete, 0));
+            if (null == virtualProduct) throw new YouyaException("获取入职推荐服务配置失败，请稍后重试");
+            Long virtualProductId = virtualProduct.getId();
+            SysVirtualProductCommission virtualProductCommission = sysVirtualProductCommissionMapper.selectOne(new LambdaQueryWrapper<SysVirtualProductCommission>().eq(SysVirtualProductCommission::getProductId, virtualProductId).eq(SysVirtualProductCommission::getIsDelete, 0));
+            if (null == virtualProductCommission) throw new YouyaException("获取入职推荐服务配置失败，请稍后重试");
+            BigDecimal commissionRate = virtualProductCommission.getCommissionRate();
+            BigDecimal totalProportion = new BigDecimal(100);
+            BigDecimal remainingProportion = totalProportion.subtract(commissionRate);
+            if (remainingProportion.intValue() < 0) throw new YouyaException("入职推荐服务平台抽成比例设置错误，请联系客服");
+            if (remainingProportion.intValue() != 0) {
+                BonusDistributionRule bonusDistributionRule = bonusDistributionRuleMapper.selectOne(new LambdaQueryWrapper<BonusDistributionRule>().eq(BonusDistributionRule::getCode, HUNT_JOB_ONBOARD_BONUS_DISTRIBUTION_RULE).eq(BonusDistributionRule::getIsDelete, 0));
+                if (null == bonusDistributionRule) throw new YouyaException("获取入职推荐奖金分配规则配置失败，请稍后重试");
+                BigDecimal sharerRatioRule = bonusDistributionRule.getSharerRatio();
+                BigDecimal recommenderRatioRule = bonusDistributionRule.getRecommenderRatio();
+                if (sharerRatioRule.add(recommenderRatioRule).intValue() != 100)
+                    throw new YouyaException("入职推荐奖金分配规则配置设置错误，请联系客服");
+                BigDecimal sharerRatio = CalculationUtil.multiplyAndTruncateToTwoDecimalPlaces(remainingProportion, sharerRatioRule.multiply(new BigDecimal("0.01")));
+                BigDecimal recommenderRatio = remainingProportion.subtract(sharerRatio);
+                if (commissionRate.add(sharerRatio).add(recommenderRatio).intValue() != 100)
+                    throw new YouyaException("求职推荐服务分配比例计算失败，请稍后重试");
+                huntJob.setPlatformOnboardCommissionRatio(commissionRate);
+                huntJob.setSharerOnboardRewardRate(sharerRatio);
+                huntJob.setRecommenderOnboardRewardRate(recommenderRatio);
+            } else {
+                huntJob.setPlatformOnboardCommissionRatio(commissionRate);
+                huntJob.setSharerOnboardRewardRate(new BigDecimal(0));
+                huntJob.setRecommenderOnboardRewardRate(new BigDecimal(0));
+            }
+            BigDecimal totalAward = onboardingAward.multiply(new BigDecimal(100));
+            huntJob.setOnboardingAward(totalAward);
+            Long walletAccountId = loginUser.getWalletAccountId();
+            String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
+            RLock walletLock = redissonClient.getLock(walletLockKey);
+            try {
+                boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
+                if (tryWalletLock) {
+                    UserWalletAccount walletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+                    if (null == walletAccount) throw new YouyaException("钱包账户不存在");
+                    Integer accountStatus = walletAccount.getStatus();
+                    if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
+                        throw new YouyaException("钱包账户已被冻结，请联系客服");
+                    BigDecimal availableBalance = walletAccount.getAvailableBalance();
+                    if (availableBalance.intValue() <= 0) throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
+                    BigDecimal shortfall = availableBalance.subtract(totalAward);
+                    if (shortfall.intValue() < 0) {
+                        String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
+                        throw new YouyaException(msg);
+                    }
+                    LocalDateTime now = LocalDateTime.now();
+                    UserWalletFreezeRecord userWalletFreezeRecord = new UserWalletFreezeRecord();
+                    userWalletFreezeRecord.setUserWalletId(walletAccountId);
+                    userWalletFreezeRecord.setHuntId(id);
+                    userWalletFreezeRecord.setAmount(totalAward);
+                    userWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
+                    userWalletFreezeRecord.setOperateTime(now);
+                    userWalletFreezeRecordMapper.insert(userWalletFreezeRecord);
+                    BigDecimal freezeAmount = walletAccount.getFreezeAmount();
+                    walletAccount.setFreezeAmount(freezeAmount.add(totalAward));
+                    walletAccount.setAvailableBalance(shortfall);
+                    userWalletAccountMapper.updateById(walletAccount);
+                    Long walletFreezeRecordId = userWalletFreezeRecord.getId();
+                    WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
+                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(totalAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                            .setDescription(HUNT_JOB_ONBOARD_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
+                    walletTransactionFlowMapper.insert(walletTransactionFlow);
+                } else {
+                    log.error("用户：【{}】，创建求职信息，获取钱包账户锁超时", phone);
+                    throw new YouyaException("网络异常，请稍后重试");
+                }
+            } catch (InterruptedException e) {
+                log.error("用户：【{}】，创建求职信息，获取钱包账户锁失败，原因：", phone, e);
+                throw new YouyaException("网络异常，请稍后重试");
+            } catch (YouyaException e) {
+                log.error("用户：【{}】，创建求职信息失败", phone);
+                throw e;
+            } catch (Exception e) {
+                log.error("用户：【{}】，创建求职信息失败，原因", phone, e);
+                throw new YouyaException("网络异常，请稍后重试");
+            } finally {
+                if (walletLock != null && walletLock.isHeldByCurrentThread()) {
+                    walletLock.unlock();
+                }
+            }
+        }
+        Long positionId = createDto.getPositionId();
+        Long areaId = createDto.getAreaId();
+        String description = createDto.getDescription();
+        huntJob.setPositionId(positionId);
+        huntJob.setAreaId(areaId);
+        huntJob.setDescription(description);
+        huntJob.setUid(loginUser.getId());
         huntJob.setStatus(HuntJobStatusEnum.PUBLISHED.getStatus());
         huntJob.setRefreshTime(LocalDateTime.now());
         huntJobMapper.insert(huntJob);
@@ -310,16 +437,12 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (null == huntJob) throw new YouyaException("求职信息不存在");
         Integer status = huntJob.getStatus();
         if (HuntJobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
-        Integer award = modifyDto.getAward();
-        if (null != award) {
-            Integer interviewRewardRate = modifyDto.getInterviewRewardRate();
-            if (null == interviewRewardRate) throw new YouyaException("面试奖励分配比例不能为空");
-            Integer onboardRewardRate = modifyDto.getOnboardRewardRate();
-            if (null == onboardRewardRate) throw new YouyaException("入职奖励分配比例不能为空");
-            Integer fullMemberRewardRate = modifyDto.getFullMemberRewardRate();
-            if (null == fullMemberRewardRate) throw new YouyaException("转正奖励分配比例不能为空");
-            int totalAllocationRatio = interviewRewardRate + onboardRewardRate + fullMemberRewardRate;
-            if (100 != totalAllocationRatio) throw new YouyaException("面试奖励比例加入职奖励比例必须满足100%");
+        BigDecimal onboardingAward = modifyDto.getOnboardingAward();
+        if (null != onboardingAward) {
+            BigDecimal divisor = new BigDecimal("1");
+            boolean isPositiveInteger = onboardingAward.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
+            if (!isPositiveInteger) throw new YouyaException("奖励金额必须是正整数");
+            modifyDto.setOnboardingAward(onboardingAward.multiply(new BigDecimal(100)));
         }
         huntJobMapper.modify(modifyDto);
     }
@@ -353,6 +476,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @param id
      */
     @Override
+    //todo 如果存在奖励金额 解冻账户金额
     public void close(Long id) {
         HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, id).eq(HuntJob::getIsDelete, 0));
         if (null == huntJob) throw new YouyaException("求职信息不存在");
@@ -370,13 +494,72 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      * @param id
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void release(Long id) {
         HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, id).eq(HuntJob::getIsDelete, 0));
         if (null == huntJob) throw new YouyaException("求职信息不存在");
-        Long userId = SpringSecurityUtil.getUserId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
+        String phone = loginUser.getPhone();
         if (!userId.equals(huntJob.getUid())) throw new YouyaException("非法操作");
         Integer status = huntJob.getStatus();
         if (HuntJobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("当前求职信息已发布");
+        BigDecimal onboardingAward = huntJob.getOnboardingAward();
+        if (null != onboardingAward) {
+            Long walletAccountId = loginUser.getWalletAccountId();
+            String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
+            RLock walletLock = redissonClient.getLock(walletLockKey);
+            try {
+                boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
+                if (tryWalletLock) {
+                    UserWalletAccount walletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
+                    if (null == walletAccount) throw new YouyaException("钱包账户不存在");
+                    Integer accountStatus = walletAccount.getStatus();
+                    if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
+                        throw new YouyaException("钱包账户已被冻结，请联系客服");
+                    BigDecimal availableBalance = walletAccount.getAvailableBalance();
+                    if (availableBalance.intValue() <= 0) throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
+                    BigDecimal shortfall = availableBalance.subtract(onboardingAward);
+                    if (shortfall.intValue() < 0) {
+                        String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
+                        throw new YouyaException(msg);
+                    }
+                    LocalDateTime now = LocalDateTime.now();
+                    UserWalletFreezeRecord userWalletFreezeRecord = new UserWalletFreezeRecord();
+                    userWalletFreezeRecord.setUserWalletId(walletAccountId);
+                    userWalletFreezeRecord.setHuntId(id);
+                    userWalletFreezeRecord.setAmount(onboardingAward);
+                    userWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
+                    userWalletFreezeRecord.setOperateTime(now);
+                    userWalletFreezeRecordMapper.insert(userWalletFreezeRecord);
+                    BigDecimal freezeAmount = walletAccount.getFreezeAmount();
+                    walletAccount.setFreezeAmount(freezeAmount.add(onboardingAward));
+                    walletAccount.setAvailableBalance(shortfall);
+                    userWalletAccountMapper.updateById(walletAccount);
+                    Long walletFreezeRecordId = userWalletFreezeRecord.getId();
+                    WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
+                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                            .setDescription(HUNT_JOB_ONBOARD_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
+                    walletTransactionFlowMapper.insert(walletTransactionFlow);
+                } else {
+                    log.error("用户：【{}】，发布求职信息，获取钱包账户锁超时", phone);
+                    throw new YouyaException("网络异常，请稍后重试");
+                }
+            } catch (InterruptedException e) {
+                log.error("用户：【{}】，发布求职信息，获取钱包账户锁失败，原因：", phone, e);
+                throw new YouyaException("网络异常，请稍后重试");
+            } catch (YouyaException e) {
+                log.error("用户：【{}】，发布求职信息失败", phone);
+                throw e;
+            } catch (Exception e) {
+                log.error("用户：【{}】，发布求职信息失败，原因", phone, e);
+                throw new YouyaException("网络异常，请稍后重试");
+            } finally {
+                if (walletLock != null && walletLock.isHeldByCurrentThread()) {
+                    walletLock.unlock();
+                }
+            }
+        }
         huntJob.setStatus(HuntJobStatusEnum.PUBLISHED.getStatus());
         huntJobMapper.updateById(huntJob);
     }

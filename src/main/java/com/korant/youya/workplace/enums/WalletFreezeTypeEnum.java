@@ -1,32 +1,22 @@
 package com.korant.youya.workplace.enums;
 
 /**
- * @ClassName TransactionTypeEnum
+ * @ClassName WalletFreezeTypeEnum
  * @Description
  * @Author chenyiqiang
- * @Date 2024/3/6 11:12
+ * @Date 2024/3/21 15:08
  * @Version 1.0
  */
-public enum TransactionTypeEnum {
+public enum WalletFreezeTypeEnum {
 
-    //充值
-    RECHARGE(1),
-    //订单
-    ORDER(2),
-    //退款
-    REFUND(3),
-    //提现
-    WITHDRAWAL(4),
     //冻结
-    FREEZE(5),
+    FREEZE(1),
     //解冻
-    UNFREEZE(6),
-    //转账
-    TRANSFER(7);
+    UNFREEZE(2);
 
     private Integer type;
 
-    TransactionTypeEnum(Integer type) {
+    WalletFreezeTypeEnum(Integer type) {
         this.type = type;
     }
 

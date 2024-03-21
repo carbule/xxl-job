@@ -83,6 +83,11 @@ public class LoginUser {
     private String alipayAccountIdentityCard;
 
     /**
+     * 用户钱包账户id
+     */
+    private Long walletAccountId;
+
+    /**
      * 企业id
      */
     private Long enterpriseId;

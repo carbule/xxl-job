@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName HuntJobCreateDto
  * @Description
@@ -27,24 +29,9 @@ public class HuntJobCreateDto {
     private Long areaId;
 
     /**
-     * 推荐奖励
+     * 入职成功奖金
      */
-    private Integer award;
-
-    /**
-     * 面试奖励分配比例
-     */
-    private Integer interviewRewardRate;
-
-    /**
-     * 入职奖励分配比例
-     */
-    private Integer onboardRewardRate;
-
-    /**
-     * 转正奖励分配比例
-     */
-    private Integer fullMemberRewardRate;
+    private BigDecimal onboardingAward;
 
     /**
      * 求职说明
