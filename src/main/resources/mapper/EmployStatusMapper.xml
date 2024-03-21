@@ -13,6 +13,8 @@
             <result column="typeName" property="typeName"/>
             <result column="sectorName" property="sectorName"/>
             <result column="positionName" property="positionName"/>
+            <result column="classLevel" property="classLevel"/>
+            <result column="organizationLevel" property="organizationLevel"/>
             <result column="industryCode" property="industryCode"/>
             <result column="typeCode" property="typeCode"/>
             <result column="sectorCode" property="sectorCode"/>
@@ -41,6 +43,8 @@
                p1.name           AS industryName,
                p2.name           AS sectorName,
                p3.name           AS positionName,
+               p3.organization_level AS organizationLevel,
+               p3.class_level AS classLevel,
                p4.name           AS typeName,
                ep.industry_code  AS industryCode,
                ep.type_code  AS typeCode,
