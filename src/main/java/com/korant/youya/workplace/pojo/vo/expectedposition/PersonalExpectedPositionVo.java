@@ -66,4 +66,14 @@ public class PersonalExpectedPositionVo {
      * 最高薪资
      */
     private Integer maxSalary;
+
+    /**
+     * 职业群名称
+     */
+    private String organizationLevel;
+
+    /**
+     * 职业等级名称
+     */
+    private String classLevel;
 }
