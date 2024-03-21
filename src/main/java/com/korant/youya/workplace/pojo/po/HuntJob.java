@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -49,28 +50,28 @@ public class HuntJob implements Serializable {
     private Long areaId;
 
     /**
-     * 推荐奖励
+     * 入职成功奖金
      */
-    @TableField("award")
-    private Integer award;
+    @TableField("onboarding_award")
+    private BigDecimal onboardingAward;
 
     /**
-     * 面试奖励分配比例
+     * 入职成功分享人入职奖励分配比例
      */
-    @TableField("interview_reward_rate")
-    private Integer interviewRewardRate;
+    @TableField("sharer_onboard_reward_rate")
+    private BigDecimal sharerOnboardRewardRate;
 
     /**
-     * 入职奖励分配比例
+     * 入职成功推荐人入职奖励分配比例
      */
-    @TableField("onboard_reward_rate")
-    private Integer onboardRewardRate;
+    @TableField("recommender_onboard_reward_rate")
+    private BigDecimal recommenderOnboardRewardRate;
 
     /**
-     * 转正奖励分配比例
+     * 入职成功平台抽成比例
      */
-    @TableField("full_member_reward_rate")
-    private Integer fullMemberRewardRate;
+    @TableField("platform_onboard_commission_ratio")
+    private BigDecimal platformOnboardCommissionRatio;
 
     /**
      * 求职说明

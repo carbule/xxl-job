@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -136,25 +137,79 @@ public class Job implements Serializable {
      * 推荐奖励
      */
     @TableField("award")
-    private Integer award;
+    private BigDecimal award;
 
     /**
      * 面试奖励分配比例
      */
     @TableField("interview_reward_rate")
-    private Integer interviewRewardRate;
+    private BigDecimal interviewRewardRate;
+
+    /**
+     * 面试成功分享人入职奖励分配比例
+     */
+    @TableField("sharer_interview_reward_rate")
+    private BigDecimal sharerInterviewRewardRate;
+
+    /**
+     * 面试成功推荐人入职奖励分配比例
+     */
+    @TableField("recommender_interview_reward_rate")
+    private BigDecimal recommenderInterviewRewardRate;
+
+    /**
+     * 面试成功平台抽成比例
+     */
+    @TableField("platform_interview_commission_ratio")
+    private BigDecimal platformInterviewCommissionRatio;
 
     /**
      * 入职奖励分配比例
      */
     @TableField("onboard_reward_rate")
-    private Integer onboardRewardRate;
+    private BigDecimal onboardRewardRate;
+
+    /**
+     * 入职成功分享人入职奖励分配比例
+     */
+    @TableField("sharer_onboard_reward_rate")
+    private BigDecimal sharerOnboardRewardRate;
+
+    /**
+     * 入职成功推荐人入职奖励分配比例
+     */
+    @TableField("recommender_onboard_reward_rate")
+    private BigDecimal recommenderOnboardRewardRate;
+
+    /**
+     * 入职成功平台抽成比例
+     */
+    @TableField("platform_onboard_commission_ratio")
+    private BigDecimal platformOnboardCommissionRatio;
 
     /**
      * 转正奖励分配比例
      */
     @TableField("full_member_reward_rate")
-    private Integer fullMemberRewardRate;
+    private BigDecimal fullMemberRewardRate;
+
+    /**
+     * 转正成功分享人入职奖励分配比例
+     */
+    @TableField("sharer_full_member_reward_rate")
+    private BigDecimal sharerFullMemberRewardRate;
+
+    /**
+     * 转正成功推荐人入职奖励分配比例
+     */
+    @TableField("recommender_full_member_reward_rate")
+    private BigDecimal recommenderFullMemberRewardRate;
+
+    /**
+     * 转正成功平台抽成比例
+     */
+    @TableField("platform_full_member_commission_ratio")
+    private BigDecimal platformFullMemberCommissionRatio;
 
     /**
      * 职位状态
