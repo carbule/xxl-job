@@ -56,22 +56,10 @@ public class HuntJob implements Serializable {
     private BigDecimal onboardingAward;
 
     /**
-     * 入职成功分享人入职奖励分配比例
+     * 入职奖金分配规则
      */
-    @TableField("sharer_onboard_reward_rate")
-    private BigDecimal sharerOnboardRewardRate;
-
-    /**
-     * 入职成功推荐人入职奖励分配比例
-     */
-    @TableField("recommender_onboard_reward_rate")
-    private BigDecimal recommenderOnboardRewardRate;
-
-    /**
-     * 入职成功平台抽成比例
-     */
-    @TableField("platform_onboard_commission_ratio")
-    private BigDecimal platformOnboardCommissionRatio;
+    @TableField("onboard_bonus_distribution_rule")
+    private String onboardBonusDistributionRule;
 
     /**
      * 求职说明

@@ -43,13 +43,19 @@ public class ApplyJobMainTask implements Serializable {
     private Integer processStep;
 
     /**
+     * 奖金分配规则
+     */
+    @TableField("bonus_distribution_rule")
+    private String bonusDistributionRule;
+
+    /**
      * 任务状态
      */
     @TableField("status")
     private Integer status;
 
     /**
-     * 截至日期
+     * 截止日期
      */
     @TableField("deadline")
     private LocalDateTime deadline;

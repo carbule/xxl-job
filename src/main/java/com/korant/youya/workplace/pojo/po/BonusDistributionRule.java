@@ -56,6 +56,12 @@ public class BonusDistributionRule implements Serializable {
     private BigDecimal recommenderRatio;
 
     /**
+     * 平台抽成比例
+     */
+    @TableField("platform_ratio")
+    private BigDecimal platformRatio;
+
+    /**
      * 描述
      */
     @TableField("description")

@@ -146,22 +146,10 @@ public class Job implements Serializable {
     private BigDecimal interviewRewardRate;
 
     /**
-     * 面试成功分享人入职奖励分配比例
+     * 面试奖金分配规则
      */
-    @TableField("sharer_interview_reward_rate")
-    private BigDecimal sharerInterviewRewardRate;
-
-    /**
-     * 面试成功推荐人入职奖励分配比例
-     */
-    @TableField("recommender_interview_reward_rate")
-    private BigDecimal recommenderInterviewRewardRate;
-
-    /**
-     * 面试成功平台抽成比例
-     */
-    @TableField("platform_interview_commission_ratio")
-    private BigDecimal platformInterviewCommissionRatio;
+    @TableField("interview_bonus_distribution_rule")
+    private String interviewBonusDistributionRule;
 
     /**
      * 入职奖励分配比例
@@ -170,22 +158,10 @@ public class Job implements Serializable {
     private BigDecimal onboardRewardRate;
 
     /**
-     * 入职成功分享人入职奖励分配比例
+     * 入职奖金分配规则
      */
-    @TableField("sharer_onboard_reward_rate")
-    private BigDecimal sharerOnboardRewardRate;
-
-    /**
-     * 入职成功推荐人入职奖励分配比例
-     */
-    @TableField("recommender_onboard_reward_rate")
-    private BigDecimal recommenderOnboardRewardRate;
-
-    /**
-     * 入职成功平台抽成比例
-     */
-    @TableField("platform_onboard_commission_ratio")
-    private BigDecimal platformOnboardCommissionRatio;
+    @TableField("onboard_bonus_distribution_rule")
+    private String onboardBonusDistributionRule;
 
     /**
      * 转正奖励分配比例
@@ -194,22 +170,11 @@ public class Job implements Serializable {
     private BigDecimal fullMemberRewardRate;
 
     /**
-     * 转正成功分享人入职奖励分配比例
+     * 转正奖金分配规则
      */
-    @TableField("sharer_full_member_reward_rate")
-    private BigDecimal sharerFullMemberRewardRate;
+    @TableField("full_member_bonus_distribution_rule")
+    private String fullMemberBonusDistributionRule;
 
-    /**
-     * 转正成功推荐人入职奖励分配比例
-     */
-    @TableField("recommender_full_member_reward_rate")
-    private BigDecimal recommenderFullMemberRewardRate;
-
-    /**
-     * 转正成功平台抽成比例
-     */
-    @TableField("platform_full_member_commission_ratio")
-    private BigDecimal platformFullMemberCommissionRatio;
 
     /**
      * 职位状态
