@@ -39,6 +39,28 @@ public class CalculationUtil {
         return dividend.divide(divisor, 2, RoundingMode.DOWN);
     }
 
+    /**
+     * 判断是否是负数
+     *
+     * @param decimal
+     * @return
+     */
+    public static boolean isNegativeNumber(BigDecimal decimal) {
+        int sigNum = decimal.signum();
+        return sigNum == -1;
+    }
+
+    /**
+     * 去除小数后无用零位返回小数位
+     *
+     * @param decimal
+     * @return
+     */
+    public static int getScaleAfterStrippingTrailingZeros(BigDecimal decimal) {
+        BigDecimal stripTrailingZeros = decimal.stripTrailingZeros();
+        return stripTrailingZeros.scale();
+    }
+
     public static void main(String[] args) {
         BigDecimal decimal1 = multiplyAndTruncateToTwoDecimalPlaces(new BigDecimal("0.93"), new BigDecimal("0.07"));
         System.out.println(decimal1);

@@ -4,6 +4,7 @@ import com.korant.youya.workplace.annotations.Dict;
 import com.korant.youya.workplace.pojo.vo.enterprisewelfarelabel.EnterpriseWelfareLabelDataVo;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -124,7 +125,7 @@ public class JobHomePageDetailVo {
     /**
      * 推荐奖励
      */
-    private Integer award;
+    private BigDecimal award;
 
     /**
      * 是否关注求职

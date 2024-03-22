@@ -2,6 +2,8 @@ package com.korant.youya.workplace.pojo.vo.job;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName JobShareInfo
  * @Description
@@ -45,7 +47,7 @@ public class JobShareInfo {
     /**
      * 推荐奖励
      */
-    private Integer award;
+    private BigDecimal award;
 
     /**
      * 推荐人头像

@@ -19,6 +19,7 @@ import com.korant.youya.workplace.pojo.vo.expectedworkarea.PersonalExpectedWorkA
 import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.pojo.vo.user.UserPublicInfoVo;
 import com.korant.youya.workplace.service.HuntJobService;
+import com.korant.youya.workplace.utils.CalculationUtil;
 import com.korant.youya.workplace.utils.JwtUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -93,9 +94,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
 
     private static final String HUNT_JOB_ONBOARD_BONUS_DISTRIBUTION_RULE = "hunt_job_onboard_rule";
 
-    private static final String HUNT_JOB_ONBOARD_FREEZE_DES = "求职入职奖金冻结";
+    private static final String HUNT_JOB_ONBOARD_FREEZE_DES = "友涯用户求职入职奖金冻结";
 
-    private static final String HUNT_JOB_ONBOARD_UNFREEZE_DES = "求职入职奖金解冻";
+    private static final String HUNT_JOB_ONBOARD_UNFREEZE_DES = "友涯用户求职入职奖金解冻";
 
     /**
      * 查询首页求职信息列表
@@ -318,22 +319,21 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (UserAuthenticationStatusEnum.CERTIFIED.getStatus() != authenticationStatus)
             throw new YouyaException("请先完成实名认证再发布求职信息");
         BigDecimal onboardingAward = createDto.getOnboardingAward();
-        Long id = IdWorker.getId();
         HuntJob huntJob = new HuntJob();
+        Long id = IdWorker.getId();
         huntJob.setId(id);
         if (null != onboardingAward) {
-            int signum = onboardingAward.signum();
-            if (signum == -1) throw new YouyaException("奖励金额必须是正数");
+            if (CalculationUtil.isNegativeNumber(onboardingAward)) throw new YouyaException("奖励金额必须是正数");
             BigDecimal divisor = new BigDecimal("1");
             boolean isPositiveInteger = onboardingAward.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
             if (!isPositiveInteger) throw new YouyaException("奖励金额必须是1的整数倍");
-            BigDecimal totalAward = onboardingAward.multiply(new BigDecimal("100"));
-            huntJob.setOnboardingAward(totalAward);
             BonusDistributionRule bonusDistributionRule = bonusDistributionRuleMapper.selectOne(new LambdaQueryWrapper<BonusDistributionRule>().eq(BonusDistributionRule::getCode, HUNT_JOB_ONBOARD_BONUS_DISTRIBUTION_RULE).eq(BonusDistributionRule::getIsDelete, 0));
-            if (null == bonusDistributionRule) throw new YouyaException("预设奖金分配规则缺失，请联系客服");
+            if (null == bonusDistributionRule) throw new YouyaException("求职入职阶段预设奖金分配规则缺失，请联系客服");
             huntJob.setOnboardBonusDistributionRule(HUNT_JOB_ONBOARD_BONUS_DISTRIBUTION_RULE);
             Long walletAccountId = loginUser.getWalletAccountId();
             if (null == walletAccountId) throw new YouyaException("钱包账户不存在");
+            BigDecimal totalAward = onboardingAward.multiply(new BigDecimal("100"));
+            huntJob.setOnboardingAward(totalAward);
             String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
             RLock walletLock = redissonClient.getLock(walletLockKey);
             try {
@@ -345,9 +345,10 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
                         throw new YouyaException("钱包账户已被冻结，请联系客服");
                     BigDecimal availableBalance = walletAccount.getAvailableBalance();
-                    if (availableBalance.intValue() <= 0) throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
+                    if (availableBalance.compareTo(new BigDecimal("0")) <= 0)
+                        throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
                     BigDecimal shortfall = availableBalance.subtract(totalAward);
-                    if (shortfall.intValue() < 0) {
+                    if (shortfall.compareTo(new BigDecimal("0")) < 0) {
                         String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
                         throw new YouyaException(msg);
                     }
@@ -413,8 +414,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (HuntJobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
         BigDecimal onboardingAward = modifyDto.getOnboardingAward();
         if (null != onboardingAward) {
-            int signum = onboardingAward.signum();
-            if (signum == -1) throw new YouyaException("奖励金额必须是正数");
+            if (CalculationUtil.isNegativeNumber(onboardingAward)) throw new YouyaException("奖励金额必须是正数");
             BigDecimal divisor = new BigDecimal("1");
             boolean isPositiveInteger = onboardingAward.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
             if (!isPositiveInteger) throw new YouyaException("奖励金额必须是1的整数倍");
@@ -548,9 +548,10 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
                         throw new YouyaException("钱包账户已被冻结，请联系客服");
                     BigDecimal availableBalance = walletAccount.getAvailableBalance();
-                    if (availableBalance.intValue() <= 0) throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
+                    if (availableBalance.compareTo(new BigDecimal("0")) <= 0)
+                        throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
                     BigDecimal shortfall = availableBalance.subtract(onboardingAward);
-                    if (shortfall.intValue() < 0) {
+                    if (shortfall.compareTo(new BigDecimal("0")) < 0) {
                         String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
                         throw new YouyaException(msg);
                     }
