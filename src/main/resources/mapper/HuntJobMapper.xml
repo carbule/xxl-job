@@ -66,7 +66,7 @@
         <result column="workExperience" property="workExperience"/>
         <result column="minExpectedSalary" property="minExpectedSalary"/>
         <result column="maxExpectedSalary" property="maxExpectedSalary"/>
-        <result column="award" property="award"/>
+        <result column="onboardingAward" property="onboardingAward"/>
         <result column="employStatus" property="employStatus"/>
         <result column="description" property="description"/>
         <result column="expectedIndustry" property="expectedIndustry"/>
@@ -103,7 +103,7 @@
         <result column="workExperience" property="workExperience"/>
         <result column="minExpectedSalary" property="minExpectedSalary"/>
         <result column="maxExpectedSalary" property="maxExpectedSalary"/>
-        <result column="award" property="award"/>
+        <result column="onboardingAward" property="onboardingAward"/>
         <result column="employStatus" property="employStatus"/>
         <result column="description" property="description"/>
         <result column="phone" property="phone"/>
@@ -152,7 +152,7 @@
         ep.max_salary AS maxExpectedSalary,
         dd1.name AS provinceName,
         dd2.name AS cityName,
-        hj.award
+        hj.onboarding_award AS onboardingAward
         FROM hunt_job AS hj
         LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
         LEFT JOIN yy_user_name_visible_info AS nvi ON u.id = nvi.uid AND nvi.is_delete = 0
@@ -208,7 +208,7 @@
         t1.maxExpectedSalary,
         t1.provinceName,
         t1.cityName,
-        t1.award
+        t1.onboardingAward
         FROM (SELECT hj.id,
         hj.uid,
         u.avatar,
@@ -221,7 +221,7 @@
         ep.max_salary AS maxExpectedSalary,
         dd1.name AS provinceName,
         dd2.name AS cityName,
-        hj.award
+        hj.onboarding_award AS onboardingAward
         FROM hunt_job AS hj
         LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
         LEFT JOIN yy_user_name_visible_info AS nvi ON u.id = nvi.uid AND nvi.is_delete = 0
@@ -272,7 +272,7 @@
                            END)      AS workExperience,
                ep.min_salary         AS minExpectedSalary,
                ep.max_salary         AS maxExpectedSalary,
-               hj.award,
+               hj.onboarding_award   AS onboardingAward,
                es.status             AS employStatus,
                hj.description,
                p1.name               AS expectedIndustry,
@@ -384,7 +384,7 @@
                                THEN DATE_PART('year', AGE(NOW(), to_date(u.start_working_time, 'YYYY-MM')))
                            ELSE NULL
                            END)      AS workExperience,
-              hj.award
+               hj.onboarding_award   AS onboardingAward
         FROM hunt_job AS hj
             LEFT JOIN yy_user AS u
         ON hj.uid = u.id AND u.is_delete = 0
@@ -395,12 +395,12 @@
     <!--  查询用户个人求职列表  -->
     <select id="queryPersonalList" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobPersonalVo">
         SELECT hj.id,
-               p.name        AS positionName,
-               dd1.name      AS provinceName,
-               dd2.name      AS cityName,
-               ep.min_salary AS minExpectedSalary,
-               ep.max_salary AS maxExpectedSalary,
-               hj.award,
+               p.name              AS positionName,
+               dd1.name            AS provinceName,
+               dd2.name            AS cityName,
+               ep.min_salary       AS minExpectedSalary,
+               ep.max_salary       AS maxExpectedSalary,
+               hj.onboarding_award AS onboardingAward,
                hj.status
         FROM hunt_job AS hj
                  LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
@@ -543,10 +543,7 @@
                ewa.country_code           AS countryCode,
                ewa.province_code          AS provinceCode,
                ewa.city_code              AS cityCode,
-               hj.award,
-               hj.interview_reward_rate   AS interviewRewardRate,
-               hj.onboard_reward_rate     AS onboardRewardRate,
-               hj.full_member_reward_rate AS fullMemberRewardRate
+               hj.onboarding_award        AS onboardingAward
         FROM hunt_job AS hj
                  LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
                  LEFT JOIN position AS p1 ON ep.industry_code = p1.code AND p1.is_delete = 0
@@ -591,7 +588,7 @@
                            END)     AS workExperience,
                ep.min_salary        AS minExpectedSalary,
                ep.max_salary        AS maxExpectedSalary,
-               hj.award,
+               hj.onboarding_award  AS onboardingAward,
                es.status            AS employStatus,
                hj.description,
                ev.phone,

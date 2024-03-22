@@ -73,9 +73,9 @@ public class HuntJobDetailsPreviewVo {
     private Integer maxExpectedSalary;
 
     /**
-     * 奖励金额
+     * 入职成功奖金
      */
-    private Integer award;
+    private Integer onboardingAward;
 
     /**
      * 求职状态

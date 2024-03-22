@@ -68,7 +68,7 @@ public class HuntJobHomePageVo {
     private String cityName;
 
     /**
-     * 奖励金额
+     * 入职成功奖金
      */
-    private Integer award;
+    private Integer onboardingAward;
 }

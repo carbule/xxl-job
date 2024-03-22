@@ -98,9 +98,9 @@ public class HuntJobDetailVo {
     private String cityCode;
 
     /**
-     * 推荐奖励
+     * 入职成功奖金
      */
-    private Integer award;
+    private Integer onboardingAward;
 
     /**
      * 面试奖励分配比例

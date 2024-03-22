@@ -60,9 +60,9 @@ public class HuntJobShareInfo {
     private Integer workExperience;
 
     /**
-     * 奖励金额
+     * 入职成功奖金
      */
-    private Integer award;
+    private Integer onboardingAward;
 
     /**
      * 推荐人头像
