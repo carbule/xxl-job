@@ -369,8 +369,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BeanUtils.copyProperties(user, loginUser);
         UserWalletAccount userWalletAccount = new UserWalletAccount();
         userWalletAccount.setUid(id);
-        userWalletAccount.setAvailableBalance(new BigDecimal(0));
-        userWalletAccount.setFreezeAmount(new BigDecimal(0));
+        userWalletAccount.setAvailableBalance(new BigDecimal("0"));
+        userWalletAccount.setFreezeAmount(new BigDecimal("0"));
         userWalletAccount.setStatus(0);
         userWalletAccountMapper.insert(userWalletAccount);
         return loginUser;
@@ -824,30 +824,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Integer status = userWalletAccount.getStatus();
         if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
         String code = userRechargeDto.getCode();
-        Integer quantity = userRechargeDto.getQuantity();
+        String quantity = userRechargeDto.getQuantity();
+        if (CalculationUtil.containsNonNumericCharacter(quantity)) throw new YouyaException("请输入有效金额");
+        BigDecimal rechargeQuantity = new BigDecimal(quantity);
+        if (CalculationUtil.isNegativeNumber(rechargeQuantity)) throw new YouyaException("充值金额必须是正数");
+        BigDecimal divisor = new BigDecimal("1");
+        boolean isPositiveInteger = rechargeQuantity.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
+        if (!isPositiveInteger) throw new YouyaException("充值金额必须是1的整数倍");
         SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getCode, USER_RECHARGE_PRODUCT_CODE).eq(SysVirtualProduct::getIsDelete, 0));
         if (null == virtualProduct) throw new YouyaException("充值商品不存在");
         Long productId = virtualProduct.getId();
         BigDecimal price = virtualProduct.getPrice();
-        BigDecimal multiply = price.multiply(new BigDecimal(quantity));
-        int totalAmount = multiply.intValue();
-        log.info("用户：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", phone, productId, price, quantity, totalAmount);
+        if (price.compareTo(new BigDecimal("0")) <= 0) throw new YouyaException("充值商品预设金额错误，请联系客服");
+        BigDecimal amount = price.multiply(rechargeQuantity);
+        log.info("用户：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", phone, productId, price, quantity, amount);
         //todo 放开最低充值限制
-        //if (totalAmount < 100) throw new YouyaException("最低充值金额为1元");
+//        if (multiply.compareTo(new BigDecimal("100")) < 0) throw new YouyaException("最低充值金额为1元");
+        int quantityValue = rechargeQuantity.intValue();
         Long accountId = userWalletAccount.getId();
         SysOrder sysOrder = new SysOrder();
         sysOrder.setSysProductId(productId).setBuyerId(accountId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
-                .setQuantity(quantity).setTotalAmount(multiply).setActualAmount(multiply).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
+                .setQuantity(quantityValue).setTotalAmount(amount).setActualAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
         sysOrderMapper.insert(sysOrder);
         String openid = WeChatUtil.code2Session(code);
         if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
         if (StringUtils.isBlank(userRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
         Long orderId = sysOrder.getId();
-        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), userRechargeNotifyUrl, totalAmount, openid);
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), userRechargeNotifyUrl, amount.intValue(), openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
         log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功，微信响应报文：【{}】", phone, productId, JSONObject.toJSONString(response));
         WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-        walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(new BigDecimal(totalAmount)).setCurrency(CurrencyTypeEnum.CNY.getType())
+        walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                 .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
         walletTransactionFlowMapper.insert(walletTransactionFlow);
         try {
@@ -1675,6 +1682,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
         String phone = loginUser.getPhone();
+        String amount = withdrawalDto.getAmount();
+        if (CalculationUtil.containsNonNumericCharacter(amount)) throw new YouyaException("请输入有效的提现金额");
+        BigDecimal decimal = new BigDecimal(amount);
+        //先去除尾部多余的零
+        BigDecimal withdrawalAmount = decimal.stripTrailingZeros();
+        //获取有效的小数位
+        int scale = withdrawalAmount.scale();
+        //判断经过处理后的小数位是否为2
+        if (scale > 2) throw new YouyaException("提现最小金额单位为分");
+        if (withdrawalAmount.compareTo(new BigDecimal("0.1")) < 0) throw new YouyaException("支付宝最小提现金额为0.1元");
         Long walletAccountId = userWalletAccountMapper.queryWalletIdByUserId(userId);
         if (null == walletAccountId) throw new YouyaException("钱包账户不存在");
         String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
@@ -1689,16 +1706,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     throw new YouyaException("钱包账户已被冻结，请联系客服");
                 BigDecimal availableBalance = walletAccount.getAvailableBalance();
                 if (availableBalance.intValue() <= 0) throw new YouyaException("当前账户可用余额为0，无法提现");
-                String amount = withdrawalDto.getAmount();
-                BigDecimal decimal = new BigDecimal(amount);
-                //先去除尾部多余的零
-                BigDecimal withdrawalAmount = decimal.stripTrailingZeros();
-                //设置小数位数为2，使用HALF_UP或其他合适的舍入模式
-                int scale = withdrawalAmount.scale();
-                //判断经过处理后的小数位是否为2
-                if (scale > 2) throw new YouyaException("提现最小金额单位为分");
                 if (withdrawalAmount.compareTo(availableBalance) > 0) throw new YouyaException("提现金额不能大于账户可用余额");
-                if (withdrawalAmount.compareTo(new BigDecimal("0.1")) < 0) throw new YouyaException("最小提现金额为0.1元");
                 //查询支付宝商户账号可用余额
                 AlipayFundAccountQueryResponse alipayFundAccountQueryResponse = AlipayUtil.fundAccountQuery();
                 if (null == alipayFundAccountQueryResponse) throw new YouyaException("网络异常，请稍后重试");
@@ -1727,7 +1735,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     if (StringUtils.isBlank(alipayAccount)) throw new YouyaException("支付宝账号未绑定，提现失败");
                     String alipayAccountName = loginUser.getAlipayAccountName();
                     if (StringUtils.isBlank(alipayAccountName)) throw new YouyaException("支付宝账号未实名认证，提现失败");
-                    BigDecimal multiplyAmount = withdrawalAmount.multiply(BigDecimal.valueOf(100));
+                    BigDecimal multiplyAmount = withdrawalAmount.multiply(new BigDecimal("100"));
                     //创建内部转账订单
                     Long withdrawalRecordId = IdWorker.getId();
                     WalletWithdrawalRecord walletWithdrawalRecord = new WalletWithdrawalRecord();
@@ -1789,9 +1797,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                                 walletWithdrawalRecord.setAlipayFundOrderId(payFundOrderId);
                                 walletWithdrawalRecord.setCompletionTime(completionDate);
                                 //更新账户金额
-                                BigDecimal hundred = BigDecimal.valueOf(100);
-                                BigDecimal multiply = withdrawalAmount.multiply(hundred);
-                                BigDecimal subtract = availableBalance.subtract(multiply);
+                                BigDecimal subtract = availableBalance.subtract(multiplyAmount);
                                 walletAccount.setAvailableBalance(subtract);
                                 //更新账户交易流水状态
                                 walletTransactionFlow.setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus());

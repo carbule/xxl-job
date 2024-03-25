@@ -1,7 +1,6 @@
 package com.korant.youya.workplace.pojo.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -23,6 +22,6 @@ public class UserRechargeDto {
     /**
      * 商品购买数量
      */
-    @NotNull(message = "购买数量不能为空")
-    private Integer quantity;
+    @NotBlank(message = "购买数量不能为空")
+    private String quantity;
 }

@@ -4,8 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 /**
  * @ClassName HuntJobModifyDto
  * @Description
@@ -37,7 +35,7 @@ public class HuntJobModifyDto {
     /**
      * 入职成功奖金
      */
-    private BigDecimal onboardingAward;
+    private String onboardingAward;
 
     /**
      * 求职说明

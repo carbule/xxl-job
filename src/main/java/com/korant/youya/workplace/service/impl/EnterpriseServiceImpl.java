@@ -490,8 +490,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         userEnterpriseMapper.insert(userEnterprise);
         EnterpriseWalletAccount enterpriseWalletAccount = new EnterpriseWalletAccount();
         enterpriseWalletAccount.setEnterpriseId(enterprise.getId());
-        enterpriseWalletAccount.setAvailableBalance(new BigDecimal(0));
-        enterpriseWalletAccount.setFreezeAmount(new BigDecimal(0));
+        enterpriseWalletAccount.setAvailableBalance(new BigDecimal("0"));
+        enterpriseWalletAccount.setFreezeAmount(new BigDecimal("0"));
         enterpriseWalletAccount.setStatus(0);
         enterpriseWalletAccountMapper.insert(enterpriseWalletAccount);
     }
@@ -923,30 +923,37 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         if (WalletAccountStatusEnum.FROZEN.getStatus() == status) throw new YouyaException("钱包账户已被冻结，请联系客服");
         String enterpriseName = enterprise.getName();
         String code = enterpriseRechargeDto.getCode();
-        Integer quantity = enterpriseRechargeDto.getQuantity();
+        String quantity = enterpriseRechargeDto.getQuantity();
+        if (CalculationUtil.containsNonNumericCharacter(quantity)) throw new YouyaException("请输入有效金额");
+        BigDecimal rechargeQuantity = new BigDecimal(quantity);
+        if (CalculationUtil.isNegativeNumber(rechargeQuantity)) throw new YouyaException("充值金额必须是正数");
+        BigDecimal divisor = new BigDecimal("1");
+        boolean isPositiveInteger = rechargeQuantity.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
+        if (!isPositiveInteger) throw new YouyaException("充值金额必须是1的整数倍");
         SysVirtualProduct virtualProduct = sysVirtualProductMapper.selectOne(new LambdaQueryWrapper<SysVirtualProduct>().eq(SysVirtualProduct::getCode, ENTERPRISE_RECHARGE_PRODUCT_CODE).eq(SysVirtualProduct::getIsDelete, 0));
         if (null == virtualProduct) throw new YouyaException("充值商品不存在");
         Long productId = virtualProduct.getId();
         BigDecimal price = virtualProduct.getPrice();
-        BigDecimal multiply = price.multiply(new BigDecimal(quantity));
-        int totalAmount = multiply.intValue();
-        log.info("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", enterpriseName, enterpriseId, productId, price, quantity, totalAmount);
+        if (price.compareTo(new BigDecimal("0")) <= 0) throw new YouyaException("充值商品预设金额错误，请联系客服");
+        BigDecimal amount = price.multiply(rechargeQuantity);
+        log.info("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，单价：【{}】，数量：【{}】，总金额：【{}】", enterpriseName, enterpriseId, productId, price, quantity, amount);
         //todo 放开最低充值限制
-        //if (totalAmount < 100) throw new YouyaException("最低充值金额为1元");
+//        if (multiply.compareTo(new BigDecimal("100")) < 0) throw new YouyaException("最低充值金额为1元");
+        int quantityValue = rechargeQuantity.intValue();
         Long walletAccountId = enterpriseWalletAccount.getId();
         SysOrder sysOrder = new SysOrder();
         sysOrder.setSysProductId(productId).setBuyerId(walletAccountId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
-                .setQuantity(quantity).setTotalAmount(multiply).setActualAmount(multiply).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
+                .setQuantity(quantityValue).setTotalAmount(amount).setActualAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
         sysOrderMapper.insert(sysOrder);
         String openid = WeChatUtil.code2Session(code);
         if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
         if (StringUtils.isBlank(enterpriseRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
         Long orderId = sysOrder.getId();
-        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), enterpriseRechargeNotifyUrl, totalAmount, openid);
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), enterpriseRechargeNotifyUrl, amount.intValue(), openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
         log.info("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功，微信响应报文：【{}】", enterpriseName, enterpriseId, productId, response);
         WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-        walletTransactionFlow.setAccountId(walletAccountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(new BigDecimal(totalAmount)).setCurrency(CurrencyTypeEnum.CNY.getType())
+        walletTransactionFlow.setAccountId(walletAccountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                 .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
         walletTransactionFlowMapper.insert(walletTransactionFlow);
         try {

@@ -318,11 +318,13 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         Integer authenticationStatus = loginUser.getAuthenticationStatus();
         if (UserAuthenticationStatusEnum.CERTIFIED.getStatus() != authenticationStatus)
             throw new YouyaException("请先完成实名认证再发布求职信息");
-        BigDecimal onboardingAward = createDto.getOnboardingAward();
         HuntJob huntJob = new HuntJob();
         Long id = IdWorker.getId();
         huntJob.setId(id);
-        if (null != onboardingAward) {
+        String amount = createDto.getOnboardingAward();
+        if (StringUtils.isNotBlank(amount)) {
+            if (CalculationUtil.containsNonNumericCharacter(amount)) throw new YouyaException("请输入有效金额");
+            BigDecimal onboardingAward = new BigDecimal(amount);
             if (CalculationUtil.isNegativeNumber(onboardingAward)) throw new YouyaException("奖励金额必须是正数");
             BigDecimal divisor = new BigDecimal("1");
             boolean isPositiveInteger = onboardingAward.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
@@ -412,15 +414,20 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         if (null == huntJob) throw new YouyaException("求职信息不存在");
         Integer status = huntJob.getStatus();
         if (HuntJobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
-        BigDecimal onboardingAward = modifyDto.getOnboardingAward();
-        if (null != onboardingAward) {
+        String amount = modifyDto.getOnboardingAward();
+        if (StringUtils.isNotBlank(amount)) {
+            if (CalculationUtil.containsNonNumericCharacter(amount)) throw new YouyaException("请输入有效金额");
+            BigDecimal onboardingAward = new BigDecimal(amount);
             if (CalculationUtil.isNegativeNumber(onboardingAward)) throw new YouyaException("奖励金额必须是正数");
             BigDecimal divisor = new BigDecimal("1");
             boolean isPositiveInteger = onboardingAward.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
             if (!isPositiveInteger) throw new YouyaException("奖励金额必须是1的整数倍");
-            modifyDto.setOnboardingAward(onboardingAward.multiply(new BigDecimal(100)));
+            huntJob.setOnboardingAward(onboardingAward.multiply(new BigDecimal("100")));
         }
-        huntJobMapper.modify(modifyDto);
+        huntJob.setPositionId(modifyDto.getPositionId());
+        huntJob.setAreaId(modifyDto.getAreaId());
+        huntJob.setDescription(modifyDto.getDescription());
+        huntJobMapper.updateById(huntJob);
     }
 
     /**

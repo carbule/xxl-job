@@ -2,6 +2,7 @@ package com.korant.youya.workplace.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.regex.Pattern;
 
 /**
  * @ClassName CalculationUtil
@@ -59,6 +60,17 @@ public class CalculationUtil {
     public static int getScaleAfterStrippingTrailingZeros(BigDecimal decimal) {
         BigDecimal stripTrailingZeros = decimal.stripTrailingZeros();
         return stripTrailingZeros.scale();
+    }
+
+    /**
+     * 判断否包含除了数字和小数点以外的字符
+     *
+     * @param str
+     * @return
+     */
+    public static boolean containsNonNumericCharacter(String str) {
+        Pattern pattern = Pattern.compile("[^0-9.]");
+        return pattern.matcher(str).find();
     }
 
     public static void main(String[] args) {
