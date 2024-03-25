@@ -12,6 +12,7 @@ import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -41,6 +42,7 @@ public class AttentionHuntJobServiceImpl extends ServiceImpl<AttentionHuntJobMap
         int pageSize = personalListDto.getPageSize();
         Long count = attentionHuntJobMapper.selectCount(new LambdaQueryWrapper<AttentionHuntJob>().eq(AttentionHuntJob::getUid, userId).eq(AttentionHuntJob::getIsDelete, 0));
         List<AttentionHuntJobPersonalVo> list = attentionHuntJobMapper.queryPersonalList(userId, personalListDto);
+        list.forEach(s -> s.setOnboardingAward(s.getOnboardingAward().multiply(new BigDecimal("0.01"))));
         Page<AttentionHuntJobPersonalVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;

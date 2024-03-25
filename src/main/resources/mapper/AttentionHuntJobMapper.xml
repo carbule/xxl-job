@@ -17,7 +17,7 @@
                ep.max_salary        AS maxExpectedSalary,
                dd1.name             AS provinceName,
                dd2.name             AS cityName,
-               hj.award
+               hj.onboarding_award  AS onboardingAward
         FROM attention_hunt_job AS ahj
                  LEFT JOIN hunt_job AS hj ON ahj.hunt_id = hj.id
                  LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0

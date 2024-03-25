@@ -146,7 +146,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     @Override
     public JobHomePageDetailVo queryHomePageDetailById(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
-        return jobMapper.queryHomePageDetailById(userId, id);
+        JobHomePageDetailVo jobHomePageDetailVo = jobMapper.queryHomePageDetailById(userId, id);
+        jobHomePageDetailVo.setAward(jobHomePageDetailVo.getAward().multiply(new BigDecimal("0.01")));
+        return jobHomePageDetailVo;
     }
 
     /**
@@ -225,6 +227,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         shareInfo.setRefereeLastName(userPublicInfoVo.getLastName());
         shareInfo.setRefereeFirstName(userPublicInfoVo.getFirstName());
         shareInfo.setRefereeGender(userPublicInfoVo.getGender());
+        shareInfo.setAward(shareInfo.getAward().multiply(new BigDecimal("0.01")));
         return shareInfo;
     }
 
@@ -421,7 +424,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
      */
     @Override
     public JobDetailVo detail(Long id) {
-        return jobMapper.detail(id);
+        JobDetailVo detail = jobMapper.detail(id);
+        detail.setAward(detail.getAward().multiply(new BigDecimal("0.01")));
+        return detail;
     }
 
     /**

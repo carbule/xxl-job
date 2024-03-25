@@ -16,7 +16,7 @@
             <result column="workExperience" property="workExperience"/>
             <result column="minSalary" property="minSalary"/>
             <result column="maxSalary" property="maxSalary"/>
-            <result column="award" property="award"/>
+            <result column="onboardingAward" property="onboardingAward"/>
             <result column="associationPositionName" property="associationPositionName"/>
             <result column="logo" property="logo"/>
             <result column="enterpriseName" property="enterpriseName"/>
@@ -117,7 +117,7 @@
             WHERE uid = u.id
           AND is_delete = 0)
         ORDER BY ep.create_time DESC LIMIT 1) AS maxSalary,
-            hj.award,
+            hj.onboarding_award AS onboardingAward,
             p.name AS associationPositionName,
             e.logo,
             e.name AS enterpriseName

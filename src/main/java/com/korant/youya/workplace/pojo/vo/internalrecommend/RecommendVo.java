@@ -3,6 +3,8 @@ package com.korant.youya.workplace.pojo.vo.internalrecommend;
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName RecommendVo
  * @Description
@@ -66,9 +68,9 @@ public class RecommendVo {
     private Integer maxSalary;
 
     /**
-     * 推荐奖励
+     * 入职成功奖金
      */
-    private Integer award;
+    private BigDecimal onboardingAward;
 
     /**
      * 关联职位名称

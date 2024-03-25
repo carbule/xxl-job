@@ -2,6 +2,8 @@ package com.korant.youya.workplace.pojo.vo.huntjob;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName HuntJobPersonalVo
  * @Description
@@ -45,7 +47,7 @@ public class HuntJobPersonalVo {
     /**
      * 入职成功奖金
      */
-    private Integer onboardingAward;
+    private BigDecimal onboardingAward;
 
     /**
      * 求职状态

@@ -4,6 +4,7 @@ import com.korant.youya.workplace.annotations.Dict;
 import com.korant.youya.workplace.pojo.vo.workexperience.WorkExperiencePreviewVo;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -80,7 +81,7 @@ public class HuntJobHomePageDetailVo {
     /**
      * 入职成功奖金
      */
-    private Integer onboardingAward;
+    private BigDecimal onboardingAward;
 
     /**
      * 求职状态

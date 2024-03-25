@@ -129,6 +129,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
             count = huntJobMapper.queryHomePageListCountByUserId(userId, enterpriseId, listDto);
             list = huntJobMapper.queryHomePageListByUserId(userId, enterpriseId, listDto);
         }
+        list.forEach(s -> s.setOnboardingAward(s.getOnboardingAward().multiply(new BigDecimal("0.01"))));
         Page<HuntJobHomePageVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
@@ -143,7 +144,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     @Override
     public HuntJobHomePageDetailVo queryHomePageDetailById(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
-        return huntJobMapper.queryHomePageDetailById(userId, id);
+        HuntJobHomePageDetailVo homePageDetailVo = huntJobMapper.queryHomePageDetailById(userId, id);
+        homePageDetailVo.setOnboardingAward(homePageDetailVo.getOnboardingAward().multiply(new BigDecimal("0.01")));
+        return homePageDetailVo;
     }
 
     /**
@@ -202,6 +205,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         shareInfo.setRefereeLastName(userPublicInfoVo.getLastName());
         shareInfo.setRefereeFirstName(userPublicInfoVo.getFirstName());
         shareInfo.setRefereeGender(userPublicInfoVo.getGender());
+        shareInfo.setOnboardingAward(shareInfo.getOnboardingAward().multiply(new BigDecimal("0.01")));
         return shareInfo;
     }
 
@@ -239,6 +243,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         int pageSize = personalListDto.getPageSize();
         Long count = huntJobMapper.selectCount(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getUid, userId).eq(HuntJob::getStatus, status).eq(HuntJob::getIsDelete, 0));
         List<HuntJobPersonalVo> list = huntJobMapper.queryPersonalList(userId, status, personalListDto);
+        list.forEach(s -> s.setOnboardingAward(s.getOnboardingAward().multiply(new BigDecimal("0.01"))));
         Page<HuntJobPersonalVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
@@ -439,7 +444,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     @Override
     public HuntJobDetailsPreviewVo detailsPreview(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
-        return huntJobMapper.detailsPreview(userId, id);
+        HuntJobDetailsPreviewVo detailsPreview = huntJobMapper.detailsPreview(userId, id);
+        detailsPreview.setOnboardingAward(detailsPreview.getOnboardingAward().multiply(new BigDecimal("0.01")));
+        return detailsPreview;
     }
 
     /**
@@ -450,7 +457,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      */
     @Override
     public HuntJobDetailVo detail(Long id) {
-        return huntJobMapper.detail(id);
+        HuntJobDetailVo detail = huntJobMapper.detail(id);
+        detail.setOnboardingAward(detail.getOnboardingAward().multiply(new BigDecimal("0.01")));
+        return detail;
     }
 
     /**

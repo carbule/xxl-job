@@ -3,6 +3,8 @@ package com.korant.youya.workplace.pojo.vo.huntjob;
 import com.korant.youya.workplace.annotations.Dict;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName HuntJobShareInfo
  * @Description
@@ -62,7 +64,7 @@ public class HuntJobShareInfo {
     /**
      * 入职成功奖金
      */
-    private Integer onboardingAward;
+    private BigDecimal onboardingAward;
 
     /**
      * 推荐人头像
