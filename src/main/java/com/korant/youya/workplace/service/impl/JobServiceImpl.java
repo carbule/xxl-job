@@ -259,21 +259,22 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     @Transactional(rollbackFor = Exception.class)
     public void create(JobCreateDto createDto) {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        String phone = loginUser.getPhone();
         Long enterpriseId = loginUser.getEnterpriseId();
         if (null == enterpriseId) throw new YouyaException("请先认证企业或者加入企业");
         Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
         if (null == enterprise) throw new YouyaException("企业未注册");
         Integer authStatus = enterprise.getAuthStatus();
         if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus) throw new YouyaException("请等待企业通过审核再发布职位");
-        BigDecimal award = createDto.getAward();
+        String award = createDto.getAward();
         Job job = new Job();
         Long id = IdWorker.getId();
         job.setId(id);
-        if (null != award) {
-            if (CalculationUtil.isNegativeNumber(award)) throw new YouyaException("奖励金额必须是正数");
+        if (StringUtils.isNotBlank(award)) {
+            if (CalculationUtil.containsNonNumericCharacter(award)) throw new YouyaException("请输入有效金额");
+            BigDecimal amount = new BigDecimal(award);
+            if (CalculationUtil.isNegativeNumber(amount)) throw new YouyaException("奖励金额必须是正数");
             BigDecimal divisor = new BigDecimal("1");
-            boolean isPositiveInteger = award.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
+            boolean isPositiveInteger = amount.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
             if (!isPositiveInteger) throw new YouyaException("奖励金额必须是1的整数倍");
             BigDecimal interviewRewardRate = createDto.getInterviewRewardRate();
             if (null == interviewRewardRate) throw new YouyaException("面试奖励分配比例不能为空");
@@ -301,62 +302,8 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             BonusDistributionRule fullMemberBonusDistributionRule = bonusDistributionRuleMapper.selectOne(new LambdaQueryWrapper<BonusDistributionRule>().eq(BonusDistributionRule::getCode, JOB_FULL_MEMBER_BONUS_DISTRIBUTION_RULE).eq(BonusDistributionRule::getIsDelete, 0));
             if (null == fullMemberBonusDistributionRule) throw new YouyaException("职位面试阶段预设奖金分配规则缺失，请联系客服");
             job.setFullMemberBonusDistributionRule(JOB_FULL_MEMBER_BONUS_DISTRIBUTION_RULE);
-            BigDecimal totalAward = award.multiply(new BigDecimal("100"));
+            BigDecimal totalAward = amount.multiply(new BigDecimal("100"));
             job.setAward(totalAward);
-//            Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
-//            String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
-//            RLock walletLock = redissonClient.getLock(walletLockKey);
-//            try {
-//                boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
-//                if (tryWalletLock) {
-//                    EnterpriseWalletAccount walletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
-//                    if (null == walletAccount) throw new YouyaException("企业钱包账户不存在");
-//                    Integer accountStatus = walletAccount.getStatus();
-//                    if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
-//                        throw new YouyaException("钱包账户已被冻结，请联系客服");
-//                    BigDecimal availableBalance = walletAccount.getAvailableBalance();
-//                    if (availableBalance.compareTo(new BigDecimal("0")) <= 0)
-//                        throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
-//                    BigDecimal shortfall = availableBalance.subtract(totalAward);
-//                    if (shortfall.compareTo(new BigDecimal("0")) < 0) {
-//                        String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
-//                        throw new YouyaException(msg);
-//                    }
-//                    LocalDateTime now = LocalDateTime.now();
-//                    EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
-//                    enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
-//                    enterpriseWalletFreezeRecord.setJobId(id);
-//                    enterpriseWalletFreezeRecord.setAmount(totalAward);
-//                    enterpriseWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
-//                    enterpriseWalletFreezeRecord.setOperateTime(now);
-//                    enterpriseWalletFreezeRecordMapper.insert(enterpriseWalletFreezeRecord);
-//                    BigDecimal freezeAmount = walletAccount.getFreezeAmount();
-//                    walletAccount.setFreezeAmount(freezeAmount.add(totalAward));
-//                    walletAccount.setAvailableBalance(shortfall);
-//                    enterpriseWalletAccountMapper.updateById(walletAccount);
-//                    Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
-//                    WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-//                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(totalAward).setCurrency(CurrencyTypeEnum.CNY.getType())
-//                            .setDescription(JOB_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
-//                    walletTransactionFlowMapper.insert(walletTransactionFlow);
-//                } else {
-//                    log.error("用户：【{}】，创建职位信息，获取钱包账户锁超时", phone);
-//                    throw new YouyaException("网络异常，请稍后重试");
-//                }
-//            } catch (InterruptedException e) {
-//                log.error("用户：【{}】，创建职位信息，获取钱包账户锁失败，原因：", phone, e);
-//                throw new YouyaException("网络异常，请稍后重试");
-//            } catch (YouyaException e) {
-//                log.error("用户：【{}】，创建职位信息失败", phone);
-//                throw e;
-//            } catch (Exception e) {
-//                log.error("用户：【{}】，创建职位信息失败，原因", phone, e);
-//                throw new YouyaException("网络异常，请稍后重试");
-//            } finally {
-//                if (walletLock != null && walletLock.isHeldByCurrentThread()) {
-//                    walletLock.unlock();
-//                }
-//            }
         }
         String address = districtDataMapper.searchAddressByCode(createDto.getProvinceCode(), createDto.getCityCode());
         String detailAddress = address + createDto.getDetailAddress();
@@ -401,11 +348,13 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
         Integer auditStatus = job.getAuditStatus();
         if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus) throw new YouyaException("等待审核中的职位不可修改");
-        BigDecimal award = modifyDto.getAward();
-        if (null != award) {
-            if (CalculationUtil.isNegativeNumber(award)) throw new YouyaException("奖励金额必须是正数");
+        String award = modifyDto.getAward();
+        if (StringUtils.isNotBlank(award)) {
+            if (CalculationUtil.containsNonNumericCharacter(award)) throw new YouyaException("请输入有效金额");
+            BigDecimal amount = new BigDecimal(award);
+            if (CalculationUtil.isNegativeNumber(amount)) throw new YouyaException("奖励金额必须是正数");
             BigDecimal divisor = new BigDecimal("1");
-            boolean isPositiveInteger = award.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
+            boolean isPositiveInteger = amount.remainder(divisor).compareTo(BigDecimal.ZERO) == 0;
             if (!isPositiveInteger) throw new YouyaException("奖励金额必须是1的整数倍");
             BigDecimal interviewRewardRate = modifyDto.getInterviewRewardRate();
             if (null == interviewRewardRate) throw new YouyaException("面试奖励分配比例不能为空");
@@ -424,7 +373,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             if (fullMemberRewardRateScale > 2) throw new YouyaException("转正奖励分配比例最多只能包含两位有效小数位");
             BigDecimal total = interviewRewardRate.add(onboardRewardRate).add(fullMemberRewardRate);
             if (total.compareTo(new BigDecimal("100")) != 0) throw new YouyaException("所有奖励比例相加必须满足100%");
-            BigDecimal totalAward = award.multiply(new BigDecimal("100"));
+            BigDecimal totalAward = amount.multiply(new BigDecimal("100"));
             job.setAward(totalAward);
         }
         String oldAddress = districtDataMapper.searchAddressByCode(job.getProvinceCode(), job.getCityCode());
@@ -487,69 +436,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         Long uid = job.getUid();
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
-        String phone = loginUser.getPhone();
         if (!uid.equals(userId)) throw new YouyaException("非法操作");
         Integer status = job.getStatus();
         if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("职位已发布");
-//        BigDecimal award = job.getAward();
-//        if (null != award) {
-//            Long enterpriseId = loginUser.getEnterpriseId();
-//            if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
-//            Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
-//            String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
-//            RLock walletLock = redissonClient.getLock(walletLockKey);
-//            try {
-//                boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
-//                if (tryWalletLock) {
-//                    EnterpriseWalletAccount walletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
-//                    if (null == walletAccount) throw new YouyaException("企业钱包账户不存在");
-//                    Integer accountStatus = walletAccount.getStatus();
-//                    if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
-//                        throw new YouyaException("钱包账户已被冻结，请联系客服");
-//                    BigDecimal availableBalance = walletAccount.getAvailableBalance();
-//                    if (availableBalance.compareTo(new BigDecimal("0")) <= 0)
-//                        throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
-//                    BigDecimal shortfall = availableBalance.subtract(award);
-//                    if (shortfall.compareTo(new BigDecimal("0")) < 0) {
-//                        String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
-//                        throw new YouyaException(msg);
-//                    }
-//                    BigDecimal freezeAmount = walletAccount.getFreezeAmount();
-//                    LocalDateTime now = LocalDateTime.now();
-//                    EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
-//                    enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
-//                    enterpriseWalletFreezeRecord.setJobId(id);
-//                    enterpriseWalletFreezeRecord.setAmount(award);
-//                    enterpriseWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
-//                    enterpriseWalletFreezeRecord.setOperateTime(now);
-//                    enterpriseWalletFreezeRecordMapper.insert(enterpriseWalletFreezeRecord);
-//                    walletAccount.setFreezeAmount(freezeAmount.add(award));
-//                    walletAccount.setAvailableBalance(shortfall);
-//                    enterpriseWalletAccountMapper.updateById(walletAccount);
-//                    Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
-//                    WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-//                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(award).setCurrency(CurrencyTypeEnum.CNY.getType())
-//                            .setDescription(JOB_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
-//                    walletTransactionFlowMapper.insert(walletTransactionFlow);
-//                } else {
-//                    log.error("用户：【{}】，关闭职位信息，获取钱包账户锁超时", phone);
-//                    throw new YouyaException("网络异常，请稍后重试");
-//                }
-//            } catch (InterruptedException e) {
-//                log.error("用户：【{}】，关闭职位信息，获取钱包账户锁失败，原因：", phone, e);
-//                throw new YouyaException("网络异常，请稍后重试");
-//            } catch (YouyaException e) {
-//                log.error("用户：【{}】，关闭职位信息失败", phone);
-//                throw e;
-//            } catch (Exception e) {
-//                log.error("用户：【{}】，关闭职位信息失败，原因", phone, e);
-//                throw new YouyaException("网络异常，请稍后重试");
-//            } finally {
-//                if (walletLock != null && walletLock.isHeldByCurrentThread()) {
-//                    walletLock.unlock();
-//                }
-//            }
-//        }
         job.setStatus(JobStatusEnum.PUBLISHED.getStatus());
         job.setAuditStatus(JobAuditStatusEnum.UNAUDITED.getStatus());
         jobMapper.updateById(job);
@@ -567,64 +456,11 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         Long uid = job.getUid();
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
-        String phone = loginUser.getPhone();
         if (!uid.equals(userId)) throw new YouyaException("非法操作");
         Integer status = job.getStatus();
         if (JobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("职位已关闭");
         Integer auditStatus = job.getAuditStatus();
         if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus) throw new YouyaException("审核中的职位无法关闭");
-//        BigDecimal award = job.getAward();
-//        if (null != award) {
-//            Long enterpriseId = loginUser.getEnterpriseId();
-//            if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
-//            Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
-//            String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
-//            RLock walletLock = redissonClient.getLock(walletLockKey);
-//            try {
-//                boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
-//                if (tryWalletLock) {
-//                    EnterpriseWalletAccount walletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
-//                    if (null == walletAccount) throw new YouyaException("企业钱包账户不存在");
-//                    Integer accountStatus = walletAccount.getStatus();
-//                    if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
-//                        throw new YouyaException("钱包账户已被冻结，请联系客服");
-//                    BigDecimal availableBalance = walletAccount.getAvailableBalance();
-//                    BigDecimal freezeAmount = walletAccount.getFreezeAmount();
-//                    LocalDateTime now = LocalDateTime.now();
-//                    EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
-//                    enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
-//                    enterpriseWalletFreezeRecord.setJobId(id);
-//                    enterpriseWalletFreezeRecord.setAmount(award);
-//                    enterpriseWalletFreezeRecord.setType(WalletFreezeTypeEnum.UNFREEZE.getType());
-//                    enterpriseWalletFreezeRecord.setOperateTime(now);
-//                    enterpriseWalletFreezeRecordMapper.insert(enterpriseWalletFreezeRecord);
-//                    walletAccount.setFreezeAmount(freezeAmount.subtract(award));
-//                    walletAccount.setAvailableBalance(availableBalance.add(award));
-//                    enterpriseWalletAccountMapper.updateById(walletAccount);
-//                    Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
-//                    WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-//                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(award).setCurrency(CurrencyTypeEnum.CNY.getType())
-//                            .setDescription(JOB_UNFREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(award));
-//                    walletTransactionFlowMapper.insert(walletTransactionFlow);
-//                } else {
-//                    log.error("用户：【{}】，关闭职位信息，获取钱包账户锁超时", phone);
-//                    throw new YouyaException("网络异常，请稍后重试");
-//                }
-//            } catch (InterruptedException e) {
-//                log.error("用户：【{}】，关闭职位信息，获取钱包账户锁失败，原因：", phone, e);
-//                throw new YouyaException("网络异常，请稍后重试");
-//            } catch (YouyaException e) {
-//                log.error("用户：【{}】，关闭职位信息失败", phone);
-//                throw e;
-//            } catch (Exception e) {
-//                log.error("用户：【{}】，关闭职位信息失败，原因", phone, e);
-//                throw new YouyaException("网络异常，请稍后重试");
-//            } finally {
-//                if (walletLock != null && walletLock.isHeldByCurrentThread()) {
-//                    walletLock.unlock();
-//                }
-//            }
-//        }
         job.setStatus(JobStatusEnum.UNPUBLISHED.getStatus());
         jobMapper.updateById(job);
     }

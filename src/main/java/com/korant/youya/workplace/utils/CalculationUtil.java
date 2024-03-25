@@ -14,6 +14,17 @@ import java.util.regex.Pattern;
 public class CalculationUtil {
 
     /**
+     * 执行乘法保留相应小数位
+     *
+     * @param bd1
+     * @param bd2
+     * @return
+     */
+    public static BigDecimal multiply(BigDecimal bd1, BigDecimal bd2, int scale) {
+        return bd1.multiply(bd2).setScale(scale, RoundingMode.DOWN);
+    }
+
+    /**
      * 执行乘法并截断到两位小数
      *
      * @param bd1
@@ -74,9 +85,9 @@ public class CalculationUtil {
     }
 
     public static void main(String[] args) {
-        BigDecimal decimal1 = multiplyAndTruncateToTwoDecimalPlaces(new BigDecimal("0.93"), new BigDecimal("0.07"));
+        BigDecimal decimal1 = multiply(new BigDecimal("0.93"), new BigDecimal("1.11"), 0);
         System.out.println(decimal1);
-        BigDecimal decimal2 = divideAndTruncateToTwoDecimalPlaces(new BigDecimal("10"), new BigDecimal("3"));
-        System.out.println(decimal2);
+//        BigDecimal decimal2 = divideAndTruncateToTwoDecimalPlaces(new BigDecimal("10"), new BigDecimal("3"));
+//        System.out.println(decimal2);
     }
 }

@@ -7,6 +7,7 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDt
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.vo.candidate.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -156,4 +157,22 @@ public interface CandidateService {
      * @param id
      */
     void deleteConfirmation(Long id);
+
+    /**
+     * 企业钱包账户冻结
+     *
+     * @param enterpriseId
+     * @param amount
+     * @param jobId
+     */
+    void freeze(Long enterpriseId, BigDecimal amount, Long jobId);
+
+    /**
+     * 企业钱包账户解冻
+     *
+     * @param enterpriseId
+     * @param amount
+     * @param jobId
+     */
+    void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId);
 }

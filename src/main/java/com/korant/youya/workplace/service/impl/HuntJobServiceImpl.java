@@ -351,7 +351,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                         throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
                     BigDecimal shortfall = availableBalance.subtract(totalAward);
                     if (shortfall.compareTo(new BigDecimal("0")) < 0) {
-                        String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
+                        String msg = String.format("钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
                         throw new YouyaException(msg);
                     }
                     LocalDateTime now = LocalDateTime.now();
@@ -559,7 +559,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                         throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
                     BigDecimal shortfall = availableBalance.subtract(onboardingAward);
                     if (shortfall.compareTo(new BigDecimal("0")) < 0) {
-                        String msg = String.format("当前用户钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
+                        String msg = String.format("钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
                         throw new YouyaException(msg);
                     }
                     LocalDateTime now = LocalDateTime.now();

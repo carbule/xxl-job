@@ -105,7 +105,7 @@ public class JobCreateDto {
     /**
      * 推荐奖励
      */
-    private BigDecimal award;
+    private String award;
 
     /**
      * 面试奖励分配比例

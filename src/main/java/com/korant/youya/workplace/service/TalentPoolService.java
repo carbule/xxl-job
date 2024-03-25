@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.korant.youya.workplace.pojo.dto.talentpool.*;
 import com.korant.youya.workplace.pojo.vo.talentpool.*;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName TalentPoolService
  * @Description
@@ -159,4 +161,22 @@ public interface TalentPoolService {
      * @param id
      */
     void deleteConfirmation(Long id);
+
+    /**
+     * 企业钱包账户冻结
+     *
+     * @param enterpriseId
+     * @param amount
+     * @param jobId
+     */
+    void freeze(Long enterpriseId, BigDecimal amount, Long jobId);
+
+    /**
+     * 企业钱包账户解冻
+     *
+     * @param enterpriseId
+     * @param amount
+     * @param jobId
+     */
+    void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId);
 }

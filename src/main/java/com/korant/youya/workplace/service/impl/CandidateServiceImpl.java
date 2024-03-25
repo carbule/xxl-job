@@ -2,10 +2,11 @@ package com.korant.youya.workplace.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.korant.youya.workplace.enums.AcceptanceStatusEnum;
-import com.korant.youya.workplace.enums.CompletionStatusEnum;
+import com.korant.youya.workplace.constants.RedisConstant;
+import com.korant.youya.workplace.enums.*;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
+import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmationDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
@@ -13,13 +14,20 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.candidate.*;
 import com.korant.youya.workplace.service.CandidateService;
+import com.korant.youya.workplace.utils.CalculationUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName CandidateServiceImpl
@@ -29,6 +37,7 @@ import java.util.List;
  * @Version 1.0
  */
 @Service
+@Slf4j
 public class CandidateServiceImpl implements CandidateService {
 
     @Resource
@@ -51,6 +60,25 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Resource
     private ConfirmationMapper confirmationMapper;
+
+    @Resource
+    private CandidateService candidateService;
+
+    @Resource
+    private EnterpriseWalletAccountMapper enterpriseWalletAccountMapper;
+
+    @Resource
+    private EnterpriseWalletFreezeRecordMapper enterpriseWalletFreezeRecordMapper;
+
+    @Resource
+    private WalletTransactionFlowMapper walletTransactionFlowMapper;
+
+    @Resource
+    private RedissonClient redissonClient;
+
+    private static final String JOB_FREEZE_DES = "友涯企业职位奖金冻结";
+
+    private static final String JOB_UNFREEZE_DES = "友涯企业职位奖金解冻";
 
     /**
      * 查询候选人列表
@@ -118,7 +146,8 @@ public class CandidateServiceImpl implements CandidateService {
         Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
         if (null == job) throw new YouyaException("职位信息不存在");
         Long uid = job.getUid();
-        Long userId = SpringSecurityUtil.getUserId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         if (!uid.equals(userId)) throw new YouyaException("非法操作");
         Long recruitProcessInstanceId = applyJob.getRecruitProcessInstanceId();
         RecruitProcessInstance recruitProcessInstance = null;
@@ -134,6 +163,18 @@ public class CandidateServiceImpl implements CandidateService {
             if (null == recruitProcessInstance) throw new YouyaException("招聘环节实列不存在");
             Integer processStep = recruitProcessInstance.getProcessStep();
             if (processStep > 1) throw new YouyaException("当前招聘环节实列已更新至最新节点，无法创建面试邀请");
+        }
+        Long enterpriseId = loginUser.getEnterpriseId();
+        BigDecimal award = job.getAward();
+        if (null != award) {
+            BigDecimal interviewRewardRate = job.getInterviewRewardRate();
+            if (interviewRewardRate.compareTo(new BigDecimal("0")) > 0) {
+                BigDecimal rate = interviewRewardRate.multiply(new BigDecimal("0.01"));
+                BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
+                if (amount.compareTo(new BigDecimal("0")) > 0) {
+                    candidateService.freeze(enterpriseId, amount, jobId);
+                }
+            }
         }
         Interview interview = new Interview();
         interview.setRecruitProcessInstanceId(recruitProcessInstanceId).setApproach(createInterviewDto.getApproach()).setInterTime(createInterviewDto.getInterTime()).setNote(createInterviewDto.getNote());
@@ -163,13 +204,32 @@ public class CandidateServiceImpl implements CandidateService {
      */
     @Override
     public void cancelInterview(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Interview interview = interviewMapper.selectOne(new LambdaQueryWrapper<Interview>().eq(Interview::getId, id).eq(Interview::getIsDelete, 0));
         if (null == interview) throw new YouyaException("面试邀约信息不存在");
         Long recruitProcessInstanceId = interview.getRecruitProcessInstanceId();
+        ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(ApplyJob::getIsDelete, 0));
+        if (null == applyJob) throw new YouyaException("候选人信息不存在");
+        Long jobId = applyJob.getJobId();
+        if (null == jobId) throw new YouyaException("职位信息不存在");
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = interview.getCompletionStatus();
         if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus) throw new YouyaException("只有未完成的面试邀约才能取消");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        BigDecimal award = job.getAward();
+        if (null != award) {
+            BigDecimal interviewRewardRate = job.getInterviewRewardRate();
+            if (interviewRewardRate.compareTo(new BigDecimal("0")) > 0) {
+                BigDecimal rate = interviewRewardRate.multiply(new BigDecimal("0.01"));
+                BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
+                if (amount.compareTo(new BigDecimal("0")) > 0) {
+                    candidateService.unfreeze(enterpriseId, amount, jobId);
+                }
+            }
+        }
         interview.setCompletionStatus(CompletionStatusEnum.CANCELED.getStatus());
         interviewMapper.updateById(interview);
     }
@@ -225,7 +285,8 @@ public class CandidateServiceImpl implements CandidateService {
         Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
         if (null == job) throw new YouyaException("职位信息不存在");
         Long uid = job.getUid();
-        Long userId = SpringSecurityUtil.getUserId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         if (!uid.equals(userId)) throw new YouyaException("非法操作");
         Long recruitProcessInstanceId = applyJob.getRecruitProcessInstanceId();
         RecruitProcessInstance recruitProcessInstance = null;
@@ -245,6 +306,18 @@ public class CandidateServiceImpl implements CandidateService {
         boolean e1 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getAcceptanceStatus, 0).eq(Onboarding::getCompletionStatus, 0));
         boolean e2 = onboardingMapper.exists(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Onboarding::getAcceptanceStatus, 2).eq(Onboarding::getCompletionStatus, 2));
         if (e1 || e2) throw new YouyaException("当前已存在入职邀请或入职邀请已完成，无法重复创建");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        BigDecimal award = job.getAward();
+        if (null != award) {
+            BigDecimal onboardRewardRate = job.getOnboardRewardRate();
+            if (onboardRewardRate.compareTo(new BigDecimal("0")) > 0) {
+                BigDecimal rate = onboardRewardRate.multiply(new BigDecimal("0.01"));
+                BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
+                if (amount.compareTo(new BigDecimal("0")) > 0) {
+                    candidateService.freeze(enterpriseId, amount, jobId);
+                }
+            }
+        }
         Onboarding onboarding = new Onboarding();
         onboarding.setRecruitProcessInstanceId(recruitProcessInstanceId).setOnboardingTime(createOnboardingDto.getOnboardingTime()).setCountryCode(createOnboardingDto.getCountryCode()).setProvinceCode(createOnboardingDto.getProvinceCode()).setCityCode(createOnboardingDto.getCityCode()).setAddress(createOnboardingDto.getAddress()).setNote(createOnboardingDto.getNote());
         onboarding.setAcceptanceStatus(AcceptanceStatusEnum.PENDING.getStatus()).setCompletionStatus(CompletionStatusEnum.INCOMPLETE.getStatus());
@@ -273,13 +346,32 @@ public class CandidateServiceImpl implements CandidateService {
      */
     @Override
     public void cancelOnboarding(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Onboarding onboarding = onboardingMapper.selectOne(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getId, id).eq(Onboarding::getIsDelete, 0));
         if (null == onboarding) throw new YouyaException("入职邀约信息不存在");
         Long recruitProcessInstanceId = onboarding.getRecruitProcessInstanceId();
+        ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(ApplyJob::getIsDelete, 0));
+        if (null == applyJob) throw new YouyaException("候选人信息不存在");
+        Long jobId = applyJob.getJobId();
+        if (null == jobId) throw new YouyaException("职位信息不存在");
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = onboarding.getCompletionStatus();
         if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus) throw new YouyaException("只有未完成的入职邀约才能取消");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        BigDecimal award = job.getAward();
+        if (null != award) {
+            BigDecimal onboardRewardRate = job.getOnboardRewardRate();
+            if (onboardRewardRate.compareTo(new BigDecimal("0")) > 0) {
+                BigDecimal rate = onboardRewardRate.multiply(new BigDecimal("0.01"));
+                BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
+                if (amount.compareTo(new BigDecimal("0")) > 0) {
+                    candidateService.unfreeze(enterpriseId, amount, jobId);
+                }
+            }
+        }
         onboarding.setCompletionStatus(CompletionStatusEnum.CANCELED.getStatus());
         onboardingMapper.updateById(onboarding);
     }
@@ -335,7 +427,8 @@ public class CandidateServiceImpl implements CandidateService {
         Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
         if (null == job) throw new YouyaException("职位信息不存在");
         Long uid = job.getUid();
-        Long userId = SpringSecurityUtil.getUserId();
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         if (!uid.equals(userId)) throw new YouyaException("非法操作");
         Long recruitProcessInstanceId = applyJob.getRecruitProcessInstanceId();
         RecruitProcessInstance recruitProcessInstance = null;
@@ -353,6 +446,18 @@ public class CandidateServiceImpl implements CandidateService {
         boolean e1 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getAcceptanceStatus, 0).eq(Confirmation::getCompletionStatus, 0));
         boolean e2 = confirmationMapper.exists(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(Confirmation::getAcceptanceStatus, 2).eq(Confirmation::getCompletionStatus, 2));
         if (e1 || e2) throw new YouyaException("当前已存在转正邀请或转正邀请已完成，无法重复创建");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        BigDecimal award = job.getAward();
+        if (null != award) {
+            BigDecimal fullMemberRewardRate = job.getFullMemberRewardRate();
+            if (fullMemberRewardRate.compareTo(new BigDecimal("0")) > 0) {
+                BigDecimal rate = fullMemberRewardRate.multiply(new BigDecimal("0.01"));
+                BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
+                if (amount.compareTo(new BigDecimal("0")) > 0) {
+                    candidateService.freeze(enterpriseId, amount, jobId);
+                }
+            }
+        }
         Confirmation confirmation = new Confirmation();
         confirmation.setRecruitProcessInstanceId(recruitProcessInstanceId).setConfirmationTime(createConfirmationDto.getConfirmationTime()).setSalary(createConfirmationDto.getSalary()).setNote(createConfirmationDto.getNote());
         confirmation.setAcceptanceStatus(AcceptanceStatusEnum.PENDING.getStatus()).setCompletionStatus(CompletionStatusEnum.INCOMPLETE.getStatus());
@@ -381,13 +486,32 @@ public class CandidateServiceImpl implements CandidateService {
      */
     @Override
     public void cancelConfirmation(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Confirmation confirmation = confirmationMapper.selectOne(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getId, id).eq(Confirmation::getIsDelete, 0));
         if (null == confirmation) throw new YouyaException("入职邀约信息不存在");
         Long recruitProcessInstanceId = confirmation.getRecruitProcessInstanceId();
+        ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(ApplyJob::getIsDelete, 0));
+        if (null == applyJob) throw new YouyaException("候选人信息不存在");
+        Long jobId = applyJob.getJobId();
+        if (null == jobId) throw new YouyaException("职位信息不存在");
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = confirmation.getCompletionStatus();
         if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus) throw new YouyaException("只有未完成的转正邀约才能取消");
+        Long enterpriseId = loginUser.getEnterpriseId();
+        BigDecimal award = job.getAward();
+        if (null != award) {
+            BigDecimal fullMemberRewardRate = job.getFullMemberRewardRate();
+            if (fullMemberRewardRate.compareTo(new BigDecimal("0")) > 0) {
+                BigDecimal rate = fullMemberRewardRate.multiply(new BigDecimal("0.01"));
+                BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
+                if (amount.compareTo(new BigDecimal("0")) > 0) {
+                    candidateService.unfreeze(enterpriseId, amount, jobId);
+                }
+            }
+        }
         confirmation.setCompletionStatus(CompletionStatusEnum.CANCELED.getStatus());
         confirmationMapper.updateById(confirmation);
     }
@@ -426,5 +550,124 @@ public class CandidateServiceImpl implements CandidateService {
         if (CompletionStatusEnum.CANCELED.getStatus() != completionStatus) throw new YouyaException("只有已取消的转正邀约才能删除");
         confirmation.setIsDelete(1);
         confirmationMapper.updateById(confirmation);
+    }
+
+    /**
+     * 企业钱包账户冻结
+     *
+     * @param enterpriseId
+     * @param amount
+     * @param jobId
+     */
+    public void freeze(Long enterpriseId, BigDecimal amount, Long jobId) {
+        if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
+        Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
+        String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
+        RLock walletLock = redissonClient.getLock(walletLockKey);
+        try {
+            boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
+            if (tryWalletLock) {
+                EnterpriseWalletAccount walletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
+                if (null == walletAccount) throw new YouyaException("企业钱包账户不存在");
+                Integer accountStatus = walletAccount.getStatus();
+                if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
+                    throw new YouyaException("钱包账户已被冻结，请联系客服");
+                BigDecimal availableBalance = walletAccount.getAvailableBalance();
+                if (availableBalance.compareTo(new BigDecimal("0")) <= 0)
+                    throw new YouyaException("当前账户可用余额为0，无法支付推荐奖励");
+                BigDecimal shortfall = availableBalance.subtract(amount);
+                if (shortfall.compareTo(new BigDecimal("0")) < 0) {
+                    String msg = String.format("钱包账户余额：【%s】元，还差：【%s】元", availableBalance.multiply(new BigDecimal("0.01")), shortfall.abs().multiply(new BigDecimal("0.01")));
+                    throw new YouyaException(msg);
+                }
+                LocalDateTime now = LocalDateTime.now();
+                EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
+                enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
+                enterpriseWalletFreezeRecord.setJobId(jobId);
+                enterpriseWalletFreezeRecord.setAmount(amount);
+                enterpriseWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
+                enterpriseWalletFreezeRecord.setOperateTime(now);
+                enterpriseWalletFreezeRecordMapper.insert(enterpriseWalletFreezeRecord);
+                BigDecimal freezeAmount = walletAccount.getFreezeAmount();
+                walletAccount.setFreezeAmount(freezeAmount.add(amount));
+                walletAccount.setAvailableBalance(shortfall);
+                enterpriseWalletAccountMapper.updateById(walletAccount);
+                Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
+                WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
+                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                        .setDescription(JOB_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
+                walletTransactionFlowMapper.insert(walletTransactionFlow);
+            } else {
+                log.error("获取钱包账户锁超时");
+                throw new YouyaException("网络异常，请稍后重试");
+            }
+        } catch (InterruptedException e) {
+            log.error("获取钱包账户锁失败，原因：", e);
+            throw new YouyaException("网络异常，请稍后重试");
+        } catch (YouyaException e) {
+            log.error("企业钱包账户冻结失败");
+            throw e;
+        } catch (Exception e) {
+            log.error("企业钱包账户冻结失败，原因", e);
+            throw new YouyaException("网络异常，请稍后重试");
+        } finally {
+            if (walletLock != null && walletLock.isHeldByCurrentThread()) {
+                walletLock.unlock();
+            }
+        }
+    }
+
+    /**
+     * 企业钱包账户解冻
+     */
+    public void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId) {
+        if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
+        Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
+        String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
+        RLock walletLock = redissonClient.getLock(walletLockKey);
+        try {
+            boolean tryWalletLock = walletLock.tryLock(3, TimeUnit.SECONDS);
+            if (tryWalletLock) {
+                EnterpriseWalletAccount walletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
+                if (null == walletAccount) throw new YouyaException("企业钱包账户不存在");
+                Integer accountStatus = walletAccount.getStatus();
+                if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus)
+                    throw new YouyaException("钱包账户已被冻结，请联系客服");
+                BigDecimal availableBalance = walletAccount.getAvailableBalance();
+                BigDecimal freezeAmount = walletAccount.getFreezeAmount();
+                LocalDateTime now = LocalDateTime.now();
+                EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
+                enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
+                enterpriseWalletFreezeRecord.setJobId(jobId);
+                enterpriseWalletFreezeRecord.setAmount(amount);
+                enterpriseWalletFreezeRecord.setType(WalletFreezeTypeEnum.UNFREEZE.getType());
+                enterpriseWalletFreezeRecord.setOperateTime(now);
+                enterpriseWalletFreezeRecordMapper.insert(enterpriseWalletFreezeRecord);
+                walletAccount.setFreezeAmount(freezeAmount.subtract(amount));
+                walletAccount.setAvailableBalance(availableBalance.add(amount));
+                enterpriseWalletAccountMapper.updateById(walletAccount);
+                Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
+                WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
+                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                        .setDescription(JOB_UNFREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(amount));
+                walletTransactionFlowMapper.insert(walletTransactionFlow);
+            } else {
+                log.error("获取钱包账户锁超时");
+                throw new YouyaException("网络异常，请稍后重试");
+            }
+        } catch (InterruptedException e) {
+            log.error("获取钱包账户锁失败，原因：", e);
+            throw new YouyaException("网络异常，请稍后重试");
+        } catch (YouyaException e) {
+            log.error("企业钱包账户解冻失败");
+            throw e;
+        } catch (Exception e) {
+            log.error("企业钱包账户解冻失败，原因", e);
+            throw new YouyaException("网络异常，请稍后重试");
+        } finally {
+            if (walletLock != null && walletLock.isHeldByCurrentThread()) {
+                walletLock.unlock();
+            }
+        }
     }
 }
