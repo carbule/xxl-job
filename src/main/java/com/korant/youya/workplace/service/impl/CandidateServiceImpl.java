@@ -11,9 +11,13 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmation
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
+import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingMsgSubDTO;
+import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingProgressMsgSubDTO;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.candidate.*;
 import com.korant.youya.workplace.service.CandidateService;
+import com.korant.youya.workplace.service.UserService;
+import com.korant.youya.workplace.service.WxService;
 import com.korant.youya.workplace.utils.CalculationUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -75,6 +79,15 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Resource
     private RedissonClient redissonClient;
+
+    @Resource(name = "wxService4CandidateImpl")
+    private WxService wxService;
+
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private EnterpriseMapper enterpriseMapper;
 
     private static final String JOB_FREEZE_DES = "友涯企业职位奖金冻结";
 
@@ -217,7 +230,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = interview.getCompletionStatus();
-        if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus) throw new YouyaException("只有未完成的面试邀约才能取消");
+        if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus)
+            throw new YouyaException("只有未完成的面试邀约才能取消");
         Long enterpriseId = loginUser.getEnterpriseId();
         BigDecimal award = job.getAward();
         if (null != award) {
@@ -247,7 +261,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer acceptanceStatus = interview.getAcceptanceStatus();
-        if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus) throw new YouyaException("请等待受邀人完成接受操作");
+        if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus)
+            throw new YouyaException("请等待受邀人完成接受操作");
         interview.setCompletionStatus(CompletionStatusEnum.COMPLETE.getStatus());
         interviewMapper.updateById(interview);
     }
@@ -265,7 +280,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = interview.getCompletionStatus();
-        if (CompletionStatusEnum.CANCELED.getStatus() != completionStatus) throw new YouyaException("只有已取消的面试邀约才能删除");
+        if (CompletionStatusEnum.CANCELED.getStatus() != completionStatus)
+            throw new YouyaException("只有已取消的面试邀约才能删除");
         interview.setIsDelete(1);
         interviewMapper.updateById(interview);
     }
@@ -326,6 +342,36 @@ public class CandidateServiceImpl implements CandidateService {
             recruitProcessInstance.setProcessStep(2);
             recruitProcessInstanceMapper.updateById(recruitProcessInstance);
         }
+
+        // 发送微信消息订阅
+        sendOnboardingMessageSubscribe(job, applyJob, onboarding);
+    }
+
+    /**
+     * 发送微信消息订阅
+     *
+     * @param job        职位
+     * @param applyJob   职位申请记录
+     * @param onboarding 入职记录
+     */
+    protected void sendOnboardingMessageSubscribe(Job job, ApplyJob applyJob, Onboarding onboarding) {
+        // 查询申请人
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getId, applyJob.getApplicant()));
+        if (user == null) {
+            throw new YouyaException("用户不存在");
+        }
+        // 查询职位所在企业
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>()
+                .eq(Enterprise::getId, job.getEnterpriseId()));
+        if (enterprise == null) {
+            throw new YouyaException("企业不存在");
+        }
+        wxService.sendOnboardingMessageSubscribe(user.getWechatOpenId(), new OnboardingMsgSubDTO()
+                .setJobId(job.getId())
+                .setPositionName(job.getPositionName())
+                .setEnterpriseName(enterprise.getName())
+                .setTime(onboarding.getOnboardingTime()));
     }
 
     /**
@@ -359,7 +405,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = onboarding.getCompletionStatus();
-        if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus) throw new YouyaException("只有未完成的入职邀约才能取消");
+        if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus)
+            throw new YouyaException("只有未完成的入职邀约才能取消");
         Long enterpriseId = loginUser.getEnterpriseId();
         BigDecimal award = job.getAward();
         if (null != award) {
@@ -389,7 +436,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer acceptanceStatus = onboarding.getAcceptanceStatus();
-        if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus) throw new YouyaException("请等待受邀人完成接受操作");
+        if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus)
+            throw new YouyaException("请等待受邀人完成接受操作");
         onboarding.setCompletionStatus(CompletionStatusEnum.COMPLETE.getStatus());
         onboardingMapper.updateById(onboarding);
     }
@@ -407,7 +455,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = onboarding.getCompletionStatus();
-        if (CompletionStatusEnum.CANCELED.getStatus() != completionStatus) throw new YouyaException("只有已取消的入职邀约才能删除");
+        if (CompletionStatusEnum.CANCELED.getStatus() != completionStatus)
+            throw new YouyaException("只有已取消的入职邀约才能删除");
         onboarding.setIsDelete(1);
         onboardingMapper.updateById(onboarding);
     }
@@ -466,7 +515,38 @@ public class CandidateServiceImpl implements CandidateService {
             recruitProcessInstance.setProcessStep(3);
             recruitProcessInstanceMapper.updateById(recruitProcessInstance);
         }
+
+        // 发送微信消息订阅
+        sendOnboardingProgressMessageSubscribe(job, applyJob, confirmation);
     }
+
+    /**
+     * 发送微信消息订阅
+     *
+     * @param job          职位
+     * @param applyJob     职位申请信息
+     * @param confirmation 转正信息
+     */
+    protected void sendOnboardingProgressMessageSubscribe(Job job, ApplyJob applyJob, Confirmation confirmation) {
+        // 查询申请人
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getId, applyJob.getApplicant()));
+        if (user == null) {
+            throw new YouyaException("用户不存在");
+        }
+        // 查询职位所在企业
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>()
+                .eq(Enterprise::getId, job.getEnterpriseId()));
+        if (enterprise == null) {
+            throw new YouyaException("企业不存在");
+        }
+        wxService.sendOnboardingProgressMessageSubscribe(user.getWechatOpenId(), new OnboardingProgressMsgSubDTO()
+                .setJobId(job.getId())
+                .setPositionName(job.getPositionName())
+                .setEnterpriseName(enterprise.getName())
+                .setProgress("转正待确认"));
+    }
+
 
     /**
      * 查询转正邀约详情
@@ -499,7 +579,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = confirmation.getCompletionStatus();
-        if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus) throw new YouyaException("只有未完成的转正邀约才能取消");
+        if (CompletionStatusEnum.INCOMPLETE.getStatus() != completionStatus)
+            throw new YouyaException("只有未完成的转正邀约才能取消");
         Long enterpriseId = loginUser.getEnterpriseId();
         BigDecimal award = job.getAward();
         if (null != award) {
@@ -529,7 +610,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer acceptanceStatus = confirmation.getAcceptanceStatus();
-        if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus) throw new YouyaException("请等待受邀人完成接受操作");
+        if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus)
+            throw new YouyaException("请等待受邀人完成接受操作");
         confirmation.setCompletionStatus(CompletionStatusEnum.COMPLETE.getStatus());
         confirmationMapper.updateById(confirmation);
     }
@@ -547,7 +629,8 @@ public class CandidateServiceImpl implements CandidateService {
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
         if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
         Integer completionStatus = confirmation.getCompletionStatus();
-        if (CompletionStatusEnum.CANCELED.getStatus() != completionStatus) throw new YouyaException("只有已取消的转正邀约才能删除");
+        if (CompletionStatusEnum.CANCELED.getStatus() != completionStatus)
+            throw new YouyaException("只有已取消的转正邀约才能删除");
         confirmation.setIsDelete(1);
         confirmationMapper.updateById(confirmation);
     }

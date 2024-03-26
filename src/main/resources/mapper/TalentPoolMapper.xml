@@ -165,11 +165,14 @@
                nv.last_name                   AS lastName,
                nv.first_name                  AS firstName,
                u.personal_signature           AS personalSignature,
+               p3.name                        AS sectorName,
                p1.name                        AS positionName,
+               p1.organization_level          AS organizationLevel,
+               p1.class_level                 AS classLevel,
                ep.min_salary                  AS minSalary,
                ep.max_salary                  AS maxSalary,
                d1.name                        AS cityName,
-               p2.name                        AS associationPositionName,
+               j.position_name                AS associationPositionName,
                j.min_salary                   AS associationPositionMinSalary,
                j.max_salary                   AS associationPositionMaxSalary,
                rpi.process_step               AS processStep
@@ -180,6 +183,7 @@
                  LEFT JOIN employ_status AS es ON u.id = es.uid AND es.is_delete = 0
                  LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
                  LEFT JOIN position AS p1 ON ep.position_code = p1.code AND p1.is_delete = 0
+                 LEFT JOIN position AS p3 ON ep.sector_code = p3.code AND p3.is_delete = 0
                  LEFT JOIN expected_work_area AS ewa ON hj.area_id = ewa.id AND ewa.is_delete = 0
                  LEFT JOIN district_data AS d1 ON ewa.city_code = d1.code AND d1.is_delete = 0
                  LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0

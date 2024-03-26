@@ -43,9 +43,24 @@ public class TalentRecruitmentRecordsVo {
     private String personalSignature;
 
     /**
+     * 领域名称
+     */
+    private String sectorName;
+
+    /**
      * 职位名称
      */
     private String positionName;
+
+    /**
+     * 职业群等级
+     */
+    private String organizationLevel;
+
+    /**
+     * 职业等级
+     */
+    private String classLevel;
 
     /**
      * 最低薪资

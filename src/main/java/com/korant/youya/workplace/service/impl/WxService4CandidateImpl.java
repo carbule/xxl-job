@@ -15,20 +15,20 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
  * <p>
+ * 微信服务 - 候选人相关
  * </p>
  *
  * @author zhouzhifeng
  * @since 2024/3/13 13:56
  */
-@Service
+@Service("wxService4CandidateImpl")
 @RequiredArgsConstructor
 @Slf4j
-public class WxServiceImpl implements WxService {
+public class WxService4CandidateImpl implements WxService {
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -45,7 +45,7 @@ public class WxServiceImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getInterviewAppointment())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-//                            .setPage(String.format("subpackages/PackageJob/JobDetail/detail?id=%s", jobId))
+                            .setPage(String.format("subpackages/PackageUser/xapply/apply-steps?id=%s", msgSubDTO.getJobId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing1").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time2").setValue(msgSubDTO.getFinalTime().format(FORMATTER)))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getTips())));
@@ -64,7 +64,7 @@ public class WxServiceImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getInterview())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-//                            .setPage(String.format("subpackages/PackageJob/JobDetail/detail?id=%s", jobId))
+                            .setPage(String.format("subpackages/PackageUser/xapply/apply-steps?id=%s", msgSubDTO.getJobId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing1").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing4").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time3").setValue(msgSubDTO.getTime().format(FORMATTER)))
@@ -84,7 +84,7 @@ public class WxServiceImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getOnboarding())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-//                            .setPage(String.format("subpackages/PackageJob/JobDetail/detail?id=%s", jobId))
+                            .setPage(String.format("subpackages/PackageUser/xapply/apply-steps?id=%s", msgSubDTO.getJobId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing2").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time6").setValue(msgSubDTO.getTime().format(FORMATTER))));
@@ -103,7 +103,7 @@ public class WxServiceImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getOnboardingProgress())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-//                            .setPage(String.format("subpackages/PackageJob/JobDetail/detail?id=%s", jobId))
+                            .setPage(String.format("subpackages/PackageUser/xapply/apply-steps?id=%s", msgSubDTO.getJobId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing4").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing5").setValue(msgSubDTO.getProgress())));

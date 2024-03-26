@@ -3,6 +3,7 @@ package com.korant.youya.workplace.pojo.dto.msgsub;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.redisson.client.protocol.decoder.Long2MultiDecoder;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,11 @@ import java.time.LocalDateTime;
 @Data
 @Accessors(chain = true)
 public class OnboardingProgressMsgSubDTO {
+
+    /**
+     * 职位 ID
+     */
+    private Long jobId;
 
     /**
      * 岗位名称
