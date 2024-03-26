@@ -164,8 +164,9 @@ public interface CandidateService {
      * @param enterpriseId
      * @param amount
      * @param jobId
+     * @param desc
      */
-    void freeze(Long enterpriseId, BigDecimal amount, Long jobId);
+    void freeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc);
 
     /**
      * 企业钱包账户解冻
@@ -173,6 +174,7 @@ public interface CandidateService {
      * @param enterpriseId
      * @param amount
      * @param jobId
+     * @param desc
      */
-    void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId);
+    void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc);
 }

@@ -9,8 +9,10 @@ import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
+import com.korant.youya.workplace.pojo.dto.wallettransactionflow.QueryAccountTransactionFlowListDto;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
+import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
 import com.korant.youya.workplace.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -440,6 +442,18 @@ public class UserController {
     @PostMapping("/queryClosedOrderList")
     public R<?> queryClosedOrderList(@RequestBody @Valid QueryClosedOrderListDto queryClosedOrderListDto) {
         Page<SysOrderVo> page = userService.queryClosedOrderList(queryClosedOrderListDto);
+        return R.success(page);
+    }
+
+    /**
+     * 查询用户钱包账户交易流水
+     *
+     * @param queryAccountTransactionFlowListDto
+     * @return
+     */
+    @PostMapping("/queryAccountTransactionFlow")
+    public R<?> queryAccountTransactionFlow(@RequestBody @Valid QueryAccountTransactionFlowListDto queryAccountTransactionFlowListDto) {
+        Page<AccountTransactionFlowVo> page = userService.queryAccountTransactionFlow(queryAccountTransactionFlowListDto);
         return R.success(page);
     }
 }

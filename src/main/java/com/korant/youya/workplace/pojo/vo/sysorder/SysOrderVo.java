@@ -36,16 +36,6 @@ public class SysOrderVo {
     private LocalDateTime orderDate;
 
     /**
-     * 总金额
-     */
-    private BigDecimal totalAmount;
-
-    /**
-     * 优惠金额
-     */
-    private BigDecimal discountAmount;
-
-    /**
      * 实付金额
      */
     private BigDecimal actualAmount;

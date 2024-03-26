@@ -8,9 +8,11 @@ import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
+import com.korant.youya.workplace.pojo.dto.wallettransactionflow.QueryAccountTransactionFlowListDto;
 import com.korant.youya.workplace.pojo.po.Enterprise;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
+import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -323,4 +325,12 @@ public interface EnterpriseService extends IService<Enterprise> {
      * @return
      */
     Page<SysOrderVo> queryClosedOrderList(QueryClosedOrderListDto queryClosedOrderListDto);
+
+    /**
+     * 查询企业钱包账户交易流水
+     *
+     * @param queryAccountTransactionFlowListDto
+     * @return
+     */
+    Page<AccountTransactionFlowVo> queryAccountTransactionFlow(QueryAccountTransactionFlowListDto queryAccountTransactionFlowListDto);
 }

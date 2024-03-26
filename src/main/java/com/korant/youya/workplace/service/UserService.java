@@ -10,12 +10,14 @@ import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
+import com.korant.youya.workplace.pojo.dto.wallettransactionflow.QueryAccountTransactionFlowListDto;
 import com.korant.youya.workplace.pojo.po.User;
 import com.korant.youya.workplace.pojo.po.UserWalletAccount;
 import com.korant.youya.workplace.pojo.po.WalletTransactionFlow;
 import com.korant.youya.workplace.pojo.po.WalletWithdrawalRecord;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
+import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -323,4 +325,12 @@ public interface UserService extends IService<User> {
      * @return
      */
     Page<SysOrderVo> queryClosedOrderList(QueryClosedOrderListDto queryClosedOrderListDto);
+
+    /**
+     * 查询用户钱包账户交易流水
+     *
+     * @param queryAccountTransactionFlowListDto
+     * @return
+     */
+    Page<AccountTransactionFlowVo> queryAccountTransactionFlow(QueryAccountTransactionFlowListDto queryAccountTransactionFlowListDto);
 }

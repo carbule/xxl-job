@@ -11,18 +11,16 @@ public enum TransactionTypeEnum {
 
     //充值
     RECHARGE(1),
-    //订单
-    ORDER(2),
+    //奖励
+    REWARD(2),
     //退款
     REFUND(3),
     //提现
     WITHDRAWAL(4),
-    //冻结
-    FREEZE(5),
-    //解冻
-    UNFREEZE(6),
+    //冻结或解冻
+    FREEZE_OR_UNFREEZE(5),
     //转账
-    TRANSFER(7);
+    TRANSFER(6);
 
     private Integer type;
 

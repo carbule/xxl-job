@@ -8,8 +8,6 @@
         p.name AS productName,
         p.description AS productDescription,
         o.order_date AS orderDate,
-        o.total_amount AS totalAmount,
-        o.discount_amount AS discountAmount,
         o.actual_amount AS actualAmount,
         o.status
         FROM yy_sys_order AS o
@@ -31,8 +29,6 @@
                p.name            AS productName,
                p.description     AS productDescription,
                o.order_date      AS orderDate,
-               o.total_amount    AS totalAmount,
-               o.discount_amount AS discountAmount,
                o.actual_amount   AS actualAmount,
                o.status
         FROM yy_sys_order AS o

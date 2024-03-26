@@ -30,9 +30,11 @@ import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
 import com.korant.youya.workplace.pojo.dto.user.*;
+import com.korant.youya.workplace.pojo.dto.wallettransactionflow.QueryAccountTransactionFlowListDto;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
+import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
 import com.korant.youya.workplace.properties.DelayProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.service.UserService;
@@ -149,9 +151,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String USER_RECHARGE_PRODUCT_CODE = "user_recharge";
 
-    private static final String RECHARGE_DESCRIPTION = "友涯用户充值";
+    private static final String RECHARGE_DESCRIPTION = "充值 - 微信";
 
-    private static final String WALLET_ACCOUNT_WITHDRAWAL = "友涯用户钱包账户提现";
+    private static final String WALLET_ACCOUNT_WITHDRAWAL = "提现 - 支付宝";
 
     //友涯支付宝账号余额不足短信通知人员手机号码
     private static final String ACCOUNTANT_PHONE = "15150586985";
@@ -1957,6 +1959,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         int pageSize = queryOrderListDto.getPageSize();
         Long count = sysOrderMapper.selectCount(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getBuyerId, walletAccountId).eq((ObjectUtil.isNotNull(status)), SysOrder::getStatus, status).eq(SysOrder::getIsDelete, 0));
         List<SysOrderVo> list = sysOrderMapper.queryOrderList(walletAccountId, queryOrderListDto);
+        list.forEach(s -> s.setActualAmount(s.getActualAmount().multiply(new BigDecimal("0.01"))));
         Page<SysOrderVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
@@ -2151,10 +2154,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Page<SysOrderVo> queryClosedOrderList(QueryClosedOrderListDto queryClosedOrderListDto) {
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
-        Long userId = loginUser.getId();
-        UserWalletAccount walletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
-        if (null == walletAccount) throw new YouyaException("钱包账户不存在");
-        Long walletAccountId = walletAccount.getId();
+        Long walletAccountId = loginUser.getWalletAccountId();
+        if (null == walletAccountId) throw new YouyaException("钱包账户不存在");
         int pageNumber = queryClosedOrderListDto.getPageNumber();
         int pageSize = queryClosedOrderListDto.getPageSize();
         List<Integer> statusList = new ArrayList<>();
@@ -2166,7 +2167,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         statusList.add(OrderStatusEnum.CLOSED.getStatus());
         Long count = sysOrderMapper.selectCount(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getBuyerId, walletAccountId).in(SysOrder::getStatus, statusList).eq(SysOrder::getIsDelete, 0));
         List<SysOrderVo> list = sysOrderMapper.queryClosedOrderList(walletAccountId, queryClosedOrderListDto);
+        list.forEach(s -> s.setActualAmount(s.getActualAmount().multiply(new BigDecimal("0.01"))));
         Page<SysOrderVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询用户钱包账户交易流水
+     *
+     * @param queryAccountTransactionFlowListDto
+     * @return
+     */
+    @Override
+    public Page<AccountTransactionFlowVo> queryAccountTransactionFlow(QueryAccountTransactionFlowListDto queryAccountTransactionFlowListDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long walletAccountId = loginUser.getWalletAccountId();
+        if (null == walletAccountId) throw new YouyaException("钱包账户不存在");
+        Integer transactionType = queryAccountTransactionFlowListDto.getTransactionType();
+        int pageNumber = queryAccountTransactionFlowListDto.getPageNumber();
+        int pageSize = queryAccountTransactionFlowListDto.getPageSize();
+        Long count = walletTransactionFlowMapper.selectCount(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getAccountId, walletAccountId).eq(ObjectUtil.isNotNull(transactionType), WalletTransactionFlow::getTransactionType, transactionType).eq(WalletTransactionFlow::getIsDelete, 0));
+        List<AccountTransactionFlowVo> list = walletTransactionFlowMapper.queryAccountTransactionFlow(walletAccountId, queryAccountTransactionFlowListDto);
+        list.forEach(s -> s.setAmount(s.getAmount().multiply(new BigDecimal("0.01"))));
+        Page<AccountTransactionFlowVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }

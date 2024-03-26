@@ -28,9 +28,11 @@ import com.korant.youya.workplace.pojo.dto.sysorder.CancelOrderDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.GeneratePaymentParametersDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryClosedOrderListDto;
 import com.korant.youya.workplace.pojo.dto.sysorder.QueryOrderListDto;
+import com.korant.youya.workplace.pojo.dto.wallettransactionflow.QueryAccountTransactionFlowListDto;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
+import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
 import com.korant.youya.workplace.properties.DelayProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.service.EnterpriseService;
@@ -139,7 +141,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
 
     private static final String ENTERPRISE_RECHARGE_PRODUCT_CODE = "enterprise_recharge";
 
-    private static final String RECHARGE_DESCRIPTION = "友涯企业充值";
+    private static final String RECHARGE_DESCRIPTION = "充值 - 微信";
 
     /**
      * 查询企业hr列表
@@ -1677,6 +1679,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         int pageSize = queryOrderListDto.getPageSize();
         Long count = sysOrderMapper.selectCount(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getBuyerId, walletAccountId).eq((ObjectUtil.isNotNull(status)), SysOrder::getStatus, status).eq(SysOrder::getIsDelete, 0));
         List<SysOrderVo> list = sysOrderMapper.queryOrderList(walletAccountId, queryOrderListDto);
+        list.forEach(s -> s.setActualAmount(s.getActualAmount().multiply(new BigDecimal("0.01"))));
         Page<SysOrderVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
@@ -1895,7 +1898,35 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         statusList.add(OrderStatusEnum.CLOSED.getStatus());
         Long count = sysOrderMapper.selectCount(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getBuyerId, walletAccountId).in(SysOrder::getStatus, statusList).eq(SysOrder::getIsDelete, 0));
         List<SysOrderVo> list = sysOrderMapper.queryClosedOrderList(walletAccountId, queryClosedOrderListDto);
+        list.forEach(s -> s.setActualAmount(s.getActualAmount().multiply(new BigDecimal("0.01"))));
         Page<SysOrderVo> page = new Page<>();
+        page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
+        return page;
+    }
+
+    /**
+     * 查询企业钱包账户交易流水
+     *
+     * @param queryAccountTransactionFlowListDto
+     * @return
+     */
+    @Override
+    public Page<AccountTransactionFlowVo> queryAccountTransactionFlow(QueryAccountTransactionFlowListDto queryAccountTransactionFlowListDto) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long enterpriseId = loginUser.getEnterpriseId();
+        if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
+        Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
+        if (null == enterprise) throw new YouyaException("企业未创建");
+        EnterpriseWalletAccount enterpriseWalletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
+        if (null == enterpriseWalletAccount) throw new YouyaException("钱包账户不存在");
+        Long walletAccountId = enterpriseWalletAccount.getId();
+        Integer transactionType = queryAccountTransactionFlowListDto.getTransactionType();
+        int pageNumber = queryAccountTransactionFlowListDto.getPageNumber();
+        int pageSize = queryAccountTransactionFlowListDto.getPageSize();
+        Long count = walletTransactionFlowMapper.selectCount(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getAccountId, walletAccountId).eq(ObjectUtil.isNotNull(transactionType), WalletTransactionFlow::getTransactionType, transactionType).eq(WalletTransactionFlow::getIsDelete, 0));
+        List<AccountTransactionFlowVo> list = walletTransactionFlowMapper.queryAccountTransactionFlow(walletAccountId, queryAccountTransactionFlowListDto);
+        list.forEach(s -> s.setAmount(s.getAmount().multiply(new BigDecimal("0.01"))));
+        Page<AccountTransactionFlowVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
     }

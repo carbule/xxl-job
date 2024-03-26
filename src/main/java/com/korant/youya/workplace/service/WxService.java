@@ -5,8 +5,6 @@ import com.korant.youya.workplace.pojo.dto.msgsub.InterviewMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingProgressMsgSubDTO;
 
-import java.time.LocalDateTime;
-
 /**
  * <p>
  * 微信对接服务

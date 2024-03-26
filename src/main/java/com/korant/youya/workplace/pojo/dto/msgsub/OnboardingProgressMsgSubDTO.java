@@ -1,11 +1,7 @@
 package com.korant.youya.workplace.pojo.dto.msgsub;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import org.redisson.client.protocol.decoder.Long2MultiDecoder;
-
-import java.time.LocalDateTime;
 
 /**
  * 入职进度通知

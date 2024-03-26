@@ -16,7 +16,6 @@ import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingProgressMsgSubDTO;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.candidate.*;
 import com.korant.youya.workplace.service.CandidateService;
-import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.service.WxService;
 import com.korant.youya.workplace.utils.CalculationUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
@@ -89,9 +88,17 @@ public class CandidateServiceImpl implements CandidateService {
     @Resource
     private EnterpriseMapper enterpriseMapper;
 
-    private static final String JOB_FREEZE_DES = "友涯企业职位奖金冻结";
+    private static final String JOB_INTERVIEW_FREEZE_DES = "面试";
 
-    private static final String JOB_UNFREEZE_DES = "友涯企业职位奖金解冻";
+    private static final String JOB_INTERVIEW_UNFREEZE_DES = "面试取消";
+
+    private static final String JOB_ONBOARD_FREEZE_DES = "入职";
+
+    private static final String JOB_ONBOARD_UNFREEZE_DES = "入职取消";
+
+    private static final String JOB_FULL_MEMBER_FREEZE_DES = "转正";
+
+    private static final String JOB_FULL_MEMBER_UNFREEZE_DES = "转正取消";
 
     /**
      * 查询候选人列表
@@ -185,7 +192,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = interviewRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.freeze(enterpriseId, amount, jobId);
+                    candidateService.freeze(enterpriseId, amount, jobId, JOB_INTERVIEW_FREEZE_DES);
                 }
             }
         }
@@ -240,7 +247,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = interviewRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.unfreeze(enterpriseId, amount, jobId);
+                    candidateService.unfreeze(enterpriseId, amount, jobId, JOB_INTERVIEW_UNFREEZE_DES);
                 }
             }
         }
@@ -330,7 +337,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = onboardRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.freeze(enterpriseId, amount, jobId);
+                    candidateService.freeze(enterpriseId, amount, jobId, JOB_ONBOARD_FREEZE_DES);
                 }
             }
         }
@@ -415,7 +422,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = onboardRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.unfreeze(enterpriseId, amount, jobId);
+                    candidateService.unfreeze(enterpriseId, amount, jobId, JOB_ONBOARD_UNFREEZE_DES);
                 }
             }
         }
@@ -503,7 +510,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = fullMemberRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.freeze(enterpriseId, amount, jobId);
+                    candidateService.freeze(enterpriseId, amount, jobId, JOB_FULL_MEMBER_FREEZE_DES);
                 }
             }
         }
@@ -589,7 +596,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = fullMemberRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.unfreeze(enterpriseId, amount, jobId);
+                    candidateService.unfreeze(enterpriseId, amount, jobId, JOB_FULL_MEMBER_UNFREEZE_DES);
                 }
             }
         }
@@ -641,8 +648,9 @@ public class CandidateServiceImpl implements CandidateService {
      * @param enterpriseId
      * @param amount
      * @param jobId
+     * @param desc
      */
-    public void freeze(Long enterpriseId, BigDecimal amount, Long jobId) {
+    public void freeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc) {
         if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
         Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
         String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
@@ -677,8 +685,8 @@ public class CandidateServiceImpl implements CandidateService {
                 enterpriseWalletAccountMapper.updateById(walletAccount);
                 Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
                 WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
-                        .setDescription(JOB_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
+                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                        .setDescription(desc).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
                 walletTransactionFlowMapper.insert(walletTransactionFlow);
             } else {
                 log.error("获取钱包账户锁超时");
@@ -702,8 +710,13 @@ public class CandidateServiceImpl implements CandidateService {
 
     /**
      * 企业钱包账户解冻
+     *
+     * @param enterpriseId
+     * @param amount
+     * @param jobId
+     * @param desc
      */
-    public void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId) {
+    public void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc) {
         if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
         Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
         String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
@@ -731,8 +744,8 @@ public class CandidateServiceImpl implements CandidateService {
                 enterpriseWalletAccountMapper.updateById(walletAccount);
                 Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
                 WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
-                        .setDescription(JOB_UNFREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(amount));
+                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                        .setDescription(desc).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(amount));
                 walletTransactionFlowMapper.insert(walletTransactionFlow);
             } else {
                 log.error("获取钱包账户锁超时");

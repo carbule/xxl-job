@@ -143,7 +143,7 @@ public interface HuntJobService extends IService<HuntJob> {
      *
      * @param id
      */
-    void release(Long id);
+    void publish(Long id);
 
     /**
      * 删除求职信息

@@ -228,9 +228,9 @@ public class HuntJobController {
      * @param
      * @return
      */
-    @GetMapping("/release/{id}")
-    public R<?> release(@PathVariable("id") Long id) {
-        huntJobService.release(id);
+    @GetMapping("/publish/{id}")
+    public R<?> publish(@PathVariable("id") Long id) {
+        huntJobService.publish(id);
         return R.ok();
     }
 

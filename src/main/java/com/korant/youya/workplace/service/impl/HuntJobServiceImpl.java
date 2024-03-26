@@ -94,9 +94,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
 
     private static final String HUNT_JOB_ONBOARD_BONUS_DISTRIBUTION_RULE = "hunt_job_onboard_rule";
 
-    private static final String HUNT_JOB_ONBOARD_FREEZE_DES = "友涯用户求职入职奖金冻结";
+    private static final String HUNT_JOB_ONBOARD_FREEZE_DES = "求职发布 - 入职奖励";
 
-    private static final String HUNT_JOB_ONBOARD_UNFREEZE_DES = "友涯用户求职入职奖金解冻";
+    private static final String HUNT_JOB_ONBOARD_UNFREEZE_DES = "求职下架 - 入职奖励";
 
     /**
      * 查询首页求职信息列表
@@ -373,7 +373,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     userWalletAccountMapper.updateById(walletAccount);
                     Long walletFreezeRecordId = userWalletFreezeRecord.getId();
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(totalAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(totalAward).setCurrency(CurrencyTypeEnum.CNY.getType())
                             .setDescription(HUNT_JOB_ONBOARD_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
                     walletTransactionFlowMapper.insert(walletTransactionFlow);
                 } else {
@@ -507,7 +507,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     userWalletAccountMapper.updateById(walletAccount);
                     Long walletFreezeRecordId = userWalletFreezeRecord.getId();
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
                             .setDescription(HUNT_JOB_ONBOARD_UNFREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(onboardingAward));
                     walletTransactionFlowMapper.insert(walletTransactionFlow);
                 } else {
@@ -540,7 +540,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void release(Long id) {
+    public void publish(Long id) {
         HuntJob huntJob = huntJobMapper.selectOne(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getId, id).eq(HuntJob::getIsDelete, 0));
         if (null == huntJob) throw new YouyaException("求职信息不存在");
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
@@ -585,7 +585,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     userWalletAccountMapper.updateById(walletAccount);
                     Long walletFreezeRecordId = userWalletFreezeRecord.getId();
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
                             .setDescription(HUNT_JOB_ONBOARD_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
                     walletTransactionFlowMapper.insert(walletTransactionFlow);
                 } else {

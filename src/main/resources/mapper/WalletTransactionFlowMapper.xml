@@ -2,4 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.korant.youya.workplace.mapper.WalletTransactionFlowMapper">
 
+    <!--  查询钱包账户交易流水  -->
+    <select id="queryAccountTransactionFlow"
+            resultType="com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo">
+        SELECT id,
+        transaction_type AS transactionType,
+        transaction_direction AS transactionDirection,
+        amount,
+        currency,
+        description,
+        initiation_date AS initiationDate,
+        status
+        FROM yy_wallet_transaction_flow
+        <where>
+            account_id = #{walletAccountId}
+            AND is_delete = 0
+            <if test="queryAccountTransactionFlowListDto.transactionType != null ">
+                AND transaction_type = #{queryAccountTransactionFlowListDto.transactionType}
+            </if>
+            ORDER BY initiation_date DESC LIMIT #{queryAccountTransactionFlowListDto.pageSize}
+            OFFSET (#{queryAccountTransactionFlowListDto.pageNumber} -1) *
+            #{queryAccountTransactionFlowListDto.pageSize}
+        </where>
+    </select>
 </mapper>
