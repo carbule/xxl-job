@@ -241,10 +241,10 @@
             resultType="com.korant.youya.workplace.pojo.vo.job.JobShareInfo">
         SELECT j.id,
                e.logo,
-               e.name       AS enterpriseName,
-               p.name       AS positionName,
-               j.min_salary AS minSalary,
-               j.max_salary AS maxSalary,
+               e.name          AS enterpriseName,
+               j.position_name AS positionName,
+               j.min_salary    AS minSalary,
+               j.max_salary    AS maxSalary,
                j.award
         FROM job AS j
                  LEFT JOIN enterprise AS e ON j.enterprise_id = e.id AND e.is_delete = 0

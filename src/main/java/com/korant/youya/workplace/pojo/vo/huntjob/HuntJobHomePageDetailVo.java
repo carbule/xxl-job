@@ -100,6 +100,11 @@ public class HuntJobHomePageDetailVo {
     private String expectedIndustry;
 
     /**
+     * 期望职业类型
+     */
+    private String expectedType;
+
+    /**
      * 期望领域
      */
     private String expectedSector;
