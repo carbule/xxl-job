@@ -79,6 +79,11 @@ public class CandidateDetailVo {
     private String expectedIndustry;
 
     /**
+     * 期望职业类型
+     */
+    private String expectedType;
+
+    /**
      * 期望领域
      */
     private String expectedSector;
@@ -87,6 +92,16 @@ public class CandidateDetailVo {
      * 期望职位
      */
     private String expectedPosition;
+
+    /**
+     * 期望职业群等级
+     */
+    private String expectedOrganizationLevel;
+
+    /**
+     * 期望职业等级
+     */
+    private String expectedClassLevel;
 
     /**
      * 期望国家
