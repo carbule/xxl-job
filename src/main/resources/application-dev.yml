@@ -174,3 +174,22 @@ rabbitmq:
       routingKey: close_enterprise_order
       #消费者类型
       consumerType: closeEnterpriseOrder
+
+wx:
+  miniapp:
+    configs:
+      #微信小程序的appid
+      - appid: wxac76b91987ca9f96
+        #小程序appSecret
+        secret: 280f7c2a134eb1577dfa0f75aed8a1b9
+    message-subscribe-template:
+      # 跳转小程序类型：developer为开发版；trial为体验版；formal为正式版；默认为正式版
+      miniprogram-state: trial
+      # 面试预约通知
+      interview-appointment: SeMOeDcFsE7gxqqVYA7C323TAZNcVU5GLwF5WatVCzE
+      # 面试通知
+      interview: sxACbuPvDdatP1sMdsoC417W7zXvpsA_bm3HOEaMcEw
+      # 入职通知
+      onboarding: dLSuhK42KDerpZJBzYUWaUuP_KuMQma21GN-qklfE_8
+      # 入职进度通知
+      onboarding-progress: MVaZRKMV9Ay_dJh9fifN2VGtW_z5pr6aaXivQKBrOdg
