@@ -49,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.core.Message;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -819,7 +820,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         if (StringUtils.isBlank(etag) && StringUtils.isBlank(objectUrl)) throw new YouyaException("上传文件失败");
         HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
         DelayProperties properties = delayProperties.get("enterprise_shareImage");
-        rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), objectKey, 7200);
+        Message message = new Message(objectKey.getBytes(StandardCharsets.UTF_8));
+        rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 7200);
         String encode = URLEncoder.encode(objectKey, StandardCharsets.UTF_8);
         return "https://" + ObsBucketConfig.getCdn(ENTERPRISE_QRCODE_BUCKET) + "/" + encode;
     }
@@ -962,7 +964,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         try {
             HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
             DelayProperties properties = delayProperties.get("enterprise_order_timeout");
-            rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), orderId, 900);
+            Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
+            rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 900);
         } catch (Exception e) {
             log.error("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，推送至订单超时队列失败，原因：", enterpriseName, enterpriseId, orderId, e);
             log.error("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，下单失败", enterpriseName, enterpriseId, orderId);
@@ -1013,7 +1016,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                                 try {
                                     HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
                                     DelayProperties properties = delayProperties.get("close_enterprise_order");
-                                    rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), orderId, 600);
+                                    Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
+                                    rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 600);
                                 } catch (Exception e) {
                                     log.error("企业订单id：【{}】，推送至关闭订单队列失败，原因：", orderId, e);
                                     log.error("企业订单id:【{}】超时处理失败", orderId);
@@ -1084,7 +1088,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                             try {
                                 HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
                                 DelayProperties properties = delayProperties.get("enterprise_order_payment_inquiry");
-                                rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), orderId, 300);
+                                Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
+                                rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 300);
                             } catch (Exception e) {
                                 log.error("企业名称：【{}】，企业id：【{}】，订单id：【{}】，推送至订单付款查询队列失败，原因：", enterpriseName, enterpriseId, orderId, e);
                             }

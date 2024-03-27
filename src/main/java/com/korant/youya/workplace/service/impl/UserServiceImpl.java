@@ -49,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.core.Message;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -862,7 +863,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         try {
             HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
             DelayProperties properties = delayProperties.get("user_order_timeout");
-            rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), orderId, 900);
+            Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
+            rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 900);
         } catch (Exception e) {
             log.error("用户：【{}】，购买商品id：【{}】，推送至订单超时队列失败，原因：", phone, orderId, e);
             log.error("用户：【{}】，购买商品id：【{}】，下单失败", phone, orderId);
@@ -913,7 +915,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                                 try {
                                     HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
                                     DelayProperties properties = delayProperties.get("close_user_order");
-                                    rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), orderId, 600);
+                                    Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
+                                    rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 600);
                                 } catch (Exception e) {
                                     log.error("用户订单id：【{}】，推送至关闭订单队列失败，原因：", orderId, e);
                                     log.error("用户订单id:【{}】超时处理失败", orderId);
@@ -929,6 +932,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     } else {
                         log.info("用户订单id:【{}】不是待支付状态，停止处理", orderId);
                     }
+                } else {
+                    log.info("用户订单id:【{}】，不存在", orderId);
                 }
             } else {
                 log.error("用户订单id：【{}】,获取订单锁超时", orderId);
@@ -942,6 +947,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 lock.unlock();
             }
         }
+        log.info("用户订单id:【{}】超时处理完毕", orderId);
     }
 
     /**
@@ -981,7 +987,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             try {
                                 HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
                                 DelayProperties properties = delayProperties.get("user_order_payment_inquiry");
-                                rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), orderId, 300);
+                                Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
+                                rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 300);
                             } catch (Exception e) {
                                 log.error("用户：【{}】，订单id：【{}】，推送至订单付款查询队列失败，原因：", phone, orderId, e);
                             }
@@ -2131,6 +2138,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     } else {
                         log.info("用户订单id:【{}】不是待支付状态，停止处理", orderId);
                     }
+                } else {
+                    log.info("用户订单id:【{}】，不存在", orderId);
                 }
             } else {
                 log.error("用户订单id：【{}】,获取订单锁超时", orderId);
@@ -2144,6 +2153,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 lock.unlock();
             }
         }
+        log.info("用户订单id:【{}】关闭处理完毕", orderId);
     }
 
     /**

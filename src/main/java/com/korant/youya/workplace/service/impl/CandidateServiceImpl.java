@@ -201,7 +201,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = interviewRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.freeze(enterpriseId, amount, jobId, JOB_INTERVIEW_FREEZE_DES);
+                    candidateService.freeze(enterpriseId, amount, jobId, RecruitmentProcessEnum.INTERVIEW.getType(), JOB_INTERVIEW_FREEZE_DES);
                 }
             }
         }
@@ -287,7 +287,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = interviewRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.unfreeze(enterpriseId, amount, jobId, JOB_INTERVIEW_UNFREEZE_DES);
+                    candidateService.unfreeze(enterpriseId, amount, jobId, RecruitmentProcessEnum.INTERVIEW.getType(), JOB_INTERVIEW_UNFREEZE_DES);
                 }
             }
         }
@@ -377,7 +377,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = onboardRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.freeze(enterpriseId, amount, jobId, JOB_ONBOARD_FREEZE_DES);
+                    candidateService.freeze(enterpriseId, amount, jobId, RecruitmentProcessEnum.ONBOARD.getType(), JOB_ONBOARD_FREEZE_DES);
                 }
             }
         }
@@ -463,7 +463,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = onboardRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.unfreeze(enterpriseId, amount, jobId, JOB_ONBOARD_UNFREEZE_DES);
+                    candidateService.unfreeze(enterpriseId, amount, jobId, RecruitmentProcessEnum.ONBOARD.getType(), JOB_ONBOARD_UNFREEZE_DES);
                 }
             }
         }
@@ -551,7 +551,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = fullMemberRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.freeze(enterpriseId, amount, jobId, JOB_FULL_MEMBER_FREEZE_DES);
+                    candidateService.freeze(enterpriseId, amount, jobId, RecruitmentProcessEnum.FULL_MEMBER.getType(), JOB_FULL_MEMBER_FREEZE_DES);
                 }
             }
         }
@@ -638,7 +638,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal rate = fullMemberRewardRate.multiply(new BigDecimal("0.01"));
                 BigDecimal amount = CalculationUtil.multiply(award, rate, 0);
                 if (amount.compareTo(new BigDecimal("0")) > 0) {
-                    candidateService.unfreeze(enterpriseId, amount, jobId, JOB_FULL_MEMBER_UNFREEZE_DES);
+                    candidateService.unfreeze(enterpriseId, amount, jobId, RecruitmentProcessEnum.FULL_MEMBER.getType(), JOB_FULL_MEMBER_UNFREEZE_DES);
                 }
             }
         }
@@ -690,9 +690,10 @@ public class CandidateServiceImpl implements CandidateService {
      * @param enterpriseId
      * @param amount
      * @param jobId
+     * @param processType
      * @param desc
      */
-    public void freeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc) {
+    public void freeze(Long enterpriseId, BigDecimal amount, Long jobId, int processType, String desc) {
         if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
         Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
         String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
@@ -719,6 +720,7 @@ public class CandidateServiceImpl implements CandidateService {
                 enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
+                enterpriseWalletFreezeRecord.setProcessType(processType);
                 enterpriseWalletFreezeRecord.setAmount(amount);
                 enterpriseWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
                 enterpriseWalletFreezeRecord.setOperateTime(now);
@@ -758,9 +760,10 @@ public class CandidateServiceImpl implements CandidateService {
      * @param enterpriseId
      * @param amount
      * @param jobId
+     * @param processType
      * @param desc
      */
-    public void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc) {
+    public void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId, int processType, String desc) {
         if (null == enterpriseId) throw new YouyaException("当前账号未关联企业");
         Long walletAccountId = enterpriseWalletAccountMapper.queryWalletIdByEnterpriseId(enterpriseId);
         String walletLockKey = String.format(RedisConstant.YY_WALLET_ACCOUNT_LOCK, walletAccountId);
@@ -781,6 +784,7 @@ public class CandidateServiceImpl implements CandidateService {
                 enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
+                enterpriseWalletFreezeRecord.setProcessType(processType);
                 enterpriseWalletFreezeRecord.setAmount(amount);
                 enterpriseWalletFreezeRecord.setType(WalletFreezeTypeEnum.UNFREEZE.getType());
                 enterpriseWalletFreezeRecord.setOperateTime(now);

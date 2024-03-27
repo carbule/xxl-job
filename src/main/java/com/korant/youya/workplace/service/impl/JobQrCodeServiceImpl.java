@@ -28,6 +28,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.Message;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -205,7 +206,8 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
         if (StringUtils.isBlank(etag) && StringUtils.isBlank(objectUrl)) throw new YouyaException("上传文件失败");
         HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
         DelayProperties properties = delayProperties.get("job_shareImage");
-        rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), objectKey, 60);
+        Message message = new Message(objectKey.getBytes(StandardCharsets.UTF_8));
+        rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 60);
         String encode = URLEncoder.encode(objectKey, StandardCharsets.UTF_8);
         return "https://" + ObsBucketConfig.getCdn(JOB_QRCODE_BUCKET) + "/" + encode;
     }

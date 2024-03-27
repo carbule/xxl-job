@@ -382,6 +382,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     userWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                     userWalletFreezeRecord.setUserWalletId(walletAccountId);
                     userWalletFreezeRecord.setHuntId(id);
+                    userWalletFreezeRecord.setProcessType(RecruitmentProcessEnum.ONBOARD.getType());
                     userWalletFreezeRecord.setAmount(totalAward);
                     userWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
                     userWalletFreezeRecord.setOperateTime(now);
@@ -525,6 +526,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     userWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                     userWalletFreezeRecord.setUserWalletId(walletAccountId);
                     userWalletFreezeRecord.setHuntId(id);
+                    userWalletFreezeRecord.setProcessType(RecruitmentProcessEnum.ONBOARD.getType());
                     userWalletFreezeRecord.setAmount(onboardingAward);
                     userWalletFreezeRecord.setType(WalletFreezeTypeEnum.UNFREEZE.getType());
                     userWalletFreezeRecord.setOperateTime(now);
@@ -604,6 +606,7 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     userWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                     userWalletFreezeRecord.setUserWalletId(walletAccountId);
                     userWalletFreezeRecord.setHuntId(id);
+                    userWalletFreezeRecord.setProcessType(RecruitmentProcessEnum.ONBOARD.getType());
                     userWalletFreezeRecord.setAmount(onboardingAward);
                     userWalletFreezeRecord.setType(WalletFreezeTypeEnum.FREEZE.getType());
                     userWalletFreezeRecord.setOperateTime(now);

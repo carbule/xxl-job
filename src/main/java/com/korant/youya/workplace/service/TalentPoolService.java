@@ -168,9 +168,10 @@ public interface TalentPoolService {
      * @param enterpriseId
      * @param amount
      * @param jobId
+     * @param processType
      * @param desc
      */
-    void freeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc);
+    void freeze(Long enterpriseId, BigDecimal amount, Long jobId, int processType, String desc);
 
     /**
      * 企业钱包账户解冻
@@ -178,7 +179,8 @@ public interface TalentPoolService {
      * @param enterpriseId
      * @param amount
      * @param jobId
+     * @param processType
      * @param desc
      */
-    void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId, String desc);
+    void unfreeze(Long enterpriseId, BigDecimal amount, Long jobId, int processType, String desc);
 }
