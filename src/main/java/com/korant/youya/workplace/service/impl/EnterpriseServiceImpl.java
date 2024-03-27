@@ -944,18 +944,19 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         int quantityValue = rechargeQuantity.intValue();
         Long walletAccountId = enterpriseWalletAccount.getId();
         SysOrder sysOrder = new SysOrder();
-        sysOrder.setSysProductId(productId).setBuyerId(walletAccountId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
+        String orderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.ENTERPRISE.getCode(), YYBusinessCode.ENTERPRISE_RECHARGE.getCode());
+        sysOrder.setOrderId(orderId).setSysProductId(productId).setBuyerId(walletAccountId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
                 .setQuantity(quantityValue).setTotalAmount(amount).setActualAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
         sysOrderMapper.insert(sysOrder);
         String openid = WeChatUtil.code2Session(code);
         if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
         if (StringUtils.isBlank(enterpriseRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
-        Long orderId = sysOrder.getId();
-        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), enterpriseRechargeNotifyUrl, amount.intValue(), openid);
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId, enterpriseRechargeNotifyUrl, amount.intValue(), openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
         log.info("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功，微信响应报文：【{}】", enterpriseName, enterpriseId, productId, response);
         WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-        walletTransactionFlow.setAccountId(walletAccountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+        String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.ENTERPRISE_RECHARGE.getCode());
+        walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                 .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
         walletTransactionFlowMapper.insert(walletTransactionFlow);
         try {
@@ -985,14 +986,14 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void orderTimeoutProcessing(Long orderId) {
+    public void orderTimeoutProcessing(String orderId) {
         log.info("企业订单id:【{}】开始进行超时处理", orderId);
         String lockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock lock = redissonClient.getLock(lockKey);
         try {
             boolean tryLock = lock.tryLock(3, TimeUnit.SECONDS);
             if (tryLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Integer status = sysOrder.getStatus();
                     if (OrderStatusEnum.PENDING_PAYMENT.getStatus() == status) {
@@ -1060,13 +1061,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         EnterpriseWalletAccount enterpriseWalletAccount = enterpriseWalletAccountMapper.selectOne(new LambdaQueryWrapper<EnterpriseWalletAccount>().eq(EnterpriseWalletAccount::getEnterpriseId, enterpriseId).eq(EnterpriseWalletAccount::getIsDelete, 0));
         if (null == enterpriseWalletAccount) throw new YouyaException("钱包账户不存在");
         String enterpriseName = enterprise.getName();
-        Long orderId = completePaymentDto.getOrderId();
+        String orderId = completePaymentDto.getOrderId();
         String lockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock lock = redissonClient.getLock(lockKey);
         try {
             boolean tryLock = lock.tryLock(3, TimeUnit.SECONDS);
             if (tryLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Long buyerId = sysOrder.getBuyerId();
                     Long walletAccountId = enterpriseWalletAccount.getId();
@@ -1240,13 +1241,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         try {
             boolean tryOrderLock = orderLock.tryLock(3, TimeUnit.SECONDS);
             if (tryOrderLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, Long.valueOf(outTradeNo)).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, outTradeNo).eq(SysOrder::getIsDelete, 0));
                 if (null == sysOrder) {
                     log.error("友涯系统不存在此笔订单");
                     writeToWechatPayNotifyResponseErrorMessage(response, "友涯系统不存在此笔订单");
                     return;
                 }
-                Long sysOrderId = sysOrder.getId();
+                String sysOrderId = sysOrder.getOrderId();
                 WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, sysOrderId).eq(WalletTransactionFlow::getIsDelete, 0));
                 if (null == walletTransactionFlow) {
                     log.error("友涯系统不存在此笔订单交易流水");
@@ -1446,8 +1447,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     public Integer queryRechargeResult(QueryEnterpriseRechargeResultDto rechargeResultDto) {
-        Long orderId = rechargeResultDto.getOrderId();
-        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+        String orderId = rechargeResultDto.getOrderId();
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
         return sysOrder.getStatus();
     }
@@ -1458,14 +1459,14 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      * @param orderId
      */
     @Override
-    public void enterpriseOrderPaymentInquiry(Long orderId) {
+    public void enterpriseOrderPaymentInquiry(String orderId) {
         log.info("企业订单id:【{}】开始进行付款查询", orderId);
         String orderLockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock orderLock = redissonClient.getLock(orderLockKey);
         try {
             boolean tryOrderLock = orderLock.tryLock(3, TimeUnit.SECONDS);
             if (tryOrderLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Integer status = sysOrder.getStatus();
                     if (OrderStatusEnum.PROCESSING_PAYMENT.getStatus() == status) {
@@ -1705,8 +1706,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         Integer accountStatus = enterpriseWalletAccount.getStatus();
         if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("钱包账户已被冻结，请联系客服");
         String enterpriseName = enterprise.getName();
-        Long orderId = generatePaymentParametersDto.getOrderId();
-        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+        String orderId = generatePaymentParametersDto.getOrderId();
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
         Integer status = sysOrder.getStatus();
         if (OrderStatusEnum.PENDING_PAYMENT.getStatus() != status) throw new YouyaException("只有待支付订单可以获取支付参数");
@@ -1718,7 +1719,7 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
         if (StringUtils.isBlank(enterpriseRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
         Integer actualAmount = sysOrder.getActualAmount().intValue();
-        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), enterpriseRechargeNotifyUrl, actualAmount, openid);
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId, enterpriseRechargeNotifyUrl, actualAmount, openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
         log.info("企业名称：【{}】，企业id：【{}】，订单id：【{}】，生成调起支付参数成功，微信响应报文：【{}】", enterpriseName, enterpriseId, orderId, response);
         JSONObject result = new JSONObject();
@@ -1745,13 +1746,13 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
         if (null == enterprise) throw new YouyaException("企业未创建");
         String enterpriseName = enterprise.getName();
-        Long orderId = cancelOrderDto.getOrderId();
+        String orderId = cancelOrderDto.getOrderId();
         String orderLockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock orderLock = redissonClient.getLock(orderLockKey);
         try {
             boolean tryOrderLock = orderLock.tryLock(3, TimeUnit.SECONDS);
             if (tryOrderLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null == sysOrder) throw new YouyaException("订单不存在");
                 Integer status = sysOrder.getStatus();
                 if (OrderStatusEnum.PENDING_PAYMENT.getStatus() != status) throw new YouyaException("只有待支付的订单才能取消");
@@ -1823,14 +1824,14 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void closeEnterpriseOrder(Long orderId) {
+    public void closeEnterpriseOrder(String orderId) {
         log.info("企业订单id:【{}】开始进行关闭处理", orderId);
         String lockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock lock = redissonClient.getLock(lockKey);
         try {
             boolean tryLock = lock.tryLock(3, TimeUnit.SECONDS);
             if (tryLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Integer status = sysOrder.getStatus();
                     if (OrderStatusEnum.PAYMENT_TIMEOUT.getStatus() == status) {

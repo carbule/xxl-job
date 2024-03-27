@@ -185,6 +185,7 @@ public class Job implements Serializable {
     /**
      * 发布时间
      */
+    @TableField("pub_time")
     private LocalDateTime pubTime;
 
     /**

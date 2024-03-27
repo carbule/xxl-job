@@ -30,7 +30,7 @@ public class UserOrderTimeoutListener extends DefaultConsumer {
         String msg = new String(body);
         log.info("消息内容:{}", msg);
         UserService userService = SpringContextUtils.getBean(UserService.class);
-        userService.orderTimeoutProcessing(Long.valueOf(msg));
+        userService.orderTimeoutProcessing(msg);
         getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 }

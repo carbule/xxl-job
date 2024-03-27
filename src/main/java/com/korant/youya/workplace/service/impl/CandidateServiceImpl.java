@@ -21,6 +21,7 @@ import com.korant.youya.workplace.pojo.vo.candidate.*;
 import com.korant.youya.workplace.service.CandidateService;
 import com.korant.youya.workplace.service.WxService;
 import com.korant.youya.workplace.utils.CalculationUtil;
+import com.korant.youya.workplace.utils.IdGenerationUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -711,6 +712,8 @@ public class CandidateServiceImpl implements CandidateService {
                 }
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
                 enterpriseWalletFreezeRecord.setAmount(amount);
@@ -721,9 +724,9 @@ public class CandidateServiceImpl implements CandidateService {
                 walletAccount.setFreezeAmount(freezeAmount.add(amount));
                 walletAccount.setAvailableBalance(shortfall);
                 enterpriseWalletAccountMapper.updateById(walletAccount);
-                Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
                 WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(freezeOrderId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                         .setDescription(desc).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
                 walletTransactionFlowMapper.insert(walletTransactionFlow);
             } else {
@@ -771,6 +774,8 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal freezeAmount = walletAccount.getFreezeAmount();
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
                 enterpriseWalletFreezeRecord.setAmount(amount);
@@ -780,9 +785,9 @@ public class CandidateServiceImpl implements CandidateService {
                 walletAccount.setFreezeAmount(freezeAmount.subtract(amount));
                 walletAccount.setAvailableBalance(availableBalance.add(amount));
                 enterpriseWalletAccountMapper.updateById(walletAccount);
-                Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
                 WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(freezeOrderId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                         .setDescription(desc).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(amount));
                 walletTransactionFlowMapper.insert(walletTransactionFlow);
             } else {

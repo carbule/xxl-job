@@ -30,7 +30,7 @@ public class EnterpriseOrderPaymentInquiryListener extends DefaultConsumer {
         String msg = new String(body);
         log.info("消息内容:{}", msg);
         EnterpriseService enterpriseService = SpringContextUtils.getBean(EnterpriseService.class);
-        enterpriseService.enterpriseOrderPaymentInquiry(Long.valueOf(msg));
+        enterpriseService.enterpriseOrderPaymentInquiry(msg);
         getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 }

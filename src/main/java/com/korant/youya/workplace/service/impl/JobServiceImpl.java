@@ -25,7 +25,6 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,18 +70,6 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
 
     @Resource
     private BonusDistributionRuleMapper bonusDistributionRuleMapper;
-
-    @Resource
-    private EnterpriseWalletAccountMapper enterpriseWalletAccountMapper;
-
-    @Resource
-    private EnterpriseWalletFreezeRecordMapper enterpriseWalletFreezeRecordMapper;
-
-    @Resource
-    private WalletTransactionFlowMapper walletTransactionFlowMapper;
-
-    @Resource
-    private RedissonClient redissonClient;
 
     private static final String CHINA_CODE = "100000";
 
@@ -147,7 +134,10 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     public JobHomePageDetailVo queryHomePageDetailById(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
         JobHomePageDetailVo jobHomePageDetailVo = jobMapper.queryHomePageDetailById(userId, id);
-        jobHomePageDetailVo.setAward(jobHomePageDetailVo.getAward().multiply(new BigDecimal("0.01")));
+        BigDecimal award = jobHomePageDetailVo.getAward();
+        if (null != award) {
+            jobHomePageDetailVo.setAward(award.multiply(new BigDecimal("0.01")));
+        }
         return jobHomePageDetailVo;
     }
 
@@ -227,7 +217,10 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         shareInfo.setRefereeLastName(userPublicInfoVo.getLastName());
         shareInfo.setRefereeFirstName(userPublicInfoVo.getFirstName());
         shareInfo.setRefereeGender(userPublicInfoVo.getGender());
-        shareInfo.setAward(shareInfo.getAward().multiply(new BigDecimal("0.01")));
+        BigDecimal award = shareInfo.getAward();
+        if (null != award) {
+            shareInfo.setAward(award.multiply(new BigDecimal("0.01")));
+        }
         return shareInfo;
     }
 
@@ -436,7 +429,10 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     @Override
     public JobDetailVo detail(Long id) {
         JobDetailVo detail = jobMapper.detail(id);
-        detail.setAward(detail.getAward().multiply(new BigDecimal("0.01")));
+        BigDecimal award = detail.getAward();
+        if (null != award) {
+            detail.setAward(award.multiply(new BigDecimal("0.01")));
+        }
         return detail;
     }
 

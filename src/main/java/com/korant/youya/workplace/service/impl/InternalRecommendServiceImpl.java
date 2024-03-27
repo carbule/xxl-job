@@ -20,7 +20,6 @@ import com.korant.youya.workplace.service.WxService;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.security.config.annotation.web.oauth2.resourceserver.OpaqueTokenDsl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

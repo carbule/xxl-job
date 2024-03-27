@@ -30,7 +30,7 @@ public class CloseUserOrderListener extends DefaultConsumer {
         String msg = new String(body);
         log.info("消息内容:{}", msg);
         UserService userService = SpringContextUtils.getBean(UserService.class);
-        userService.closeUserOrder(Long.valueOf(msg));
+        userService.closeUserOrder(msg);
         getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 }

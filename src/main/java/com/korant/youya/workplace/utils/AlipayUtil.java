@@ -100,7 +100,7 @@ public class AlipayUtil {
      * @param identity
      * @param name
      */
-    public static AlipayFundTransUniTransferResponse transfer(String orderTitle, Long outBizNo, BigDecimal transAmount, String identity, String name) {
+    public static AlipayFundTransUniTransferResponse transfer(String orderTitle, String outBizNo, BigDecimal transAmount, String identity, String name) {
         if (StringUtils.isBlank(orderTitle)) throw new YouyaException("转账业务标题缺失");
         if (ObjectUtil.isNull(outBizNo)) throw new YouyaException("商家转账订单号缺失");
         if (ObjectUtil.isNull(transAmount)) throw new YouyaException("转账总金额缺失");
@@ -118,7 +118,7 @@ public class AlipayUtil {
         //设置业务备注(非必填)
 //        model.setRemark("201905代发");
         //设置商家侧唯一订单号(必填)
-        model.setOutBizNo(outBizNo.toString());
+        model.setOutBizNo(outBizNo);
         //设置订单总金额(必填)
         model.setTransAmount(transAmount.toString());
         //设置业务产品码(固定参数)

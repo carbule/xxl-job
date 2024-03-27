@@ -20,6 +20,7 @@ import com.korant.youya.workplace.pojo.vo.talentpool.*;
 import com.korant.youya.workplace.service.TalentPoolService;
 import com.korant.youya.workplace.service.WxService;
 import com.korant.youya.workplace.utils.CalculationUtil;
+import com.korant.youya.workplace.utils.IdGenerationUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,9 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.security.config.annotation.web.oauth2.resourceserver.OpaqueTokenDsl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.desktop.OpenFilesEvent;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -745,6 +744,8 @@ public class TalentPoolServiceImpl implements TalentPoolService {
                 }
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
                 enterpriseWalletFreezeRecord.setAmount(amount);
@@ -755,9 +756,9 @@ public class TalentPoolServiceImpl implements TalentPoolService {
                 walletAccount.setFreezeAmount(freezeAmount.add(amount));
                 walletAccount.setAvailableBalance(shortfall);
                 enterpriseWalletAccountMapper.updateById(walletAccount);
-                Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
                 WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(freezeOrderId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                         .setDescription(desc).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
                 walletTransactionFlowMapper.insert(walletTransactionFlow);
             } else {
@@ -806,6 +807,8 @@ public class TalentPoolServiceImpl implements TalentPoolService {
                 BigDecimal freezeAmount = walletAccount.getFreezeAmount();
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
                 enterpriseWalletFreezeRecord.setAmount(amount);
@@ -815,9 +818,9 @@ public class TalentPoolServiceImpl implements TalentPoolService {
                 walletAccount.setFreezeAmount(freezeAmount.subtract(amount));
                 walletAccount.setAvailableBalance(availableBalance.add(amount));
                 enterpriseWalletAccountMapper.updateById(walletAccount);
-                Long walletFreezeRecordId = enterpriseWalletFreezeRecord.getId();
                 WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+                String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(freezeOrderId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                         .setDescription(desc).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(amount));
                 walletTransactionFlowMapper.insert(walletTransactionFlow);
             } else {

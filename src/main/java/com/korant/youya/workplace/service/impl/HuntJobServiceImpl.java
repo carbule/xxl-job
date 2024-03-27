@@ -20,6 +20,7 @@ import com.korant.youya.workplace.pojo.vo.huntjob.*;
 import com.korant.youya.workplace.pojo.vo.user.UserPublicInfoVo;
 import com.korant.youya.workplace.service.HuntJobService;
 import com.korant.youya.workplace.utils.CalculationUtil;
+import com.korant.youya.workplace.utils.IdGenerationUtil;
 import com.korant.youya.workplace.utils.JwtUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
@@ -129,7 +130,12 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
             count = huntJobMapper.queryHomePageListCountByUserId(userId, enterpriseId, listDto);
             list = huntJobMapper.queryHomePageListByUserId(userId, enterpriseId, listDto);
         }
-        list.forEach(s -> s.setOnboardingAward(s.getOnboardingAward().multiply(new BigDecimal("0.01"))));
+        list.forEach(s -> {
+            BigDecimal onboardingAward = s.getOnboardingAward();
+            if (null != onboardingAward) {
+                s.setOnboardingAward(onboardingAward.multiply(new BigDecimal("0.01")));
+            }
+        });
         Page<HuntJobHomePageVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
@@ -145,7 +151,10 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     public HuntJobHomePageDetailVo queryHomePageDetailById(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
         HuntJobHomePageDetailVo homePageDetailVo = huntJobMapper.queryHomePageDetailById(userId, id);
-        homePageDetailVo.setOnboardingAward(homePageDetailVo.getOnboardingAward().multiply(new BigDecimal("0.01")));
+        BigDecimal onboardingAward = homePageDetailVo.getOnboardingAward();
+        if (null != onboardingAward) {
+            homePageDetailVo.setOnboardingAward(onboardingAward.multiply(new BigDecimal("0.01")));
+        }
         return homePageDetailVo;
     }
 
@@ -205,7 +214,10 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         shareInfo.setRefereeLastName(userPublicInfoVo.getLastName());
         shareInfo.setRefereeFirstName(userPublicInfoVo.getFirstName());
         shareInfo.setRefereeGender(userPublicInfoVo.getGender());
-        shareInfo.setOnboardingAward(shareInfo.getOnboardingAward().multiply(new BigDecimal("0.01")));
+        BigDecimal onboardingAward = shareInfo.getOnboardingAward();
+        if (null != onboardingAward) {
+            shareInfo.setOnboardingAward(onboardingAward.multiply(new BigDecimal("0.01")));
+        }
         return shareInfo;
     }
 
@@ -243,7 +255,12 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         int pageSize = personalListDto.getPageSize();
         Long count = huntJobMapper.selectCount(new LambdaQueryWrapper<HuntJob>().eq(HuntJob::getUid, userId).eq(HuntJob::getStatus, status).eq(HuntJob::getIsDelete, 0));
         List<HuntJobPersonalVo> list = huntJobMapper.queryPersonalList(userId, status, personalListDto);
-        list.forEach(s -> s.setOnboardingAward(s.getOnboardingAward().multiply(new BigDecimal("0.01"))));
+        list.forEach(s -> {
+            BigDecimal onboardingAward = s.getOnboardingAward();
+            if (null != onboardingAward) {
+                s.setOnboardingAward(onboardingAward.multiply(new BigDecimal("0.01")));
+            }
+        });
         Page<HuntJobPersonalVo> page = new Page<>();
         page.setRecords(list).setCurrent(pageNumber).setSize(pageSize).setTotal(count);
         return page;
@@ -361,6 +378,8 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     }
                     LocalDateTime now = LocalDateTime.now();
                     UserWalletFreezeRecord userWalletFreezeRecord = new UserWalletFreezeRecord();
+                    String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                    userWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                     userWalletFreezeRecord.setUserWalletId(walletAccountId);
                     userWalletFreezeRecord.setHuntId(id);
                     userWalletFreezeRecord.setAmount(totalAward);
@@ -371,9 +390,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     walletAccount.setFreezeAmount(freezeAmount.add(totalAward));
                     walletAccount.setAvailableBalance(shortfall);
                     userWalletAccountMapper.updateById(walletAccount);
-                    Long walletFreezeRecordId = userWalletFreezeRecord.getId();
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(totalAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                    String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                    walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(freezeOrderId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(totalAward).setCurrency(CurrencyTypeEnum.CNY.getType())
                             .setDescription(HUNT_JOB_ONBOARD_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
                     walletTransactionFlowMapper.insert(walletTransactionFlow);
                 } else {
@@ -445,7 +464,10 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     public HuntJobDetailsPreviewVo detailsPreview(Long id) {
         Long userId = SpringSecurityUtil.getUserId();
         HuntJobDetailsPreviewVo detailsPreview = huntJobMapper.detailsPreview(userId, id);
-        detailsPreview.setOnboardingAward(detailsPreview.getOnboardingAward().multiply(new BigDecimal("0.01")));
+        BigDecimal onboardingAward = detailsPreview.getOnboardingAward();
+        if (null != onboardingAward) {
+            detailsPreview.setOnboardingAward(onboardingAward.multiply(new BigDecimal("0.01")));
+        }
         return detailsPreview;
     }
 
@@ -458,7 +480,10 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
     @Override
     public HuntJobDetailVo detail(Long id) {
         HuntJobDetailVo detail = huntJobMapper.detail(id);
-        detail.setOnboardingAward(detail.getOnboardingAward().multiply(new BigDecimal("0.01")));
+        BigDecimal onboardingAward = detail.getOnboardingAward();
+        if (null != onboardingAward) {
+            detail.setOnboardingAward(onboardingAward.multiply(new BigDecimal("0.01")));
+        }
         return detail;
     }
 
@@ -496,6 +521,8 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     BigDecimal freezeAmount = walletAccount.getFreezeAmount();
                     LocalDateTime now = LocalDateTime.now();
                     UserWalletFreezeRecord userWalletFreezeRecord = new UserWalletFreezeRecord();
+                    String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                    userWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                     userWalletFreezeRecord.setUserWalletId(walletAccountId);
                     userWalletFreezeRecord.setHuntId(id);
                     userWalletFreezeRecord.setAmount(onboardingAward);
@@ -505,9 +532,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     walletAccount.setFreezeAmount(freezeAmount.subtract(onboardingAward));
                     walletAccount.setAvailableBalance(availableBalance.add(onboardingAward));
                     userWalletAccountMapper.updateById(walletAccount);
-                    Long walletFreezeRecordId = userWalletFreezeRecord.getId();
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                    String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                    walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(freezeOrderId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
                             .setDescription(HUNT_JOB_ONBOARD_UNFREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(availableBalance.add(onboardingAward));
                     walletTransactionFlowMapper.insert(walletTransactionFlow);
                 } else {
@@ -573,6 +600,8 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     }
                     LocalDateTime now = LocalDateTime.now();
                     UserWalletFreezeRecord userWalletFreezeRecord = new UserWalletFreezeRecord();
+                    String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                    userWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                     userWalletFreezeRecord.setUserWalletId(walletAccountId);
                     userWalletFreezeRecord.setHuntId(id);
                     userWalletFreezeRecord.setAmount(onboardingAward);
@@ -583,9 +612,9 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
                     walletAccount.setFreezeAmount(freezeAmount.add(onboardingAward));
                     walletAccount.setAvailableBalance(shortfall);
                     userWalletAccountMapper.updateById(walletAccount);
-                    Long walletFreezeRecordId = userWalletFreezeRecord.getId();
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(walletFreezeRecordId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
+                    String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_FREEZE_OR_UNFREEZE.getCode());
+                    walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(transactionFlowId).setTransactionType(TransactionTypeEnum.FREEZE_OR_UNFREEZE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(onboardingAward).setCurrency(CurrencyTypeEnum.CNY.getType())
                             .setDescription(HUNT_JOB_ONBOARD_FREEZE_DES).setInitiationDate(now).setCompletionDate(now).setStatus(TransactionFlowStatusEnum.SUCCESSFUL.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.SUCCESSFUL.getStatusDesc()).setBalanceBefore(availableBalance).setBalanceAfter(shortfall);
                     walletTransactionFlowMapper.insert(walletTransactionFlow);
                 } else {

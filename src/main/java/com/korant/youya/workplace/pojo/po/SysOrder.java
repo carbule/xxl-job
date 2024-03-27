@@ -32,6 +32,12 @@ public class SysOrder implements Serializable {
     private Long id;
 
     /**
+     * 订单id
+     */
+    @TableField("order_id")
+    private String orderId;
+
+    /**
      * 商品id
      */
     @TableField("sys_product_id")

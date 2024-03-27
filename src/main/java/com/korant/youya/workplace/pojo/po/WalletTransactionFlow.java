@@ -32,6 +32,12 @@ public class WalletTransactionFlow implements Serializable {
     private Long id;
 
     /**
+     * 交易流水id
+     */
+    @TableField("transaction_id")
+    private String transactionId;
+
+    /**
      * 账户id
      */
     @TableField("account_id")
@@ -65,7 +71,7 @@ public class WalletTransactionFlow implements Serializable {
      * 订单id
      */
     @TableField("order_id")
-    private Long orderId;
+    private String orderId;
 
     /**
      * 交易类型
@@ -96,6 +102,12 @@ public class WalletTransactionFlow implements Serializable {
      */
     @TableField("description")
     private String description;
+
+    /**
+     * 交易详细描述
+     */
+    @TableField("detail_desc")
+    private String detailDesc;
 
     /**
      * 交易发起日期

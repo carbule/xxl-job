@@ -30,7 +30,7 @@ public class EnterpriseOrderTimeoutListener extends DefaultConsumer {
         String msg = new String(body);
         log.info("消息内容:{}", msg);
         EnterpriseService enterpriseService = SpringContextUtils.getBean(EnterpriseService.class);
-        enterpriseService.orderTimeoutProcessing(Long.valueOf(msg));
+        enterpriseService.orderTimeoutProcessing(msg);
         getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 }

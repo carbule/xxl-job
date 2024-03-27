@@ -30,7 +30,7 @@ public class CloseEnterpriseOrderListener extends DefaultConsumer {
         String msg = new String(body);
         log.info("消息内容:{}", msg);
         EnterpriseService enterpriseService = SpringContextUtils.getBean(EnterpriseService.class);
-        enterpriseService.closeEnterpriseOrder(Long.valueOf(msg));
+        enterpriseService.closeEnterpriseOrder(msg);
         getChannel().basicAck(envelope.getDeliveryTag(), false);
     }
 }

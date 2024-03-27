@@ -1,7 +1,6 @@
 package com.korant.youya.workplace.pojo.dto.sysorder;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -23,6 +22,6 @@ public class GeneratePaymentParametersDto {
     /**
      * 订单id
      */
-    @NotNull(message = "订单id不能为空")
-    private Long orderId;
+    @NotBlank(message = "订单id不能为空")
+    private String orderId;
 }

@@ -32,6 +32,12 @@ public class WalletWithdrawalRecord implements Serializable {
     private Long id;
 
     /**
+     * 提现订单id
+     */
+    @TableField("withdrawal_order_id")
+    private String withdrawalOrderId;
+
+    /**
      * 钱包账户id
      */
     @TableField("account_id")

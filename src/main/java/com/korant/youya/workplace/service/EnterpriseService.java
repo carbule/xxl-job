@@ -256,7 +256,7 @@ public interface EnterpriseService extends IService<Enterprise> {
      *
      * @param orderId
      */
-    void orderTimeoutProcessing(Long orderId);
+    void orderTimeoutProcessing(String orderId);
 
     /**
      * 企业完成支付
@@ -286,7 +286,7 @@ public interface EnterpriseService extends IService<Enterprise> {
      *
      * @param orderId
      */
-    void enterpriseOrderPaymentInquiry(Long orderId);
+    void enterpriseOrderPaymentInquiry(String orderId);
 
     /**
      * 查询企业订单列表
@@ -316,7 +316,7 @@ public interface EnterpriseService extends IService<Enterprise> {
      *
      * @param orderId
      */
-    void closeEnterpriseOrder(Long orderId);
+    void closeEnterpriseOrder(String orderId);
 
     /**
      * 查询企业已关闭订单列表

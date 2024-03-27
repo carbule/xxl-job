@@ -6,7 +6,6 @@ import com.alipay.api.diagnosis.DiagnosisUtils;
 import com.alipay.api.response.AlipayFundAccountQueryResponse;
 import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.constants.RedisConstant;
@@ -845,18 +844,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         int quantityValue = rechargeQuantity.intValue();
         Long accountId = userWalletAccount.getId();
         SysOrder sysOrder = new SysOrder();
-        sysOrder.setSysProductId(productId).setBuyerId(accountId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
+        String orderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.USER_RECHARGE.getCode());
+        sysOrder.setOrderId(orderId).setSysProductId(productId).setBuyerId(accountId).setType(OrderTypeEnum.VIRTUAL_PRODUCT.getType()).setPaymentMethod(PaymentMethodTypeEnum.WECHAT_PAYMENT.getType()).setOrderDate(LocalDateTime.now())
                 .setQuantity(quantityValue).setTotalAmount(amount).setActualAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType()).setStatus(OrderStatusEnum.PENDING_PAYMENT.getStatus());
         sysOrderMapper.insert(sysOrder);
         String openid = WeChatUtil.code2Session(code);
         if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
         if (StringUtils.isBlank(userRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
-        Long orderId = sysOrder.getId();
-        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), userRechargeNotifyUrl, amount.intValue(), openid);
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId, userRechargeNotifyUrl, amount.intValue(), openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
         log.info("用户：【{}】，购买商品id：【{}】，小程序下单并生成调起支付参数成功，微信响应报文：【{}】", phone, productId, JSONObject.toJSONString(response));
         WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-        walletTransactionFlow.setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
+        String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_RECHARGE.getCode());
+        walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(accountId).setProductId(productId).setOrderId(orderId).setTransactionType(TransactionTypeEnum.RECHARGE.getType()).setTransactionDirection(TransactionDirectionTypeEnum.CREDIT.getType()).setAmount(amount).setCurrency(CurrencyTypeEnum.CNY.getType())
                 .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
         walletTransactionFlowMapper.insert(walletTransactionFlow);
         try {
@@ -886,14 +886,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void orderTimeoutProcessing(Long orderId) {
+    public void orderTimeoutProcessing(String orderId) {
         log.info("用户订单id:【{}】开始进行超时处理", orderId);
         String lockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock lock = redissonClient.getLock(lockKey);
         try {
             boolean tryLock = lock.tryLock(3, TimeUnit.SECONDS);
             if (tryLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Integer status = sysOrder.getStatus();
                     if (OrderStatusEnum.PENDING_PAYMENT.getStatus() == status) {
@@ -958,13 +958,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String phone = loginUser.getPhone();
         UserWalletAccount userWalletAccount = userWalletAccountMapper.selectOne(new LambdaQueryWrapper<UserWalletAccount>().eq(UserWalletAccount::getUid, userId).eq(UserWalletAccount::getIsDelete, 0));
         if (null == userWalletAccount) throw new YouyaException("钱包账户不存在");
-        Long orderId = completePaymentDto.getOrderId();
+        String orderId = completePaymentDto.getOrderId();
         String lockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock lock = redissonClient.getLock(lockKey);
         try {
             boolean tryLock = lock.tryLock(3, TimeUnit.SECONDS);
             if (tryLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Long buyerId = sysOrder.getBuyerId();
                     Long walletAccountId = userWalletAccount.getId();
@@ -1139,13 +1139,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         try {
             boolean tryOrderLock = orderLock.tryLock(3, TimeUnit.SECONDS);
             if (tryOrderLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, Long.valueOf(outTradeNo)).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, outTradeNo).eq(SysOrder::getIsDelete, 0));
                 if (null == sysOrder) {
                     log.error("友涯系统不存在此笔订单");
                     writeToWechatPayNotifyResponseErrorMessage(response, "友涯系统不存在此笔订单");
                     return;
                 }
-                Long sysOrderId = sysOrder.getId();
+                String sysOrderId = sysOrder.getOrderId();
                 WalletTransactionFlow walletTransactionFlow = walletTransactionFlowMapper.selectOne(new LambdaQueryWrapper<WalletTransactionFlow>().eq(WalletTransactionFlow::getOrderId, sysOrderId).eq(WalletTransactionFlow::getIsDelete, 0));
                 if (null == walletTransactionFlow) {
                     log.error("友涯系统不存在此笔订单交易流水");
@@ -1345,8 +1345,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Integer queryRechargeResult(UserQueryRechargeResultDto rechargeResultDto) {
-        Long orderId = rechargeResultDto.getOrderId();
-        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+        String orderId = rechargeResultDto.getOrderId();
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
         return sysOrder.getStatus();
     }
@@ -1357,14 +1357,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param orderId
      */
     @Override
-    public void userOrderPaymentInquiry(Long orderId) {
+    public void userOrderPaymentInquiry(String orderId) {
         log.info("用户订单id:【{}】开始进行付款查询", orderId);
         String orderLockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock orderLock = redissonClient.getLock(orderLockKey);
         try {
             boolean tryOrderLock = orderLock.tryLock(3, TimeUnit.SECONDS);
             if (tryOrderLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Integer status = sysOrder.getStatus();
                     if (OrderStatusEnum.PROCESSING_PAYMENT.getStatus() == status) {
@@ -1739,13 +1739,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     if (StringUtils.isBlank(alipayAccountName)) throw new YouyaException("支付宝账号未实名认证，提现失败");
                     BigDecimal multiplyAmount = withdrawalAmount.multiply(new BigDecimal("100"));
                     //创建内部转账订单
-                    Long withdrawalRecordId = IdWorker.getId();
                     WalletWithdrawalRecord walletWithdrawalRecord = new WalletWithdrawalRecord();
-                    walletWithdrawalRecord.setId(withdrawalRecordId).setAccountId(walletAccountId).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setWithdrawalMethod(WithdrawalMethodEnum.ALIPAY_ACCOUNT.getMethod())
+                    String withdrawalOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.USER_WITHDRAWAL.getCode());
+                    walletWithdrawalRecord.setWithdrawalOrderId(withdrawalOrderId).setAccountId(walletAccountId).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setWithdrawalMethod(WithdrawalMethodEnum.ALIPAY_ACCOUNT.getMethod())
                             .setPaymentAccount(alipayAccount).setPaymentName(alipayAccountName).setStatus(WalletWithdrawalStatusEnum.PROCESSING.getStatus()).setRequestTime(LocalDateTime.now()).setProcessingTime(LocalDateTime.now());
                     //创建账户交易流水
                     WalletTransactionFlow walletTransactionFlow = new WalletTransactionFlow();
-                    walletTransactionFlow.setAccountId(walletAccountId).setOrderId(withdrawalRecordId).setTransactionType(TransactionTypeEnum
+                    String transactionFlowId = IdGenerationUtil.generateTransactionFlowId(YYBusinessCode.USER_WITHDRAWAL.getCode());
+                    walletTransactionFlow.setTransactionId(transactionFlowId).setAccountId(walletAccountId).setOrderId(withdrawalOrderId).setTransactionType(TransactionTypeEnum
                             .WITHDRAWAL.getType()).setTransactionDirection(TransactionDirectionTypeEnum.DEBIT.getType()).setAmount(multiplyAmount).setCurrency(CurrencyTypeEnum.CNY.getType()).setDescription(WALLET_ACCOUNT_WITHDRAWAL)
                             .setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
                     try {
@@ -1756,33 +1757,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         throw new YouyaException("网络异常，请稍后重试");
                     }
                     //发起转账
-                    AlipayFundTransUniTransferResponse transferResponse = AlipayUtil.transfer(WALLET_ACCOUNT_WITHDRAWAL, withdrawalRecordId, withdrawalAmount, alipayAccount, alipayAccountName);
+                    AlipayFundTransUniTransferResponse transferResponse = AlipayUtil.transfer(WALLET_ACCOUNT_WITHDRAWAL, withdrawalOrderId, withdrawalAmount, alipayAccount, alipayAccountName);
                     if (null == transferResponse) throw new YouyaException("网络异常，请稍后重试");
-                    log.info("友涯用户:【{}】，提现订单号：【{}】，友涯商户转账到支付宝账号响应明文：【{}】", phone, withdrawalRecordId, JSONObject.toJSONString(transferResponse));
+                    log.info("友涯用户:【{}】，提现订单号：【{}】，友涯商户转账到支付宝账号响应明文：【{}】", phone, withdrawalOrderId, JSONObject.toJSONString(transferResponse));
                     if (transferResponse.isSuccess()) {
                         String code = transferResponse.getCode();
                         if (StringUtils.isBlank(code)) {
-                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态码", phone, withdrawalRecordId, withdrawalAmount);
+                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态码", phone, withdrawalOrderId, withdrawalAmount);
                             return R.error("网络异常，请稍后重试");
                         }
                         String status = transferResponse.getStatus();
                         if (StringUtils.isBlank(status)) {
-                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态值", phone, withdrawalRecordId, withdrawalAmount);
+                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失响应状态值", phone, withdrawalOrderId, withdrawalAmount);
                             return R.error("网络异常，请稍后重试");
                         }
                         String outBizNo = transferResponse.getOutBizNo();
                         if (StringUtils.isBlank(outBizNo)) {
-                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失商户订单号", phone, withdrawalRecordId, withdrawalAmount);
+                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失商户订单号", phone, withdrawalOrderId, withdrawalAmount);
                             return R.error("网络异常，请稍后重试");
                         }
                         String outOrderId = transferResponse.getOrderId();
                         if (StringUtils.isBlank(outOrderId)) {
-                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝订单号", phone, withdrawalRecordId, withdrawalAmount);
+                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝订单号", phone, withdrawalOrderId, withdrawalAmount);
                             return R.error("网络异常，请稍后重试");
                         }
                         String payFundOrderId = transferResponse.getPayFundOrderId();
                         if (StringUtils.isBlank(payFundOrderId)) {
-                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝支付资金流水号", phone, withdrawalRecordId, withdrawalAmount);
+                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，友涯商户转账到支付宝账号响应报文缺失支付宝支付资金流水号", phone, withdrawalOrderId, withdrawalAmount);
                             return R.error("网络异常，请稍后重试");
                         }
                         String transDate = transferResponse.getTransDate();
@@ -1792,7 +1793,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         }
                         //转账支付宝账号成功
                         if ("10000".equals(code) && "SUCCESS".equals(status)) {
-                            if (withdrawalRecordId.toString().equals(outBizNo)) {
+                            if (withdrawalOrderId.equals(outBizNo)) {
                                 //更新转账订单状态
                                 walletWithdrawalRecord.setStatus(WalletWithdrawalStatusEnum.SUCCESSFUL.getStatus());
                                 walletWithdrawalRecord.setAlipayOrderId(outOrderId);
@@ -1810,14 +1811,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                                 walletTransactionFlow.setOutTransactionId(payFundOrderId);
                                 try {
                                     userService.updateAccountWithdrawalRelatedInfo(walletWithdrawalRecord, walletAccount, walletTransactionFlow);
-                                    log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元成功，转账订单和交易流水更新成功", phone, withdrawalRecordId, withdrawalAmount);
+                                    log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元成功，转账订单和交易流水更新成功", phone, withdrawalOrderId, withdrawalAmount);
                                     return R.ok();
                                 } catch (Exception e) {
-                                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元成功，转账订单和交易流水更新失败，原因：", phone, withdrawalRecordId, withdrawalAmount, e);
+                                    log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元成功，转账订单和交易流水更新失败，原因：", phone, withdrawalOrderId, withdrawalAmount, e);
                                     return R.error("网络异常，请稍后重试");
                                 }
                             } else {
-                                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中的商户订单号与平台提现订单号不一致", phone, withdrawalRecordId, withdrawalAmount);
+                                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中的商户订单号与平台提现订单号不一致", phone, withdrawalOrderId, withdrawalAmount);
                                 return R.error("网络异常，请稍后重试");
                             }
                         } else {
@@ -1826,7 +1827,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             String subCode = transferResponse.getSubCode();
                             String subMsg = transferResponse.getSubMsg();
                             if (StringUtils.isBlank(msg) || StringUtils.isBlank(subCode) || StringUtils.isBlank(subMsg)) {
-                                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalRecordId, withdrawalAmount);
+                                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalOrderId, withdrawalAmount);
                                 return R.error("网络异常，请稍后重试");
                             }
                             //修改转账订单状态
@@ -1845,9 +1846,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             walletTransactionFlow.setOutTransactionId(payFundOrderId);
                             try {
                                 userService.updateAccountWithdrawalRelatedInfo(walletWithdrawalRecord, null, walletTransactionFlow);
-                                log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新成功", phone, withdrawalRecordId, withdrawalAmount, subMsg);
+                                log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新成功", phone, withdrawalOrderId, withdrawalAmount, subMsg);
                             } catch (Exception e) {
-                                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新失败，原因：", phone, withdrawalRecordId, withdrawalAmount, subMsg, e);
+                                log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新失败，原因：", phone, withdrawalOrderId, withdrawalAmount, subMsg, e);
                             }
                             return R.error(subMsg);
                         }
@@ -1856,7 +1857,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         String subCode = transferResponse.getSubCode();
                         String subMsg = transferResponse.getSubMsg();
                         if (StringUtils.isBlank(msg) || StringUtils.isBlank(subCode) || StringUtils.isBlank(subMsg)) {
-                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalRecordId, withdrawalAmount);
+                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，支付宝转账api接口响应报文中缺失状态码或状态描述信息", phone, withdrawalOrderId, withdrawalAmount);
                             return R.error("网络异常，请稍后重试");
                         }
                         //更新转账订单状态
@@ -1870,9 +1871,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         walletTransactionFlow.setBalanceAfter(availableBalance);
                         try {
                             userService.updateAccountWithdrawalRelatedInfo(walletWithdrawalRecord, null, walletTransactionFlow);
-                            log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新成功", phone, withdrawalRecordId, withdrawalAmount, subMsg);
+                            log.info("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新成功", phone, withdrawalOrderId, withdrawalAmount, subMsg);
                         } catch (Exception e) {
-                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新失败，原因：", phone, withdrawalRecordId, withdrawalAmount, subMsg, e);
+                            log.error("友涯用户:【{}】，提现订单号：【{}】，提现：【{}】元失败，原因：【{}】，转账订单和交易流水更新失败，原因：", phone, withdrawalOrderId, withdrawalAmount, subMsg, e);
                         }
                         return R.error(subMsg);
                     }
@@ -1980,8 +1981,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (null == walletAccount) throw new YouyaException("钱包账户不存在");
         Integer accountStatus = walletAccount.getStatus();
         if (WalletAccountStatusEnum.FROZEN.getStatus() == accountStatus) throw new YouyaException("钱包账户已被冻结，请联系客服");
-        Long orderId = generatePaymentParametersDto.getOrderId();
-        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+        String orderId = generatePaymentParametersDto.getOrderId();
+        SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
         if (null == sysOrder) throw new YouyaException("订单不存在");
         Integer status = sysOrder.getStatus();
         if (OrderStatusEnum.PENDING_PAYMENT.getStatus() != status) throw new YouyaException("只有待支付订单可以获取支付参数");
@@ -1993,7 +1994,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isBlank(openid)) throw new YouyaException("用户微信openid获取失败");
         if (StringUtils.isBlank(userRechargeNotifyUrl)) throw new YouyaException("支付通知地址获取失败");
         Integer actualAmount = sysOrder.getActualAmount().intValue();
-        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId.toString(), userRechargeNotifyUrl, actualAmount, openid);
+        PrepayWithRequestPaymentResponse response = WechatPayUtil.prepayWithRequestPayment(RECHARGE_DESCRIPTION, orderId, userRechargeNotifyUrl, actualAmount, openid);
         if (null == response) throw new YouyaException("充值下单失败，请稍后重试");
         log.info("用户：【{}】，订单id：【{}】，生成调起支付参数成功，微信响应报文：【{}】", phone, orderId, JSONObject.toJSONString(response));
         JSONObject result = new JSONObject();
@@ -2018,13 +2019,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
         String phone = loginUser.getPhone();
-        Long orderId = cancelOrderDto.getOrderId();
+        String orderId = cancelOrderDto.getOrderId();
         String orderLockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock orderLock = redissonClient.getLock(orderLockKey);
         try {
             boolean tryOrderLock = orderLock.tryLock(3, TimeUnit.SECONDS);
             if (tryOrderLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null == sysOrder) throw new YouyaException("订单不存在");
                 Integer status = sysOrder.getStatus();
                 if (OrderStatusEnum.PENDING_PAYMENT.getStatus() != status)
@@ -2097,14 +2098,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void closeUserOrder(Long orderId) {
+    public void closeUserOrder(String orderId) {
         log.info("用户订单id:【{}】开始进行关闭处理", orderId);
         String lockKey = String.format(RedisConstant.YY_SYS_ORDER_LOCK, orderId);
         RLock lock = redissonClient.getLock(lockKey);
         try {
             boolean tryLock = lock.tryLock(3, TimeUnit.SECONDS);
             if (tryLock) {
-                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getId, orderId).eq(SysOrder::getIsDelete, 0));
+                SysOrder sysOrder = sysOrderMapper.selectOne(new LambdaQueryWrapper<SysOrder>().eq(SysOrder::getOrderId, orderId).eq(SysOrder::getIsDelete, 0));
                 if (null != sysOrder) {
                     Integer status = sysOrder.getStatus();
                     if (OrderStatusEnum.PAYMENT_TIMEOUT.getStatus() == status) {

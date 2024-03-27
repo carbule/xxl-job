@@ -18,7 +18,7 @@ public class SysOrderVo {
     /**
      * 订单id
      */
-    private Long id;
+    private String orderId;
 
     /**
      * 商品名称

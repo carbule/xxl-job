@@ -4,7 +4,7 @@
 
     <!--  查询订单列表  -->
     <select id="queryOrderList" resultType="com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo">
-        SELECT o.id,
+        SELECT o.order_id AS orderId,
         p.name AS productName,
         p.description AS productDescription,
         o.order_date AS orderDate,
@@ -25,11 +25,11 @@
 
     <!--  查询已关闭订单列表  -->
     <select id="queryClosedOrderList" resultType="com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo">
-        SELECT o.id,
-               p.name            AS productName,
-               p.description     AS productDescription,
-               o.order_date      AS orderDate,
-               o.actual_amount   AS actualAmount,
+        SELECT o.order_id      AS orderId,
+               p.name          AS productName,
+               p.description   AS productDescription,
+               o.order_date    AS orderDate,
+               o.actual_amount AS actualAmount,
                o.status
         FROM yy_sys_order AS o
                  LEFT JOIN yy_sys_virtual_product AS p ON o.sys_product_id = p.id AND p.is_delete = 0

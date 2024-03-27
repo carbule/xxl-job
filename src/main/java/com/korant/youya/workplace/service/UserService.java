@@ -192,7 +192,7 @@ public interface UserService extends IService<User> {
      *
      * @param orderId
      */
-    void orderTimeoutProcessing(Long orderId);
+    void orderTimeoutProcessing(String orderId);
 
     /**
      * 用户完成支付
@@ -222,7 +222,7 @@ public interface UserService extends IService<User> {
      *
      * @param orderId
      */
-    void userOrderPaymentInquiry(Long orderId);
+    void userOrderPaymentInquiry(String orderId);
 
     /**
      * 查询用户支付宝账号
@@ -316,7 +316,7 @@ public interface UserService extends IService<User> {
      *
      * @param orderId
      */
-    void closeUserOrder(Long orderId);
+    void closeUserOrder(String orderId);
 
     /**
      * 查询用户已关闭订单列表
