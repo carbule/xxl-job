@@ -38,7 +38,7 @@
         FROM position
         WHERE level = 1
           AND is_delete = 0
-        ORDER BY create_time
+        ORDER BY code
     </select>
 
     <!--  根据行业id查询所有职位  -->
