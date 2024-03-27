@@ -82,5 +82,6 @@ public class Interview implements Serializable {
      * 是否删除 0-未删除 1-已删除
      */
     @TableField(value = "is_delete", fill = FieldFill.INSERT)
+    @TableLogic
     private Integer isDelete;
 }

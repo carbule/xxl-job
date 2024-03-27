@@ -1,7 +1,9 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.korant.youya.workplace.constants.RabbitConstant;
 import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.*;
 import com.korant.youya.workplace.exception.YouyaException;
@@ -13,6 +15,7 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDt
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingProgressMsgSubDTO;
+import com.korant.youya.workplace.pojo.dto.msgsub.mq.InterviewAppointmentMsgSubMessage;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.candidate.*;
 import com.korant.youya.workplace.service.CandidateService;
@@ -24,12 +27,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -87,6 +92,9 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Resource
     private EnterpriseMapper enterpriseMapper;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     private static final String JOB_INTERVIEW_FREEZE_DES = "面试";
 
@@ -204,6 +212,36 @@ public class CandidateServiceImpl implements CandidateService {
             recruitProcessInstance.setProcessStep(1);
             recruitProcessInstanceMapper.updateById(recruitProcessInstance);
         }
+
+        // 发送微信消息订阅事件
+        sendInterviewAppointmentMessageSubscribeEvent(job, applyJob, interview);
+    }
+
+    /**
+     * 发送微信订阅事件
+     *
+     * @param job 职位
+     * @param aj  职位申请记录
+     * @param itv 面试记录
+     */
+    protected void sendInterviewAppointmentMessageSubscribeEvent(Job job, ApplyJob aj, Interview itv) {
+        User user = Optional.ofNullable(userMapper.selectById(aj.getApplicant()))
+                .orElseThrow(() -> new YouyaException("找不到职位申请人的用户信息"));
+
+        InterviewAppointmentMsgSubMessage messageBody = new InterviewAppointmentMsgSubMessage();
+        messageBody.setJob(job);
+        messageBody.setUser(user);
+        messageBody.setInterview(itv);
+
+        // 发送延迟队列
+        rabbitTemplate.convertAndSend(
+                RabbitConstant.Exchange.WX_MESSAGE_SUBSCRIBE_INTERVIEW_APPOINTMENT_EXCHANGE,
+                RabbitConstant.RoutingKey.WX_MESSAGE_SUBSCRIBE_INTERVIEW_APPOINTMENT_4CANDIDATE_ROUTING_KEY,
+                JSON.toJSONString(messageBody),
+                message -> {
+                    message.getMessageProperties().setDelay(24 * 60 * 60 * 1000);
+                    return message;
+                });
     }
 
     /**
