@@ -185,6 +185,7 @@ public class ApplyJobServiceImpl extends ServiceImpl<ApplyJobMapper, ApplyJob> i
 
         wxService.sendInterviewMessageSubscribe(user.getWechatOpenId(), new InterviewMsgSubDTO()
                 .setJobId(job.getId())
+                .setApplyJobId(applyJob.getId())
                 .setPositionName(job.getPositionName())
                 .setEnterpriseName(enterprise.getName())
                 .setTime(interview.getInterTime())

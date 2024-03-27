@@ -233,6 +233,7 @@ public class CandidateServiceImpl implements CandidateService {
         messageBody.setJob(job);
         messageBody.setUser(user);
         messageBody.setInterview(itv);
+        messageBody.setApplyJobId(aj.getId());
 
         // 发送延迟队列
         rabbitTemplate.convertAndSend(
@@ -415,6 +416,7 @@ public class CandidateServiceImpl implements CandidateService {
         }
         wxService.sendOnboardingMessageSubscribe(user.getWechatOpenId(), new OnboardingMsgSubDTO()
                 .setJobId(job.getId())
+                .setApplyJobId(applyJob.getId())
                 .setPositionName(job.getPositionName())
                 .setEnterpriseName(enterprise.getName())
                 .setTime(onboarding.getOnboardingTime()));
@@ -588,6 +590,7 @@ public class CandidateServiceImpl implements CandidateService {
         }
         wxService.sendOnboardingProgressMessageSubscribe(user.getWechatOpenId(), new OnboardingProgressMsgSubDTO()
                 .setJobId(job.getId())
+                .setApplyJobId(applyJob.getId())
                 .setPositionName(job.getPositionName())
                 .setEnterpriseName(enterprise.getName())
                 .setProgress("转正待确认"));

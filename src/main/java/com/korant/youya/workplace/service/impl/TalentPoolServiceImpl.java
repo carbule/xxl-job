@@ -272,6 +272,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
         messageBody.setJob(job);
         messageBody.setUser(user);
         messageBody.setInterview(itv);
+        messageBody.setInternalRecommendId(ir.getId());
 
         // 发送到延迟队列
         rabbitTemplate.convertAndSend(
@@ -451,6 +452,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
 
         wxService.sendOnboardingMessageSubscribe(user.getWechatOpenId(), new OnboardingMsgSubDTO()
                 .setJobId(job.getId())
+                .setInternalRecommendId(internalRecommend.getId())
                 .setPositionName(job.getPositionName())
                 .setEnterpriseName(enterprise.getName())
                 .setTime(onboarding.getOnboardingTime()));
@@ -620,6 +622,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
 
         wxService.sendOnboardingProgressMessageSubscribe(user.getWechatOpenId(), new OnboardingProgressMsgSubDTO()
                 .setJobId(job.getId())
+                .setInternalRecommendId(ir.getId())
                 .setPositionName(job.getPositionName())
                 .setEnterpriseName(enterprise.getName())
                 .setProgress("转正待确认"));

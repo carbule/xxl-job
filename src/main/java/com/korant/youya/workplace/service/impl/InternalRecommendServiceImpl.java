@@ -221,6 +221,7 @@ public class InternalRecommendServiceImpl extends ServiceImpl<InternalRecommendM
 
         wxService.sendInterviewMessageSubscribe(user.getWechatOpenId(), new InterviewMsgSubDTO()
                 .setJobId(job.getId())
+                .setInternalRecommendId(internalRecommend.getId())
                 .setPositionName(job.getPositionName())
                 .setEnterpriseName(enterprise.getName())
                 .setTime(interview.getInterTime())

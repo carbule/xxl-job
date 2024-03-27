@@ -45,7 +45,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getInterviewAppointment())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getJobId()))
+                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getInternalRecommendId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing1").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time2").setValue(msgSubDTO.getFinalTime().format(FORMATTER)))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getTips())));
@@ -64,7 +64,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getInterview())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getJobId()))
+                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getInternalRecommendId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing1").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing4").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time3").setValue(msgSubDTO.getTime().format(FORMATTER)))
@@ -84,7 +84,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getOnboarding())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getJobId()))
+                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getInternalRecommendId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing2").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time6").setValue(msgSubDTO.getTime().format(FORMATTER))));
@@ -103,7 +103,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .setToUser(toUser)
                             .setTemplateId(wxMaProperties.getMessageSubscribeTemplate().getOnboardingProgress())
                             .setMiniprogramState(wxMaProperties.getMessageSubscribeTemplate().getMiniprogramState())
-                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getJobId()))
+                            .setPage(String.format("subpackages/PackageUser/xapply/share-steps?id=%s", msgSubDTO.getInternalRecommendId()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing4").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing5").setValue(msgSubDTO.getProgress())));

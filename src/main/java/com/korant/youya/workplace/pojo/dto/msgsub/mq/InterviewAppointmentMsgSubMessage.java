@@ -20,6 +20,16 @@ public class InterviewAppointmentMsgSubMessage {
     private Job job;
 
     /**
+     * 职位申请 ID
+     */
+    private Long applyJobId;
+
+    /**
+     * 内部推荐 ID
+     */
+    private Long internalRecommendId;
+
+    /**
      * 面试人
      */
     private User user;

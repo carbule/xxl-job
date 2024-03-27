@@ -21,6 +21,16 @@ public class OnboardingMsgSubDTO {
     private Long jobId;
 
     /**
+     * 职位申请 ID
+     */
+    private Long applyJobId;
+
+    /**
+     * 内部推荐 ID
+     */
+    private Long internalRecommendId;
+
+    /**
      * 入职职位
      */
     private String positionName;
