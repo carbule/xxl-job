@@ -183,6 +183,11 @@ public class Job implements Serializable {
     private Integer status;
 
     /**
+     * 发布时间
+     */
+    private LocalDateTime pubTime;
+
+    /**
      * 审核状态
      */
     @TableField("audit_status")

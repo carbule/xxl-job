@@ -267,7 +267,8 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         Enterprise enterprise = enterpriseMapper.selectOne(new LambdaQueryWrapper<Enterprise>().eq(Enterprise::getId, enterpriseId).eq(Enterprise::getIsDelete, 0));
         if (null == enterprise) throw new YouyaException("企业未注册");
         Integer authStatus = enterprise.getAuthStatus();
-        if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus) throw new YouyaException("请等待企业通过审核再发布职位");
+        if (EnterpriseAuthStatusEnum.AUTH_SUCCESS.getStatus() != authStatus)
+            throw new YouyaException("请等待企业通过审核再发布职位");
         String award = createDto.getAward();
         Job job = new Job();
         Long id = IdWorker.getId();
@@ -281,29 +282,35 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             if (!isPositiveInteger) throw new YouyaException("奖励金额必须是1的整数倍");
             BigDecimal interviewRewardRate = createDto.getInterviewRewardRate();
             if (null == interviewRewardRate) throw new YouyaException("面试奖励分配比例不能为空");
-            if (CalculationUtil.isNegativeNumber(interviewRewardRate)) throw new YouyaException("面试奖励分配比例必须是正数");
+            if (CalculationUtil.isNegativeNumber(interviewRewardRate))
+                throw new YouyaException("面试奖励分配比例必须是正数");
             int interviewRewardRateScale = CalculationUtil.getScaleAfterStrippingTrailingZeros(interviewRewardRate);
             if (interviewRewardRateScale > 2) throw new YouyaException("面试奖励分配比例最多只能包含两位有效小数位");
             BigDecimal onboardRewardRate = createDto.getOnboardRewardRate();
             if (null == onboardRewardRate) throw new YouyaException("入职奖励分配比例不能为空");
-            if (CalculationUtil.isNegativeNumber(onboardRewardRate)) throw new YouyaException("入职奖励分配比例必须是正数");
+            if (CalculationUtil.isNegativeNumber(onboardRewardRate))
+                throw new YouyaException("入职奖励分配比例必须是正数");
             int onboardRewardRateScale = CalculationUtil.getScaleAfterStrippingTrailingZeros(onboardRewardRate);
             if (onboardRewardRateScale > 2) throw new YouyaException("入职奖励分配比例最多只能包含两位有效小数位");
             BigDecimal fullMemberRewardRate = createDto.getFullMemberRewardRate();
             if (null == fullMemberRewardRate) throw new YouyaException("转正奖励分配比例不能为空");
-            if (CalculationUtil.isNegativeNumber(fullMemberRewardRate)) throw new YouyaException("转正奖励分配比例比例必须是正数");
+            if (CalculationUtil.isNegativeNumber(fullMemberRewardRate))
+                throw new YouyaException("转正奖励分配比例比例必须是正数");
             int fullMemberRewardRateScale = CalculationUtil.getScaleAfterStrippingTrailingZeros(fullMemberRewardRate);
             if (fullMemberRewardRateScale > 2) throw new YouyaException("转正奖励分配比例最多只能包含两位有效小数位");
             BigDecimal total = interviewRewardRate.add(onboardRewardRate).add(fullMemberRewardRate);
             if (total.compareTo(new BigDecimal("100")) != 0) throw new YouyaException("所有奖励比例相加必须满足100%");
             BonusDistributionRule interviewBonusDistributionRule = bonusDistributionRuleMapper.selectOne(new LambdaQueryWrapper<BonusDistributionRule>().eq(BonusDistributionRule::getCode, JOB_INTERVIEW_BONUS_DISTRIBUTION_RULE).eq(BonusDistributionRule::getIsDelete, 0));
-            if (null == interviewBonusDistributionRule) throw new YouyaException("职位面试阶段预设奖金分配规则缺失，请联系客服");
+            if (null == interviewBonusDistributionRule)
+                throw new YouyaException("职位面试阶段预设奖金分配规则缺失，请联系客服");
             job.setInterviewBonusDistributionRule(JOB_INTERVIEW_BONUS_DISTRIBUTION_RULE);
             BonusDistributionRule onboardBonusDistributionRule = bonusDistributionRuleMapper.selectOne(new LambdaQueryWrapper<BonusDistributionRule>().eq(BonusDistributionRule::getCode, JOB_ONBOARD_BONUS_DISTRIBUTION_RULE).eq(BonusDistributionRule::getIsDelete, 0));
-            if (null == onboardBonusDistributionRule) throw new YouyaException("职位入职阶段预设奖金分配规则缺失，请联系客服");
+            if (null == onboardBonusDistributionRule)
+                throw new YouyaException("职位入职阶段预设奖金分配规则缺失，请联系客服");
             job.setOnboardBonusDistributionRule(JOB_ONBOARD_BONUS_DISTRIBUTION_RULE);
             BonusDistributionRule fullMemberBonusDistributionRule = bonusDistributionRuleMapper.selectOne(new LambdaQueryWrapper<BonusDistributionRule>().eq(BonusDistributionRule::getCode, JOB_FULL_MEMBER_BONUS_DISTRIBUTION_RULE).eq(BonusDistributionRule::getIsDelete, 0));
-            if (null == fullMemberBonusDistributionRule) throw new YouyaException("职位面试阶段预设奖金分配规则缺失，请联系客服");
+            if (null == fullMemberBonusDistributionRule)
+                throw new YouyaException("职位面试阶段预设奖金分配规则缺失，请联系客服");
             job.setFullMemberBonusDistributionRule(JOB_FULL_MEMBER_BONUS_DISTRIBUTION_RULE);
             BigDecimal totalAward = amount.multiply(new BigDecimal("100"));
             job.setAward(totalAward);
@@ -350,7 +357,8 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         Integer status = job.getStatus();
         if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
         Integer auditStatus = job.getAuditStatus();
-        if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus) throw new YouyaException("等待审核中的职位不可修改");
+        if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus)
+            throw new YouyaException("等待审核中的职位不可修改");
         String award = modifyDto.getAward();
         if (StringUtils.isNotBlank(award)) {
             if (CalculationUtil.containsNonNumericCharacter(award)) throw new YouyaException("请输入有效金额");
@@ -361,17 +369,20 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
             if (!isPositiveInteger) throw new YouyaException("奖励金额必须是1的整数倍");
             BigDecimal interviewRewardRate = modifyDto.getInterviewRewardRate();
             if (null == interviewRewardRate) throw new YouyaException("面试奖励分配比例不能为空");
-            if (CalculationUtil.isNegativeNumber(interviewRewardRate)) throw new YouyaException("面试奖励分配比例必须是正数");
+            if (CalculationUtil.isNegativeNumber(interviewRewardRate))
+                throw new YouyaException("面试奖励分配比例必须是正数");
             int interviewRewardRateScale = CalculationUtil.getScaleAfterStrippingTrailingZeros(interviewRewardRate);
             if (interviewRewardRateScale > 2) throw new YouyaException("面试奖励分配比例最多只能包含两位有效小数位");
             BigDecimal onboardRewardRate = modifyDto.getOnboardRewardRate();
             if (null == onboardRewardRate) throw new YouyaException("入职奖励分配比例不能为空");
-            if (CalculationUtil.isNegativeNumber(onboardRewardRate)) throw new YouyaException("入职奖励分配比例必须是正数");
+            if (CalculationUtil.isNegativeNumber(onboardRewardRate))
+                throw new YouyaException("入职奖励分配比例必须是正数");
             int onboardRewardRateScale = CalculationUtil.getScaleAfterStrippingTrailingZeros(onboardRewardRate);
             if (onboardRewardRateScale > 2) throw new YouyaException("入职奖励分配比例最多只能包含两位有效小数位");
             BigDecimal fullMemberRewardRate = modifyDto.getFullMemberRewardRate();
             if (null == fullMemberRewardRate) throw new YouyaException("转正奖励分配比例不能为空");
-            if (CalculationUtil.isNegativeNumber(fullMemberRewardRate)) throw new YouyaException("转正奖励分配比例比例必须是正数");
+            if (CalculationUtil.isNegativeNumber(fullMemberRewardRate))
+                throw new YouyaException("转正奖励分配比例比例必须是正数");
             int fullMemberRewardRateScale = CalculationUtil.getScaleAfterStrippingTrailingZeros(fullMemberRewardRate);
             if (fullMemberRewardRateScale > 2) throw new YouyaException("转正奖励分配比例最多只能包含两位有效小数位");
             BigDecimal total = interviewRewardRate.add(onboardRewardRate).add(fullMemberRewardRate);
@@ -445,6 +456,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         Integer status = job.getStatus();
         if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("职位已发布");
         job.setStatus(JobStatusEnum.PUBLISHED.getStatus());
+        job.setPubTime(LocalDateTime.now());
         job.setAuditStatus(JobAuditStatusEnum.UNAUDITED.getStatus());
         jobMapper.updateById(job);
     }
