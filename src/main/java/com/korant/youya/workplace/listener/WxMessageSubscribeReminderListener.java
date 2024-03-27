@@ -1,7 +1,6 @@
 package com.korant.youya.workplace.listener;
 
 import com.alibaba.fastjson2.JSON;
-import com.alipay.api.domain.MANPRIVATE;
 import com.korant.youya.workplace.constants.RabbitConstant;
 import com.korant.youya.workplace.enums.AcceptanceStatusEnum;
 import com.korant.youya.workplace.enums.CompletionStatusEnum;
@@ -21,8 +20,6 @@ import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.config.annotation.web.oauth2.resourceserver.OpaqueTokenDsl;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
