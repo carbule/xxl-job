@@ -16,6 +16,7 @@
         FROM yy_wallet_transaction_flow
         <where>
             account_id = #{walletAccountId}
+            AND status = 3
             AND is_delete = 0
             <if test="queryAccountTransactionFlowListDto.transactionType != null ">
                 AND transaction_type = #{queryAccountTransactionFlowListDto.transactionType}
