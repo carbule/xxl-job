@@ -300,7 +300,7 @@
             AND is_delete = 0) AS isCollected,
             (SELECT CASE WHEN COUNT (*) > 0 THEN 1 ELSE 0 END
             FROM internal_recommend
-            WHERE referee =
+            WHERE recommender =
                #{userId}
             AND hunt_id =
                #{id}
@@ -530,23 +530,23 @@
     <select id="detail" parameterType="java.lang.Long"
             resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobDetailVo">
         SELECT hj.id,
-               hj.position_id             AS positionId,
-               p1.name                    AS industryName,
-               p2.name                    AS sectorName,
-               p3.name                    AS positionName,
-               ep.industry_code           AS industryCode,
-               ep.sector_code             AS sectorCode,
-               ep.position_code           AS positionCode,
-               ep.min_salary              AS minSalary,
-               ep.max_salary              AS maxSalary,
-               hj.area_id                 AS areaId,
-               dd1.name                   AS countryName,
-               dd2.name                   AS provinceName,
-               dd3.name                   AS cityName,
-               ewa.country_code           AS countryCode,
-               ewa.province_code          AS provinceCode,
-               ewa.city_code              AS cityCode,
-               hj.onboarding_award        AS onboardingAward
+               hj.position_id      AS positionId,
+               p1.name             AS industryName,
+               p2.name             AS sectorName,
+               p3.name             AS positionName,
+               ep.industry_code    AS industryCode,
+               ep.sector_code      AS sectorCode,
+               ep.position_code    AS positionCode,
+               ep.min_salary       AS minSalary,
+               ep.max_salary       AS maxSalary,
+               hj.area_id          AS areaId,
+               dd1.name            AS countryName,
+               dd2.name            AS provinceName,
+               dd3.name            AS cityName,
+               ewa.country_code    AS countryCode,
+               ewa.province_code   AS provinceCode,
+               ewa.city_code       AS cityCode,
+               hj.onboarding_award AS onboardingAward
         FROM hunt_job AS hj
                  LEFT JOIN expected_position AS ep ON hj.position_id = ep.id AND ep.is_delete = 0
                  LEFT JOIN position AS p1 ON ep.industry_code = p1.code AND p1.is_delete = 0
