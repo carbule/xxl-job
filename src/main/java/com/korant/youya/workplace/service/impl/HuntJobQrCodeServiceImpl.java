@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
@@ -7,6 +8,7 @@ import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.HuntJobMapper;
 import com.korant.youya.workplace.mapper.HuntJobQrCodeMapper;
 import com.korant.youya.workplace.pojo.PageData;
+import com.korant.youya.workplace.pojo.dto.graph.SharedDto;
 import com.korant.youya.workplace.pojo.dto.huntjobqrcode.HuntJobUnlimitedQRCodeDto;
 import com.korant.youya.workplace.pojo.dto.huntjobqrcode.huntJobQrCodeQueryListDto;
 import com.korant.youya.workplace.pojo.po.HuntJob;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -123,8 +126,8 @@ public class HuntJobQrCodeServiceImpl extends ServiceImpl<HuntJobQrCodeMapper, H
             scene = "qrCodeId" + "=" + qrCode.getId();
         } else {
             if (isShare == 1) {
-                boolean exists = huntJobQrCodeMapper.exists(new LambdaQueryWrapper<HuntJobQrCode>().eq(HuntJobQrCode::getId, qrId).eq(HuntJobQrCode::getIsDelete, 0));
-                if (!exists) throw new YouyaException("分享信息不存在");
+                HuntJobQrCode huntJobQrCode = huntJobQrCodeMapper.selectOne(new LambdaQueryWrapper<HuntJobQrCode>().eq(HuntJobQrCode::getId, qrId).eq(HuntJobQrCode::getIsDelete, 0));
+                if (null == huntJobQrCode) throw new YouyaException("分享信息不存在");
                 HuntJobQrCode qrCode = new HuntJobQrCode();
                 qrCode.setPid(qrId);
                 qrCode.setReferee(userId);
@@ -132,6 +135,13 @@ public class HuntJobQrCodeServiceImpl extends ServiceImpl<HuntJobQrCodeMapper, H
                 qrCode.setHuntId(huntId);
                 huntJobQrCodeMapper.insert(qrCode);
                 scene = "qrCodeId" + "=" + qrCode.getId();
+                SharedDto sharedDto = new SharedDto();
+                sharedDto.setTargetId(huntId);
+                sharedDto.setFromUserId(huntJobQrCode.getReferee());
+                sharedDto.setToUserId(userId);
+                sharedDto.setIsHr(false);
+                sharedDto.setTimestamp(LocalDateTime.now());
+                rabbitMqUtil.sendMsg("youya.share", "huntjob.share", JSON.toJSONString(sharedDto));
             } else {
                 HuntJobQrCode huntJobQrCode = huntJobQrCodeMapper.selectOne(new LambdaQueryWrapper<HuntJobQrCode>().eq(HuntJobQrCode::getId, qrId).eq(HuntJobQrCode::getIsDelete, 0));
                 if (null == huntJobQrCode) throw new YouyaException("分享信息不存在");
@@ -143,6 +153,13 @@ public class HuntJobQrCodeServiceImpl extends ServiceImpl<HuntJobQrCodeMapper, H
                     qrCode.setHuntId(huntId);
                     huntJobQrCodeMapper.insert(qrCode);
                     scene = "qrCodeId" + "=" + qrCode.getId();
+                    SharedDto sharedDto = new SharedDto();
+                    sharedDto.setTargetId(huntId);
+                    sharedDto.setFromUserId(huntJobQrCode.getReferee());
+                    sharedDto.setToUserId(userId);
+                    sharedDto.setIsHr(false);
+                    sharedDto.setTimestamp(LocalDateTime.now());
+                    rabbitMqUtil.sendMsg("youya.share", "huntjob.share", JSON.toJSONString(sharedDto));
                 } else {
                     scene = "qrCodeId" + "=" + qrId;
                 }

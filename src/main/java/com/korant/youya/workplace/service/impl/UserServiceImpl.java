@@ -36,6 +36,7 @@ import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
 import com.korant.youya.workplace.properties.DelayProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
+import com.korant.youya.workplace.repository.UserGraphRepo;
 import com.korant.youya.workplace.service.UserService;
 import com.korant.youya.workplace.utils.*;
 import com.wechat.pay.java.core.notification.RequestParam;
@@ -47,6 +48,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.neo4j.driver.Driver;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.core.Message;
@@ -67,10 +69,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -102,6 +101,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private RecruiterVisibleInfoMapper recruiterVisibleInfoMapper;
+
+    @Resource
+    private UserGraphRepo userGraphRepo;
 
     @Resource
     private EnterpriseMapper enterpriseMapper;
@@ -138,6 +140,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private RedissonClient redissonClient;
+
+    @Resource
+    private Driver neoDriver;
 
     @Resource
     RabbitMqConfigurationProperties mqConfigurationProperties;
@@ -375,6 +380,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userWalletAccount.setFreezeAmount(new BigDecimal("0"));
         userWalletAccount.setStatus(0);
         userWalletAccountMapper.insert(userWalletAccount);
+        var userRecord = userGraphRepo.findById(id);
+        var cql = "match (u:User {id: $user_id}) set u.is_deleted = false";
+        if (userRecord.isPresent()) {
+            if (userRecord.get().getIsDeleted()) {
+                var result = neoDriver.executableQuery(cql).withParameters(Map.of("user_id", id)).execute();
+                if (result.summary().counters().propertiesSet() != 1) throw new YouyaException("网络异常，请稍后重试");
+            }
+        } else {
+            UserGraph userGraph = new UserGraph();
+            userGraph.setId(id);
+            userGraph.setPhone(phoneNumber);
+            userGraphRepo.save(userGraph);
+        }
         return loginUser;
     }
 
@@ -458,6 +476,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         redisUtil.del(tokenKey);
         user.setIsDelete(1);
         userMapper.updateById(user);
+        var userRecord = userGraphRepo.findById(id);
+        var cql = "match (u:User {id: $user_id}) set u.is_deleted = true";
+        if (userRecord.isPresent()) {
+            if (!userRecord.get().getIsDeleted()) {
+                var result = neoDriver.executableQuery(cql).withParameters(Map.of("user_id", id)).execute();
+                if (result.summary().counters().propertiesSet() != 1) throw new YouyaException("网络异常，请稍后重试");
+            }
+        }
     }
 
     /**

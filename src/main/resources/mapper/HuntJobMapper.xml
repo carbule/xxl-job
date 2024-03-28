@@ -643,4 +643,17 @@
         WHERE hj.id = #{id}
           AND u.is_delete = 0
     </select>
+
+    <!--  根据qrId查找对应的分享信息  -->
+    <select id="findHuntJobShared" resultType="com.korant.youya.workplace.pojo.vo.huntjob.HuntJobSharedVo">
+        SELECT q1.hunt_id AS targetId,
+               q2.referee AS fromUserId,
+               q1.referee AS toUserId,
+               q1.create_time AS  timestamp
+        FROM hunt_job_qr_code AS q1 LEFT JOIN hunt_job_qr_code AS q2
+        ON q1.pid = q2.id
+        WHERE q1.id = #{qrId}
+          AND q1.is_delete = 0
+          AND q2.is_delete = 0
+    </select>
 </mapper>

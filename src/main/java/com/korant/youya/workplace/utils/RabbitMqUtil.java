@@ -36,7 +36,7 @@ public class RabbitMqUtil {
      * @param routingKey 路由key
      * @param obj        数据
      */
-    public void sendTTLMsg(String exchange, String routingKey, Object obj) {
+    public void sendMsg(String exchange, String routingKey, Object obj) {
         try {
             rabbitTemplate.convertAndSend(exchange, routingKey, obj);
         } catch (Exception e) {

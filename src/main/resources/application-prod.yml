@@ -70,6 +70,14 @@ spring:
       simple:
         acknowledge-mode: manual
 
+  neo4j:
+    uri: neo4j://139.9.144.123:7687
+    authentication:
+      username: neo4j
+      password: YouYai@12345
+    pool:
+      max-connection-pool-size: 2
+
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl

@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
@@ -9,6 +10,7 @@ import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.JobMapper;
 import com.korant.youya.workplace.mapper.JobQrCodeMapper;
 import com.korant.youya.workplace.pojo.PageData;
+import com.korant.youya.workplace.pojo.dto.graph.SharedDto;
 import com.korant.youya.workplace.pojo.dto.jobqrcode.JobQrCodeQueryListDto;
 import com.korant.youya.workplace.pojo.dto.jobqrcode.JobUnlimitedQRCodeDto;
 import com.korant.youya.workplace.pojo.po.Job;
@@ -38,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -128,8 +131,8 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
             scene = "qrCodeId" + "=" + qrCode.getId();
         } else {
             if (isShare == 1) {
-                boolean exists = jobQrCodeMapper.exists(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getId, qrId).eq(JobQrCode::getIsDelete, 0));
-                if (!exists) throw new YouyaException("分享信息不存在");
+                JobQrCode jobQrCode = jobQrCodeMapper.selectOne(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getId, qrId).eq(JobQrCode::getIsDelete, 0));
+                if (null == jobQrCode) throw new YouyaException("分享信息不存在");
                 JobQrCode qrCode = new JobQrCode();
                 qrCode.setPid(qrId);
                 qrCode.setReferee(userId);
@@ -137,6 +140,13 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
                 qrCode.setJobId(jobId);
                 jobQrCodeMapper.insert(qrCode);
                 scene = "qrCodeId" + "=" + qrCode.getId();
+                SharedDto sharedDto = new SharedDto();
+                sharedDto.setTargetId(jobId);
+                sharedDto.setFromUserId(jobQrCode.getReferee());
+                sharedDto.setToUserId(userId);
+                sharedDto.setIsHr(userId.equals(job.getUid()));
+                sharedDto.setTimestamp(LocalDateTime.now());
+                rabbitMqUtil.sendMsg("youya.share", "job.share", JSON.toJSONString(sharedDto));
             } else {
                 JobQrCode jobQrCode = jobQrCodeMapper.selectOne(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getId, qrId).eq(JobQrCode::getIsDelete, 0));
                 if (null == jobQrCode) throw new YouyaException("分享信息不存在");
@@ -148,6 +158,13 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
                     qrCode.setJobId(jobId);
                     jobQrCodeMapper.insert(qrCode);
                     scene = "qrCodeId" + "=" + qrCode.getId();
+                    SharedDto sharedDto = new SharedDto();
+                    sharedDto.setTargetId(jobId);
+                    sharedDto.setFromUserId(jobQrCode.getReferee());
+                    sharedDto.setToUserId(userId);
+                    sharedDto.setIsHr(userId.equals(job.getUid()));
+                    sharedDto.setTimestamp(LocalDateTime.now());
+                    rabbitMqUtil.sendMsg("youya.share", "job.share", JSON.toJSONString(sharedDto));
                 } else {
                     scene = "qrCodeId" + "=" + qrId;
                 }

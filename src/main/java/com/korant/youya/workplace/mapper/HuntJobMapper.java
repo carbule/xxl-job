@@ -141,4 +141,12 @@ public interface HuntJobMapper extends BaseMapper<HuntJob> {
      * @return
      */
     HuntJobDetailsPreviewVo detailsPreview(@Param("userId") Long userId, @Param("id") Long id);
+
+    /**
+     * 根据qrId查找对应的分享信息
+     *
+     * @param qrId
+     * @return
+     */
+    HuntJobSharedVo findHuntJobShared(@Param("qrId") Long qrId);
 }
