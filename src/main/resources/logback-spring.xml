@@ -13,7 +13,7 @@
     <property name="info.path" value="/opt/workplace/logs/info"/>
     <property name="debug.path" value="/opt/workplace/logs/debug"/>
     <property name="error.path" value="/opt/workplace/logs/error"/>
-    <property name="full.path" value="/opt/workplace-back/logs"/>
+    <property name="full.path" value="/opt/workplace/logs"/>
     <!-- 日志输出格式 -->
     <!-- <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n"/> -->
     <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%thread|%-5level|%msg%n"/>
