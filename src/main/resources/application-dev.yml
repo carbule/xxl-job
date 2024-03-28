@@ -59,7 +59,7 @@ spring:
 
   rabbitmq:
     addresses: 139.9.240.37:5672
-    virtual-host: /
+    virtual-host: workplace-dev
     publisher-confirm-type: correlated # 确认消息已发送到交换机(Exchange)
     publisher-returns: true  # 开启发送端消息抵达队列的确认
     template:
@@ -184,7 +184,7 @@ wx:
         secret: 280f7c2a134eb1577dfa0f75aed8a1b9
     message-subscribe-template:
       # 跳转小程序类型：developer为开发版；trial为体验版；formal为正式版；默认为正式版
-      miniprogram-state: trial
+      miniprogram-state: developer
       # 面试预约通知
       interview-appointment: SeMOeDcFsE7gxqqVYA7C323TAZNcVU5GLwF5WatVCzE
       # 面试通知
