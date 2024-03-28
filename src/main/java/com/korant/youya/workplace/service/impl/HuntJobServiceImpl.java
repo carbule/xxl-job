@@ -192,10 +192,14 @@ public class HuntJobServiceImpl extends ServiceImpl<HuntJobMapper, HuntJob> impl
         Long enterpriseId = loginUser.getEnterpriseId();
         if (!enterpriseId.equals(hrEnterpriseId)) throw new YouyaException("只能向本企业的HR推荐");
         Long userId = loginUser.getId();
-        boolean exists = internalRecommendMapper.exists(new LambdaQueryWrapper<InternalRecommend>().eq(InternalRecommend::getReferee, userId).eq(InternalRecommend::getHuntId, huntJobId).eq(InternalRecommend::getHr, hrId).eq(InternalRecommend::getIsDelete, 0));
+        boolean exists = internalRecommendMapper.exists(new LambdaQueryWrapper<InternalRecommend>().eq(InternalRecommend::getRecommender, userId).eq(InternalRecommend::getHuntId, huntJobId).eq(InternalRecommend::getHr, hrId).eq(InternalRecommend::getIsDelete, 0));
         if (exists) throw new YouyaException("您已向该HR推荐过此求职信息，请勿重复推荐");
         InternalRecommend internalRecommend = new InternalRecommend();
-        internalRecommend.setHuntId(huntJobId).setReferee(userId).setHr(hrId);
+        internalRecommend.setHuntId(huntJobId).setRecommender(userId).setHr(hrId);
+        Long referee = recommendDto.getReferee();
+        if (null != referee) {
+            internalRecommend.setReferee(referee);
+        }
         internalRecommendMapper.insert(internalRecommend);
     }
 

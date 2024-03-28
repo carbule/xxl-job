@@ -24,4 +24,9 @@ public class HuntJobRecommendDto {
      */
     @NotNull(message = "hr不能为空")
     private Long hr;
+
+    /**
+     * 分享卡片上的推荐人
+     */
+    private Long referee;
 }

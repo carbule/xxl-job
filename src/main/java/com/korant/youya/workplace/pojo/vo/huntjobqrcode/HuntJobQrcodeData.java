@@ -23,6 +23,11 @@ public class HuntJobQrcodeData {
     private Long huntId;
 
     /**
+     * 推荐人id
+     */
+    private Long referee;
+
+    /**
      * 是否分享收益 0-不分享 1-分享
      */
     private Integer isShare;

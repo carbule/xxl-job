@@ -129,7 +129,7 @@
             LEFT JOIN enterprise AS e ON ue.enterprise_id = e.id AND e.is_delete = 0
             LEFT JOIN yy_user AS u ON hj.uid = u.id AND u.is_delete = 0
             LEFT JOIN yy_user_name_visible_info AS nv ON u.id = nv.uid AND nv.is_delete = 0
-        WHERE ir.referee = #{userId}
+        WHERE ir.recommender = #{userId}
           AND ir.is_delete = 0
         ORDER BY ir.create_time DESC LIMIT #{listDto.pageSize}
         OFFSET (#{listDto.pageNumber} -1) * #{listDto.pageSize}

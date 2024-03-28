@@ -70,6 +70,7 @@
             resultType="com.korant.youya.workplace.pojo.vo.huntjobqrcode.HuntJobQrcodeData">
         SELECT id,
                hunt_id  AS huntId,
+               referee,
                is_share AS isShare
         FROM hunt_job_qr_code
         WHERE id = #{id}

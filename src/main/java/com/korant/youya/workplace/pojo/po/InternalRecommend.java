@@ -43,10 +43,16 @@ public class InternalRecommend implements Serializable {
     private Long jobId;
 
     /**
-     * 推荐人id
+     * 分享卡片上的推荐人
      */
     @TableField("referee")
     private Long referee;
+
+    /**
+     * 内部推荐的人（即当前登录用户）
+     */
+    @TableField("recommender")
+    private Long recommender;
 
     /**
      * HRid
