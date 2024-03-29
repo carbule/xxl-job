@@ -67,7 +67,6 @@ public class HuntJobQrCodeController {
      * @return
      */
     @PostMapping("/getUnlimitedQRCode")
-    //todo 序列化有问题 明天看
     public void getUnlimitedQRCode(@RequestBody @Valid HuntJobUnlimitedQRCodeDto unlimitedQRCodeDto, HttpServletResponse response) throws IOException {
         huntJobQrCodeService.getUnlimitedQRCode(unlimitedQRCodeDto, response);
     }
