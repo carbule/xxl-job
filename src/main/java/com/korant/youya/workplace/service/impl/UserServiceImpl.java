@@ -150,7 +150,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Value("${user_recharge_notify_url}")
     private String userRechargeNotifyUrl;
 
-    private static final String DEFAULT_AVATAR = "https://resources.youyai.cn/icon/male.svg";
+    private static final String DEFAULT_AVATAR = "https://resources.youyai.cn/icon/male.png";
 
     private static final String CHINA_CODE = "100000";
 
