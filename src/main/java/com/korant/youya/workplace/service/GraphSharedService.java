@@ -36,7 +36,7 @@ public interface GraphSharedService {
      * @param targetId
      * @return
      */
-    Boolean existShared(Long fUserId, Long tUserId, Long targetId);
+    boolean existShared(Long fUserId, Long tUserId, Long targetId);
 
     /**
      * 判断职位分享链中的直接推荐人

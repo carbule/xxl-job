@@ -64,15 +64,10 @@ public class GraphSharedServiceImpl implements GraphSharedService {
     }
 
     @Override
-    public Boolean existShared(Long fUserId, Long tUserId, Long targetId) {
-        var user = new UserGraphVo();
+    public boolean existShared(Long fUserId, Long tUserId, Long targetId) {
         var cql = "match (fu:User {id: $fu_id})-[r:Shared]->(tu:User {id: $tu_id}) where r.target_id=$target_id return r";
         var result = neoDriver.executableQuery(cql).withParameters(Map.of("fu_id", fUserId, "tu_id", tUserId, "target_id", targetId)).execute();
-        if (!result.records().isEmpty()) {
-            return true;
-        } else {
-            return false;
-        }
+        return !result.records().isEmpty();
     }
 
     @Override

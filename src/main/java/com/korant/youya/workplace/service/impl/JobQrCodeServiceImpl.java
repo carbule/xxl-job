@@ -20,6 +20,7 @@ import com.korant.youya.workplace.pojo.vo.jobqrcode.JobQrcodeData;
 import com.korant.youya.workplace.pojo.vo.jobqrcode.JobSharingVo;
 import com.korant.youya.workplace.properties.DelayProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
+import com.korant.youya.workplace.service.GraphSharedService;
 import com.korant.youya.workplace.service.JobQrCodeService;
 import com.korant.youya.workplace.utils.ObsUtil;
 import com.korant.youya.workplace.utils.RabbitMqUtil;
@@ -62,6 +63,9 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
 
     @Resource
     private RabbitMqUtil rabbitMqUtil;
+
+    @Resource
+    private GraphSharedService graphSharedService;
 
     @Resource
     RabbitMqConfigurationProperties mqConfigurationProperties;
@@ -140,14 +144,18 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
                 qrCode.setJobId(jobId);
                 jobQrCodeMapper.insert(qrCode);
                 scene = "qrCodeId" + "=" + qrCode.getId();
-                SharedDto sharedDto = new SharedDto();
-                sharedDto.setTargetId(jobId);
-                sharedDto.setFromUserId(jobQrCode.getReferee());
-                sharedDto.setToUserId(userId);
-                sharedDto.setIsHr(userId.equals(job.getUid()));
-                sharedDto.setTimestamp(LocalDateTime.now());
-                Message message = new Message(JSONObject.toJSONString(sharedDto).getBytes(StandardCharsets.UTF_8));
-                rabbitMqUtil.sendMsg("youya.share", "job.share", message);
+                Long fromUserId = jobQrCode.getReferee();
+                boolean result = graphSharedService.existShared(fromUserId, userId, jobId);
+                if (!result) {
+                    SharedDto sharedDto = new SharedDto();
+                    sharedDto.setTargetId(jobId);
+                    sharedDto.setFromUserId(fromUserId);
+                    sharedDto.setToUserId(userId);
+                    sharedDto.setIsHr(userId.equals(job.getUid()));
+                    sharedDto.setTimestamp(LocalDateTime.now());
+                    Message message = new Message(JSONObject.toJSONString(sharedDto).getBytes(StandardCharsets.UTF_8));
+                    rabbitMqUtil.sendMsg("youya.share", "job.share", message);
+                }
             } else {
                 JobQrCode jobQrCode = jobQrCodeMapper.selectOne(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getId, qrId).eq(JobQrCode::getIsDelete, 0));
                 if (null == jobQrCode) throw new YouyaException("分享信息不存在");
@@ -159,14 +167,18 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
                     qrCode.setJobId(jobId);
                     jobQrCodeMapper.insert(qrCode);
                     scene = "qrCodeId" + "=" + qrCode.getId();
-                    SharedDto sharedDto = new SharedDto();
-                    sharedDto.setTargetId(jobId);
-                    sharedDto.setFromUserId(jobQrCode.getReferee());
-                    sharedDto.setToUserId(userId);
-                    sharedDto.setIsHr(userId.equals(job.getUid()));
-                    sharedDto.setTimestamp(LocalDateTime.now());
-                    Message message = new Message(JSONObject.toJSONString(sharedDto).getBytes(StandardCharsets.UTF_8));
-                    rabbitMqUtil.sendMsg("youya.share", "job.share", message);
+                    Long fromUserId = jobQrCode.getReferee();
+                    boolean result = graphSharedService.existShared(fromUserId, userId, jobId);
+                    if (!result) {
+                        SharedDto sharedDto = new SharedDto();
+                        sharedDto.setTargetId(jobId);
+                        sharedDto.setFromUserId(fromUserId);
+                        sharedDto.setToUserId(userId);
+                        sharedDto.setIsHr(userId.equals(job.getUid()));
+                        sharedDto.setTimestamp(LocalDateTime.now());
+                        Message message = new Message(JSONObject.toJSONString(sharedDto).getBytes(StandardCharsets.UTF_8));
+                        rabbitMqUtil.sendMsg("youya.share", "job.share", message);
+                    }
                 } else {
                     scene = "qrCodeId" + "=" + qrId;
                 }
