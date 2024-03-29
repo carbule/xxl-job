@@ -1,6 +1,6 @@
 package com.korant.youya.workplace.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.config.ObsBucketConfig;
@@ -146,7 +146,8 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
                 sharedDto.setToUserId(userId);
                 sharedDto.setIsHr(userId.equals(job.getUid()));
                 sharedDto.setTimestamp(LocalDateTime.now());
-                rabbitMqUtil.sendMsg("youya.share", "job.share", JSON.toJSONString(sharedDto));
+                Message message = new Message(JSONObject.toJSONString(sharedDto).getBytes(StandardCharsets.UTF_8));
+                rabbitMqUtil.sendMsg("youya.share", "job.share", message);
             } else {
                 JobQrCode jobQrCode = jobQrCodeMapper.selectOne(new LambdaQueryWrapper<JobQrCode>().eq(JobQrCode::getId, qrId).eq(JobQrCode::getIsDelete, 0));
                 if (null == jobQrCode) throw new YouyaException("分享信息不存在");
@@ -164,7 +165,8 @@ public class JobQrCodeServiceImpl extends ServiceImpl<JobQrCodeMapper, JobQrCode
                     sharedDto.setToUserId(userId);
                     sharedDto.setIsHr(userId.equals(job.getUid()));
                     sharedDto.setTimestamp(LocalDateTime.now());
-                    rabbitMqUtil.sendMsg("youya.share", "job.share", JSON.toJSONString(sharedDto));
+                    Message message = new Message(JSONObject.toJSONString(sharedDto).getBytes(StandardCharsets.UTF_8));
+                    rabbitMqUtil.sendMsg("youya.share", "job.share", message);
                 } else {
                     scene = "qrCodeId" + "=" + qrId;
                 }
