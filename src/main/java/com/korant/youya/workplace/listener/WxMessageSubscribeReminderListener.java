@@ -65,6 +65,7 @@ public class WxMessageSubscribeReminderListener {
                     Objects.equals(itr.getCompletionStatus(), CompletionStatusEnum.INCOMPLETE.getStatus())) {
                 wxService4Candidate.sendInterviewAppointmentMessageSubscribe(messageBody.getUser().getWechatOpenId(), new InterviewAppointmentMsgSubDTO()
                         .setJobId(messageBody.getJob().getId())
+                        .setApplyJobId(messageBody.getApplyJobId())
                         .setPositionName(messageBody.getJob().getPositionName())
                         .setFinalTime(messageBody.getInterview().getInterTime())
                         .setTips(TIPS));
@@ -98,6 +99,7 @@ public class WxMessageSubscribeReminderListener {
                     Objects.equals(itr.getCompletionStatus(), CompletionStatusEnum.INCOMPLETE.getStatus())) {
                 wxService4TalentPool.sendInterviewAppointmentMessageSubscribe(messageBody.getUser().getWechatOpenId(), new InterviewAppointmentMsgSubDTO()
                         .setJobId(messageBody.getJob().getId())
+                        .setInternalRecommendId(messageBody.getInternalRecommendId())
                         .setPositionName(messageBody.getJob().getPositionName())
                         .setFinalTime(messageBody.getInterview().getInterTime())
                         .setTips(TIPS));
