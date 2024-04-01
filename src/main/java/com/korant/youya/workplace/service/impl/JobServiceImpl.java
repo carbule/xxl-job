@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.korant.youya.workplace.enums.enterprise.EnterpriseAuthStatusEnum;
 import com.korant.youya.workplace.enums.job.JobAuditStatusEnum;
+import com.korant.youya.workplace.enums.job.JobNewStatusEnum;
 import com.korant.youya.workplace.enums.job.JobStatusEnum;
 import com.korant.youya.workplace.enums.user.UserAuthenticationStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
@@ -318,6 +319,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         job.setUid(userId);
         job.setStatus(JobStatusEnum.PUBLISHED.getStatus());
         job.setAuditStatus(JobAuditStatusEnum.UNAUDITED.getStatus());
+        job.setNewStatus(JobNewStatusEnum.PENDING_APPROVAL);
         job.setCountryCode(CHINA_CODE);
         job.setLongitude(location.getLng());
         job.setLatitude(location.getLat());
@@ -348,10 +350,16 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         if (null == job) throw new YouyaException("职位不存在");
         if (!userId.equals(job.getUid())) throw new YouyaException("只有发布人才可以修改职位信息");
         Integer status = job.getStatus();
-        if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
-        Integer auditStatus = job.getAuditStatus();
-        if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus)
+//        if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("已发布的职位不可修改");
+//        Integer auditStatus = job.getAuditStatus();
+//        if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus)
+//            throw new YouyaException("等待审核中的职位不可修改");
+        if (job.getNewStatus() == JobNewStatusEnum.PENDING_APPROVAL) {
             throw new YouyaException("等待审核中的职位不可修改");
+        }
+        if (job.getNewStatus() == JobNewStatusEnum.APPROVED) {
+            throw new YouyaException("已发布的职位不可修改");
+        }
         String award = modifyDto.getAward();
         if (StringUtils.isNotBlank(award)) {
             if (CalculationUtil.containsNonNumericCharacter(award)) throw new YouyaException("请输入有效金额");
@@ -449,11 +457,17 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
         if (!uid.equals(userId)) throw new YouyaException("非法操作");
-        Integer status = job.getStatus();
-        if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("职位已发布");
+//        Integer status = job.getStatus();
+//        if (JobStatusEnum.PUBLISHED.getStatus() == status) throw new YouyaException("职位已发布");
+        if (job.getNewStatus() == JobNewStatusEnum.PENDING_APPROVAL) {
+            throw new YouyaException("职位审核中");
+        }
+        if (job.getNewStatus() == JobNewStatusEnum.APPROVED) {
+            throw new YouyaException("职位已发布");
+        }
         job.setStatus(JobStatusEnum.PUBLISHED.getStatus());
-        job.setPubTime(LocalDateTime.now());
         job.setAuditStatus(JobAuditStatusEnum.UNAUDITED.getStatus());
+        job.setNewStatus(JobNewStatusEnum.PENDING_APPROVAL);
         jobMapper.updateById(job);
     }
 
@@ -470,11 +484,20 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
         LoginUser loginUser = SpringSecurityUtil.getUserInfo();
         Long userId = loginUser.getId();
         if (!uid.equals(userId)) throw new YouyaException("非法操作");
-        Integer status = job.getStatus();
-        if (JobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("职位已关闭");
-        Integer auditStatus = job.getAuditStatus();
-        if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus) throw new YouyaException("审核中的职位无法关闭");
+//        Integer status = job.getStatus();
+//        if (JobStatusEnum.UNPUBLISHED.getStatus() == status) throw new YouyaException("职位已关闭");
+//        Integer auditStatus = job.getAuditStatus();
+//        if (JobAuditStatusEnum.UNAUDITED.getStatus() == auditStatus) throw new YouyaException("审核中的职位无法关闭");
+
+        if (job.getNewStatus() == JobNewStatusEnum.PENDING_APPROVAL) {
+            throw new YouyaException("审核中的职位无法关闭");
+        }
+        if (job.getNewStatus() == JobNewStatusEnum.CLOSED) {
+            throw new YouyaException("职位已关闭");
+        }
+
         job.setStatus(JobStatusEnum.UNPUBLISHED.getStatus());
+        job.setNewStatus(JobNewStatusEnum.CLOSED);
         jobMapper.updateById(job);
     }
 

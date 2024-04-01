@@ -1,6 +1,7 @@
 package com.korant.youya.workplace.pojo.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.korant.youya.workplace.enums.job.JobNewStatusEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -181,6 +182,11 @@ public class Job implements Serializable {
      */
     @TableField("status")
     private Integer status;
+
+    /**
+     * 职位状态（新）
+     */
+    private JobNewStatusEnum newStatus;
 
     /**
      * 发布时间
