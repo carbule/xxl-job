@@ -34,7 +34,7 @@ import java.util.Optional;
 @Slf4j
 public class WxMessageSubscribeReminderListener {
 
-    public static final String TIPS = "请在截止前完成预约，否则将视为放弃！（已确认的请忽略此消息）";
+    public static final String TIPS = "请在截止前完成预约，否则将视为放弃！";
 
     private final InterviewMapper interviewMapper;
 
