@@ -33,7 +33,7 @@ import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.enterprise.*;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
-import com.korant.youya.workplace.properties.DelayProperties;
+import com.korant.youya.workplace.properties.BindingProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.service.EnterpriseService;
 import com.korant.youya.workplace.utils.*;
@@ -779,8 +779,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
             invitationQrCode.setEnterpriseId(enterpriseId);
             invitationQrCode.setMd5FileName(objectKey);
             enterpriseInvitationQrCodeMapper.insert(invitationQrCode);
-            HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-            DelayProperties properties = delayProperties.get("enterprise_qrcode");
+            HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+            BindingProperties properties = delayProperties.get("enterprise_qrcode");
             rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), id, 604800);
             String qrcodeUrl = "https://" + ObsBucketConfig.getCdn(ENTERPRISE_QRCODE_BUCKET) + "/" + encode;
             EnterpriseSharedInfoVo sharedInfoVo = new EnterpriseSharedInfoVo();
@@ -818,8 +818,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
         String objectUrl = result.getObjectUrl();
         String objectKey = result.getObjectKey();
         if (StringUtils.isBlank(etag) && StringUtils.isBlank(objectUrl)) throw new YouyaException("上传文件失败");
-        HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-        DelayProperties properties = delayProperties.get("enterprise_shareImage");
+        HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+        BindingProperties properties = delayProperties.get("enterprise_shareImage");
         Message message = new Message(objectKey.getBytes(StandardCharsets.UTF_8));
         rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 7200);
         String encode = URLEncoder.encode(objectKey, StandardCharsets.UTF_8);
@@ -962,13 +962,12 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                 .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
         walletTransactionFlowMapper.insert(walletTransactionFlow);
         try {
-            HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-            DelayProperties properties = delayProperties.get("enterprise_order_timeout");
+            HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+            BindingProperties properties = delayProperties.get("enterprise_order_timeout");
             Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
             rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 900);
         } catch (Exception e) {
             log.error("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，推送至订单超时队列失败，原因：", enterpriseName, enterpriseId, orderId, e);
-            log.error("企业名称：【{}】，企业id：【{}】，购买商品id：【{}】，下单失败", enterpriseName, enterpriseId, orderId);
             throw new YouyaException("网络异常，请稍后重试");
         }
         JSONObject result = new JSONObject();
@@ -1014,8 +1013,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                                 walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.EXPIRED.getStatusDesc());
                                 walletTransactionFlowMapper.updateById(walletTransactionFlow);
                                 try {
-                                    HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-                                    DelayProperties properties = delayProperties.get("close_enterprise_order");
+                                    HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+                                    BindingProperties properties = delayProperties.get("close_enterprise_order");
                                     Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
                                     rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 600);
                                 } catch (Exception e) {
@@ -1086,8 +1085,8 @@ public class EnterpriseServiceImpl extends ServiceImpl<EnterpriseMapper, Enterpr
                             walletTransactionFlowMapper.updateById(walletTransactionFlow);
                             log.info("企业名称：【{}】，企业id：【{}】，订单id：【{}】，完成支付操作", enterpriseName, enterpriseId, orderId);
                             try {
-                                HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-                                DelayProperties properties = delayProperties.get("enterprise_order_payment_inquiry");
+                                HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+                                BindingProperties properties = delayProperties.get("enterprise_order_payment_inquiry");
                                 Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
                                 rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 300);
                             } catch (Exception e) {

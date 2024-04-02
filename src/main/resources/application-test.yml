@@ -91,97 +91,161 @@ user_recharge_notify_url: https://tweichat.youyai.cn/workplace/user/rechargeNoti
 enterprise_recharge_notify_url: https://tweichat.youyai.cn/workplace/enterprise/rechargeNotify
 
 rabbitmq:
+  normalProperties:
+    hunt_job_bonus_allocation:
+      #交换机名称
+      exchangeName: hunt_job_bonus_allocation_exchange
+      #队列名称
+      queueName: hunt_job_bonus_allocation_queue
+      #路由键
+      routingKey: hunt_job_bonus_allocation_routing_key
+      #消费者类型
+      consumerType: huntJobBonusAllocation
+    job_bonus_allocation:
+      #交换机名称
+      exchangeName: job_bonus_allocation_exchange
+      #队列名称
+      queueName: job_bonus_allocation_queue
+      #路由键
+      routingKey: job_bonus_allocation_routing_key
+      #消费者类型
+      consumerType: jobBonusAllocation
+    hunt_job_sub_task:
+      #交换机名称
+      exchangeName: hunt_job_sub_task_exchange
+      #队列名称
+      queueName: hunt_job_sub_task_queue
+      #路由键
+      routingKey: hunt_job_sub_task_routing_key
+      #消费者类型
+      consumerType: huntJobSubTask
+    job_sub_task:
+      #交换机名称
+      exchangeName: hjob_sub_task_exchange
+      #队列名称
+      queueName: job_sub_task_queue
+      #路由键
+      routingKey: job_sub_task_routing_key
+      #消费者类型
+      consumerType: jobSubTask
+    sys_commission_payment:
+      #交换机名称
+      exchangeName: sys_commission_payment_exchange
+      #队列名称
+      queueName: sys_commission_payment_queue
+      #路由键
+      routingKey: sys_commission_payment_routing_key
+      #消费者类型
+      consumerType: sysCommissionPayment
   delayProperties:
     enterprise_qrcode:
       #交换机名称
-      exchangeName: enterprise_qrcode_test_exchange
+      exchangeName: enterprise_qrcode_exchange
       #队列名称
-      queueName: enterprise_qrcode_test_queue
+      queueName: enterprise_qrcode_queue
       #路由键
       routingKey: enterprise_qrcode
       #消费者类型
       consumerType: enterpriseQrcode
     enterprise_shareImage:
       #交换机名称
-      exchangeName: enterprise_shareImage_test_exchange
+      exchangeName: enterprise_shareImage_exchange
       #队列名称
-      queueName: enterprise_shareImage_test_queue
+      queueName: enterprise_shareImage_queue
       #路由键
       routingKey: enterprise_shareImage
       #消费者类型
       consumerType: enterpriseShareImage
     hunt_job_shareImage:
       #交换机名称
-      exchangeName: hunt_job_shareImage_test_exchange
+      exchangeName: hunt_job_shareImage_exchange
       #队列名称
-      queueName: hunt_job_shareImage_test_queue
+      queueName: hunt_job_shareImage_queue
       #路由键
       routingKey: hunt_job_shareImage
       #消费者类型
       consumerType: huntJobShareImage
     job_shareImage:
       #交换机名称
-      exchangeName: job_shareImage_test_exchange
+      exchangeName: job_shareImage_exchange
       #队列名称
-      queueName: job_shareImage_test_queue
+      queueName: job_shareImage_queue
       #路由键
       routingKey: job_shareImage
       #消费者类型
       consumerType: jobShareImage
     user_order_payment_inquiry:
       #交换机名称
-      exchangeName: user_order_payment_inquiry_test_exchange
+      exchangeName: user_order_payment_inquiry_exchange
       #队列名称
-      queueName: user_order_payment_inquiry_test_queue
+      queueName: user_order_payment_inquiry_queue
       #路由键
       routingKey: user_order_payment_inquiry
       #消费者类型
       consumerType: userOrderPaymentInquiry
     enterprise_order_payment_inquiry:
       #交换机名称
-      exchangeName: enterprise_order_payment_inquiry_test_exchange
+      exchangeName: enterprise_order_payment_inquiry_exchange
       #队列名称
-      queueName: enterprise_order_payment_inquiry_test_queue
+      queueName: enterprise_order_payment_inquiry_queue
       #路由键
       routingKey: enterprise_order_payment_inquiry
       #消费者类型
       consumerType: enterpriseOrderPaymentInquiry
     user_order_timeout:
       #交换机名称
-      exchangeName: user_order_timeout_test_exchange
+      exchangeName: user_order_timeout_exchange
       #队列名称
-      queueName: user_order_timeout_test_queue
+      queueName: user_order_timeout_queue
       #路由键
       routingKey: user_order_timeout
       #消费者类型
       consumerType: userOrderTimeout
     enterprise_order_timeout:
       #交换机名称
-      exchangeName: enterprise_order_timeout_test_exchange
+      exchangeName: enterprise_order_timeout_exchange
       #队列名称
-      queueName: enterprise_order_timeout_test_queue
+      queueName: enterprise_order_timeout_queue
       #路由键
       routingKey: enterprise_order_timeout
       #消费者类型
       consumerType: enterpriseOrderTimeout
     close_user_order:
       #交换机名称
-      exchangeName: close_user_order_test_exchange
+      exchangeName: close_user_order_exchange
       #队列名称
-      queueName: close_user_order_test_queue
+      queueName: close_user_order_queue
       #路由键
       routingKey: close_user_order
       #消费者类型
       consumerType: closeUserOrder
     close_enterprise_order:
       #交换机名称
-      exchangeName: close_enterprise_order_test_exchange
+      exchangeName: close_enterprise_order_exchange
       #队列名称
-      queueName: close_enterprise_order_test_queue
+      queueName: close_enterprise_order_queue
       #路由键
       routingKey: close_enterprise_order
       #消费者类型
       consumerType: closeEnterpriseOrder
+    hunt_job_main_task:
+      #交换机名称
+      exchangeName: hunt_job_main_task_exchange
+      #队列名称
+      queueName: hunt_job_main_task_queue
+      #路由键
+      routingKey: hunt_job_main_task
+      #消费者类型
+      consumerType: huntJobMainTask
+    job_main_task:
+      #交换机名称
+      exchangeName: job_main_task_exchange
+      #队列名称
+      queueName: job_main_task_queue
+      #路由键
+      routingKey: jobn_main_task
+      #消费者类型
+      consumerType: jobMainTask
 
 
 wx:

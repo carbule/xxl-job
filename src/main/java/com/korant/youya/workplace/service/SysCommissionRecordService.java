@@ -13,4 +13,10 @@ import com.korant.youya.workplace.pojo.po.SysCommissionRecord;
  */
 public interface SysCommissionRecordService extends IService<SysCommissionRecord> {
 
+    /**
+     * 平台奖金抽成
+     *
+     * @param commissionId
+     */
+    void commissionPayment(Long commissionId);
 }

@@ -15,5 +15,7 @@ import java.util.HashMap;
 @ConfigurationProperties(prefix = "rabbitmq")
 public class RabbitMqConfigurationProperties {
 
-    private HashMap<String, DelayProperties> delayProperties;
+    private HashMap<String, BindingProperties> normalProperties;
+
+    private HashMap<String, BindingProperties> delayProperties;
 }

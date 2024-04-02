@@ -91,6 +91,52 @@ user_recharge_notify_url: https://tweichat.youyai.cn/workplace/user/rechargeNoti
 enterprise_recharge_notify_url: https://tweichat.youyai.cn/workplace/enterprise/rechargeNotify
 
 rabbitmq:
+  normalProperties:
+    hunt_job_bonus_allocation:
+      #交换机名称
+      exchangeName: hunt_job_bonus_allocation_exchange
+      #队列名称
+      queueName: hunt_job_bonus_allocation_queue
+      #路由键
+      routingKey: hunt_job_bonus_allocation_routing_key
+      #消费者类型
+      consumerType: huntJobBonusAllocation
+    job_bonus_allocation:
+      #交换机名称
+      exchangeName: job_bonus_allocation_exchange
+      #队列名称
+      queueName: job_bonus_allocation_queue
+      #路由键
+      routingKey: job_bonus_allocation_routing_key
+      #消费者类型
+      consumerType: jobBonusAllocation
+    hunt_job_sub_task:
+      #交换机名称
+      exchangeName: hunt_job_sub_task_exchange
+      #队列名称
+      queueName: hunt_job_sub_task_queue
+      #路由键
+      routingKey: hunt_job_sub_task_routing_key
+      #消费者类型
+      consumerType: huntJobSubTask
+    job_sub_task:
+      #交换机名称
+      exchangeName: hjob_sub_task_exchange
+      #队列名称
+      queueName: job_sub_task_queue
+      #路由键
+      routingKey: job_sub_task_routing_key
+      #消费者类型
+      consumerType: jobSubTask
+    sys_commission_payment:
+      #交换机名称
+      exchangeName: sys_commission_payment_exchange
+      #队列名称
+      queueName: sys_commission_payment_queue
+      #路由键
+      routingKey: sys_commission_payment_routing_key
+      #消费者类型
+      consumerType: sysCommissionPayment
   delayProperties:
     enterprise_qrcode:
       #交换机名称
@@ -182,6 +228,24 @@ rabbitmq:
       routingKey: close_enterprise_order
       #消费者类型
       consumerType: closeEnterpriseOrder
+    hunt_job_main_task:
+      #交换机名称
+      exchangeName: hunt_job_main_task_exchange
+      #队列名称
+      queueName: hunt_job_main_task_queue
+      #路由键
+      routingKey: hunt_job_main_task
+      #消费者类型
+      consumerType: huntJobMainTask
+    job_main_task:
+      #交换机名称
+      exchangeName: job_main_task_exchange
+      #队列名称
+      queueName: job_main_task_queue
+      #路由键
+      routingKey: jobn_main_task
+      #消费者类型
+      consumerType: jobMainTask
 
 wx:
   miniapp:

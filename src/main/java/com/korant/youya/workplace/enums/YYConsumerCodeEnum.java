@@ -10,7 +10,8 @@ package com.korant.youya.workplace.enums;
 public enum YYConsumerCodeEnum {
 
     USER("500"),
-    ENTERPRISE("600");
+    ENTERPRISE("600"),
+    SYSTEM("700");
 
     private String code;
 

@@ -774,7 +774,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
                 }
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
-                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.ENTERPRISE.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
                 enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
@@ -839,7 +839,7 @@ public class TalentPoolServiceImpl implements TalentPoolService {
                 BigDecimal freezeAmount = walletAccount.getFreezeAmount();
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
-                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.ENTERPRISE.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
                 enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);

@@ -26,4 +26,12 @@ public interface WalletTransactionFlowMapper extends BaseMapper<WalletTransactio
      * @return
      */
     List<AccountTransactionFlowVo> queryAccountTransactionFlow(@Param("walletAccountId") Long walletAccountId, @Param("queryAccountTransactionFlowListDto") QueryAccountTransactionFlowListDto queryAccountTransactionFlowListDto);
+
+    /**
+     * 批量插入流水
+     *
+     * @param list
+     * @return
+     */
+    int batchInsert(@Param("list") List<WalletTransactionFlow> list);
 }

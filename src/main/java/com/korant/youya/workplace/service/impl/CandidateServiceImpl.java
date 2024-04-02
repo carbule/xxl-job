@@ -1,5 +1,6 @@
 package com.korant.youya.workplace.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,6 +9,7 @@ import com.korant.youya.workplace.constants.RedisConstant;
 import com.korant.youya.workplace.enums.*;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
+import com.korant.youya.workplace.pojo.JobBonusAllocation;
 import com.korant.youya.workplace.pojo.LoginUser;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmationDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
@@ -19,22 +21,29 @@ import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingProgressMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.mq.InterviewAppointmentMsgSubMessage;
 import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.candidate.*;
+import com.korant.youya.workplace.properties.BindingProperties;
+import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.service.CandidateService;
+import com.korant.youya.workplace.service.GraphSharedService;
 import com.korant.youya.workplace.service.WxService;
 import com.korant.youya.workplace.utils.CalculationUtil;
 import com.korant.youya.workplace.utils.IdGenerationUtil;
+import com.korant.youya.workplace.utils.RabbitMqUtil;
 import com.korant.youya.workplace.utils.SpringSecurityUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -75,16 +84,46 @@ public class CandidateServiceImpl implements CandidateService {
     private CandidateService candidateService;
 
     @Resource
+    private SysWalletAccountMapper sysWalletAccountMapper;
+
+    @Resource
+    private UserWalletAccountMapper userWalletAccountMapper;
+
+    @Resource
     private EnterpriseWalletAccountMapper enterpriseWalletAccountMapper;
 
     @Resource
     private EnterpriseWalletFreezeRecordMapper enterpriseWalletFreezeRecordMapper;
 
     @Resource
+    private SysVirtualProductMapper sysVirtualProductMapper;
+
+    @Resource
+    private SysOrderMapper sysOrderMapper;
+
+    @Resource
     private WalletTransactionFlowMapper walletTransactionFlowMapper;
 
     @Resource
+    private JobMainTaskMapper jobMainTaskMapper;
+
+    @Resource
+    private JobSubTaskMapper jobSubTaskMapper;
+
+    @Resource
+    private RabbitMqUtil rabbitMqUtil;
+
+    @Resource
     private RedissonClient redissonClient;
+
+    @Resource
+    private GraphSharedService graphSharedService;
+
+    @Resource
+    private BonusDistributionRuleMapper bonusDistributionRuleMapper;
+
+    @Resource
+    private SysCommissionRecordMapper sysCommissionRecordMapper;
 
     @Resource(name = "wxService4CandidateImpl")
     private WxService wxService;
@@ -97,6 +136,9 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    RabbitMqConfigurationProperties mqConfigurationProperties;
 
     private static final String JOB_INTERVIEW_FREEZE_DES = "面试";
 
@@ -326,14 +368,33 @@ public class CandidateServiceImpl implements CandidateService {
      */
     @Override
     public void confirmInterview(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         Interview interview = interviewMapper.selectOne(new LambdaQueryWrapper<Interview>().eq(Interview::getId, id).eq(Interview::getIsDelete, 0));
         if (null == interview) throw new YouyaException("面试邀约信息不存在");
         Long recruitProcessInstanceId = interview.getRecruitProcessInstanceId();
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
-        if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
+        if (ObjectUtils.notEqual(hr, userId)) throw new YouyaException("非法操作");
         Integer acceptanceStatus = interview.getAcceptanceStatus();
         if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus)
             throw new YouyaException("请等待受邀人完成接受操作");
+        //判断职位是否存在
+        ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(ApplyJob::getIsDelete, 0));
+        if (null == applyJob) throw new YouyaException("候选人信息不存在");
+        Long jobId = applyJob.getJobId();
+        if (null == jobId) throw new YouyaException("职位信息不存在");
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        JobBonusAllocation bonusAllocation = new JobBonusAllocation();
+        bonusAllocation.setJob(job);
+        bonusAllocation.setTaskType(MainTaskTypeEnum.CANDIDATE.getType());
+        bonusAllocation.setApplyJob(applyJob);
+        bonusAllocation.setProcessStep(RecruitmentProcessEnum.INTERVIEW.getType());
+        Message message = new Message(JSONObject.toJSONString(bonusAllocation).getBytes(StandardCharsets.UTF_8));
+        HashMap<String, BindingProperties> normalProperties = mqConfigurationProperties.getNormalProperties();
+        BindingProperties properties = normalProperties.get("job_bonus_allocation");
+        rabbitMqUtil.sendMsg(properties.getExchangeName(), properties.getRoutingKey(), message);
+        //确认完成面试邀约
         interview.setCompletionStatus(CompletionStatusEnum.COMPLETE.getStatus());
         interviewMapper.updateById(interview);
     }
@@ -501,15 +562,35 @@ public class CandidateServiceImpl implements CandidateService {
      * @param id
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void confirmOnboarding(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         Onboarding onboarding = onboardingMapper.selectOne(new LambdaQueryWrapper<Onboarding>().eq(Onboarding::getId, id).eq(Onboarding::getIsDelete, 0));
         if (null == onboarding) throw new YouyaException("入职邀约信息不存在");
         Long recruitProcessInstanceId = onboarding.getRecruitProcessInstanceId();
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
-        if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
+        if (ObjectUtils.notEqual(hr, userId)) throw new YouyaException("非法操作");
         Integer acceptanceStatus = onboarding.getAcceptanceStatus();
         if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus)
             throw new YouyaException("请等待受邀人完成接受操作");
+        //判断职位是否存在
+        ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(ApplyJob::getIsDelete, 0));
+        if (null == applyJob) throw new YouyaException("候选人信息不存在");
+        Long jobId = applyJob.getJobId();
+        if (null == jobId) throw new YouyaException("职位信息不存在");
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        JobBonusAllocation bonusAllocation = new JobBonusAllocation();
+        bonusAllocation.setJob(job);
+        bonusAllocation.setTaskType(MainTaskTypeEnum.CANDIDATE.getType());
+        bonusAllocation.setApplyJob(applyJob);
+        bonusAllocation.setProcessStep(RecruitmentProcessEnum.ONBOARD.getType());
+        Message message = new Message(JSONObject.toJSONString(bonusAllocation).getBytes(StandardCharsets.UTF_8));
+        HashMap<String, BindingProperties> normalProperties = mqConfigurationProperties.getNormalProperties();
+        BindingProperties properties = normalProperties.get("job_bonus_allocation");
+        rabbitMqUtil.sendMsg(properties.getExchangeName(), properties.getRoutingKey(), message);
+        //确认完成入职邀约
         onboarding.setCompletionStatus(CompletionStatusEnum.COMPLETE.getStatus());
         onboardingMapper.updateById(onboarding);
     }
@@ -677,14 +758,33 @@ public class CandidateServiceImpl implements CandidateService {
      */
     @Override
     public void confirmConfirmation(Long id) {
+        LoginUser loginUser = SpringSecurityUtil.getUserInfo();
+        Long userId = loginUser.getId();
         Confirmation confirmation = confirmationMapper.selectOne(new LambdaQueryWrapper<Confirmation>().eq(Confirmation::getId, id).eq(Confirmation::getIsDelete, 0));
         if (null == confirmation) throw new YouyaException("入职邀约信息不存在");
         Long recruitProcessInstanceId = confirmation.getRecruitProcessInstanceId();
         Long hr = applyJobMapper.selectHRByInstanceId(recruitProcessInstanceId);
-        if (ObjectUtils.notEqual(hr, SpringSecurityUtil.getUserId())) throw new YouyaException("非法操作");
+        if (ObjectUtils.notEqual(hr, userId)) throw new YouyaException("非法操作");
         Integer acceptanceStatus = confirmation.getAcceptanceStatus();
         if (AcceptanceStatusEnum.ACCEPTED.getStatus() != acceptanceStatus)
             throw new YouyaException("请等待受邀人完成接受操作");
+        //判断职位是否存在
+        ApplyJob applyJob = applyJobMapper.selectOne(new LambdaQueryWrapper<ApplyJob>().eq(ApplyJob::getRecruitProcessInstanceId, recruitProcessInstanceId).eq(ApplyJob::getIsDelete, 0));
+        if (null == applyJob) throw new YouyaException("候选人信息不存在");
+        Long jobId = applyJob.getJobId();
+        if (null == jobId) throw new YouyaException("职位信息不存在");
+        Job job = jobMapper.selectOne(new LambdaQueryWrapper<Job>().eq(Job::getId, jobId).eq(Job::getIsDelete, 0));
+        if (null == job) throw new YouyaException("职位信息不存在");
+        JobBonusAllocation bonusAllocation = new JobBonusAllocation();
+        bonusAllocation.setJob(job);
+        bonusAllocation.setTaskType(MainTaskTypeEnum.CANDIDATE.getType());
+        bonusAllocation.setApplyJob(applyJob);
+        bonusAllocation.setProcessStep(RecruitmentProcessEnum.FULL_MEMBER.getType());
+        Message message = new Message(JSONObject.toJSONString(bonusAllocation).getBytes(StandardCharsets.UTF_8));
+        HashMap<String, BindingProperties> normalProperties = mqConfigurationProperties.getNormalProperties();
+        BindingProperties properties = normalProperties.get("job_bonus_allocation");
+        rabbitMqUtil.sendMsg(properties.getExchangeName(), properties.getRoutingKey(), message);
+        //确认完成入职邀约
         confirmation.setCompletionStatus(CompletionStatusEnum.COMPLETE.getStatus());
         confirmationMapper.updateById(confirmation);
     }
@@ -740,7 +840,7 @@ public class CandidateServiceImpl implements CandidateService {
                 }
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
-                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.ENTERPRISE.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
                 enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);
@@ -804,7 +904,7 @@ public class CandidateServiceImpl implements CandidateService {
                 BigDecimal freezeAmount = walletAccount.getFreezeAmount();
                 LocalDateTime now = LocalDateTime.now();
                 EnterpriseWalletFreezeRecord enterpriseWalletFreezeRecord = new EnterpriseWalletFreezeRecord();
-                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.USER.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
+                String freezeOrderId = IdGenerationUtil.generateOrderId(YYConsumerCodeEnum.ENTERPRISE.getCode(), YYBusinessCode.ENTERPRISE_FREEZE_OR_UNFREEZE.getCode());
                 enterpriseWalletFreezeRecord.setFreezeOrderId(freezeOrderId);
                 enterpriseWalletFreezeRecord.setEnterpriseWalletId(walletAccountId);
                 enterpriseWalletFreezeRecord.setJobId(jobId);

@@ -31,6 +31,11 @@ public class RabbitMqListenerFactory implements ListenerFactory {
             return null;
         }
         return switch (type) {
+            case "huntJobBonusAllocation" -> new HuntJobBonusAllocationListener(channel);
+            case "jobBonusAllocation" -> new JobBonusAllocationListener(channel);
+            case "huntJobSubTask" -> new HuntJobSubTaskListener(channel);
+            case "jobSubTask" -> new JobSubTaskListener(channel);
+            case "sysCommissionPayment" -> new SysCommissionPaymentListener(channel);
             case "enterpriseQrcode" -> new EnterpriseQrcodeListener(channel);
             case "enterpriseShareImage" -> new EnterpriseShareImageListener(channel);
             case "huntJobShareImage" -> new HuntJobShareImageListener(channel);
@@ -41,6 +46,8 @@ public class RabbitMqListenerFactory implements ListenerFactory {
             case "enterpriseOrderTimeout" -> new EnterpriseOrderTimeoutListener(channel);
             case "closeUserOrder" -> new CloseUserOrderListener(channel);
             case "closeEnterpriseOrder" -> new CloseEnterpriseOrderListener(channel);
+            case "huntJobMainTask" -> new HuntJobMainTaskListener(channel);
+            case "jobMainTask" -> new JobMainTaskListener(channel);
             default -> null;
         };
     }

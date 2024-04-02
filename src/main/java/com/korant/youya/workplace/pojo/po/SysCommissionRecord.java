@@ -32,6 +32,12 @@ public class SysCommissionRecord implements Serializable {
     private Long id;
 
     /**
+     * 抽成订单id
+     */
+    @TableField("commission_order_id")
+    private String commissionOrderId;
+
+    /**
      * 账户id
      */
     @TableField("account_id")

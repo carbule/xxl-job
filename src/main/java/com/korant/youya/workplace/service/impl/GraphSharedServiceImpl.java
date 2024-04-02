@@ -23,6 +23,13 @@ public class GraphSharedServiceImpl implements GraphSharedService {
     @Resource
     private UserGraphRepo userGraphRepo;
 
+    /**
+     * 根据候选人id和职位id 查出职位分享链
+     *
+     * @param userId 候选人id
+     * @param jobId  职位id
+     * @return
+     */
     @Override
     public List<UserGraphVo> findJobShared(Long userId, Long jobId) {
         var users = new ArrayList<UserGraphVo>();
@@ -43,6 +50,13 @@ public class GraphSharedServiceImpl implements GraphSharedService {
         }
     }
 
+    /**
+     * 根据内推人id和求职id 查出求职分享链
+     *
+     * @param userId    内推人id
+     * @param huntJobId 求职id
+     * @return
+     */
     @Override
     public List<UserGraphVo> findHuntJobShared(Long userId, Long huntJobId) {
         var users = new ArrayList<UserGraphVo>();
@@ -63,6 +77,14 @@ public class GraphSharedServiceImpl implements GraphSharedService {
         }
     }
 
+    /**
+     * 判断分享链是否已经存在
+     *
+     * @param fUserId
+     * @param tUserId
+     * @param targetId
+     * @return
+     */
     @Override
     public boolean existShared(Long fUserId, Long tUserId, Long targetId) {
         var cql = "match (fu:User {id: $fu_id})-[r:Shared]->(tu:User {id: $tu_id}) where r.target_id=$target_id return r";
@@ -70,6 +92,13 @@ public class GraphSharedServiceImpl implements GraphSharedService {
         return !result.records().isEmpty();
     }
 
+    /**
+     * 根据候选人id和职位id 查出职位分享链中最后分享的人
+     *
+     * @param userId 候选人id
+     * @param jobId  职位id
+     * @return
+     */
     @Override
     public UserGraphVo findJobSharer(Long userId, Long jobId) {
         var user = new UserGraphVo();

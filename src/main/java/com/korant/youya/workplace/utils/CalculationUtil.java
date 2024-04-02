@@ -36,6 +36,22 @@ public class CalculationUtil {
     }
 
     /**
+     * 执行除法并截断到相应小数位
+     *
+     * @param dividend
+     * @param divisor
+     * @return
+     */
+    public static BigDecimal divide(BigDecimal dividend, BigDecimal divisor, int scale) {
+        // 确保除数不为零
+        if (divisor.compareTo(BigDecimal.ZERO) == 0) {
+            throw new ArithmeticException("Divisor cannot be zero");
+        }
+        // 执行除法运算
+        return dividend.divide(divisor, scale, RoundingMode.DOWN);
+    }
+
+    /**
      * 执行除法并截断到两位小数
      *
      * @param dividend

@@ -6,22 +6,21 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
  * <p>
- * 友涯系统钱包账户表
+ * 企业招聘任务子表
  * </p>
  *
  * @author chenyiqiang
- * @since 2024-02-22
+ * @since 2024-03-29
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("yy_sys_wallet_account")
-public class SysWalletAccount implements Serializable {
+@TableName("hunt_job_sub_task")
+public class HuntJobSubTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,16 +31,28 @@ public class SysWalletAccount implements Serializable {
     private Long id;
 
     /**
-     * 钱包账户名称
+     * 主任务id
      */
-    @TableField("name")
-    private String name;
+    @TableField("main_task_id")
+    private Long mainTaskId;
 
     /**
-     * 可用余额
+     * 订单id
      */
-    @TableField("available_balance")
-    private BigDecimal availableBalance;
+    @TableField("order_id")
+    private Long orderId;
+
+    /**
+     * 任务描述
+     */
+    @TableField("description")
+    private String description;
+
+    /**
+     * 任务状态
+     */
+    @TableField("status")
+    private Integer status;
 
     /**
      * 创建时间

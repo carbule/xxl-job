@@ -26,4 +26,46 @@
             #{queryAccountTransactionFlowListDto.pageSize}
         </where>
     </select>
+
+    <!--  批量插入流水  -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO
+        yy_wallet_transaction_flow(id,transaction_id,account_id,
+        account_name,seller_id,seller_name,product_id,
+        order_id,transaction_type,transaction_direction,
+        amount,currency,description,detail_desc,
+        initiation_date,completion_date,status,trade_status_desc,
+        out_transaction_id,transaction_fail_reason,reference_number
+        ,balance_before,balance_after,create_time,is_delete)
+        VALUES
+        <foreach collection="list" item="param" index="index" separator=",">
+            (
+            #{param.id},
+            #{param.transactionId},
+            #{param.accountId},
+            #{param.accountName},
+            #{param.sellerId},
+            #{param.sellerName},
+            #{param.productId},
+            #{param.orderId},
+            #{param.transactionType},
+            #{param.transactionDirection},
+            #{param.amount},
+            #{param.currency},
+            #{param.description},
+            #{param.detailDesc},
+            #{param.initiationDate},
+            #{param.completionDate},
+            #{param.status},
+            #{param.tradeStatusDesc},
+            #{param.outTransactionId},
+            #{param.transactionFailReason},
+            #{param.referenceNumber},
+            #{param.balanceBefore},
+            #{param.balanceAfter},
+            CURRENT_TIMESTAMP,
+            0
+            )
+        </foreach>
+    </insert>
 </mapper>

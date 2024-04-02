@@ -1,22 +1,20 @@
 package com.korant.youya.workplace.enums;
 
 /**
- * @ClassName PaymentMethodTypeEnum
+ * @ClassName MainTaskTypeEnum
  * @Description
  * @Author chenyiqiang
- * @Date 2024/2/29 16:07
+ * @Date 2024/3/29 17:28
  * @Version 1.0
  */
-public enum PaymentMethodTypeEnum {
+public enum MainTaskTypeEnum {
 
-    WECHAT_PAYMENT(1),
-    ALIPAY_PAYMENT(2),
-    UNIONPAY_PAYMENT(3),
-    BALANCE_PAYMENT(4);
+    CANDIDATE(1),
+    TALENT_POOL(2);
 
     private int type;
 
-    PaymentMethodTypeEnum(int type) {
+    MainTaskTypeEnum(int type) {
         this.type = type;
     }
 

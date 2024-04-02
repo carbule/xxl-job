@@ -6,22 +6,21 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
  * <p>
- * 友涯系统钱包账户表
+ * 
  * </p>
  *
  * @author chenyiqiang
- * @since 2024-02-22
+ * @since 2024-03-29
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("yy_sys_wallet_account")
-public class SysWalletAccount implements Serializable {
+@TableName("job_main_task")
+public class JobMainTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,16 +31,52 @@ public class SysWalletAccount implements Serializable {
     private Long id;
 
     /**
-     * 钱包账户名称
+     * 求职id
      */
-    @TableField("name")
-    private String name;
+    @TableField("job_id")
+    private Long jobId;
 
     /**
-     * 可用余额
+     * 任务类型 1- 候选人 2-人才库
      */
-    @TableField("available_balance")
-    private BigDecimal availableBalance;
+    @TableField("task_type")
+    private Integer taskType;
+
+    /**
+     * 职位申请id
+     */
+    @TableField("apply_id")
+    private Long applyId;
+
+    /**
+     * 职位内推id
+     */
+    @TableField("inter_id")
+    private Long interId;
+
+    /**
+     * 流程环节
+     */
+    @TableField("process_step")
+    private Integer processStep;
+
+    /**
+     * 奖金分配规则
+     */
+    @TableField("bonus_distribution_rule")
+    private String bonusDistributionRule;
+
+    /**
+     * 任务状态
+     */
+    @TableField("status")
+    private Integer status;
+
+    /**
+     * 截止日期
+     */
+    @TableField("deadline")
+    private LocalDateTime deadline;
 
     /**
      * 创建时间

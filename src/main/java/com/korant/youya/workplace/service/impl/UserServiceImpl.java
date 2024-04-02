@@ -34,7 +34,7 @@ import com.korant.youya.workplace.pojo.po.*;
 import com.korant.youya.workplace.pojo.vo.sysorder.SysOrderVo;
 import com.korant.youya.workplace.pojo.vo.user.*;
 import com.korant.youya.workplace.pojo.vo.wallettransactionflow.AccountTransactionFlowVo;
-import com.korant.youya.workplace.properties.DelayProperties;
+import com.korant.youya.workplace.properties.BindingProperties;
 import com.korant.youya.workplace.properties.RabbitMqConfigurationProperties;
 import com.korant.youya.workplace.repository.UserGraphRepo;
 import com.korant.youya.workplace.service.UserService;
@@ -887,13 +887,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .setDescription(RECHARGE_DESCRIPTION).setInitiationDate(LocalDateTime.now()).setStatus(TransactionFlowStatusEnum.PENDING.getStatus()).setTradeStatusDesc(TransactionFlowStatusEnum.PENDING.getStatusDesc());
         walletTransactionFlowMapper.insert(walletTransactionFlow);
         try {
-            HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-            DelayProperties properties = delayProperties.get("user_order_timeout");
+            HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+            BindingProperties properties = delayProperties.get("user_order_timeout");
             Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
             rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 900);
         } catch (Exception e) {
             log.error("用户：【{}】，购买商品id：【{}】，推送至订单超时队列失败，原因：", phone, orderId, e);
-            log.error("用户：【{}】，购买商品id：【{}】，下单失败", phone, orderId);
             throw new YouyaException("网络异常，请稍后重试");
         }
         JSONObject result = new JSONObject();
@@ -939,8 +938,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                                 walletTransactionFlow.setTradeStatusDesc(TransactionFlowStatusEnum.EXPIRED.getStatusDesc());
                                 walletTransactionFlowMapper.updateById(walletTransactionFlow);
                                 try {
-                                    HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-                                    DelayProperties properties = delayProperties.get("close_user_order");
+                                    HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+                                    BindingProperties properties = delayProperties.get("close_user_order");
                                     Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
                                     rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 600);
                                 } catch (Exception e) {
@@ -1011,8 +1010,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             walletTransactionFlowMapper.updateById(walletTransactionFlow);
                             log.info("用户：【{}】，订单id：【{}】，完成支付操作", phone, orderId);
                             try {
-                                HashMap<String, DelayProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
-                                DelayProperties properties = delayProperties.get("user_order_payment_inquiry");
+                                HashMap<String, BindingProperties> delayProperties = mqConfigurationProperties.getDelayProperties();
+                                BindingProperties properties = delayProperties.get("user_order_payment_inquiry");
                                 Message message = new Message(orderId.getBytes(StandardCharsets.UTF_8));
                                 rabbitMqUtil.sendDelayedMsg(properties.getExchangeName(), properties.getRoutingKey(), message, 300);
                             } catch (Exception e) {

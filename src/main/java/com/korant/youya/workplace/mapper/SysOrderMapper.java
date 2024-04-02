@@ -36,4 +36,12 @@ public interface SysOrderMapper extends BaseMapper<SysOrder> {
      * @return
      */
     List<SysOrderVo> queryClosedOrderList(@Param("walletAccountId") Long walletAccountId, @Param("queryClosedOrderListDto") QueryClosedOrderListDto queryClosedOrderListDto);
+
+    /**
+     * 批量插入子订单
+     *
+     * @param list
+     * @return
+     */
+    int batchInsert(@Param("list") List<SysOrder> list);
 }

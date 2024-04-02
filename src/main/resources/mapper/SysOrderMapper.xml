@@ -39,4 +39,38 @@
         ORDER BY o.create_time DESC LIMIT #{queryClosedOrderListDto.pageSize}
         OFFSET (#{queryClosedOrderListDto.pageNumber} -1) * #{queryClosedOrderListDto.pageSize}
     </select>
+
+    <!--  批量插入子订单  -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO expected_position(id, order_id,sys_product_id, buyer_id, buyer_name,seller_id, seller_name, type,
+        payment_method,
+        order_date,quantity,
+        total_amount,commission_amount,discount_amount,actual_amount,currency,out_transaction_id,status,invoice_id,createTime,isDelete)
+        VALUES
+        <foreach collection="list" item="param" index="index" separator=",">
+            (
+            #{param.id},
+            #{param.orderId},
+            #{param.sysProductId},
+            #{param.buyerId},
+            #{param.buyerName},
+            #{param.sellerId},
+            #{param.sellerName},
+            #{param.type},
+            #{param.paymentMethod},
+            #{param.orderDate},
+            #{param.quantity},
+            #{param.totalAmount},
+            #{param.commissionAmount},
+            #{param.discountAmount},
+            #{param.actualAmount},
+            #{param.currency},
+            #{param.outTransactionId},
+            #{param.status},
+            #{param.invoiceId},
+            CURRENT_TIMESTAMP,
+            0
+            )
+        </foreach>
+    </insert>
 </mapper>
