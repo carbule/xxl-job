@@ -75,7 +75,7 @@ public class JobCreateDto {
     /**
      * 职位描述
      */
-    @Size(max = 1000, message = "最多不得超过1000字")
+    @Size(max = 2000, message = "最多不得超过1000字")
     private String jobDesc;
 
     /**
