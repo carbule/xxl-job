@@ -49,7 +49,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing1").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time2").setValue(msgSubDTO.getFinalTime().format(FORMATTER)))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getTips())));
-        } catch (WxErrorException e) {
+        } catch (Exception e) {
             log.error("发送微信消息订阅失败：toUser={}, msgSubDTO={}", toUser, JSON.toJSONString(msgSubDTO));
             log.error(e.getMessage(), e);
         }
@@ -69,7 +69,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing4").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time3").setValue(msgSubDTO.getTime().format(FORMATTER)))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing6").setValue(msgSubDTO.getLinkman())));
-        } catch (WxErrorException e) {
+        } catch (Exception e) {
             log.error("发送微信消息订阅失败：toUser={}, msgSubDTO={}", toUser, JSON.toJSONString(msgSubDTO));
             log.error(e.getMessage(), e);
         }
@@ -88,7 +88,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing2").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("time6").setValue(msgSubDTO.getTime().format(FORMATTER))));
-        } catch (WxErrorException e) {
+        } catch (Exception e) {
             log.error("发送微信消息订阅失败：toUser={}, msgSubDTO={}", toUser, JSON.toJSONString(msgSubDTO));
             log.error(e.getMessage(), e);
         }
@@ -107,7 +107,7 @@ public class WxService4TalentPoolImpl implements WxService {
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing4").setValue(msgSubDTO.getPositionName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing3").setValue(msgSubDTO.getEnterpriseName()))
                             .addData(new WxMaSubscribeMessage.MsgData().setName("thing5").setValue(msgSubDTO.getProgress())));
-        } catch (WxErrorException e) {
+        } catch (Exception e) {
             log.error("发送微信消息订阅失败：toUser={}, msgSubDTO={}", toUser, JSON.toJSONString(msgSubDTO));
             log.error(e.getMessage(), e);
         }
