@@ -11,9 +11,11 @@ import com.korant.youya.workplace.pojo.dto.confirmation.ConfirmationQueryListDto
 import com.korant.youya.workplace.pojo.dto.internalrecommend.InternalRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.dto.internalrecommend.MyRecommendQueryListDto;
 import com.korant.youya.workplace.pojo.dto.interview.InterviewQueryListDto;
-import com.korant.youya.workplace.pojo.dto.msgsub.InterviewMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.onboarding.OnboardingQueryListDto;
-import com.korant.youya.workplace.pojo.po.*;
+import com.korant.youya.workplace.pojo.po.Confirmation;
+import com.korant.youya.workplace.pojo.po.InternalRecommend;
+import com.korant.youya.workplace.pojo.po.Interview;
+import com.korant.youya.workplace.pojo.po.Onboarding;
 import com.korant.youya.workplace.pojo.vo.internalrecommend.*;
 import com.korant.youya.workplace.service.InternalRecommendService;
 import com.korant.youya.workplace.service.WxService;
@@ -23,7 +25,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * <p>
@@ -192,42 +193,7 @@ public class InternalRecommendServiceImpl extends ServiceImpl<InternalRecommendM
             throw new YouyaException("只有待接受的面试邀约才可以操作");
         interview.setAcceptanceStatus(AcceptanceStatusEnum.ACCEPTED.getStatus());
         interviewMapper.updateById(interview);
-
-        // 发送微信消息订阅
-        sendInterviewMessageSubscribe(interview);
     }
-
-    /**
-     * 发送微信消息订阅
-     *
-     * @param interview 面试记录
-     */
-    protected void sendInterviewMessageSubscribe(Interview interview) {
-        InternalRecommend internalRecommend = internalRecommendMapper.selectOne(new LambdaQueryWrapper<InternalRecommend>()
-                .eq(InternalRecommend::getRecruitProcessInstanceId, interview.getRecruitProcessInstanceId()));
-        if (internalRecommend == null) {
-            throw new YouyaException("找不到推荐人信息");
-        }
-        HuntJob huntJob = Optional.ofNullable(huntJobMapper.selectById(internalRecommend.getHuntId()))
-                .orElseThrow(() -> new YouyaException("找不到推荐人的求职信息"));
-        Job job = Optional.ofNullable(jobMapper.selectById(internalRecommend.getJobId()))
-                .orElseThrow(() -> new YouyaException("找不到职位信息"));
-        User hr = Optional.ofNullable(userMapper.selectById(internalRecommend.getHr()))
-                .orElseThrow(() -> new YouyaException("找不到 HR 用户信息"));
-        User user = Optional.ofNullable(userMapper.selectById(huntJob.getUid()))
-                .orElseThrow(() -> new YouyaException("找不到求职人信息"));
-        Enterprise enterprise = Optional.ofNullable(enterpriseMapper.selectById(job.getEnterpriseId()))
-                .orElseThrow(() -> new YouyaException("找不到职位的企业信息"));
-
-        wxService.sendInterviewMessageSubscribe(user.getWechatOpenId(), new InterviewMsgSubDTO()
-                .setJobId(job.getId())
-                .setInternalRecommendId(internalRecommend.getId())
-                .setPositionName(job.getPositionName())
-                .setEnterpriseName(enterprise.getName())
-                .setTime(interview.getInterTime())
-                .setLinkman(hr.getLastName() + hr.getFirstName()));
-    }
-
 
     /**
      * 接受入职邀约

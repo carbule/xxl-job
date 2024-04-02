@@ -11,6 +11,7 @@ import com.korant.youya.workplace.enums.job.JobStatusEnum;
 import com.korant.youya.workplace.exception.YouyaException;
 import com.korant.youya.workplace.mapper.*;
 import com.korant.youya.workplace.pojo.LoginUser;
+import com.korant.youya.workplace.pojo.dto.msgsub.InterviewMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingProgressMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.mq.InterviewAppointmentMsgSubMessage;
@@ -252,7 +253,32 @@ public class TalentPoolServiceImpl implements TalentPoolService {
         }
 
         // 发送微信消息订阅事件
+        sendInterviewMessageSubscribe(job, internalRecommend, interview);
         sendInterviewAppointmentMessageSubscribeEvent(job, internalRecommend, interview);
+    }
+
+    /**
+     * 发送微信消息订阅
+     *
+     * @param interview 面试记录
+     */
+    protected void sendInterviewMessageSubscribe(Job job, InternalRecommend internalRecommend, Interview interview) {
+        HuntJob huntJob = Optional.ofNullable(huntJobMapper.selectById(internalRecommend.getHuntId()))
+                .orElseThrow(() -> new YouyaException("找不到推荐人的求职信息"));
+        User hr = Optional.ofNullable(userMapper.selectById(internalRecommend.getHr()))
+                .orElseThrow(() -> new YouyaException("找不到 HR 用户信息"));
+        User user = Optional.ofNullable(userMapper.selectById(huntJob.getUid()))
+                .orElseThrow(() -> new YouyaException("找不到求职人信息"));
+        Enterprise enterprise = Optional.ofNullable(enterpriseMapper.selectById(job.getEnterpriseId()))
+                .orElseThrow(() -> new YouyaException("找不到职位的企业信息"));
+
+        wxService.sendInterviewMessageSubscribe(user.getWechatOpenId(), new InterviewMsgSubDTO()
+                .setJobId(job.getId())
+                .setInternalRecommendId(internalRecommend.getId())
+                .setPositionName(job.getPositionName())
+                .setEnterpriseName(enterprise.getName())
+                .setTime(interview.getInterTime())
+                .setLinkman(hr.getLastName() + hr.getFirstName()));
     }
 
     /**

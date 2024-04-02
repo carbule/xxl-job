@@ -13,6 +13,7 @@ import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateConfirmation
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateInterviewDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateCreateOnboardingDto;
 import com.korant.youya.workplace.pojo.dto.candidate.CandidateQueryListDto;
+import com.korant.youya.workplace.pojo.dto.msgsub.InterviewMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.OnboardingProgressMsgSubDTO;
 import com.korant.youya.workplace.pojo.dto.msgsub.mq.InterviewAppointmentMsgSubMessage;
@@ -215,7 +216,30 @@ public class CandidateServiceImpl implements CandidateService {
         }
 
         // 发送微信消息订阅事件
+        sendInterviewMessageSubscribe(job, applyJob, interview);
         sendInterviewAppointmentMessageSubscribeEvent(job, applyJob, interview);
+    }
+
+    /**
+     * 发送微信消息订阅
+     *
+     * @param interview 面试记录
+     */
+    protected void sendInterviewMessageSubscribe(Job job, ApplyJob applyJob, Interview interview) {
+        User hr = Optional.ofNullable(userMapper.selectById(job.getUid()))
+                .orElseThrow(() -> new YouyaException("找不到职位的发布人信息"));
+        User user = Optional.ofNullable(userMapper.selectById(applyJob.getApplicant()))
+                .orElseThrow(() -> new YouyaException("找不到职位申请人信息"));
+        Enterprise enterprise = Optional.ofNullable(enterpriseMapper.selectById(job.getEnterpriseId()))
+                .orElseThrow(() -> new YouyaException("找不到职位对应的企业"));
+
+        wxService.sendInterviewMessageSubscribe(user.getWechatOpenId(), new InterviewMsgSubDTO()
+                .setJobId(job.getId())
+                .setApplyJobId(applyJob.getId())
+                .setPositionName(job.getPositionName())
+                .setEnterpriseName(enterprise.getName())
+                .setTime(interview.getInterTime())
+                .setLinkman(hr.getLastName() + hr.getFirstName()));
     }
 
     /**
