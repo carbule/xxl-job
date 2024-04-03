@@ -46,8 +46,8 @@ spring:
   data:
     redis:
       database: 0
-      host: 139.9.240.37
-      port: 16379
+      host: 192.168.3.215
+      port: 6379
       password: korant@123
       lettuce:
         pool:
