@@ -85,7 +85,18 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
                             .setPositionCode(e.getCode())
                             .setPositionName(e.getName())
                             .setDescription(e.getDescription()))
-                    .sorted(Comparator.comparing(PositionClassLevelVO.ClassLevel::getClassLevel))
+//                    .sorted(Comparator.comparing(PositionClassLevelVO.ClassLevel::getClassLevel))
+                    .sorted((o1, o2) -> {
+                        String o1ClassLevel = o1.getClassLevel();
+                        String o2ClassLevel = o2.getClassLevel();
+
+                        // 专业岗位 - 初级（P1）
+                        // 截取等级编码部分进行排序
+                        String o1ClassLevelNo = o1ClassLevel.substring(o1ClassLevel.lastIndexOf("（"), o1ClassLevel.lastIndexOf("）"));
+                        String o2ClassLevelNo = o2ClassLevel.substring(o2ClassLevel.lastIndexOf("（"), o2ClassLevel.lastIndexOf("）"));
+                        return o1ClassLevelNo.compareTo(o2ClassLevelNo);
+                    })
+
                     .toList());
             returns.add(vo);
         });
